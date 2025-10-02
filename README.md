@@ -94,7 +94,7 @@ What the workflow does on every run (aligned with CI):
 - Builds OpenCV native libraries from source via scripts/build_opencv_android.sh
 - Collects reproducibility evidence for native builds (scripts/collect_repro_evidence.sh)
 - Integrates OpenCV artifacts into the app via scripts/prepare_opencv.sh
-- Builds ONNX Runtime for Android (CPU-only, Java bindings) via scripts/build_onnxruntime_android.sh
+- Builds ONNX Runtime for Android (CXNNPACK and NNAPI, Java bindings) via scripts/build_onnxruntime_android.sh
 - Builds the Android app with Gradle (AAB and ABI-split APKs)
 
 Behavior by event type:
