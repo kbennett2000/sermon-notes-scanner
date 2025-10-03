@@ -7,9 +7,9 @@ package de.schliweb.makeacopy.utils;
  */
 public enum PdfQualityPreset {
     HIGH(300, 85, false),
-    STANDARD(200, 72, true),
-    SMALL(150, 62, true),
-    VERY_SMALL(110, 52, true);
+    STANDARD(200, 72, false),
+    SMALL(150, 62, false),
+    VERY_SMALL(110, 52, false);
 
     public final int targetDpi;
     public final int jpegQuality; // 0..100

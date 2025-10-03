@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -69,8 +68,6 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         RadioButton rbExportPdf = view.findViewById(R.id.dialog_checkbox_export_pdf);
         RadioButton rbExportJpeg = view.findViewById(R.id.dialog_checkbox_export_jpeg);
         View pdfGroup = view.findViewById(R.id.dialog_pdf_group);
-        CheckBox cbGray = view.findViewById(R.id.dialog_checkbox_grayscale);
-        CheckBox cbBw = view.findViewById(R.id.dialog_checkbox_blackwhite);
         RadioGroup pdfPresetGroup = view.findViewById(R.id.dialog_pdf_preset_group);
         RadioButton rbHigh = view.findViewById(R.id.dialog_radio_pdf_high);
         RadioButton rbStandard = view.findViewById(R.id.dialog_radio_pdf_standard);
@@ -82,10 +79,17 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         RadioButton rbJpegNone = view.findViewById(R.id.dialog_radio_jpeg_none);
         RadioButton rbJpegAuto = view.findViewById(R.id.dialog_radio_jpeg_auto);
         RadioButton rbJpegBw = view.findViewById(R.id.dialog_radio_jpeg_bw_text);
+        RadioButton rbJpegBwRobust = view.findViewById(R.id.dialog_radio_jpeg_bw_robust);
+
+        View pdfBwModeGroup = view.findViewById(R.id.dialog_pdf_bw_mode_group);
+        CheckBox rbPdfGray = view.findViewById(R.id.dialog_pdf_grayscale);
+        CheckBox rbPdfBwRobust = view.findViewById(R.id.dialog_pdf_bw_robust);
+        CheckBox rbPdfBwClassic = view.findViewById(R.id.dialog_pdf_bw_classic);
 
         SharedPreferences prefs = ctx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
         boolean includeOcr = prefs.getBoolean("include_ocr", false);
         boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
+        // Legacy booleans kept for backward-compat; selection now driven solely by pdf_bw_mode
         boolean toGray = prefs.getBoolean("convert_to_grayscale", false);
         boolean toBw = prefs.getBoolean("convert_to_blackwhite", false);
         String jpegModeSaved = prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name());
@@ -95,6 +99,7 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         } catch (Exception e) {
             jpegMode = JpegExportOptions.Mode.AUTO;
         }
+        String pdfBwModeSaved = prefs.getString("pdf_bw_mode", null);
         String presetSaved = prefs.getString("pdf_preset", null);
 
         cbIncludeOcr.setChecked(includeOcr);
@@ -104,8 +109,6 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         } else {
             rbExportPdf.setChecked(true);
         }
-        cbGray.setChecked(toGray);
-        if (cbBw != null) cbBw.setChecked(toBw);
 
         // pick default preset if none saved: High for single page, Standard for multi (ExportFragment will compute page count; here fallback Standard)
         PdfQualityPreset preset = presetSaved != null ? PdfQualityPreset.fromName(presetSaved, PdfQualityPreset.STANDARD) : PdfQualityPreset.STANDARD;
@@ -117,6 +120,12 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         if (jpegMode == JpegExportOptions.Mode.NONE) rbJpegNone.setChecked(true);
         else if (jpegMode == JpegExportOptions.Mode.AUTO) rbJpegAuto.setChecked(true);
         else if (jpegMode == JpegExportOptions.Mode.BW_TEXT) rbJpegBw.setChecked(true);
+        else if (jpegMode == JpegExportOptions.Mode.BW_ROBUST) rbJpegBwRobust.setChecked(true);
+
+        // Initialize PDF mode radios (none selected if no saved value)
+        if ("GRAYSCALE".equalsIgnoreCase(pdfBwModeSaved)) rbPdfGray.setChecked(true);
+        else if ("CLASSIC".equalsIgnoreCase(pdfBwModeSaved)) rbPdfBwClassic.setChecked(true);
+        else if ("ROBUST".equalsIgnoreCase(pdfBwModeSaved)) rbPdfBwRobust.setChecked(true);
 
         // Visibility toggle between PDF and JPEG groups based on selected format
         updateGroups(exportAsJpeg, pdfGroup, jpegGroup);
@@ -128,6 +137,20 @@ public class ExportOptionsDialogFragment extends DialogFragment {
             });
         }
 
+        // PDF color mode via CheckBoxes: allow none, but enforce mutual exclusivity when one is checked
+        View.OnClickListener pdfModeClick = v -> {
+            if (!(v instanceof CheckBox clicked)) return;
+            boolean nowChecked = clicked.isChecked();
+            if (nowChecked) {
+                if (clicked != rbPdfGray) rbPdfGray.setChecked(false);
+                if (clicked != rbPdfBwRobust) rbPdfBwRobust.setChecked(false);
+                if (clicked != rbPdfBwClassic) rbPdfBwClassic.setChecked(false);
+            }
+        };
+        rbPdfGray.setOnClickListener(pdfModeClick);
+        rbPdfBwRobust.setOnClickListener(pdfModeClick);
+        rbPdfBwClassic.setOnClickListener(pdfModeClick);
+
         // JPEG modes use RadioGroup; mutual exclusivity is handled by the group.
 
         AlertDialog dialog = new AlertDialog.Builder(ctx)
@@ -137,8 +160,6 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.confirm, (d, w) -> {
                     boolean incOcr = cbIncludeOcr.isChecked();
                     boolean asJpeg = rbExportJpeg.isChecked();
-                    boolean gray = cbGray.isChecked();
-                    boolean bw = cbBw != null && cbBw.isChecked();
 
                     // determine jpeg mode from RadioGroup
                     JpegExportOptions.Mode mode = JpegExportOptions.Mode.AUTO;
@@ -146,6 +167,13 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                     if (jpegCheckedId == rbJpegNone.getId()) mode = JpegExportOptions.Mode.NONE;
                     else if (jpegCheckedId == rbJpegAuto.getId()) mode = JpegExportOptions.Mode.AUTO;
                     else if (jpegCheckedId == rbJpegBw.getId()) mode = JpegExportOptions.Mode.BW_TEXT;
+                    else if (jpegCheckedId == rbJpegBwRobust.getId()) mode = JpegExportOptions.Mode.BW_ROBUST;
+
+                    // determine PDF color mode (null = none selected)
+                    String pdfBwMode = null;
+                    if (rbPdfGray.isChecked()) pdfBwMode = "GRAYSCALE";
+                    else if (rbPdfBwClassic.isChecked()) pdfBwMode = "CLASSIC";
+                    else if (rbPdfBwRobust.isChecked()) pdfBwMode = "ROBUST";
 
                     // determine pdf preset
                     PdfQualityPreset sel = PdfQualityPreset.STANDARD;
@@ -156,21 +184,21 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                     else if (checkedId == rbVerySmall.getId()) sel = PdfQualityPreset.VERY_SMALL;
 
                     // persist
-                    prefs.edit()
+                    SharedPreferences.Editor editor = prefs.edit()
                             .putBoolean("include_ocr", incOcr)
                             .putBoolean("export_as_jpeg", asJpeg)
-                            .putBoolean("convert_to_grayscale", gray)
-                            .putBoolean("convert_to_blackwhite", bw)
                             .putString("jpeg_mode", mode.name())
-                            .putString("pdf_preset", sel.name())
-                            .apply();
+                            .putString("pdf_preset", sel.name());
+                    if (pdfBwMode != null) editor.putString("pdf_bw_mode", pdfBwMode);
+                    else editor.remove("pdf_bw_mode");
+                    editor.apply();
 
                     Bundle result = new Bundle();
                     result.putBoolean(BUNDLE_INCLUDE_OCR, incOcr);
                     result.putBoolean(BUNDLE_EXPORT_AS_JPEG, asJpeg);
-                    result.putBoolean(BUNDLE_CONVERT_TO_GRAYSCALE, gray);
-                    result.putBoolean(BUNDLE_CONVERT_TO_BLACKWHITE, bw);
                     result.putString(BUNDLE_JPEG_MODE, mode.name());
+                    if (pdfBwMode != null) result.putString("pdf_bw_mode", pdfBwMode);
+                    else result.remove("pdf_bw_mode");
                     result.putString(BUNDLE_PDF_PRESET, sel.name());
                     getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
                 })

@@ -1,0 +1,144 @@
+<resources>
+    <string name="app_name">MakeACopy</string>
+
+    <!-- New menu items for document scanner -->
+    <string name="title_camera">Камера</string>
+    <string name="title_crop">Обрезка</string>
+    <string name="title_ocr">Распознавание</string>
+    <string name="title_export">Экспорт</string>
+
+    <!-- Button labels -->
+    <string name="btn_scan">Сканировать</string>
+    <string name="btn_crop">Обрезать</string>
+    <string name="btn_process">Обработать</string>
+    <string name="btn_export">Экспорт</string>
+    <string name="btn_share">Поделиться</string>
+    <string name="next">Далее</string>
+    <string name="back">Назад</string>
+
+    <!-- Messages -->
+    <string name="msg_camera_permission_required">Для сканирования документов требуется разрешение на камеру</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Проверьте скан. Нажмите «Далее», чтобы продолжить, или «Назад», чтобы повторить попытку.</string>
+    <string name="camera_ready_tap_the_button_to_scan_a_document">Камера готова. Нажмите кнопку, чтобы отсканировать документ.</string>
+    <string name="captured_image">Снятое изображение</string>
+    <string name="retake">Переснять</string>
+    <string name="image_to_crop">Изображение для обрезки</string>
+    <string name="cropped_image">Обрезанное изображение</string>
+    <string name="recrop">Обрезать заново</string>
+    <string name="document_preview">Предпросмотр документа</string>
+    <string name="include_ocr_text">Включить текст OCR</string>
+    <string name="language">Язык:</string>
+    <string name="ocr_results_will_appear_here">Результаты OCR будут показаны здесь</string>
+    <string name="no_image_loaded_capture_an_image_first">Изображение не загружено. Сначала сделайте снимок.</string>
+    <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Отрегулируйте углы трапеции, чтобы выбрать область обрезки, затем нажмите «Обрезать».</string>
+    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Проверьте обрезанное изображение. Нажмите «Далее», чтобы продолжить, или «Назад», чтобы попытаться снова.</string>
+    <string name="no_document_ready_process_ocr_first">Документ не готов. Сначала выполните OCR.</string>
+    <string name="document_ready_for_export">Документ готов к экспорту</string>
+    <string name="processing_image">Обработка изображения…</string>
+    <string name="no_image_processed_crop_an_image_first">Изображение не обработано. Сначала обрежьте изображение.</string>
+    <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR завершён. Нажмите кнопку, чтобы перейти к экспорту.</string>
+
+    <string name="initializing_camera">Инициализация камеры…</string>
+    <string name="resetting_camera">Сброс камеры…</string>
+    <string name="error_initializing_camera">Ошибка инициализации камеры: %1$s</string>
+    <string name="error_camera_provider_null">Не удалось инициализировать камеру — провайдер равен null</string>
+    <string name="error_camera_not_initialized">Камера не инициализирована. Повторите попытку.</string>
+    <string name="error_image_capture_failed">Ошибка захвата изображения: %1$s</string>
+    <string name="error_displaying_image">Ошибка отображения изображения: %1$s</string>
+    <string name="error_resetting_camera">Ошибка сброса камеры: %1$s</string>
+    <string name="error_toggling_flashlight">Ошибка переключения фонарика: %1$s</string>
+    <string name="error_camera_preview_failed">Не удалось запустить предпросмотр камеры. Повторите попытку.</string>
+
+    <!-- Export options -->
+    <string name="convert_to_grayscale">Преобразовать в оттенки серого</string>
+    <string name="convert_to_blackwhite_pdf">Преобразовать в ч/б</string>
+    <string name="export_as_jpeg">Экспорт как JPEG</string>
+    <string name="export_as_pdf">Экспорт как PDF (по умолчанию)</string>
+
+    <!-- Flashlight options -->
+    <string name="toggle_flashlight">Переключить фонарик</string>
+    <string name="flashlight_on">Фонарик включён</string>
+    <string name="flashlight_off">Фонарик выключен</string>
+    <string name="flashlight_not_available">На этом устройстве нет фонарика</string>
+    <string name="low_light_detected">Обнаружено слабое освещение. Включить фонарик?</string>
+
+    <!-- JPEG mode labels -->
+    <string name="jpeg_mode_none">Без улучшений (JPEG)</string>
+    <string name="jpeg_mode_auto">Автоулучшение (JPEG)</string>
+    <string name="jpeg_mode_bw_text">Чёрно-белый (классический) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">Чёрно-белый (устойчивый) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">Ч/Б (устойчивый)</string>
+    <string name="pdf_bw_mode_classic">Ч/Б (классический)</string>
+    <string name="skip_ocr_export_only">Пропустить OCR (только экспорт)</string>
+    <string name="btn_pick_image">Загрузить</string>
+    <string name="pick_image_cd">Загрузить существующее изображение</string>
+    <string name="error_selected_file_is_not_an_image">Выбранный файл не является изображением</string>
+
+    <!-- Multipage Export (v1 increment) -->
+    <string name="pages_header">Страницы (%1$d)</string>
+    <string name="add_another_page">Добавить</string>
+    <string name="clear_all_pages">Очистить все</string>
+    <string name="remove_this_page">Удалить эту страницу</string>
+    <string name="multipage_not_implemented">Многостраничный экспорт ещё не реализован</string>
+
+    <!-- Reorder A11y controls -->
+    <string name="move_page_left">Переместить страницу влево</string>
+    <string name="move_page_right">Переместить страницу вправо</string>
+
+    <!-- Back confirmation for clearing multipage session -->
+    <string name="confirm_clear_multipage_title">Удалить страницы?</string>
+    <string name="confirm_clear_multipage_message">Добавлено несколько страниц. Удалить все страницы и вернуться?</string>
+    <string name="cancel">Отмена</string>
+
+    <!-- Clear-all confirmation for trash icon in multipage -->
+    <string name="confirm_clear_pages_title">Очистить все страницы?</string>
+    <string name="confirm_clear_pages_message">Удалить все страницы из ленты миниатюр?</string>
+
+    <!-- Registry Picker -->
+    <string name="picker_title_completed_scans">Выберите из завершённых сканов</string>
+    <string name="picker_empty">Завершённые сканы не найдены</string>
+    <string name="done">Далее</string>
+    <string name="thumbnail">Миниатюра</string>
+    <string name="delete">Удалить</string>
+
+    <!-- Picker bulk actions -->
+    <string name="select_all">Выбрать все</string>
+    <string name="deselect_all">Снять выделение со всех</string>
+
+    <string name="added_pages_from_registry">Добавлено %1$d страниц(ы) из реестра</string>
+
+    <!-- Add page options dialog -->
+    <string name="add_page_option_choose_completed">Выбрать из завершённых сканов</string>
+    <string name="add_page_option_capture_new">Снять новую страницу</string>
+
+    <!-- Picker states -->
+    <string name="missing_file">Файл отсутствует</string>
+
+    <!-- Inline OCR cues -->
+    <string name="ocr_processing_started">Выполняется OCR…</string>
+    <string name="ocr_processing_finished">Для этой страницы добавлен текст OCR</string>
+    <string name="ocr_processing_failed">Сбой встроенного OCR</string>
+
+    <!-- Registry Picker: context action -->
+    <string name="remove_from_registry_title">Удалить из реестра</string>
+    <string name="remove_from_registry_message">Удалить эту запись и связанные файлы?</string>
+    <string name="remove">Удалить</string>
+    <string name="removed_from_registry_toast">Запись удалена</string>
+
+    <!-- PDF quality presets (Phase 1) -->
+    <string name="pdf_quality_title">Качество/размер PDF</string>
+    <string name="pdf_preset_high">Высокое (300 dpi, q85)</string>
+    <string name="pdf_preset_standard">Стандартное (200 dpi, q72)</string>
+    <string name="pdf_preset_small">Небольшое (150 dpi, q62)</string>
+    <string name="pdf_preset_very_small">Очень маленькое (110 dpi, q52)</string>
+    <string name="export_options_title">Параметры экспорта</string>
+    <string name="jpeg_enhancement_title">Улучшение JPEG</string>
+    <string name="btn_options">Параметры</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_new">Новый</string>
+
+    <!-- Rotation (post-crop) -->
+    <string name="rotate_left_cd">Повернуть страницу на 90° против часовой стрелки</string>
+    <string name="rotate_right_cd">Повернуть страницу на 90° по часовой стрелке</string>
+</resources>

@@ -23,24 +23,37 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
- * Generates a searchable PDF (image + invisible OCR text layer).
- * The OCR text is drawn in the SAME transform as the image to avoid viewer-specific drift.
+ * The PdfCreator class provides static methods for generating searchable PDFs from bitmap images
+ * and recognized OCR words. It supports advanced options such as grayscale or black-and-white
+ * conversion, DPI scaling, and robust font fallback for text rendering. This class allows
+ * creation of both single-page and multi-page searchable PDFs.
  */
 public class PdfCreator {
+    public enum BwMode {ROBUST, CLASSIC}
+
     private static final String TAG = "PdfCreator";
     // Text sizing (relative to OCR box height in image space)
     private static final float TEXT_SIZE_RATIO = 0.70f;
     private static final float MIN_FONT_PT = 2f; // lower bound for tiny boxes
 
     /**
-     * Creates a searchable PDF from bitmap + OCR words.
+     * Creates a searchable PDF document from a bitmap and a list of recognized words. The resulting PDF
+     * includes an image of the provided bitmap and overlays it with a text layer derived from the recognized
+     * words for searchability. The output PDF is written to the provided URI with specified image quality
+     * and optional grayscale conversion.
+     *
+     * @param context            the Android context, used to access system resources and file utilities
+     * @param bitmap             the bitmap to place into the PDF as an image
+     * @param words              the list of recognized words to overlay as a text layer for searchability
+     * @param outputUri          the URI of the output file where the generated PDF will be stored
+     * @param jpegQuality        the compression quality of the bitmap within the PDF (0-100)
+     * @param convertToGrayscale a flag indicating whether to convert the image to grayscale
+     * @return the URI of the generated searchable PDF
      */
     public static Uri createSearchablePdf(Context context,
                                           Bitmap bitmap,
@@ -53,31 +66,20 @@ public class PdfCreator {
     }
 
     /**
-     * Creates a searchable PDF from bitmap + OCR words with explicit black-and-white option.
+     * Creates a searchable PDF document from a bitmap and a list of recognized words. The PDF contains
+     * an image representation of the provided bitmap and includes a searchable text layer based on the
+     * recognized words. The resulting file is saved to the specified output URI.
+     *
+     * @param context             the Android context, used to access system resources and file utilities
+     * @param bitmap              the bitmap to include in the PDF as an image
+     * @param words               a list of recognized words to overlay as a searchable text layer
+     * @param outputUri           the URI where the generated PDF will be saved
+     * @param jpegQuality         the compression quality (0-100) for the bitmap image in the PDF
+     * @param convertToGrayscale  specifies whether the bitmap image should be converted to grayscale
+     * @param convertToBlackWhite specifies whether the bitmap image should be converted to black-and-white
+     * @param targetDpi           the target DPI (dots per inch) at which the image should be rendered in the PDF
+     * @return the URI of the generated searchable PDF file
      */
-    public static Uri createSearchablePdf(Context context,
-                                          Bitmap bitmap,
-                                          List<RecognizedWord> words,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          boolean convertToBlackWhite) {
-        return createSearchablePdf(context, bitmap, words, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, 300);
-    }
-
-    // Phase 1: Overload with target DPI
-    // Backward-compatible: target DPI overload without BW flag delegates to BW=false
-    public static Uri createSearchablePdf(Context context,
-                                          Bitmap bitmap,
-                                          List<RecognizedWord> words,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          int targetDpi) {
-        return createSearchablePdf(context, bitmap, words, outputUri, jpegQuality, convertToGrayscale, false, targetDpi);
-    }
-
-    // Phase 1: Overload with target DPI and black-white flag
     public static Uri createSearchablePdf(Context context,
                                           Bitmap bitmap,
                                           List<RecognizedWord> words,
@@ -86,6 +88,34 @@ public class PdfCreator {
                                           boolean convertToGrayscale,
                                           boolean convertToBlackWhite,
                                           int targetDpi) {
+        // Back-compat: default to ROBUST when BW is requested
+        return createSearchablePdf(context, bitmap, words, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, targetDpi, convertToBlackWhite ? BwMode.ROBUST : null);
+    }
+
+    /**
+     * Creates a searchable PDF from the given bitmap and recognized text words, and writes it to the specified URI.
+     * The method allows customization of image processing, PDF properties, and OCR text handling.
+     *
+     * @param context             The application context used for PDF library initialization and resource access.
+     * @param bitmap              The input bitmap image to be included in the PDF.
+     * @param words               A list of recognized words with their coordinates, used to create the text layer in the PDF.
+     * @param outputUri           The URI where the generated PDF will be saved.
+     * @param jpegQuality         The quality of the JPEG compression for the image in the range of 0-100 (100 for lossless).
+     * @param convertToGrayscale  True to convert the image to grayscale before adding it to the PDF.
+     * @param convertToBlackWhite True to convert the image to black-and-white using thresholding techniques.
+     * @param targetDpi           The target resolution (dots per inch) for the output image in the PDF.
+     * @param bwMode              The black-and-white conversion mode (e.g., robust or simple thresholding). Ignored if {@code convertToBlackWhite} is false.
+     * @return The URI pointing to the created PDF, or null if the PDF creation failed.
+     */
+    public static Uri createSearchablePdf(Context context,
+                                          Bitmap bitmap,
+                                          List<RecognizedWord> words,
+                                          Uri outputUri,
+                                          int jpegQuality,
+                                          boolean convertToGrayscale,
+                                          boolean convertToBlackWhite,
+                                          int targetDpi,
+                                          BwMode bwMode) {
         Log.d(TAG, "createSearchablePdf: uri=" + outputUri + ", words=" + (words == null ? 0 : words.size()));
         if (bitmap == null || outputUri == null) return null;
 
@@ -102,7 +132,7 @@ public class PdfCreator {
 
         Bitmap prepared = null;
         try {
-            prepared = processImageForPdf(bitmap, convertToGrayscale, convertToBlackWhite, targetDpi);
+            prepared = processImageForPdf(bitmap, convertToGrayscale, convertToBlackWhite, targetDpi, convertToBlackWhite ? (bwMode != null ? bwMode : BwMode.ROBUST) : null);
             if (prepared == null) {
                 Log.e(TAG, "Image preparation via OpenCV failed");
                 return null;
@@ -196,6 +226,16 @@ public class PdfCreator {
         }
     }
 
+    /**
+     * Loads a list of PDF fonts with fallback mechanisms based on provided font files.
+     * The method attempts to load specified fonts from the application's assets. If none
+     * of the specified fonts are found or successfully loaded, it falls back to a default
+     * font configuration, using Helvetica as a last resort.
+     *
+     * @param document the PDF document instance where fonts will be loaded into
+     * @param context  the Android context used for asset access and caching
+     * @return a list of PDFont objects, including the successfully loaded fonts and any fallbacks
+     */
     private static List<PDFont> loadFontsWithFallbacks(PDDocument document, Context context) {
         List<PDFont> fonts = new ArrayList<>();
         // Minimal & memory-efficient:
@@ -204,6 +244,7 @@ public class PdfCreator {
         //   Note: In pdfbox-android, the File overload is subset-embedded by default.
         String[] candidates = new String[]{
                 "fonts/NotoSans-Regular.ttf",          // Latin
+                "fonts/NotoSansThai-Regular.ttf",      // Thai
                 "fonts/NotoSansCJKsc-Regular.ttf",     // CJK (Han) – one font is sufficient for the invisible layer
                 "fonts/NotoNaskhArabic-Regular.ttf",   // Arabic (optional)
                 "fonts/NotoSansDevanagari-Regular.ttf" // Indic (optional)
@@ -254,30 +295,98 @@ public class PdfCreator {
         return out;
     }
 
-    // ===== Fonts (embedded) with fallbacks =====
-
+    /**
+     * Writes text to a PDF page content stream with support for font fallbacks.
+     * Ensures that the text is displayed using the most suitable font from the provided list of fonts.
+     * If no suitable font is found for a character, it substitutes the character with the Unicode replacement character (�).
+     *
+     * @param cs       the {@link PDPageContentStream} used to draw the text
+     * @param token    the text string to be displayed
+     * @param fontSize the font size for rendering the text
+     * @param fonts    a {@link List} of {@link PDFont} objects to try for displaying the text. The order of fonts in the list determines the priority of fallback.
+     * @throws Exception             if there is an error during text drawing or font operations
+     * @throws IllegalStateException if the fonts list is null or empty
+     */
     private static void showTextWithFallbacks(PDPageContentStream cs,
                                               String token,
                                               float fontSize,
                                               List<PDFont> fonts) throws Exception {
-        Exception last = null;
-        for (PDFont f : fonts) {
-            try {
-                cs.setFont(f, fontSize);
-                cs.showText(token);
-                return; // success
-            } catch (Exception e) {
-                last = e; // try next
+        if (token == null || token.isEmpty()) return;
+        if (fonts == null || fonts.isEmpty()) throw new IllegalStateException("No fonts available");
+
+        final int len = token.length();
+        int i = 0;
+        while (i < len) {
+            // 1) Find a suitable font for this code point
+            int cp = token.codePointAt(i);
+            String ch = new String(Character.toChars(cp));
+
+            int fontIdx = -1;
+            for (int f = 0; f < fonts.size(); f++) {
+                try {
+                    fonts.get(f).encode(ch); // probe-encode
+                    fontIdx = f;
+                    break;
+                } catch (Exception ignore) {
+                }
             }
-        }
-        // As a safety net, replace control chars and draw with first font
-        cs.setFont(fonts.get(0), fontSize);
-        cs.showText(token.replaceAll("\\p{C}", "?"));
-        if (last != null) {
-            Log.w(TAG, "showText fallback used: " + last.getMessage());
+            if (fontIdx < 0) {
+                // Fallback: replace with � using the first font
+                cs.setFont(fonts.get(0), fontSize);
+                try {
+                    cs.showText("\uFFFD");
+                } catch (Exception ignore) {
+                    // Ignore if even that fails
+                }
+                i += Character.charCount(cp);
+                continue;
+            }
+
+            // 2) Collect a run using the same font
+            StringBuilder run = new StringBuilder();
+            run.append(ch);
+            int j = i + Character.charCount(cp);
+            while (j < len) {
+                int cp2 = token.codePointAt(j);
+                String ch2 = new String(Character.toChars(cp2));
+                try {
+                    fonts.get(fontIdx).encode(ch2);
+                    run.append(ch2);
+                    j += Character.charCount(cp2);
+                } catch (Exception notThisFont) {
+                    break; // different font required → end current run
+                }
+            }
+
+            // 3) Output the run (robustly guarded)
+            cs.setFont(fonts.get(fontIdx), fontSize);
+            try {
+                cs.showText(run.toString());
+            } catch (Exception e) {
+                // If the entire run fails, at least output a replacement glyph
+                try {
+                    cs.showText("\uFFFD");
+                } catch (Exception ignore) {
+                    // worst case: ignore completely
+                }
+            }
+
+            i = j;
         }
     }
 
+    /**
+     * Adds a text layer to the PDF page content stream using image-space coordinates.
+     * This method processes a list of recognized words, validates their bounding boxes, clusters them into lines,
+     * and renders them as invisible but selectable text on the PDF document.
+     *
+     * @param cs          The content stream of the PDF page where the text layer will be added.
+     * @param words       The list of recognized words that contain text and their respective bounding boxes.
+     * @param fonts       A list of fonts used to render the text. The method handles font fallbacks if necessary.
+     * @param imageWidth  The width of the image, used to clamp and transform bounding box coordinates.
+     * @param imageHeight The height of the image, used to clamp and transform bounding box coordinates.
+     * @throws Exception If there is an error while adding the text layer to the content stream.
+     */
     private static void addTextLayerImageSpace(PDPageContentStream cs,
                                                List<RecognizedWord> words,
                                                List<PDFont> fonts,
@@ -285,93 +394,168 @@ public class PdfCreator {
                                                int imageHeight) throws Exception {
         if (words == null || words.isEmpty()) return;
 
-        // Sort top->bottom, then left->right
-        words.sort((a, b) -> {
-            float ya = (a.getBoundingBox().top + a.getBoundingBox().bottom) * 0.5f;
-            float yb = (b.getBoundingBox().top + b.getBoundingBox().bottom) * 0.5f;
-            if (Math.abs(ya - yb) < 6f) {
-                return Float.compare(a.getBoundingBox().left, b.getBoundingBox().left);
-            }
-            return Float.compare(ya, yb);
-        });
+        final float EPS_Y = 6f;
 
-        // Cluster to lines
-        List<List<RecognizedWord>> lines = new ArrayList<>();
+        // --- 1) Clean and validate ---
+        List<RecognizedWord> clean = new ArrayList<>(words.size());
         for (RecognizedWord w : words) {
-            if (lines.isEmpty()) {
-                List<RecognizedWord> l = new ArrayList<>();
-                l.add(w);
-                lines.add(l);
-            } else {
-                List<RecognizedWord> last = lines.get(lines.size() - 1);
-                float refY = (last.get(0).getBoundingBox().top + last.get(0).getBoundingBox().bottom) * 0.5f;
-                float curY = (w.getBoundingBox().top + w.getBoundingBox().bottom) * 0.5f;
-                if (Math.abs(curY - refY) < 6f) last.add(w);
-                else {
-                    List<RecognizedWord> l = new ArrayList<>();
-                    l.add(w);
-                    lines.add(l);
-                }
+            if (w == null || w.getBoundingBox() == null) continue;
+            RectF b = new RectF(w.getBoundingBox());
+
+            // Replace NaN/Inf with 0
+            if (!Float.isFinite(b.left)) b.left = 0f;
+            if (!Float.isFinite(b.top)) b.top = 0f;
+            if (!Float.isFinite(b.right)) b.right = 0f;
+            if (!Float.isFinite(b.bottom)) b.bottom = 0f;
+
+            // Ensure normal ordering
+            if (b.right < b.left) {
+                float t = b.left;
+                b.left = b.right;
+                b.right = t;
+            }
+            if (b.bottom < b.top) {
+                float t = b.top;
+                b.top = b.bottom;
+                b.bottom = t;
+            }
+
+            // Clip to image bounds
+            b.left = clamp(b.left, 0f, imageWidth);
+            b.right = clamp(b.right, 0f, imageWidth);
+            b.top = clamp(b.top, 0f, imageHeight);
+            b.bottom = clamp(b.bottom, 0f, imageHeight);
+
+            // Discard if too small/empty
+            if (b.width() <= 0.5f || b.height() <= 0.5f) continue;
+
+            // Use a copy with the clipped rect
+            clean.add(new RecognizedWord(w.getText(), b, w.getConfidence()));
+        }
+        if (clean.isEmpty()) return;
+
+        // Stable tie-breaker: original index
+        java.util.IdentityHashMap<RecognizedWord, Integer> idx = new java.util.IdentityHashMap<>();
+        for (int i = 0; i < clean.size(); i++) idx.put(clean.get(i), i);
+
+        // Precompute sort keys (bucket + coordinates)
+        class Key {
+            final RecognizedWord w;
+            final int bucket;
+            final float left;
+            final float top;
+
+            Key(RecognizedWord w) {
+                this.w = w;
+                RectF r = w.getBoundingBox();
+                float yCenter = (r.top + r.bottom) * 0.5f;
+                // Bucket = line (top→bottom), robust against ±EPS_Y
+                this.bucket = (int) Math.floor(yCenter / EPS_Y);
+                this.left = r.left;
+                this.top = r.top;
             }
         }
+        List<Key> keys = new ArrayList<>(clean.size());
+        for (RecognizedWord w : clean) keys.add(new Key(w));
 
-        // Render lines; absolute positioning per token (no TJ-kerning)
+        // --- 2) Total order: bucket → left → top → originalIndex ---
+        keys.sort((ka, kb) -> {
+            int c = Integer.compare(ka.bucket, kb.bucket);
+            if (c != 0) return c;
+            c = Float.compare(ka.left, kb.left);
+            if (c != 0) return c;
+            c = Float.compare(ka.top, kb.top);
+            if (c != 0) return c;
+            return Integer.compare(idx.get(ka.w), idx.get(kb.w));
+        });
+
+        // --- 3) Cluster into lines – same bucket logic! ---
+        List<List<RecognizedWord>> lines = new ArrayList<>();
+        int currentBucket = Integer.MIN_VALUE;
+        for (Key k : keys) {
+            if (k.bucket != currentBucket) {
+                lines.add(new ArrayList<>());
+                currentBucket = k.bucket;
+            }
+            lines.get(lines.size() - 1).add(k.w);
+        }
+
+        // --- 4) Render: line L→R; invisible/selectable ---
         for (List<RecognizedWord> line : lines) {
             if (line.isEmpty()) continue;
-            line.sort(Comparator.comparingDouble(rw -> rw.getBoundingBox().left));
 
-            float medianH = medianHeight(line);                       // px in image
+            // within the line: left→right, then top→bottom (stable)
+            line.sort((a, b) -> {
+                int c = Float.compare(a.getBoundingBox().left, b.getBoundingBox().left);
+                if (c != 0) return c;
+                c = Float.compare(a.getBoundingBox().top, b.getBoundingBox().top);
+                if (c != 0) return c;
+                return Integer.compare(idx.get(a), idx.get(b));
+            });
+
+            float medianH = medianHeight(line);                // px in image
             float fontSize = Math.max(MIN_FONT_PT, medianH * TEXT_SIZE_RATIO);
 
-            for (int i = 0; i < line.size(); i++) {
-                RecognizedWord w = line.get(i);
+            for (RecognizedWord w : line) {
                 String tokenRaw = safeText(w.getText());
                 if (tokenRaw.trim().isEmpty()) continue;
 
-                // Normalize to NFC; trailing space improves selection continuity
-                String token = Normalizer.normalize(tokenRaw + " ", Normalizer.Form.NFC);
+                // NFC + trailing space improves selection/copy
+                String token = java.text.Normalizer.normalize(tokenRaw + " ", java.text.Normalizer.Form.NFC);
 
                 RectF b = w.getBoundingBox();
                 float boxH = b.height();
 
-                // Baseline ~ lower quarter of the box (image space: Y grows downward)
+                // Baseline roughly at the lower quarter of the box area (image Y increases downward)
                 float baselineImgY = b.bottom + boxH * 0.25f;
 
-                // Convert to PDF Y-up (image space): invert Y once
+                // Invert Y (image space → PDF Y-up)
                 float x_img = clamp(b.left, 0f, imageWidth);
                 float y_img = clamp((imageHeight - baselineImgY), 0f, imageHeight);
 
                 cs.beginText();
-                cs.setRenderingMode(RenderingMode.NEITHER); // invisible but selectable
-                cs.setTextMatrix(Matrix.getTranslateInstance(x_img, y_img));
-                showTextWithFallbacks(cs, token, fontSize, fonts);
-                cs.endText();
+                try {
+                    cs.setRenderingMode(RenderingMode.NEITHER); // unsichtbar aber auswählbar
+                    cs.setTextMatrix(com.tom_roush.pdfbox.util.Matrix.getTranslateInstance(x_img, y_img));
+                    showTextWithFallbacks(cs, token, fontSize, fonts);
+                } finally {
+                    cs.endText();
+                }
             }
         }
     }
 
-    // ===== OCR text rendering in IMAGE SPACE =====
-
+    /**
+     * Calculates the scale factor required to fit an image within a given page size while maintaining its aspect ratio.
+     *
+     * @param imageWidth  the width of the image
+     * @param imageHeight the height of the image
+     * @param pageWidth   the width of the page
+     * @param pageHeight  the height of the page
+     * @return the scale factor to fit the image within the page dimensions
+     */
     private static float calculateScale(int imageWidth, int imageHeight, float pageWidth, float pageHeight) {
         float sx = pageWidth / imageWidth;
         float sy = pageHeight / imageHeight;
         return Math.min(sx, sy);
     }
 
-    // ===== Image prep & helpers =====
-
-    private static Bitmap processImageForPdf(Bitmap original, boolean toGray) {
-        // Backward-compatible: default to 300 dpi A4 target
-        return processImageForPdf(original, toGray, false, 300);
-    }
-
-    // Backward-compatible: target DPI control without BW flag
-    private static Bitmap processImageForPdf(Bitmap original, boolean toGray, int targetDpi) {
-        return processImageForPdf(original, toGray, false, targetDpi);
-    }
-
-    // New: allow BW conversion with precedence over grayscale
-    private static Bitmap processImageForPdf(Bitmap original, boolean toGray, boolean toBw, int targetDpi) {
+    /**
+     * Processes an image to prepare it for inclusion in a PDF by resizing, and optionally converting it to grayscale or
+     * black and white (BW) based on the parameters provided.
+     *
+     * @param original  The original Bitmap image to process. Must not be null.
+     * @param toGray    If true, the image will be converted to grayscale.
+     * @param toBw      If true, the image will be converted to black and white. The conversion respects the specified bwMode.
+     *                  If both toGray and toBw are true, the image will be converted to black and white.
+     * @param targetDpi The target DPI (dots per inch) for the processed image. Determines the resizing scale for the image.
+     *                  If targetDpi is less than or equal to 0, a default DPI of 300 will be used.
+     * @param bwMode    The mode for black-and-white conversion. If null, the default "ROBUST" mode will be used. Other modes
+     *                  determine the specific method of B&W processing.
+     * @return A processed Bitmap object resized to match the target DPI dimensions and optionally converted to grayscale
+     * or black and white. Returns null if the original Bitmap is null or if an error occurs during conversion.
+     */
+    private static Bitmap processImageForPdf(Bitmap original, boolean toGray, boolean toBw, int targetDpi, BwMode bwMode) {
         if (original == null) return null;
 
         int[] a4px = a4PixelsForDpi(targetDpi <= 0 ? 300 : targetDpi);
@@ -400,7 +584,16 @@ public class PdfCreator {
         }
 
         if (toBw) {
-            Bitmap viaCv = OpenCVUtils.toBw(base);
+            Bitmap viaCv;
+            if (bwMode == null || bwMode == BwMode.ROBUST) {
+                viaCv = OpenCVUtils.toBw(base);
+            } else {
+                OpenCVUtils.BwOptions opt = new OpenCVUtils.BwOptions();
+                opt.mode = OpenCVUtils.BwOptions.Mode.OTSU_ONLY;
+                opt.useClahe = false;
+                opt.removeShadows = false;
+                viaCv = OpenCVUtils.toBw(base, opt);
+            }
             if (base != original) {
                 try {
                     base.recycle();
@@ -423,6 +616,13 @@ public class PdfCreator {
     }
 
 
+    /**
+     * Calculates the pixel dimensions of an A4 paper size at a given DPI (dots per inch).
+     *
+     * @param dpi the resolution in dots per inch used to calculate the dimensions.
+     * @return an array of two integers where the first element is the width in pixels
+     * and the second element is the height in pixels.
+     */
     private static int[] a4PixelsForDpi(int dpi) {
         // A4 size in inches: 8.27 x 11.69
         int w = Math.max(1, Math.round(8.27f * dpi));
@@ -430,6 +630,12 @@ public class PdfCreator {
         return new int[]{w, h};
     }
 
+    /**
+     * Calculates the median height of bounding boxes from a list of recognized words.
+     *
+     * @param line a list of RecognizedWord objects, each containing a bounding box with a height value
+     * @return the median height of the bounding boxes; returns 0 if the list is empty
+     */
     private static float medianHeight(List<RecognizedWord> line) {
         List<Float> heights = new ArrayList<>();
         for (RecognizedWord w : line) heights.add(w.getBoundingBox().height());
@@ -440,20 +646,40 @@ public class PdfCreator {
         return (heights.get(n / 2 - 1) + heights.get(n / 2)) / 2f;
     }
 
+    /**
+     * Ensures that the given text is sanitized by replacing all control characters,
+     * except for carriage return, new line, and tab, with a space.
+     *
+     * @param t the input text to sanitize; can be null.
+     * @return the sanitized text, or an empty string if the input is null.
+     */
     private static String safeText(String t) {
         if (t == null) return "";
         return t.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", " ");
     }
 
+    /**
+     * Restricts a given value to lie within the specified minimum and maximum bounds.
+     *
+     * @param v   The value to be clamped.
+     * @param min The minimum bound to which the value can be clamped.
+     * @param max The maximum bound to which the value can be clamped.
+     * @return The clamped value, lying between the specified minimum and maximum bounds.
+     */
     private static float clamp(float v, float min, float max) {
         return Math.max(min, Math.min(max, v));
     }
 
     /**
-     * Creates a searchable multi-page PDF from a list of bitmaps and optional per-page OCR words.
-     * Each bitmap is placed on its own A4 page with the same scaling and centering logic as the
-     * single-page variant. If perPageWords[i] is non-null/non-empty, an OCR text layer is drawn
-     * for that page using identical image-space transform.
+     * Creates a searchable PDF from the given bitmaps and recognized words per page.
+     *
+     * @param context            the application context
+     * @param bitmaps            a list of bitmaps representing the pages of the PDF
+     * @param perPageWords       a list of lists containing recognized words for each page
+     * @param outputUri          the URI where the generated PDF will be saved
+     * @param jpegQuality        the JPEG quality for image compression (0-100)
+     * @param convertToGrayscale a flag indicating if the images should be converted to grayscale
+     * @return the URI of the created searchable PDF
      */
     public static Uri createSearchablePdf(Context context,
                                           List<Bitmap> bitmaps,
@@ -465,6 +691,18 @@ public class PdfCreator {
         return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, false);
     }
 
+    /**
+     * Creates a searchable PDF file from a list of image bitmaps and their corresponding recognized words.
+     *
+     * @param context             the application context used for accessing system resources
+     * @param bitmaps             the list of bitmaps representing pages of the PDF
+     * @param perPageWords        the list of lists, where each inner list contains recognized words for a corresponding page
+     * @param outputUri           the URI where the output PDF file will be written
+     * @param jpegQuality         the quality (0-100) for compressing images in the PDF
+     * @param convertToGrayscale  whether to convert images to grayscale before including them in the PDF
+     * @param convertToBlackWhite whether to convert images to black-and-white before including them in the PDF
+     * @return the URI of the generated searchable PDF file
+     */
     public static Uri createSearchablePdf(Context context,
                                           List<Bitmap> bitmaps,
                                           List<List<RecognizedWord>> perPageWords,
@@ -476,29 +714,22 @@ public class PdfCreator {
         return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, 300, null);
     }
 
-    public static Uri createSearchablePdf(Context context,
-                                          List<Bitmap> bitmaps,
-                                          List<List<RecognizedWord>> perPageWords,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          ProgressListener listener) {
-        // Default 300 dpi behavior without BW flag
-        return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, false, 300, listener);
-    }
-
-    // Phase 1: Overload with target DPI + progress listener
-    public static Uri createSearchablePdf(Context context,
-                                          List<Bitmap> bitmaps,
-                                          List<List<RecognizedWord>> perPageWords,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          int targetDpi,
-                                          ProgressListener listener) {
-        return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, false, targetDpi, listener);
-    }
-
+    /**
+     * Creates a searchable PDF document from the given list of bitmaps and recognized text data.
+     * The resulting PDF is written to the specified output URI. Options such as grayscale conversion,
+     * black-and-white conversion, JPEG quality, and target DPI are supported for customization.
+     *
+     * @param context             The application context, required for accessing resources and file paths.
+     * @param bitmaps             A list of bitmap images representing the pages of the document.
+     * @param perPageWords        A list containing recognized words for each corresponding bitmap page.
+     * @param outputUri           The URI where the generated PDF will be saved.
+     * @param jpegQuality         The quality of JPEG compression (0-100) for the bitmap images.
+     * @param convertToGrayscale  If true, the bitmaps will be converted to grayscale before addition to the PDF.
+     * @param convertToBlackWhite If true, the bitmaps will be converted to black-and-white using the default mode.
+     * @param targetDpi           The target resolution in DPI for the bitmap images in the PDF.
+     * @param listener            A listener to track and report the progress of the PDF creation process.
+     * @return The URI of the generated searchable PDF.
+     */
     public static Uri createSearchablePdf(Context context,
                                           List<Bitmap> bitmaps,
                                           List<List<RecognizedWord>> perPageWords,
@@ -508,6 +739,35 @@ public class PdfCreator {
                                           boolean convertToBlackWhite,
                                           int targetDpi,
                                           ProgressListener listener) {
+        // Back-compat: default to ROBUST when BW is requested
+        return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, targetDpi, listener, convertToBlackWhite ? BwMode.ROBUST : null);
+    }
+
+    /**
+     * Creates a searchable PDF from a collection of bitmap images and their corresponding recognized words.
+     *
+     * @param context             the application context required for resource initialization and file handling
+     * @param bitmaps             a list of bitmap images representing the pages of the PDF
+     * @param perPageWords        a list containing recognized words for each page, where each sublist corresponds to the text on a specific page
+     * @param outputUri           the URI where the resulting PDF will be saved
+     * @param jpegQuality         the quality level for encoding images into the PDF as a percentage (0-100); lower values result in more compression
+     * @param convertToGrayscale  a flag indicating whether the images should be converted to grayscale
+     * @param convertToBlackWhite a flag indicating whether the images should be converted to black-and-white
+     * @param targetDpi           the target resolution in dots per inch (DPI) for the PDF pages
+     * @param listener            a progress listener to receive updates on the processing of pages
+     * @param bwMode              the black-and-white processing mode to be used if convertToBlackWhite is true
+     * @return the URI of the generated PDF file, or null if an error occurred
+     */
+    public static Uri createSearchablePdf(Context context,
+                                          List<Bitmap> bitmaps,
+                                          List<List<RecognizedWord>> perPageWords,
+                                          Uri outputUri,
+                                          int jpegQuality,
+                                          boolean convertToGrayscale,
+                                          boolean convertToBlackWhite,
+                                          int targetDpi,
+                                          ProgressListener listener,
+                                          BwMode bwMode) {
         if (bitmaps == null || bitmaps.isEmpty() || outputUri == null) return null;
         try {
             PDFBoxResourceLoader.init(context);
@@ -546,7 +806,7 @@ public class PdfCreator {
                 }
                 Bitmap prepared = null;
                 try {
-                    prepared = processImageForPdf(src, convertToGrayscale, convertToBlackWhite, targetDpi);
+                    prepared = processImageForPdf(src, convertToGrayscale, convertToBlackWhite, targetDpi, convertToBlackWhite ? (bwMode != null ? bwMode : BwMode.ROBUST) : null);
                     if (prepared == null) {
                         Log.e(TAG, "Image preparation via OpenCV failed for page " + (i + 1));
                         return null;
@@ -630,6 +890,14 @@ public class PdfCreator {
         }
     }
 
+    /**
+     * An interface for listening to progress updates during a multi-step process,
+     * such as processing pages, files, or any sequential tasks.
+     * <p>
+     * Implementations of this interface should provide behavior to handle updates
+     * when a single step or unit of work is completed, including information about
+     * the progress relative to the total work.
+     */
     public interface ProgressListener {
         void onPageProcessed(int pageIndex, int totalPages);
     }

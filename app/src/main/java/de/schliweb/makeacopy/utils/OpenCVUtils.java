@@ -12,6 +12,7 @@ import android.util.Log;
 import lombok.Getter;
 import org.opencv.android.Utils;
 import org.opencv.core.*;
+import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
@@ -74,7 +75,6 @@ public class OpenCVUtils {
         return isInitialized;
     }
 
-
     /**
      * Initializes the ONNX runtime for inference.
      * This method loads the ONNX model from the assets directory and creates an inference session.
@@ -83,6 +83,14 @@ public class OpenCVUtils {
      */
     private static volatile String onnxInputName;
 
+    /**
+     * Initializes the ONNX runtime environment and loads the ONNX model for inference.
+     * This method ensures that the ONNX runtime is properly set up, enabling optional
+     * accelerations such as NNAPI and XNNPACK when available. The model is copied from
+     * the application assets to a cache location and loaded with optimization options.
+     *
+     * @param context the application context used for accessing resources and cache directories
+     */
     private static void initOnnxRuntime(Context context) {
         if (ortSession != null) return;
         Log.i(TAG, "Initializing ONNX runtime");
@@ -100,7 +108,7 @@ public class OpenCVUtils {
                 opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
                 opts.setIntraOpNumThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
 
-                // NNAPI probieren (fällt automatisch auf CPU zurück, wenn nicht verfügbar)
+                // Try NNAPI, then XNNPACK (both optional, fall back to CPU)
                 try {
                     opts.addNnapi();
                     Log.i(TAG, "NNAPI EP enabled");
@@ -362,7 +370,7 @@ public class OpenCVUtils {
             Imgproc.resize(bgr, resized, new Size(targetW, targetH));
             resized.convertTo(floatImage, CvType.CV_32FC3, 1.0 / 255.0);
 
-            Core.split(floatImage, channels); // B, G, R als CV_32F
+            Core.split(floatImage, channels); // B, G, R as CV_32F
 
             int H = targetH, W = targetW, C = 3;
             int HW = H * W;
@@ -405,30 +413,182 @@ public class OpenCVUtils {
     }
 
     /**
-     * Converts the given bitmap to a binary (black and white) image using Otsu's thresholding method.
-     *
-     * @param src The source bitmap to be converted. Must not be null or recycled.
-     * @return A new bitmap representing the binary (black and white) image, or null if the source
-     * bitmap is invalid or an error occurs during conversion.
+     * Configuration options for black-and-white image processing.
      */
-    public static Bitmap toBw(Bitmap src) {
+    public static class BwOptions {
+        public enum Mode {AUTO_ADAPTIVE, OTSU_ONLY}
+
+        public Mode mode = Mode.AUTO_ADAPTIVE;
+        public boolean useClahe = true;
+        public boolean removeShadows = true;
+        /**
+         * Adaptive window (odd). 0 = auto
+         */
+        public int blockSize = 0;
+        /**
+         * Offset for adaptiveThreshold (typ. 5–10)
+         */
+        public int C = 5;
+    }
+
+
+    /**
+     * Robust B/W conversion with shadow handling.
+     * Emulator: adaptiveThreshold is disabled (avoid SIGILL).
+     * Real devices: gentle adaptive variant (MEAN + higher C).
+     */
+    public static Bitmap toBw(Bitmap src, BwOptions opt) {
         if (src == null || src.isRecycled()) return null;
+        if (opt == null) opt = new BwOptions();
+
         Mat rgba = new Mat();
         Mat gray = new Mat();
+        Mat work = new Mat();
         Mat bw = new Mat();
+        CLAHE clahe = null;
+
         try {
             Utils.bitmapToMat(src, rgba);
             Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
-            Imgproc.threshold(gray, bw, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+
+            // --- 1) Shadow correction: gentle division-based normalization ---
+            if (opt.removeShadows) {
+                int k = Math.max(15, (int) (Math.min(gray.width(), gray.height()) * 0.03));
+                if (k % 2 == 0) k++;
+                Mat bg = new Mat();
+                Imgproc.GaussianBlur(gray, bg, new Size(k, k), 0);
+
+                // Use floating-point arithmetic to avoid quantization artifacts
+                Mat gf = new Mat(), bgf = new Mat(), norm = new Mat();
+                gray.convertTo(gf, CvType.CV_32F);
+                bg.convertTo(bgf, CvType.CV_32F);
+                Core.max(bgf, new Scalar(1.0), bgf);          // Prevent division by 0
+                Core.divide(gf, bgf, norm);                   // ~0..1
+                Core.multiply(norm, new Scalar(255.0), norm); // ~0..255
+                norm.convertTo(work, CvType.CV_8U);
+
+                bg.release();
+                gf.release();
+                bgf.release();
+                norm.release();
+            } else {
+                work = gray;
+            }
+
+            // --- 2) very gentle CLAHE (or leave opt.useClahe=false) ---
+            if (opt.useClahe) {
+                clahe = Imgproc.createCLAHE();
+                clahe.setClipLimit(1.1);
+                clahe.setTilesGridSize(new Size(8, 8));
+                clahe.apply(work, work);
+            }
+
+            // --- 3) slight smoothing against pepper noise ---
+            Imgproc.medianBlur(work, work, 3);
+
+            boolean ok = false;
+
+            // --- 4) Adaptive only on real devices (Emulator => Otsu) and less aggressive ---
+            if (opt.mode == BwOptions.Mode.AUTO_ADAPTIVE && !isSafeMode()) {
+                int bs;
+                if (opt.blockSize > 0) {
+                    bs = (opt.blockSize % 2 == 1) ? opt.blockSize : opt.blockSize + 1;
+                } else {
+                    // moderately large, guaranteed odd
+                    bs = Math.max(41, (Math.min(work.width(), work.height()) / 40) | 1);
+                    if (bs % 2 == 0) bs++;
+                }
+                int C = Math.max(2, Math.min(6, opt.C)); // smaller C reduces bleaching/fading
+
+                try {
+                    Imgproc.adaptiveThreshold(
+                            work, bw, 255,
+                            Imgproc.ADAPTIVE_THRESH_MEAN_C,
+                            Imgproc.THRESH_BINARY,
+                            bs, C
+                    );
+                    ok = true;
+                } catch (Throwable ignore) {
+                    ok = false;
+                }
+            }
+
+            despeckleFast(bw);
+
+            // --- 5) Fallback: Otsu (emulator or error) ---
+            if (!ok) {
+                Imgproc.threshold(work, bw, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+            }
+
+            // --- 6) very gentle closing stabilizes characters ---
+            try {
+                Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2, 2));
+                Imgproc.morphologyEx(bw, bw, Imgproc.MORPH_CLOSE, kernel);
+                kernel.release();
+            } catch (Throwable ignore) { /* optional */ }
+
             Bitmap out = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(bw, out);
             return out;
+
         } catch (Throwable t) {
-            Log.d(TAG, "toBw failed: " + t.getMessage());
-            return null;
+            Log.d(TAG, "toBw (robust) failed: " + t.getMessage());
+            try {
+                Mat tmpGray = new Mat(), tmpBw = new Mat();
+                Utils.bitmapToMat(src, rgba);
+                Imgproc.cvtColor(rgba, tmpGray, Imgproc.COLOR_RGBA2GRAY);
+                Imgproc.threshold(tmpGray, tmpBw, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+                Bitmap out = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(tmpBw, out);
+                tmpGray.release();
+                tmpBw.release();
+                return out;
+            } catch (Throwable t2) {
+                Log.d(TAG, "toBw fallback failed: " + t2.getMessage());
+                return null;
+            }
         } finally {
-            release(rgba, gray, bw);
+            release(rgba, gray, work, bw);
+            if (clahe != null) {
+                try {
+                    clahe.collectGarbage();
+                } catch (Throwable ignore) {
+                }
+            }
         }
+    }
+
+    /**
+     * Removes small speckles from a binary image using morphological operations.
+     * The function processes the input binary image to eliminate noise or small artifacts,
+     * leaving the major structures intact.
+     *
+     * @param bw Input binary image of type Mat (CV_8UC1), with pixel values of 0 or 255.
+     *           It will be modified in-place to remove speckles.
+     */
+    private static void despeckleFast(Mat bw /* CV_8UC1, 0/255 */) {
+        Mat inv = new Mat();
+        try {
+            // Make text and speckles white so the opening operation removes them
+            Core.bitwise_not(bw, inv);
+            Mat k3 = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+            Imgproc.morphologyEx(inv, inv, Imgproc.MORPH_OPEN, k3);
+            Core.bitwise_not(inv, bw);
+        } finally {
+            inv.release();
+        }
+    }
+
+
+    /**
+     * Converts a given Bitmap image to a black-and-white (grayscale) representation
+     * using default options.
+     *
+     * @param src the source Bitmap to be converted to black-and-white
+     * @return a new Bitmap representing the black-and-white version of the source image
+     */
+    public static Bitmap toBw(Bitmap src) {
+        return toBw(src, new BwOptions());
     }
 
     /**
@@ -862,7 +1022,7 @@ public class OpenCVUtils {
         if (cornersOnnx == null || cornersOnnx.length != 4) return cornersOpenCV;
         if (cornersOpenCV == null || cornersOpenCV.length != 4) return cornersOnnx;
 
-        // Fallback? → ONNX bevorzugen, wenn valide
+        // Fallback? → Prefer ONNX if valid
         if (isFallback(cornersOpenCV, w, h)) {
             Log.i(TAG, "OpenCV returned fallback → choosing ONNX");
             return sortPointsClockwise(cornersOnnx);
@@ -972,6 +1132,59 @@ public class OpenCVUtils {
     }
 
     /**
+     * Enhances the visual quality of the image by applying histogram equalization
+     * to the luminance channel and sharpening the overall image.
+     *
+     * @param bgr the input image in BGR color space. The operation modifies this
+     *            image in place. Must not be null or empty.
+     */
+    public static void autoEnhance(Mat bgr) {
+        if (bgr == null || bgr.empty()) return;
+        Mat lab = new Mat();
+        Mat l = new Mat();
+        Mat a = new Mat();
+        Mat bb = new Mat();
+        try {
+            Imgproc.cvtColor(bgr, lab, Imgproc.COLOR_BGR2Lab);
+            java.util.List<Mat> chans = new java.util.ArrayList<>(3);
+            Core.split(lab, chans);
+            l = chans.get(0);
+            a = chans.get(1);
+            bb = chans.get(2);
+            Imgproc.equalizeHist(l, l);
+            chans.set(0, l);
+            chans.set(1, a);
+            chans.set(2, bb);
+            Core.merge(chans, lab);
+            Imgproc.cvtColor(lab, bgr, Imgproc.COLOR_Lab2BGR);
+            Mat blurred = new Mat();
+            try {
+                Imgproc.GaussianBlur(bgr, blurred, new Size(0, 0), 1.0);
+                Core.addWeighted(bgr, 1.5, blurred, -0.5, 0, bgr);
+            } finally {
+                blurred.release();
+            }
+        } finally {
+            try {
+                lab.release();
+            } catch (Throwable ignore) {
+            }
+            try {
+                l.release();
+            } catch (Throwable ignore) {
+            }
+            try {
+                a.release();
+            } catch (Throwable ignore) {
+            }
+            try {
+                bb.release();
+            } catch (Throwable ignore) {
+            }
+        }
+    }
+
+    /**
      * Computes a tight target size (width/height) for the warp based on the lengths of the
      * selected quadrilateral edges. This preserves the aspect ratio of the selected area
      * when mapping to a rectangle.
@@ -1000,4 +1213,3 @@ public class OpenCVUtils {
         return Math.hypot(a.x - b.x, a.y - b.y);
     }
 }
-

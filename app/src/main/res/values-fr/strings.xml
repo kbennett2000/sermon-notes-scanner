@@ -65,7 +65,10 @@
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Aucune amélioration (JPEG)</string>
     <string name="jpeg_mode_auto">Amélioration automatique (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Noir et blanc (texte) (JPEG)</string>
+    <string name="jpeg_mode_bw_text">Noir et blanc (classique) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">Noir et blanc (robuste) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">N&amp;B (robuste)</string>
+    <string name="pdf_bw_mode_classic">N&amp;B (classique)</string>
     <string name="skip_ocr_export_only">Ignorer l’OCR (export seulement)</string>
     <string name="btn_pick_image">Charger</string>
     <string name="pick_image_cd">Charger une image existante</string>

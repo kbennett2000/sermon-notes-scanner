@@ -1,0 +1,145 @@
+<resources>
+    <string name="app_name">MakeACopy</string>
+
+    <!-- New menu items for document scanner -->
+    <string name="title_camera">กล้อง</string>
+    <string name="title_crop">ครอบตัด</string>
+    <string name="title_ocr">OCR</string>
+    <string name="title_export">ส่งออก</string>
+
+    <!-- Button labels -->
+    <string name="btn_scan">สแกน</string>
+    <string name="btn_crop">ครอบตัด</string>
+    <string name="btn_process">ประมวลผล</string>
+    <string name="btn_export">ส่งออก</string>
+    <string name="btn_share">แชร์</string>
+    <string name="next">ถัดไป</string>
+    <string name="back">ย้อนกลับ</string>
+
+    <!-- Messages -->
+    <string name="msg_camera_permission_required">ต้องการสิทธิ์กล้องเพื่อสแกนเอกสาร</string>
+    <string name="confirm">ยืนยัน</string>
+    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">ตรวจสอบการสแกนของคุณ แตะ “ถัดไป” เพื่อดำเนินการต่อ หรือ “ย้อนกลับ” เพื่อลองใหม่</string>
+    <string name="camera_ready_tap_the_button_to_scan_a_document">กล้องพร้อมแล้ว แตะปุ่มเพื่อสแกนเอกสาร</string>
+    <string name="captured_image">รูปที่ถ่าย</string>
+    <string name="retake">ถ่ายใหม่</string>
+    <string name="image_to_crop">รูปภาพสำหรับครอบตัด</string>
+    <string name="cropped_image">รูปที่ครอบตัดแล้ว</string>
+    <string name="recrop">ครอบตัดใหม่</string>
+    <string name="document_preview">ตัวอย่างเอกสาร</string>
+    <string name="include_ocr_text">รวมข้อความ OCR</string>
+    <string name="language">ภาษา:</string>
+    <string name="ocr_results_will_appear_here">ผลลัพธ์ OCR จะแสดงที่นี่</string>
+    <string name="no_image_loaded_capture_an_image_first">ยังไม่มีรูปภาพ โหลดรูปภาพก่อน</string>
+    <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">ปรับมุมสี่เหลี่ยมคางหมูเพื่อเลือกพื้นที่ที่ต้องการครอบตัด แล้วแตะปุ่มครอบตัด</string>
+    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">ตรวจสอบรูปที่ครอบตัด แตะ “ถัดไป” เพื่อดำเนินการต่อ หรือ “ย้อนกลับ” เพื่อลองใหม่</string>
+    <string name="no_document_ready_process_ocr_first">ยังไม่มีเอกสารพร้อม ประมวลผล OCR ก่อน</string>
+    <string name="document_ready_for_export">เอกสารพร้อมสำหรับการส่งออก</string>
+    <string name="processing_image">กำลังประมวลผลรูปภาพ…</string>
+    <string name="no_image_processed_crop_an_image_first">ยังไม่มีรูปประมวลผล ครอบตัดรูปก่อน</string>
+    <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR เสร็จสิ้น แตะปุ่มเพื่อไปยังการส่งออก</string>
+
+    <string name="initializing_camera">กำลังเริ่มต้นกล้อง…</string>
+    <string name="resetting_camera">กำลังกำหนดค่ากล้องใหม่…</string>
+    <string name="error_initializing_camera">ไม่สามารถเริ่มต้นกล้อง: %1$s</string>
+    <string name="error_camera_provider_null">ไม่สามารถเริ่มต้นกล้อง – provider เป็น null</string>
+    <string name="error_camera_not_initialized">กล้องยังไม่ได้เริ่มต้น กรุณาลองใหม่</string>
+    <string name="error_image_capture_failed">การถ่ายรูปผิดพลาด: %1$s</string>
+    <string name="error_displaying_image">ไม่สามารถแสดงรูปภาพ: %1$s</string>
+    <string name="error_resetting_camera">ข้อผิดพลาดในการรีเซ็ตกล้อง: %1$s</string>
+    <string name="error_toggling_flashlight">เปิด/ปิดไฟฉายผิดพลาด: %1$s</string>
+    <string name="error_camera_preview_failed">ไม่สามารถเริ่มพรีวิวกล้อง กรุณาลองใหม่</string>
+
+    <!-- Export options -->
+    <string name="convert_to_grayscale">แปลงเป็นระดับเทา</string>
+    <string name="convert_to_blackwhite_pdf">แปลงเป็นขาวดำ</string>
+    <string name="export_as_jpeg">ส่งออกเป็น JPEG</string>
+    <string name="export_as_pdf">ส่งออกเป็น PDF (ค่าเริ่มต้น)</string>
+
+    <!-- Flashlight options -->
+    <string name="toggle_flashlight">เปิด/ปิดไฟฉาย</string>
+    <string name="flashlight_on">ไฟฉายเปิด</string>
+    <string name="flashlight_off">ไฟฉายปิด</string>
+    <string name="flashlight_not_available">อุปกรณ์นี้ไม่มีไฟฉาย</string>
+    <string name="low_light_detected">ตรวจพบแสงน้อย เปิดไฟฉายหรือไม่?</string>
+
+    <!-- JPEG mode labels -->
+    <string name="jpeg_mode_none">ไม่ปรับแต่ง (JPEG)</string>
+    <string name="jpeg_mode_auto">ปรับแต่งอัตโนมัติ (JPEG)</string>
+    <string name="jpeg_mode_bw_text">ขาวดำ (คลาสสิก) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">ขาวดำ (ทนทาน) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">ขาวดำ (ทนทาน)</string>
+    <string name="pdf_bw_mode_classic">ขาวดำ (คลาสสิก)</string>
+    <string name="skip_ocr_export_only">ข้าม OCR (ส่งออกเท่านั้น)</string>
+    <string name="btn_pick_image">โหลด</string>
+    <string name="pick_image_cd">โหลดรูปที่มีอยู่</string>
+    <string name="error_selected_file_is_not_an_image">ไฟล์ที่เลือกไม่ใช่รูปภาพ</string>
+
+    <!-- Multipage Export (v1 increment) -->
+    <string name="pages_header">หน้า (%1$d)</string>
+    <string name="add_another_page">เพิ่ม</string>
+    <string name="clear_all_pages">ล้างทั้งหมด</string>
+    <string name="remove_this_page">ลบหน้านี้</string>
+    <string name="multipage_not_implemented">ยังไม่รองรับการส่งออกหลายหน้า</string>
+
+    <!-- Reorder A11y controls -->
+    <string name="move_page_left">ย้ายหน้าไปทางซ้าย</string>
+    <string name="move_page_right">ย้ายหน้าไปทางขวา</string>
+
+    <!-- Back confirmation for clearing multipage session -->
+    <string name="confirm_clear_multipage_title">ลบหน้าทั้งหมด?</string>
+    <string name="confirm_clear_multipage_message">มีหลายหน้า คุณต้องการลบทั้งหมดและย้อนกลับหรือไม่?</string>
+    <string name="cancel">ยกเลิก</string>
+
+    <!-- Clear-all confirmation for trash icon in multipage -->
+    <string name="confirm_clear_pages_title">ล้างหน้าทั้งหมด?</string>
+    <string name="confirm_clear_pages_message">คุณต้องการลบหน้าทั้งหมดจากฟิล์มสตริปหรือไม่?</string>
+
+    <!-- Registry Picker -->
+    <string name="picker_title_completed_scans">เลือกจากการสแกนที่เสร็จแล้ว</string>
+    <string name="picker_empty">ไม่พบการสแกนที่เสร็จแล้ว</string>
+    <string name="done">ถัดไป</string>
+    <string name="thumbnail">ภาพขนาดย่อ</string>
+    <string name="delete">ลบ</string>
+
+    <!-- Picker bulk actions -->
+    <string name="select_all">เลือกทั้งหมด</string>
+    <string name="deselect_all">ยกเลิกเลือกทั้งหมด</string>
+
+    <string name="added_pages_from_registry">เพิ่ม %1$d หน้า จาก registry</string>
+
+    <!-- Add page options dialog -->
+    <string name="add_page_option_choose_completed">เลือกจากการสแกนที่เสร็จแล้ว</string>
+    <string name="add_page_option_capture_new">ถ่ายหน้าใหม่</string>
+
+    <!-- Picker states -->
+    <string name="missing_file">ไฟล์หายไป</string>
+
+    <!-- Inline OCR cues -->
+    <string name="ocr_processing_started">กำลังทำ OCR…</string>
+    <string name="ocr_processing_finished">เพิ่ม OCR สำหรับหน้านี้แล้ว</string>
+    <string name="ocr_processing_failed">OCR ล้มเหลว</string>
+
+    <!-- Registry Picker: context action -->
+    <string name="remove_from_registry_title">ลบออกจาก registry</string>
+    <string name="remove_from_registry_message">ลบรายการนี้และไฟล์ที่เกี่ยวข้องหรือไม่?</string>
+    <string name="remove">ลบ</string>
+    <string name="removed_from_registry_toast">ลบเรียบร้อยแล้ว</string>
+
+    <!-- PDF quality presets (Phase 1) -->
+    <string name="pdf_quality_title">คุณภาพ/ขนาด PDF</string>
+    <string name="pdf_preset_high">สูง (300 dpi, q85)</string>
+    <string name="pdf_preset_standard">มาตรฐาน (200 dpi, q72)</string>
+    <string name="pdf_preset_small">เล็ก (150 dpi, q62)</string>
+    <string name="pdf_preset_very_small">เล็กมาก (110 dpi, q52)</string>
+    <string name="export_options_title">ตัวเลือกการส่งออก</string>
+    <string name="jpeg_enhancement_title">การปรับปรุง JPEG</string>
+    <string name="btn_options">ตัวเลือก</string>
+    <string name="btn_save">บันทึก</string>
+    <string name="btn_new">ใหม่</string>
+
+    <!-- Rotation (post-crop) -->
+    <string name="rotate_left_cd">หมุนหน้า 90° ทวนเข็มนาฬิกา</string>
+    <string name="rotate_right_cd">หมุนหน้า 90° ตามเข็มนาฬิกา</string>
+
+</resources>

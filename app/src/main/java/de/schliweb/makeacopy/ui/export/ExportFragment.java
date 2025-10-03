@@ -1,7 +1,6 @@
 package de.schliweb.makeacopy.ui.export;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -154,7 +152,9 @@ public class ExportFragment extends Fragment {
         android.content.SharedPreferences prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
 
         boolean includeOcr = prefs.getBoolean("include_ocr", false);
-        boolean convertToGrayscale = prefs.getBoolean("convert_to_grayscale", false);
+        // For PDF, grayscale is now selected via pdf_bw_mode == GRAYSCALE
+        String initPdfMode = prefs.getString("pdf_bw_mode", null);
+        boolean convertToGrayscale = ("GRAYSCALE".equalsIgnoreCase(initPdfMode));
         boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
 
         // Initialize JPEG mode checkboxes from saved preference (default AUTO)
@@ -574,7 +574,8 @@ public class ExportFragment extends Fragment {
             android.content.SharedPreferences p = ctx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
             boolean includeOcrSel = p.getBoolean("include_ocr", false);
             boolean exportAsJpegSel = p.getBoolean("export_as_jpeg", false);
-            boolean graySel = p.getBoolean("convert_to_grayscale", false);
+            String pdfMode = p.getString("pdf_bw_mode", null);
+            boolean graySel = ("GRAYSCALE".equalsIgnoreCase(pdfMode));
 
             // Update ViewModel to reflect the options used for this export
             exportViewModel.setIncludeOcr(includeOcrSel);
@@ -596,8 +597,10 @@ public class ExportFragment extends Fragment {
                     // Update ViewModel with new choices for immediate feedback and re-render preview
                     boolean includeOcrSel = bundle.getBoolean(ExportOptionsDialogFragment.BUNDLE_INCLUDE_OCR, false);
                     boolean exportAsJpegSel = bundle.getBoolean(ExportOptionsDialogFragment.BUNDLE_EXPORT_AS_JPEG, false);
-                    boolean graySel = bundle.getBoolean(ExportOptionsDialogFragment.BUNDLE_CONVERT_TO_GRAYSCALE, false);
+                    String pdfMode = bundle.getString("pdf_bw_mode", null);
                     exportViewModel.setIncludeOcr(includeOcrSel);
+                    // Derive grayscale flag for ViewModel from pdf_bw_mode (GRAYSCALE selected)
+                    boolean graySel = ("GRAYSCALE".equalsIgnoreCase(pdfMode));
                     exportViewModel.setConvertToGrayscale(graySel);
                     exportViewModel.setExportFormat(exportAsJpegSel ? "JPEG" : "PDF");
                     // Re-render preview to reflect grayscale/BW selections immediately
@@ -771,7 +774,8 @@ public class ExportFragment extends Fragment {
                 try {
                     android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
                     String presetSaved = p.getString("pdf_preset", null);
-                    convertBwEffectiveLocal = p.getBoolean("convert_to_blackwhite", false);
+                    String bwModeSaved = p.getString("pdf_bw_mode", null);
+                    convertBwEffectiveLocal = (("ROBUST".equalsIgnoreCase(bwModeSaved) || "CLASSIC".equalsIgnoreCase(bwModeSaved)));
                     List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pgs =
                             exportSessionViewModel != null ? exportSessionViewModel.getPages().getValue() : null;
                     int pageCount = (pgs == null) ? 0 : pgs.size();
@@ -782,9 +786,41 @@ public class ExportFragment extends Fragment {
                 } catch (Throwable t) {
                     preset = de.schliweb.makeacopy.utils.PdfQualityPreset.STANDARD;
                 }
+                // Determine exclusivity from pdf_bw_mode: GRAYSCALE vs BW
+                boolean convertGrayEffectiveLocal = preset.forceGrayscale || convertToGrayscale;
+                try {
+                    android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                    String pdfModeSel = p.getString("pdf_bw_mode", null);
+                    if ("GRAYSCALE".equalsIgnoreCase(pdfModeSel)) {
+                        convertGrayEffectiveLocal = true;
+                        convertBwEffectiveLocal = false;
+                    } else if ("CLASSIC".equalsIgnoreCase(pdfModeSel) || "ROBUST".equalsIgnoreCase(pdfModeSel)) {
+                        convertGrayEffectiveLocal = false;
+                        convertBwEffectiveLocal = true;
+                    }
+                } catch (Throwable ignore) {
+                }
                 final boolean convertBwEffective = convertBwEffectiveLocal;
                 final int jpegQuality = preset.jpegQuality;
-                final boolean convertGrayEffective = preset.forceGrayscale || convertToGrayscale;
+                final boolean convertGrayEffective = convertGrayEffectiveLocal;
+                // Determine PDF BW mode (ROBUST/CLASSIC) if BW is enabled
+                de.schliweb.makeacopy.utils.PdfCreator.BwMode tmpBwMode;
+                try {
+                    if (convertBwEffective) {
+                        android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                        String bw = p.getString("pdf_bw_mode", null);
+                        if ("CLASSIC".equalsIgnoreCase(bw))
+                            tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.CLASSIC;
+                        else if ("ROBUST".equalsIgnoreCase(bw))
+                            tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.ROBUST;
+                        else tmpBwMode = null;
+                    } else {
+                        tmpBwMode = null;
+                    }
+                } catch (Throwable ignore) {
+                    tmpBwMode = null;
+                }
+                final de.schliweb.makeacopy.utils.PdfCreator.BwMode bwMode = tmpBwMode;
 
                 Uri exportUri;
                 if (isMulti) {
@@ -880,7 +916,8 @@ public class ExportFragment extends Fragment {
                             convertBwEffective,
                             preset.targetDpi,
                             (pageIndex, total) -> postToUiSafe(() ->
-                                    exportViewModel.setExportProgress(Math.max(0, Math.min(pageIndex, total))))
+                                    exportViewModel.setExportProgress(Math.max(0, Math.min(pageIndex, total)))),
+                            bwMode
                     );
                     // Recycle any temporary bitmaps we created (those not part of the session's in-memory references)
                     try {
@@ -911,7 +948,8 @@ public class ExportFragment extends Fragment {
                             jpegQuality,
                             convertGrayEffective,
                             convertBwEffective,
-                            preset.targetDpi
+                            preset.targetDpi,
+                            bwMode
                     );
                 }
 

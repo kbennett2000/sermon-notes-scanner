@@ -20,7 +20,11 @@ public class JpegExportOptions {
         /**
          * Black/White mode optimized for text via Otsu binarization.
          */
-        BW_TEXT
+        BW_TEXT,
+        /**
+         * Black/White robust mode (adaptive threshold + shadow removal + CLAHE).
+         */
+        BW_ROBUST
     }
 
     /**

@@ -431,6 +431,39 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         return -1;
     }
 
+    /**
+     * Retrieves the major version number of the EMUI system based on system property or fallback string.
+     * <p>
+     * This method first attempts to get the EMUI version from the system property "ro.build.version.emui".
+     * If it fails, it uses a fallback approach by analyzing the build's display string.
+     *
+     * @return The major version number of EMUI, or -1 if the version cannot be determined.
+     */
+    private static int getEmuiMajorLoose() {
+        // 1) Systemproperty
+        String emui = getSystemProperty("ro.build.version.emui", "");
+        if (emui != null && !emui.isEmpty()) {
+            int us = emui.indexOf('_');
+            String rest = (us >= 0 && us + 1 < emui.length()) ? emui.substring(us + 1) : emui;
+            String num = rest.split("\\.")[0];
+            try {
+                return Integer.parseInt(num);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        // 2) Fallback: Build.DISPLAY (Marketing-String)
+        try {
+            String disp = android.os.Build.DISPLAY;
+            if (disp != null) {
+                java.util.regex.Matcher m = java.util.regex.Pattern
+                        .compile("EMUI\\s*([0-9]{1,2})", java.util.regex.Pattern.CASE_INSENSITIVE)
+                        .matcher(disp);
+                if (m.find()) return Integer.parseInt(m.group(1));
+            }
+        } catch (Throwable ignored) {
+        }
+        return -1;
+    }
 
     /**
      * Extracts the major version number of Magic UI from system properties or build display information.
@@ -475,7 +508,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
      * @return true if the device is identified as having the black screen preview quirk; false otherwise.
      */
     private boolean isPreviewBlackScreenQuirkDevice() {
-        if (isHuaweiEmui10QuirkDevice()) return true;
+        if (isHuaweiQuirkDevice()) return true;
 
         String manufacturer = android.os.Build.MANUFACTURER;
         String brand = android.os.Build.BRAND;
@@ -492,26 +525,27 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     }
 
     /**
-     * Determines if the current device is a Huawei device running EMUI 10
-     * and is part of specific device families such as P30 or P40.
-     * <p>
-     * The method checks the manufacturer and model strings to confirm the device
-     * is a Huawei device and matches the patterns for P30 or P40 series. Additionally,
-     * it validates that the EMUI version is 10.
+     * Determines whether the current device is a Huawei device with specific quirks.
+     * It checks if the device manufacturer is Huawei, verifies the model against known Huawei
+     * device families (P30 and P40 series), and considers the EMUI version for certain conditions.
      *
-     * @return true if the device is a Huawei device from the P30 or P40 family running EMUI 10,
-     * false otherwise.
+     * @return true if the device is a Huawei P30/P40 series device with EMUI version 10 or above,
+     * or if the EMUI version cannot be determined; false otherwise.
      */
-    private boolean isHuaweiEmui10QuirkDevice() {
+    private boolean isHuaweiQuirkDevice() {
         String manufacturer = android.os.Build.MANUFACTURER;
         String model = android.os.Build.MODEL;
         if (manufacturer == null || model == null) return false;
         if (!manufacturer.equalsIgnoreCase("HUAWEI")) return false;
+
         String m = model.toUpperCase(Locale.ROOT);
-        boolean isP30Fam = m.contains("ELE-") || m.contains("VOG-"); // P30 / P30 Pro
+        boolean isP30Fam = m.contains("ELE-") || m.contains("VOG-");               // P30 / P30 Pro
         boolean isP40Fam = m.contains("ANA-") || m.contains("ELS-") || m.contains("JNY-"); // P40 / Pro / Lite
-        int emui = getEmuiMajor();
-        return (isP30Fam || isP40Fam) && emui == 10;
+        if (!(isP30Fam || isP40Fam)) return false;
+
+        int emui = getEmuiMajorLoose();
+        // konservativ: wenn wir die Version nicht sicher kennen (-1), lieber fallbacken
+        return (emui == -1) || (emui >= 10);
     }
 
     private Preview preview; // make field to update rotation later

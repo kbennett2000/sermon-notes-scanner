@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
+import de.schliweb.makeacopy.utils.OpenCVUtils;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -88,6 +89,11 @@ public final class JpegExporter {
         }
 
         // From here on, process with OpenCV
+        try {
+            if (!OpenCVUtils.isInitialized()) OpenCVUtils.init(context.getApplicationContext());
+        } catch (Throwable t) {
+            Log.w(TAG, "export: OpenCV init failed or not available", t);
+        }
         Bitmap outBitmap = null;
         Mat srcRgba = new Mat();
         Mat work = new Mat();
@@ -126,6 +132,32 @@ public final class JpegExporter {
                     // Export as grayscale-like JPEG: Gray -> RGBA
                     Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
                     Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                    break;
+                case BW_ROBUST:
+                    // Convert to Bitmap, use OpenCVUtils robust BW (with defaults), and convert back
+                    try {
+                        Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+                        Utils.matToBitmap(work, tmpIn);
+                        Bitmap bw = OpenCVUtils.toBw(tmpIn); // defaults = robust
+                        if (bw != null) {
+                            Utils.bitmapToMat(bw, work);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                        } else {
+                            // Fallback to classic BW
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2BGR);
+                            applyBwText(work);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                        }
+                    } catch (Throwable t) {
+                        // Fallback to classic BW in case of any error
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                        Imgproc.GaussianBlur(work, work, new Size(0, 0), 1.2);
+                        Imgproc.threshold(work, work, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                    }
                     break;
 
                 case NONE:
@@ -178,56 +210,8 @@ public final class JpegExporter {
     // === Image ops ===
 
     private static void applyAutoEnhancement(Mat bgr) {
-        // bgr: 3-channel 8-bit image
-        Mat lab = new Mat();
-        Mat l = new Mat();
-        Mat a = new Mat();
-        Mat b = new Mat();
-        try {
-            Imgproc.cvtColor(bgr, lab, Imgproc.COLOR_BGR2Lab);
-
-            java.util.List<Mat> chans = new java.util.ArrayList<>(3);
-            Core.split(lab, chans);
-            l = chans.get(0);
-            a = chans.get(1);
-            b = chans.get(2);
-
-            // L-channel equalization (simple equalizeHist; CLAHE optional später)
-            Imgproc.equalizeHist(l, l);
-
-            // Merge back → Lab → BGR
-            chans.set(0, l);
-            chans.set(1, a);
-            chans.set(2, b);
-            Core.merge(chans, lab);
-            Imgproc.cvtColor(lab, bgr, Imgproc.COLOR_Lab2BGR);
-
-            // Mild unsharp mask
-            Mat blurred = new Mat();
-            try {
-                Imgproc.GaussianBlur(bgr, blurred, new Size(0, 0), 1.0);
-                Core.addWeighted(bgr, 1.5, blurred, -0.5, 0, bgr);
-            } finally {
-                blurred.release();
-            }
-        } finally {
-            try {
-                lab.release();
-            } catch (Throwable ignore) {
-            }
-            try {
-                l.release();
-            } catch (Throwable ignore) {
-            }
-            try {
-                a.release();
-            } catch (Throwable ignore) {
-            }
-            try {
-                b.release();
-            } catch (Throwable ignore) {
-            }
-        }
+        // Delegate implementation to OpenCVUtils to keep logic centralized
+        OpenCVUtils.autoEnhance(bgr);
     }
 
     /**
@@ -326,6 +310,13 @@ public final class JpegExporter {
             }
         }
 
+        // Ensure OpenCV is ready for downstream ops
+        try {
+            if (!OpenCVUtils.isInitialized()) OpenCVUtils.init(context.getApplicationContext());
+        } catch (Throwable t) {
+            Log.w(TAG, "exportToStream: OpenCV init failed or not available", t);
+        }
+
         Bitmap outBitmap = null;
         Mat srcRgba = new Mat();
         Mat work = new Mat();
@@ -354,6 +345,32 @@ public final class JpegExporter {
                     applyBwText(work);
                     Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
                     Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                    break;
+                case BW_ROBUST:
+                    // Convert to Bitmap, use OpenCVUtils robust BW (with defaults), and convert back
+                    try {
+                        Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+                        Utils.matToBitmap(work, tmpIn);
+                        Bitmap bw = OpenCVUtils.toBw(tmpIn); // defaults = robust
+                        if (bw != null) {
+                            Utils.bitmapToMat(bw, work);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                        } else {
+                            // Fallback to classic BW
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2BGR);
+                            applyBwText(work);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                        }
+                    } catch (Throwable t) {
+                        // Fallback to classic BW in case of any error
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                        Imgproc.GaussianBlur(work, work, new Size(0, 0), 1.2);
+                        Imgproc.threshold(work, work, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                    }
                     break;
                 case NONE:
                 default:

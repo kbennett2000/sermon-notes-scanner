@@ -66,7 +66,10 @@
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">无增强（JPEG）</string>
     <string name="jpeg_mode_auto">自动增强（JPEG）</string>
-    <string name="jpeg_mode_bw_text">黑白（文本）（JPEG）</string>
+    <string name="jpeg_mode_bw_text">黑白（经典）（JPEG）</string>
+    <string name="jpeg_mode_bw_robust">黑白（稳健）（JPEG）</string>
+    <string name="pdf_bw_mode_robust">黑白（稳健）</string>
+    <string name="pdf_bw_mode_classic">黑白（经典）</string>
     <string name="skip_ocr_export_only">跳过 OCR（仅导出）</string>
     <string name="btn_pick_image">加载</string>
     <string name="pick_image_cd">加载已有图像</string>

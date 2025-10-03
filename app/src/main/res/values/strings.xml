@@ -65,7 +65,10 @@
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">No enhancement (JPEG)</string>
     <string name="jpeg_mode_auto">Auto enhance (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Black &amp; White (Text) (JPEG)</string>
+    <string name="jpeg_mode_bw_text">Black &amp; White (classic) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">Black &amp; White (robust) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">B&amp;W (robust)</string>
+    <string name="pdf_bw_mode_classic">B&amp;W (classic)</string>
     <string name="skip_ocr_export_only">Skip OCR (export only)</string>
     <string name="btn_pick_image">Load</string>
     <string name="pick_image_cd">Load existing image</string>

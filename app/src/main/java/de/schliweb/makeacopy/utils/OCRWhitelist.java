@@ -24,8 +24,11 @@ public class OCRWhitelist {
     // Italian
     public static final String IT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ0123456789.,:;-?!()[]/\"' ";
 
+    // Russian (Cyrillic incl. Ё/ё)
+    public static final String RU = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789.,:;-?!()[]/\"' ";
+
     // Default: Superset
-    public static final String DEFAULT = (DE + EN + ES + FR + IT);
+    public static final String DEFAULT = (DE + EN + ES + FR + IT + RU);
 
     /**
      * Returns a predefined whitelist of allowed characters for a given language code.
@@ -49,6 +52,8 @@ public class OCRWhitelist {
                 return FR;
             case "ita":
                 return IT;
+            case "rus":
+                return RU;
             default:
                 return DEFAULT;
         }

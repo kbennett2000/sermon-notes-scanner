@@ -3,11 +3,12 @@ package de.schliweb.makeacopy.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.util.DisplayMetrics;
 import android.util.Size;
 import de.schliweb.makeacopy.ui.export.session.CompletedScan;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * Utility class providing methods for handling and optimizing {@code Bitmap} instances,
@@ -204,8 +205,9 @@ public final class BitmapUtils {
         try {
             SharedPreferences prefs = ctx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
             boolean toGray = prefs.getBoolean("convert_to_grayscale", false);
-            boolean toBw = prefs.getBoolean("convert_to_blackwhite", false);
+            boolean toBw = false;
             boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
+            boolean doAuto = false;
 
             if (exportAsJpeg) {
                 // Preview reflects JPEG options only
@@ -216,17 +218,37 @@ public final class BitmapUtils {
                             de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.valueOf(
                                     prefs.getString("jpeg_mode", de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.AUTO.name())
                             );
-                    if (mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.BW_TEXT) {
+                    if (mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.BW_TEXT
+                            || mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.BW_ROBUST) {
                         toBw = true;
+                    } else if (mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.AUTO) {
+                        doAuto = true;
                     }
                 } catch (Exception ignored) {
+                }
+            } else {
+                // PDF path: determine mode solely from selected pdf_bw_mode
+                try {
+                    String mode = prefs.getString("pdf_bw_mode", null);
+                    if ("GRAYSCALE".equalsIgnoreCase(mode)) {
+                        toGray = true;
+                        toBw = false;
+                    } else if ("ROBUST".equalsIgnoreCase(mode) || "CLASSIC".equalsIgnoreCase(mode)) {
+                        toBw = true;
+                        toGray = false;
+                    } else {
+                        toBw = false;
+                        // keep toGray as-is (legacy or preset preview)
+                    }
+                } catch (Throwable ignored) {
+                    toBw = false;
                 }
             }
 
             Bitmap safe = BitmapUtils.ensureDisplaySafe(source);
             Bitmap out = safe;
 
-            if (toBw || toGray) {
+            if (toBw || toGray || doAuto) {
                 try {
                     if (!OpenCVUtils.isInitialized()) {
                         OpenCVUtils.init(ctx.getApplicationContext());
@@ -235,11 +257,57 @@ public final class BitmapUtils {
                 }
                 try {
                     if (toBw) {
-                        Bitmap bw = OpenCVUtils.toBw(safe);
+                        boolean classicBw = false;
+                        try {
+                            if (exportAsJpeg) {
+                                de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode mode =
+                                        de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.valueOf(
+                                                prefs.getString("jpeg_mode", de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.AUTO.name())
+                                        );
+                                classicBw = (mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.BW_TEXT);
+                            } else {
+                                String bw = prefs.getString("pdf_bw_mode", "ROBUST");
+                                classicBw = "CLASSIC".equalsIgnoreCase(bw);
+                            }
+                        } catch (Throwable ignored2) {
+                        }
+                        Bitmap bw;
+                        if (classicBw) {
+                            OpenCVUtils.BwOptions opt = new OpenCVUtils.BwOptions();
+                            opt.mode = OpenCVUtils.BwOptions.Mode.OTSU_ONLY;
+                            opt.useClahe = false;
+                            opt.removeShadows = false;
+                            bw = OpenCVUtils.toBw(safe, opt);
+                        } else {
+                            bw = OpenCVUtils.toBw(safe);
+                        }
                         if (bw != null) out = bw;
                     } else if (toGray) {
                         Bitmap gr = OpenCVUtils.toGray(safe);
                         if (gr != null) out = gr;
+                    } else if (doAuto) {
+                        // Apply JPEG Auto enhance for preview: RGBA -> BGR, enhance, back to RGBA
+                        Mat rgba = new Mat();
+                        Mat bgr = new Mat();
+                        try {
+                            Utils.bitmapToMat(safe, rgba);
+                            Imgproc.cvtColor(rgba, bgr, Imgproc.COLOR_RGBA2BGR);
+                            OpenCVUtils.autoEnhance(bgr);
+                            Imgproc.cvtColor(bgr, rgba, Imgproc.COLOR_BGR2RGBA);
+                            Bitmap enhanced = Bitmap.createBitmap(safe.getWidth(), safe.getHeight(), Bitmap.Config.ARGB_8888);
+                            Utils.matToBitmap(rgba, enhanced);
+                            out = enhanced;
+                        } catch (Throwable ignore) {
+                        } finally {
+                            try {
+                                rgba.release();
+                            } catch (Throwable ignore) {
+                            }
+                            try {
+                                bgr.release();
+                            } catch (Throwable ignore) {
+                            }
+                        }
                     }
                 } catch (Throwable ignored) {
                 }
