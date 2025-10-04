@@ -200,6 +200,13 @@ public class OpenCVUtils {
         USE_ADAPTIVE_THRESHOLD = isHighEnd;
 
         Log.i(TAG, "Safe mode = " + USE_SAFE_MODE + ", AdaptiveThreshold = " + USE_ADAPTIVE_THRESHOLD);
+        try {
+            if (USE_SAFE_MODE) {
+                // Disable aggressive SIMD/parallel optimizations that may use unsupported instructions on some CPUs
+                org.opencv.core.Core.setUseOptimized(false);
+                org.opencv.core.Core.setNumThreads(1);
+            }
+        } catch (Throwable ignore) { }
     }
 
     /**
@@ -452,7 +459,7 @@ public class OpenCVUtils {
             Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
 
             // --- 1) Shadow correction: gentle division-based normalization ---
-            if (opt.removeShadows) {
+            if (opt.removeShadows && !isSafeMode()) {
                 int k = Math.max(15, (int) (Math.min(gray.width(), gray.height()) * 0.03));
                 if (k % 2 == 0) k++;
                 Mat bg = new Mat();
