@@ -160,7 +160,7 @@ How it works:
 - MakeACopy discovers installed packs locally and lets you import the models.
 - Once imported, the best models appear in the OCR language selection.
 
-📦 [GitHub Release Page]([https://github.com/egdels/makeacopy/releases](https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.0.0)
+📦 [GitHub Release Page]([https://github.com/egdels/makeacopy/releases](https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.0.0))
 
 Notes:
 - Packs are signed with the same key as the main app, so you can verify them with `apksigner`.
