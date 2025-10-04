@@ -141,4 +141,19 @@
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">Повернуть страницу на 90° против часовой стрелки</string>
     <string name="rotate_right_cd">Повернуть страницу на 90° по часовой стрелке</string>
+
+    <!-- Управление моделями OCR (прототип) -->
+    <string name="ocr_models_manage">Модели OCR</string>
+    <string name="ocr_import_manual">Импортировать .traineddata…</string>
+    <string name="ocr_discover_packs">Найти языковые пакеты</string>
+    <string name="ocr_no_packs_found">Языковые пакеты не найдены</string>
+    <string name="ocr_choose_pack">Выберите языковой пакет</string>
+    <string name="ocr_no_models_in_pack">В этом пакете моделей не найдено</string>
+    <string name="ocr_choose_model">Выберите модель для импорта</string>
+    <string name="ocr_import_success">Модель импортирована</string>
+    <string name="ocr_import_failed">Ошибка импорта</string>
+
+    <!-- Подсказка по моделям OCR -->
+    <string name="ocr_models_hint">Для более быстрой распознаваемости включены компактные модели. Для большей точности вы можете установить более крупные модели «Best». Подключение к интернету не требуется.</string>
+
 </resources>

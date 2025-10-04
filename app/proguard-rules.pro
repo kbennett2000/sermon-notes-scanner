@@ -99,5 +99,7 @@
 -keep class de.schliweb.makeacopy.data.CompletedScanEntry { *; }
 -keep class de.schliweb.makeacopy.data.CompletedScansRegistry$RegistryFile { *; }
 
+-keep class de.schliweb.makeacopy.utils.OcrModelManager { *; }
+
 # Ensure generic type info is retained (Gson reads List<CompletedScanEntry> from field signature)
 -keepattributes Signature

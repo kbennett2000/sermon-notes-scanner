@@ -142,4 +142,19 @@
     <string name="rotate_left_cd">หมุนหน้า 90° ทวนเข็มนาฬิกา</string>
     <string name="rotate_right_cd">หมุนหน้า 90° ตามเข็มนาฬิกา</string>
 
+
+    <!-- การจัดการโมเดล OCR (ต้นแบบ) -->
+    <string name="ocr_models_manage">โมเดล OCR</string>
+    <string name="ocr_import_manual">นำเข้า .traineddata…</string>
+    <string name="ocr_discover_packs">ค้นหาแพ็กภาษา</string>
+    <string name="ocr_no_packs_found">ไม่พบแพ็กภาษา</string>
+    <string name="ocr_choose_pack">เลือกแพ็กภาษา</string>
+    <string name="ocr_no_models_in_pack">ไม่พบโมเดลในแพ็กนี้</string>
+    <string name="ocr_choose_model">เลือกโมเดลเพื่อนำเข้า</string>
+    <string name="ocr_import_success">นำเข้าโมเดลสำเร็จ</string>
+    <string name="ocr_import_failed">นำเข้าไม่สำเร็จ</string>
+
+    <!-- คำแนะนำเกี่ยวกับโมเดล OCR -->
+    <string name="ocr_models_hint">เพื่อการรู้จำที่เร็วขึ้น มีโมเดลแบบกะทัดรัดรวมมาให้แล้ว หากต้องการความแม่นยำสูงขึ้น คุณสามารถติดตั้งโมเดล "Best" ที่มีขนาดใหญ่กว่าได้ โดยไม่ต้องเชื่อมต่ออินเทอร์เน็ต</string>
+
 </resources>

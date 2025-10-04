@@ -139,4 +139,19 @@
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">Faire pivoter la page de 90° dans le sens antihoraire</string>
     <string name="rotate_right_cd">Faire pivoter la page de 90° dans le sens horaire</string>
+
+    <!-- Gestion des modèles OCR (prototype) -->
+    <string name="ocr_models_manage">Modèles OCR</string>
+    <string name="ocr_import_manual">Importer .traineddata…</string>
+    <string name="ocr_discover_packs">Découvrir des packs de langue</string>
+    <string name="ocr_no_packs_found">Aucun pack de langue trouvé</string>
+    <string name="ocr_choose_pack">Choisir un pack de langue</string>
+    <string name="ocr_no_models_in_pack">Aucun modèle trouvé dans ce pack</string>
+    <string name="ocr_choose_model">Choisir le modèle à importer</string>
+    <string name="ocr_import_success">Modèle importé</string>
+    <string name="ocr_import_failed">Échec de l\'importation</string>
+
+    <!-- Astuce sur les modèles OCR -->
+    <string name="ocr_models_hint">Pour une reconnaissance plus rapide, des modèles compacts sont inclus. Pour une meilleure précision, vous pouvez installer des modèles « Best » plus volumineux. Aucune connexion Internet n’est requise.</string>
+
 </resources>

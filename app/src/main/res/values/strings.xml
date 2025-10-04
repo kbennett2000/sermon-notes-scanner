@@ -140,4 +140,19 @@
     <string name="rotate_left_cd">Rotate page 90 degrees counter-clockwise</string>
     <string name="rotate_right_cd">Rotate page 90 degrees clockwise</string>
 
+    <!-- OCR models management (prototype) -->
+    <string name="ocr_models_manage">OCR models</string>
+    <string name="ocr_import_manual">Import .traineddata…</string>
+    <string name="ocr_discover_packs">Discover language packs</string>
+    <string name="ocr_no_packs_found">No language packs found</string>
+    <string name="ocr_choose_pack">Choose language pack</string>
+    <string name="ocr_no_models_in_pack">No models found in this pack</string>
+    <string name="ocr_choose_model">Choose model to import</string>
+    <string name="ocr_import_success">Model imported</string>
+    <string name="ocr_import_failed">Import failed</string>
+
+    
+    <!-- OCR models hint -->
+    <string name="ocr_models_hint">For faster recognition, compact models are included. For higher accuracy, you can install larger \"Best\" models. No internet connection is required.</string>
+
 </resources>

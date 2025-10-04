@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.util.Log;
+import androidx.core.content.ContextCompat;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.*;
@@ -45,7 +46,19 @@ public class OCRHelper {
     public OCRHelper(Context context) {
         this.context = context.getApplicationContext();
         this.language = DEFAULT_LANGUAGE;
-        this.dataPath = context.getFilesDir().getAbsolutePath();
+        // Use no-backup directory to align with OcrModelManager imports
+        this.dataPath = ContextCompat.getNoBackupFilesDir(this.context).getAbsolutePath();
+    }
+
+    /**
+     * Retrieves the directory path for the tessdata folder within the application's
+     * private file storage.
+     *
+     * @param context the Context of the application, used to access file directories
+     * @return a File object representing the tessdata directory
+     */
+    public static File getTessdataDir(Context context) {
+        return new File(ContextCompat.getNoBackupFilesDir(context), TESSDATA_DIR);
     }
 
     /* ==================== Init / Shutdown ==================== */

@@ -14,7 +14,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:textColor="?attr/colorOnSurface"
+            android:textColor="?android:attr/textColorPrimary"
             android:text="@string/ocr_processing_complete_tap_the_button_to_proceed_to_export"
             android:textAlignment="center"
             android:textSize="20sp"
@@ -46,6 +46,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />-->
 
+    <!-- Hint about OCR models (Fast vs Best) -->
+    <TextView
+            android:id="@+id/ocr_models_hint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/ocr_models_hint"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/language_spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- OCR-Resultat -->
     <TextView
             android:id="@+id/ocr_result_text"
@@ -62,10 +78,34 @@
             android:gravity="top|start"
             android:padding="12dp"
             android:minHeight="80dp"
-            app:layout_constraintTop_toBottomOf="@id/language_spinner"
-            app:layout_constraintBottom_toTopOf="@id/button_container"
+            app:layout_constraintTop_toBottomOf="@id/ocr_models_hint"
+            app:layout_constraintBottom_toTopOf="@id/ocr_actions_row"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- OCR actions row: settings icon above the button bar (analog zu Export) -->
+    <LinearLayout
+            android:id="@+id/ocr_actions_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/button_container">
+
+        <ImageButton
+                android:id="@+id/button_ocr_options"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="8dp"
+                android:contentDescription="@string/btn_options"
+                android:src="@drawable/ic_build"
+                app:tint="?attr/colorControlNormal"
+                android:background="@android:color/transparent"/>
+    </LinearLayout>
 
     <!-- Bottom button bar (mirror CropFragment positioning) -->
     <LinearLayout

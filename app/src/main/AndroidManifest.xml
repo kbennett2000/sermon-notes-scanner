@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         >
 
+    <!-- Package visibility for discovering installed Language-Packs (Android 11+) -->
+    <queries>
+        <intent>
+            <action android:name="de.schliweb.makeacopy.ACTION_TESSDATA" />
+        </intent>
+    </queries>
+
     <!-- Camera permission for document scanning -->
     <uses-permission android:name="android.permission.CAMERA"/>
 

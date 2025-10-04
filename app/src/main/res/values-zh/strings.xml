@@ -142,4 +142,19 @@
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">将页面逆时针旋转 90 度</string>
     <string name="rotate_right_cd">将页面顺时针旋转 90 度</string>
+
+    <!-- OCR 模型管理（原型） -->
+    <string name="ocr_models_manage">OCR 模型</string>
+    <string name="ocr_import_manual">导入 .traineddata…</string>
+    <string name="ocr_discover_packs">发现语言包</string>
+    <string name="ocr_no_packs_found">未找到语言包</string>
+    <string name="ocr_choose_pack">选择语言包</string>
+    <string name="ocr_no_models_in_pack">此语言包中未找到模型</string>
+    <string name="ocr_choose_model">选择要导入的模型</string>
+    <string name="ocr_import_success">模型已导入</string>
+    <string name="ocr_import_failed">导入失败</string>
+
+    <!-- OCR 模型提示 -->
+    <string name="ocr_models_hint">为加快识别速度，已包含紧凑型模型。若需更高精度，可以安装更大的“Best”模型。无需互联网连接。</string>
+
 </resources>

@@ -1,7 +1,10 @@
 package de.schliweb.makeacopy.ui.ocr;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,7 +14,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
@@ -52,6 +58,9 @@ public class OCRFragment extends Fragment {
     private volatile Future<?> runningOcr = null;
     private final AtomicBoolean ocrCancelled = new AtomicBoolean(false);
 
+    // SAF launcher for manual traineddata import
+    private ActivityResultLauncher<Intent> openTraineddataLauncher;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ocrViewModel = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
@@ -61,6 +70,19 @@ public class OCRFragment extends Fragment {
 
         // Language helper (no initTesseract() here!)
         langHelper = new OCRHelper(requireContext().getApplicationContext());
+
+        // Init SAF launcher for manual .traineddata import
+        openTraineddataLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+                        Uri uri = data.getData();
+                        boolean ok = uri != null && OcrModelManager.importFromUri(requireContext(), uri);
+                        UIUtils.showToast(requireContext(), ok ? getString(R.string.ocr_import_success) : getString(R.string.ocr_import_failed), Toast.LENGTH_SHORT);
+                        if (ok) refreshLanguageSpinner();
+                    }
+                }
+        );
 
         // State observer
         ocrViewModel.getState().observe(getViewLifecycleOwner(), state -> {
@@ -118,6 +140,11 @@ public class OCRFragment extends Fragment {
         if (binding.buttonBack != null) {
             binding.buttonBack.setOnClickListener(v ->
                     Navigation.findNavController(requireView()).navigateUp());
+        }
+
+        // OCR options (settings) icon above the button bar
+        if (binding.buttonOcrOptions != null) {
+            binding.buttonOcrOptions.setOnClickListener(v -> showOcrOptionsDialog());
         }
 
         // Language selection
@@ -196,6 +223,81 @@ public class OCRFragment extends Fragment {
         }
         // Fallback includes Chinese (Simplified and Traditional) so users on zh locales can select them when asset listing fails
         return OCRUtils.getLanguages();
+    }
+
+    /**
+     * Refresh the language spinner after importing new models.
+     */
+    private void refreshLanguageSpinner() {
+        try {
+            // Recreate helper to see any new files (not strictly necessary)
+            langHelper = new OCRHelper(requireContext().getApplicationContext());
+            setupLanguageSpinner();
+        } catch (Throwable t) {
+            Log.w(TAG, "Failed to refresh language spinner", t);
+        }
+    }
+
+    /**
+     * Open a small dialog with OCR model actions.
+     */
+    private void showOcrOptionsDialog() {
+        CharSequence[] items = new CharSequence[]{
+                getString(R.string.ocr_import_manual),
+                getString(R.string.ocr_discover_packs)
+        };
+        AlertDialog dlg = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.ocr_models_manage)
+                .setItems(items, (dialog, which) -> {
+                    if (which == 0) {
+                        // Manual import via SAF
+                        openTraineddataLauncher.launch(OcrModelManager.createOpenTraineddataIntent());
+                    } else if (which == 1) {
+                        showDiscoverPacksDialog();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        dlg.setOnShowListener(d -> DialogUtils.improveAlertDialogButtonContrastForNight(dlg, requireContext()));
+        dlg.show();
+    }
+
+    private void showDiscoverPacksDialog() {
+        List<String> pkgs = OcrModelManager.discoverAddonPackages(requireContext());
+        if (pkgs == null || pkgs.isEmpty()) {
+            UIUtils.showToast(requireContext(), getString(R.string.ocr_no_packs_found), Toast.LENGTH_SHORT);
+            return;
+        }
+        CharSequence[] items = pkgs.toArray(new CharSequence[0]);
+        AlertDialog dlg = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.ocr_choose_pack)
+                .setItems(items, (d, idx) -> showModelsInPackDialog(pkgs.get(idx)))
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+
+        dlg.setOnShowListener(e -> DialogUtils.improveAlertDialogButtonContrastForNight(dlg, requireContext()));
+        dlg.show();
+    }
+
+    private void showModelsInPackDialog(String pkg) {
+        List<String> files = OcrModelManager.listTrainedDataInPackage(requireContext(), pkg);
+        if (files == null || files.isEmpty()) {
+            UIUtils.showToast(requireContext(), getString(R.string.ocr_no_models_in_pack), Toast.LENGTH_SHORT);
+            return;
+        }
+        CharSequence[] items = files.toArray(new CharSequence[0]);
+        AlertDialog dlg = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.ocr_choose_model)
+                .setItems(items, (d, idx) -> {
+                    String filename = files.get(idx);
+                    boolean ok = OcrModelManager.importFromPackage(requireContext(), pkg, filename);
+                    UIUtils.showToast(requireContext(), ok ? getString(R.string.ocr_import_success) : getString(R.string.ocr_import_failed), Toast.LENGTH_SHORT);
+                    if (ok) refreshLanguageSpinner();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        dlg.setOnShowListener(e -> DialogUtils.improveAlertDialogButtonContrastForNight(dlg, requireContext()));
+        dlg.show();
     }
 
     /**
