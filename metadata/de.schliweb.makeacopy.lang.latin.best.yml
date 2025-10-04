@@ -1,0 +1,29 @@
+Categories:
+  - AddOn
+License: Apache-2.0
+AuthorName: egdels
+WebSite: https://github.com/egdels/makeacopy
+SourceCode: https://github.com/egdels/makeacopy
+IssueTracker: https://github.com/egdels/makeacopy/issues
+AutoName: MakeACopy OCR Latin (Best)
+
+RepoType: git
+Repo: https://github.com/egdels/makeacopy.git
+Subdir: langpack-latin-best
+
+# Nur Pack-Tags matchen:
+UpdateCheckMode: Tags ^lp-latin-best-v[0-9]+\.[0-9]+\.[0-9]+$
+AutoUpdateMode: Version
+
+Builds:
+  - versionName: %v
+    versionCode: 1
+    commit: lp-latin-best-v%v
+    subdir: langpack-latin-best
+    gradle:
+      - yes
+    output: lang-latin-best/build/outputs/apk/release/lang-latin-best-release-unsigned.apk
+    scanignore:
+      - "**/*.traineddata"
+
+AllowedAPKSigningKeys: ae322d3fb71afe21df4727e37a5c6803511d5a2fe1fc3135430cee0699fa1b34

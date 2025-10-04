@@ -1,0 +1,50 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace = 'de.schliweb.makeacopy.lang.latin.best'
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId "de.schliweb.makeacopy.lang.latin.best"
+        minSdk = 29
+        targetSdk = 36
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            shrinkResources = false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug { }
+    }
+
+    dependenciesInfo {
+        // Disables the inclusion of dependency metadata in the APK,
+        // required for F-Droid to comply with its focus on privacy and transparency.
+        // Dependency metadata is unnecessary and could expose additional information.
+        includeInApk = false
+        // Disables the inclusion of dependency metadata in Android App Bundles as well.
+        includeInBundle = false
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    aaptOptions { noCompress 'traineddata' }
+
+    buildFeatures {
+        buildConfig = false
+        viewBinding = false
+    }
+}
+
+dependencies {
+    // none
+}

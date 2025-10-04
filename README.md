@@ -34,7 +34,7 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
 - **Edge Detection**: Automatic document edge detection using OpenCV, enhanced with a machine learning model ([ONNX, from DocAligner](https://github.com/DocsaidLab/DocAligner) – Apache 2.0)
 - **Perspective Correction**: Adjust and crop documents with manual or automatic perspective correction
 - **Image Enhancement**: Apply filters (grayscale, contrast, sharpening)
-- **OCR**: Offline text recognition with Tesseract
+- **OCR**: Offline text recognition with Tesseract (fast models included, optional best models via Language-Pack APKs)
 - **PDF Export**: Save as searchable PDF with recognized text
 - **JPEG Export**: Export scans as high-quality JPEG images (configurable quality, color/BW)
 - **Multi-page Scanning**: Combine multiple pages into one document; reorder and manage pages before export
@@ -94,7 +94,7 @@ What the workflow does on every run (aligned with CI):
 - Builds OpenCV native libraries from source via scripts/build_opencv_android.sh
 - Collects reproducibility evidence for native builds (scripts/collect_repro_evidence.sh)
 - Integrates OpenCV artifacts into the app via scripts/prepare_opencv.sh
-- Builds ONNX Runtime for Android (CXNNPACK and NNAPI, Java bindings) via scripts/build_onnxruntime_android.sh
+- Builds ONNX Runtime for Android (CPU-only, Java bindings) via scripts/build_onnxruntime_android.sh
 - Builds the Android app with Gradle (AAB and ABI-split APKs)
 
 Behavior by event type:
@@ -145,6 +145,27 @@ MakeACopy follows the Single-Activity + Multi-Fragment pattern with MVVM archite
   - Built from source via scripts/build_onnxruntime_android.sh (XNNPACK and NNAPI, Java bindings).
   - Artifacts integrated into app/src/main/jniLibs/<ABI>/ (libonnxruntime.so, libonnxruntime4j_jni.so) and app/libs/ (onnxruntime-*.jar).
   - See [NOTICE](NOTICE) for attributions.
+
+### Optional OCR Language-Packs
+
+MakeACopy includes fast, compact Tesseract models by default.  
+If you want **higher accuracy OCR**, you can install optional *Language-Pack APKs*:
+
+- **MakeACopy OCR Latin (Best)** → Includes best-quality models for  
+  German (deu), English (eng), French (fra), Italian (ita), Spanish (spa).
+
+How it works:
+- Language-Packs are separate, permissionless APKs.
+- They only contain `.traineddata` files, no code, no network.
+- MakeACopy discovers installed packs locally and lets you import the models.
+- Once imported, the best models appear in the OCR language selection.
+
+📦 [Download from F-Droid](https://f-droid.org/packages/de.schliweb.makeacopy.lang.latin.best)  
+📦 [GitHub Release Page](https://github.com/egdels/makeacopy/releases)
+
+Notes:
+- Packs are signed with the same key as the main app, so you can verify them with `apksigner`.
+- They rarely change (only when new Tesseract models are published).
 
 ## Privacy
 
