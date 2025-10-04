@@ -2,10 +2,7 @@ name: Build Release (Langpack Latin Best)
 
 on:
   push:
-    branches: [ main ]
     tags: [ 'langpack-latin-best-v*' ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
