@@ -264,7 +264,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             try {
                 if (isAdded() && binding != null) {
                     v.setEnabled(false);
-                    UIUtils.showToast(requireContext(), R.string.resetting_camera, Toast.LENGTH_SHORT); // (7) keine Hardcodes
+                    UIUtils.showToast(requireContext(), R.string.resetting_camera, Toast.LENGTH_SHORT);
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         resetCamera();
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -321,7 +321,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     resetCamera();
                 } else {
                     this.setEnabled(false);
-                    // (10) Fallback, kein rekursives Muster – Dispatcher erneut aufrufen
                     requireActivity().getOnBackPressedDispatcher().onBackPressed();
                 }
             }
@@ -878,8 +877,19 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             setProcessing(true);
             binding.textCamera.setText(R.string.processing_image);
 
-            // Speicherort im app-eigenen Ordner
-            File outputDir = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "MakeACopy");
+            // PATCH A: robustes Zielverzeichnis (externalFilesDir kann null sein; SD-Karte / Hersteller-Geräte)
+            File baseExt = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File outputDir;
+            if (baseExt != null) {
+                // /storage/.../Android/data/<pkg>/files/Pictures/MakeACopy (auch auf SD, falls gemountet)
+                outputDir = new File(baseExt, "MakeACopy");
+            } else {
+                // Fallback intern: /data/data/<pkg>/files/Pictures/MakeACopy
+                File picturesInInternal = new File(requireContext().getFilesDir(), "Pictures");
+                //noinspection ResultOfMethodCallIgnored
+                picturesInInternal.mkdirs();
+                outputDir = new File(picturesInInternal, "MakeACopy");
+            }
             if (!outputDir.exists()) {
                 //noinspection ResultOfMethodCallIgnored
                 outputDir.mkdirs();
@@ -936,11 +946,20 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         Log.d(TAG, "Image saved to: " + photoFile.getAbsolutePath() + ", size=" + photoFile.length());
-                        Uri imageUri = FileProvider.getUriForFile(
-                                requireContext(),
-                                BuildConfig.APPLICATION_ID + ".fileprovider",
-                                photoFile
-                        );
+
+                        // PATCH B: FileProvider-URI robust mit Fallback
+                        Uri imageUri;
+                        try {
+                            imageUri = FileProvider.getUriForFile(
+                                    requireContext(),
+                                    BuildConfig.APPLICATION_ID + ".fileprovider",
+                                    photoFile
+                            );
+                        } catch (IllegalArgumentException badRoot) {
+                            Log.w(TAG, "FileProvider root mismatch, falling back to file:// for in-app use", badRoot);
+                            imageUri = Uri.fromFile(photoFile); // Nur intern verwenden, nicht extern teilen
+                        }
+
                         if (cameraViewModel != null && isAdded()) {
                             try {
                                 if (cropViewModel != null) {

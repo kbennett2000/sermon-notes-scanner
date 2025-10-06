@@ -48,7 +48,7 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
 MakeACopy supports OCR via Tesseract. You can choose the OCR language during the OCR step.
 
 Supported out of the box:
-- English (eng), German (deu), French (fra), Italian (ita), Spanish (spa)
+- English (eng), German (deu), French (fra), Italian (ita), Spanish (spa), Russian (rus), Thai (tha)
 - Chinese (Simplified) — chi_sim, Chinese (Traditional) — chi_tra
 
 Notes:
@@ -159,6 +159,11 @@ How it works:
 - They only contain `.traineddata` files, no code, no network.
 - MakeACopy discovers installed packs locally and lets you import the models.
 - Once imported, the best models appear in the OCR language selection.
+
+Alternatively: You can also use the original Tesseract "best" models from the official tessdata repository.  
+- Source: https://github.com/tesseract-ocr/tessdata_best  
+- Tesseract project: https://github.com/tesseract-ocr/tesseract  
+Install or download the desired `.traineddata` files and add them via the same import dialog in MakeACopy.
 
 📦 [GitHub Release Page](https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.0.0)
 
