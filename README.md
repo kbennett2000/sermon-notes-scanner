@@ -162,6 +162,10 @@ How it works:
 
 📦 [GitHub Release Page](https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.0.0)
 
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+alt="Get it on Google Play"
+height="40">](https://play.google.com/store/apps/details?id=de.schliweb.makeacopy.lang.latin.best)
+
 Notes:
 - Packs are signed with the same key as the main app, so you can verify them with `apksigner`.
 - They rarely change (only when new Tesseract models are published).
