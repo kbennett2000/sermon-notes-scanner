@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://egdels.github.io/makeacopy/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://egdels.github.io/makeacopy/" />
+    <meta property="og:title" content="MakeACopy – Scanner de documents respectueux de la vie privée" />
+    <meta property="og:description" content="Numériser. Enregistrer. Partager. Un scanner de documents léger avec OCR. 100% hors ligne, open source, sans publicité." />
+    <meta property="og:image" content="https://egdels.github.io/makeacopy/og/makeacopy-1200x630.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="MakeACopy" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:locale:alternate" content="de_DE" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MakeACopy – Scanner de documents respectueux de la vie privée" />
+    <meta name="twitter:description" content="Numériser. Enregistrer. Partager. Scanner OCR léger, entièrement hors ligne, open source, sans publicité." />
+    <meta name="twitter:image" content="https://egdels.github.io/makeacopy/og/makeacopy-1200x630.png" />
+
+    <!-- Basic SEO -->
+    <meta name="description" content="MakeACopy est une application Android de numérisation de documents avec OCR, respectueuse de la vie privée. Fonctionne entièrement hors ligne, sans pubs, open source." />
+    <meta name="robots" content="index,follow" />
+    <title>MakeACopy - Application de numérisation de documents</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 { color: #4A90E2; }
+        h2 {
+            color: #607D8B;
+            margin-top: 30px;
+        }
+        a { color: #4A90E2; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .nav-links { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>MakeACopy</h1>
+
+    <p>MakeACopy est une application open source de numérisation de documents pour Android qui vous permet de numériser des documents papier avec OCR. L’application est conçue dans le respect de la vie privée : elle fonctionne entièrement hors ligne, sans cloud ni suivi.</p>
+
+    <div class="nav-links">
+        <a href="https://github.com/egdels/makeacopy/releases">Télécharger l’APK</a> |
+        <a href="https://github.com/egdels/makeacopy">Voir sur GitHub</a> |
+        <a href="index_de.html">Deutsch</a> |
+        <a href="index.html">English</a> |
+        <a href="#faq">FAQ</a>
+    </div>
+
+    <div class="store-badges" style="margin: 10px 0;">
+        <a href="https://f-droid.org/packages/de.schliweb.makeacopy/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Disponible sur F-Droid" height="80"></a>
+        <a href="https://play.google.com/store/apps/details?id=de.schliweb.makeacopy"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Disponible sur Google Play" height="80"></a>
+    </div>
+
+    <h2>Fonctionnalités</h2>
+    <ul>
+        <li><strong>Numérisation avec l’appareil photo</strong> : capturez des documents avec la caméra de l’appareil</li>
+        <li><strong>Détection des bords</strong> : détection automatique des bords du document avec OpenCV, améliorée par un modèle ONNX (DocAligner)</li>
+        <li><strong>Correction de perspective</strong> : ajustez et recadrez les documents manuellement ou automatiquement</li>
+        <li><strong>Amélioration d’image</strong> : appliquez des filtres (niveaux de gris, contraste, netteté)</li>
+        <li><strong>OCR</strong> : reconnaissance de texte hors ligne avec Tesseract</li>
+        <li><strong>Export PDF</strong> : enregistrement en PDF interrogeable avec texte reconnu</li>
+        <li><strong>Export JPEG</strong> : exportez en images JPEG de haute qualité (qualité, couleur/NB configurables)</li>
+        <li><strong>Numérisation multipage</strong> : combinez plusieurs pages en un seul document ; réorganisez et gérez les pages avant l’export</li>
+        <li><strong>Derniers scans</strong> : accédez rapidement à vos numérisations récentes</li>
+        <li><strong>Partager & Enregistrer</strong> : enregistrement local ou partage avec d’autres applications</li>
+        <li><strong>Mode sombre</strong> : thème Material 3 avec support jour/nuit</li>
+        <li><strong>Respect de la vie privée</strong> : 100% hors ligne, aucune connexion Internet requise</li>
+    </ul>
+
+    <h2>Langues OCR</h2>
+    <p>MakeACopy prend en charge l’OCR hors ligne via Tesseract. Vous pouvez sélectionner la langue lors de l’étape OCR.</p>
+    <ul>
+        <li>Anglais (<code>eng</code>)</li>
+        <li>Allemand (<code>deu</code>)</li>
+        <li>Français (<code>fra</code>)</li>
+        <li>Italien (<code>ita</code>)</li>
+        <li>Espagnol (<code>spa</code>)</li>
+        <li>Chinois (simplifié) (<code>chi_sim</code>)</li>
+        <li>Chinois (traditionnel) (<code>chi_tra</code>)</li>
+        <li>Russe (<code>rus</code>)</li>
+        <li>Thaï (<code>tha</code>)</li>
+    </ul>
+    <p>En plus des APKs de <em>Language-Pack</em> optionnels, vous pouvez aussi ajouter les modèles <em>best</em> officiels de Tesseract depuis le dépôt : <a href="https://github.com/tesseract-ocr/tessdata_best">tessdata_best</a>. Voir le projet Tesseract : <a href="https://github.com/tesseract-ocr/tesseract">github.com/tesseract-ocr/tesseract</a>.</p>
+    <p><strong>Language-Pack APK :</strong> MakeACopy OCR Latin (Best) – inclut des modèles haute précision pour l’anglais (eng), l’allemand (deu), le français (fra), l’italien (ita) et l’espagnol (spa). Téléchargez-le depuis la <a href="https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.0.0">page de publication du Language‑Pack</a>.</p>
+    <div class="store-badges" style="margin: 6px 0 16px 0;">
+        <a href="https://play.google.com/store/apps/details?id=de.schliweb.makeacopy.lang.latin.best"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Obtenir le pack de langue Latin Best sur Google Play" height="60"></a>
+    </div>
+    <p><em>Remarque :</em> pour le chinois, l’application inclut des polices CJK adaptées pour améliorer le rendu du texte PDF.</p>
+
+    <h2>Captures d’écran</h2>
+    <p align="center">
+        <img src="https://raw.githubusercontent.com/egdels/makeacopy/main/fastlane/metadata/android/en-US/images/phoneScreenshots/1_en-US.png" alt="Capture MakeACopy 1" width="110" />
+        <img src="https://raw.githubusercontent.com/egdels/makeacopy/main/fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.png" alt="Capture MakeACopy 2" width="110" />
+        <img src="https://raw.githubusercontent.com/egdels/makeacopy/main/fastlane/metadata/android/en-US/images/phoneScreenshots/3_en-US.png" alt="Capture MakeACopy 3" width="110" />
+        <img src="https://raw.githubusercontent.com/egdels/makeacopy/main/fastlane/metadata/android/en-US/images/phoneScreenshots/4_en-US.png" alt="Capture MakeACopy 4" width="110" />
+    </p>
+
+    <h2>Guide d’utilisation</h2>
+    <ol>
+        <li><strong>Numériser le document</strong> : ouvrez l’application et touchez le bouton de scan pour capturer un document</li>
+        <li><strong>Ajuster les coins</strong> : peaufinez les bords détectés</li>
+        <li><strong>Recadrer & améliorer</strong> : appliquez le recadrage et améliorez l’image si nécessaire</li>
+        <li><strong>Traitement OCR</strong> : l’application reconnaît le texte du document</li>
+        <li><strong>Exporter & partager</strong> : enregistrez en PDF ou partagez avec d’autres applications</li>
+    </ol>
+
+    <h2>Confidentialité</h2>
+    <ul>
+        <li>Aucune connexion Internet requise</li>
+        <li>Aucune requête serveur ni télémétrie</li>
+        <li>Traitement OCR local sur votre appareil</li>
+        <li>Autorisations requises : Appareil photo, Stockage</li>
+        <li>Aucune connexion à des tiers</li>
+    </ul>
+    <p>Pour plus de détails, consultez notre <a href="privacy_fr.html">politique de confidentialité</a>.</p>
+
+    <h2>Installation</h2>
+    <h3>F-Droid</h3>
+    <p>MakeACopy est disponible sur F-Droid : <a href="https://f-droid.org/packages/de.schliweb.makeacopy/">f-droid.org/packages/de.schliweb.makeacopy</a>.
+        Pour la conformité F-Droid, tous les composants natifs sont construits à partir des sources : bibliothèques OpenCV (du
+        sous-module <code>external/opencv</code>) et ONNX Runtime (XNNPACK et NNAPI, liaisons Java) depuis <code>external/onnxruntime</code>. Les bibliothèques résultantes sont intégrées à l’application pendant la construction ; aucun binaire précompilé n’est stocké dans le dépôt.</p>
+
+    <h3>GitHub Releases</h3>
+    <p>Vous pouvez télécharger la dernière APK sur la page <a href="https://github.com/egdels/makeacopy/releases">Releases</a>.</p>
+
+    <h2>Vérification de l’APK</h2>
+    <p>Pour vérifier l’authenticité des versions de MakeACopy, comparez l’empreinte du certificat de signature ci‑dessous avec la sortie de <code>apksigner</code> ou <code>AppVerifier</code>.</p>
+
+    <h3>SHA-256</h3>
+    <ul>
+        <li><strong>Clé d’upload (GitHub / F-Droid / APKs en sideload)</strong><br>
+            <code>AE:32:2D:3F:B7:1A:FE:21:DF:47:27:E3:7A:5C:68:03:51:1D:5A:2F:E1:FC:31:35:43:0C:EE:06:99:FA:1B:34</code>
+        </li>
+        <li><strong>Clé de signature Google Play (versions Play Store)</strong><br>
+            <code>C0:71:44:39:CB:51:62:32:A4:47:91:7A:6F:C2:28:1E:45:FA:AA:DD:37:F8:30:B1:01:1F:B4:85:68:8E:0D:64</code>
+        </li>
+    </ul>
+
+    <h3>Commandes de vérification</h3>
+    <pre><code class="language-bash">
+# Avec apksigner (depuis Android SDK build-tools)
+apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
+
+# Avec AppVerifier (https://github.com/soupslurpr/AppVerifier)
+appverifier verify MakeACopy-vX.Y.Z.apk
+</code></pre>
+
+    <h2>❤️ Soutenir ce projet</h2>
+    <p>MakeACopy est gratuit et open source. Si l’application vous est utile, pensez à soutenir le développement :</p>
+    <p>
+        <a href="https://ko-fi.com/egdels"><img alt="Ko-fi" src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Ko--fi-orange"></a>
+        <a href="https://paypal.me/egdels"><img alt="PayPal" src="https://img.shields.io/badge/Donate-PayPal-blue"></a>
+    </p>
+
+    <h2 id="faq">FAQ</h2>
+
+    <h3>Numérisation (Caméra)</h3>
+    <ul>
+        <li><strong>L’image est floue / le texte est difficile à lire</strong><br>
+            - Assurez un éclairage suffisant ; évitez une lumière d’ambiance faible et chaude. <br>
+            - Tenez l’appareil bien stable ou appuyez‑le. <br>
+            - Déclenchez l’autofocus en touchant la zone pertinente dans le viseur (si disponible). <br>
+            - Éloignez légèrement l’appareil puis recadrez — être trop proche peut nuire à la mise au point.
+        </li>
+        <li><strong>Fortes ombres ou reflets</strong><br>
+            - Éclairez le document uniformément depuis plusieurs côtés. <br>
+            - Évitez les sources directes provoquant des reflets (p. ex. sur papier brillant). <br>
+            - Posez le document sur un fond mat et contrasté.
+        </li>
+        <li><strong>L’image est trop sombre/clair</strong><br>
+            - Améliorez l’éclairage. <br>
+            - N’utilisez le flash qu’en cas de besoin — il peut créer des reflets.
+        </li>
+        <li><strong>Perspective déformée</strong><br>
+            - Prenez la photo le plus perpendiculairement possible à la surface du document.
+        </li>
+    </ul>
+
+    <h3>Détection des bords</h3>
+    <ul>
+        <li><strong>Les bords du document sont mal détectés</strong><br>
+            - Assurez un bon contraste entre le document et le fond (par ex. papier clair sur table sombre). <br>
+            - Aplatissez le papier (sans vagues/pliures) et alignez‑le correctement. <br>
+            - Évitez les ombres pouvant être interprétées comme des bords.
+        </li>
+        <li><strong>Aucune détection automatique</strong><br>
+            - Reprenez la photo avec un meilleur éclairage. <br>
+            - Utilisez l’<em>ajustement manuel des coins</em> après le scan pour déplacer les points.
+        </li>
+        <li><strong>Résultat incliné ou rogné</strong><br>
+            - Après la détection automatique, vérifiez les quatre points et ajustez‑les manuellement si nécessaire. <br>
+        </li>
+    </ul>
+
+    <h3>OCR (Reconnaissance de texte)</h3>
+    <ul>
+        <li><strong>L’OCR ne reconnaît presque aucun texte</strong><br>
+            - Vérifiez que la <em>langue</em> correcte est sélectionnée. <br>
+            - Numérisez en bonne qualité : image nette, lumière suffisante, peu de bruit. <br>
+            - Évitez les caractères trop petits — remplissez davantage la page ou rapprochez‑vous (sans flou).
+        </li>
+        <li><strong>Mauvaise langue / les accents ne sont pas reconnus</strong><br>
+            - Choisissez la langue OCR appropriée dans l’application. <br>
+            - Pour une meilleure précision dans les langues latines, installez le <em>Language Pack : MakeACopy OCR Latin (Best)</em> (lien Play Store ci‑dessus sur cette page).
+        </li>
+        <li><strong>Langues mélangées dans le document</strong><br>
+            - Si possible, numérisez les sections séparément par langue. <br>
+            - Sinon, choisissez la langue principale ; le texte mixte peut réduire la précision.
+        </li>
+        <li><strong>L’écriture manuscrite n’est pas reconnue</strong><br>
+            - Tesseract est principalement prévu pour le texte imprimé ; la reconnaissance manuscrite est limitée. <br>
+            - De meilleurs résultats avec une écriture claire et proche de l’imprimé ; sinon, envisagez une transcription manuelle.
+        </li>
+        <li><strong>Mauvaise rotation/orientation de l’OCR</strong><br>
+            - Faites pivoter l’image dans la bonne orientation avant l’OCR (0°, 90°, 180°, 270°). <br>
+            - Assurez des lignes de texte horizontales et éviter une forte perspective.
+        </li>
+        <li><strong>La recherche dans le PDF ne fonctionne pas</strong><br>
+            - Vérifiez si la langue sélectionnée est correcte ; une mauvaise langue produit un texte reconnu non concordant. <br>
+            - Vous pouvez aussi exporter le texte OCR séparément en fichier TXT.
+        </li>
+    </ul>
+
+    <p>Plus de questions ? Ouvrez un ticket : <a href="https://github.com/egdels/makeacopy/issues">github.com/egdels/makeacopy/issues</a>.</p>
+
+    <h2>Licence</h2>
+    <p>MakeACopy est sous licence <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.</p>
+
+    <pre>
+Copyright 2025 Christian Kierdorf
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+    </pre>
+</body>
+</html>
