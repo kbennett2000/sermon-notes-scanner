@@ -14,6 +14,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.*;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.photo.Photo;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -206,7 +207,8 @@ public class OpenCVUtils {
                 org.opencv.core.Core.setUseOptimized(false);
                 org.opencv.core.Core.setNumThreads(1);
             }
-        } catch (Throwable ignore) { }
+        } catch (Throwable ignore) {
+        }
     }
 
     /**
@@ -332,67 +334,75 @@ public class OpenCVUtils {
         return output;
     }
 
-    /**
-     * Converts a Bitmap image in RGBA format to a normalized float array in BGR format.
-     *
-     * @param bitmap the input Bitmap image to be converted; must not be null.
-     * @return a float array representation of the input image in BGR format, normalized
-     * and resized to 256x256 dimensions in NCHW format.
-     * @throws IllegalArgumentException if the input bitmap is null.
-     */
+
+    // ---------- ONNX utilities ----------
+
     public static float[] fromBitmapBGR(Bitmap bitmap) {
         if (bitmap == null) throw new IllegalArgumentException("bitmap is null");
-        Mat mat = new Mat();
+        Mat rgba = new Mat();
+        Mat bgr = new Mat();
         try {
-            Utils.bitmapToMat(bitmap, mat);                // RGBA
-            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGBA2BGR);
-            return toNCHW01_BGR(mat, 256, 256);
+            Utils.bitmapToMat(bitmap, rgba);
+
+            // Low-light probe
+            Mat grayProbe = new Mat();
+            Imgproc.cvtColor(rgba, grayProbe, Imgproc.COLOR_RGBA2GRAY);
+            boolean low = isLowLight(grayProbe);
+            grayProbe.release();
+            if (low) preprocessLowLight(rgba);
+
+            Imgproc.cvtColor(rgba, bgr, Imgproc.COLOR_RGBA2BGR);
+
+            // Letterbox to 256x256 (BGR)
+            Mat boxed = letterboxBGR(bgr, 256);
+
+            Mat floatImage = new Mat();
+            boxed.convertTo(floatImage, CvType.CV_32FC3, 1.0 / 255.0);
+
+            List<Mat> ch = new ArrayList<>(3);
+            Core.split(floatImage, ch); // B,G,R
+            int H = 256, W = 256, C = 3, HW = H * W;
+            float[] nchw = new float[C * HW];
+            for (int c = 0; c < C; c++) {
+                float[] buf = new float[HW];
+                ch.get(c).get(0, 0, buf);
+                System.arraycopy(buf, 0, nchw, c * HW, HW);
+            }
+            for (Mat cMat : ch) {
+                if (cMat != null) cMat.release();
+            }
+            floatImage.release();
+            boxed.release();
+            return nchw;
         } finally {
-            release(mat);
+            bgr.release();
+            rgba.release();
         }
     }
 
     /**
-     * Converts an OpenCV Mat object in BGR format to a NCHW (batch, channels, height, width)
-     * float array scaled to the range [0,1].
-     * <p>
-     * This method performs resizing of the input Mat to the target width and height, scales the
-     * pixel values to the range [0,1], and reorders the data into NCHW format. The resulting array
-     * has dimensions [1, channels, targetH, targetW].
+     * Resizes the given source BGR image while preserving its aspect ratio
+     * and places it onto a square canvas of the specified target size,
+     * padding the remaining area with zeros (black).
      *
-     * @param bgr     The input OpenCV Mat object in BGR format. It must not be empty.
-     * @param targetW The target width for resizing the input Mat.
-     * @param targetH The target height for resizing the input Mat.
-     * @return A float array in NCHW format (batch=1, channels=3 (BGR), height=targetH, width=targetW),
-     * with values scaled to the range [0,1].
-     * @throws IllegalArgumentException If the input Mat is empty.
+     * @param srcBGR The source image in BGR format to be resized and padded.
+     * @param target The size of the target square canvas (in pixels).
+     * @return A new Mat object representing the resized source image centered
+     * on a square canvas of the specified target size with padding.
      */
-    private static float[] toNCHW01_BGR(Mat bgr, int targetW, int targetH) {
-        if (bgr.empty()) throw new IllegalArgumentException("input Mat is empty");
+    private static Mat letterboxBGR(Mat srcBGR, int target) {
+        int w = srcBGR.width(), h = srcBGR.height();
+        double s = Math.min(target / (double) w, target / (double) h);
+        int nw = (int) Math.round(w * s), nh = (int) Math.round(h * s);
 
         Mat resized = new Mat();
-        Mat floatImage = new Mat();
-        List<Mat> channels = new ArrayList<>(3);
-        try {
-            Imgproc.resize(bgr, resized, new Size(targetW, targetH));
-            resized.convertTo(floatImage, CvType.CV_32FC3, 1.0 / 255.0);
+        Imgproc.resize(srcBGR, resized, new Size(nw, nh), 0, 0, Imgproc.INTER_AREA);
 
-            Core.split(floatImage, channels); // B, G, R as CV_32F
-
-            int H = targetH, W = targetW, C = 3;
-            int HW = H * W;
-            float[] nchw = new float[C * H * W];
-
-            for (int c = 0; c < C; c++) {
-                float[] buf = new float[HW];
-                channels.get(c).get(0, 0, buf);
-                System.arraycopy(buf, 0, nchw, c * HW, HW);
-            }
-            return nchw;
-        } finally {
-            release(resized, floatImage);
-            releaseAll(channels);
-        }
+        Mat canvas = Mat.zeros(target, target, srcBGR.type());
+        int x = (target - nw) / 2, y = (target - nh) / 2;
+        resized.copyTo(canvas.submat(new Rect(x, y, nw, nh)));
+        resized.release();
+        return canvas; // BGR 256x256, mit Padding
     }
 
     /**
@@ -559,7 +569,10 @@ public class OpenCVUtils {
             if (work != gray) release(work);
             release(gray);
             if (clahe != null) {
-                try { clahe.collectGarbage(); } catch (Throwable ignore) {}
+                try {
+                    clahe.collectGarbage();
+                } catch (Throwable ignore) {
+                }
             }
         }
     }
@@ -671,18 +684,17 @@ public class OpenCVUtils {
     }
 
     /**
-     * Detects the corners of a document in a given bitmap using an ONNX model.
+     * Detects the corners of a document from the given bitmap image using an ONNX model.
      *
-     * @param bitmap The input bitmap image from which document corners are to be detected.
-     *               The bitmap should contain the document to be analyzed.
-     * @return An array of {@code Point} representing the detected corners of the document.
-     * Returns {@code null} if the corners could not be detected or if an error occurs.
+     * @param bitmap The input bitmap image containing the document to process.
+     * @return An array of Points representing the corners of the detected document or null
+     * if the detection fails or returns invalid results.
      */
     private static Point[] detectDocumentCornersWithOnnx(Bitmap bitmap) {
         Log.i(TAG, "Starting detectDocumentCornersWithOnnx()");
         try {
             float[] pred = detectModel(bitmap);
-            Point[] pts = predictionToPoints(pred, bitmap.getWidth(), bitmap.getHeight());
+            Point[] pts = parsePrediction(pred, bitmap.getWidth(), bitmap.getHeight());
             if (pts != null) {
                 Log.i(TAG, "ONNX corners OK: area=" + quadArea(pts) + ", corners=" + Arrays.toString(pts));
             } else {
@@ -712,107 +724,19 @@ public class OpenCVUtils {
     }
 
     /**
-     * Converts a prediction heatmap into an array of points representing corners of a quadrilateral.
+     * Parses the prediction output array into an array of points that represent coordinates.
      *
-     * @param pred A 1D array of predicted heatmap values, with expected dimensions 1x4x128x128.
-     *             This array represents the heatmap output from a model.
-     * @param outW The width of the output image used to scale the points.
-     * @param outH The height of the output image used to scale the points.
-     * @return An array of 4 points (corners) sorted in a clockwise order, or null if the input is invalid,
-     * the heatmap peaks are too low, or the computed points are deemed invalid based on area or geometry.
-     */
-    private static Point[] predictionToPoints(float[] pred, int outW, int outH) {
-        if (pred == null || pred.length != 4 * 128 * 128) {
-            Log.w(TAG, "predictionToPoints: unexpected pred length " + (pred == null ? -1 : pred.length));
-            return null;
-        }
-        final int C = 4, H = 128, W = 128;
-        // idx = c*H*W + y*W + x
-        Point[] pts = new Point[C];
-
-        for (int c = 0; c < C; c++) {
-            int base = c * H * W;
-
-            int maxIdx = base;
-            float maxVal = -Float.MAX_VALUE;
-            for (int i = 0; i < H * W; i++) {
-                float v = pred[base + i];
-                if (v > maxVal) {
-                    maxVal = v;
-                    maxIdx = base + i;
-                }
-            }
-
-            final float MIN_PEAK = 1e-4f;
-            if (maxVal < MIN_PEAK) {
-                Log.w(TAG, "Heatmap peak too low for corner " + c + " → rejecting ONNX");
-                return null;
-            }
-
-            int peak = maxIdx - base;
-            int py = peak / W;
-            int px = peak % W;
-
-            int x0 = Math.max(0, px - 1), x1 = Math.min(W - 1, px + 1);
-            int y0 = Math.max(0, py - 1), y1 = Math.min(H - 1, py + 1);
-            double sumW = 0, sumX = 0, sumY = 0;
-            for (int yy = y0; yy <= y1; yy++) {
-                for (int xx = x0; xx <= x1; xx++) {
-                    float wv = pred[base + yy * W + xx];
-                    double w = Math.max(0.0, wv);
-                    sumW += w;
-                    sumX += w * xx;
-                    sumY += w * yy;
-                }
-            }
-            double fx = (sumW > 0) ? (sumX / sumW) : px;
-            double fy = (sumW > 0) ? (sumY / sumW) : py;
-
-            double scaleX = (double) outW / W;
-            double scaleY = (double) outH / H;
-            double bx = fx * scaleX;
-            double by = fy * scaleY;
-
-            bx = Math.max(0, Math.min(bx, outW - 1));
-            by = Math.max(0, Math.min(by, outH - 1));
-
-            pts[c] = new Point(bx, by);
-        }
-
-        pts = sortPointsClockwise(pts);
-        double area = quadArea(pts);
-        double imgArea = (double) outW * outH;
-        if (area < 0.05 * imgArea) {
-            Log.w(TAG, String.format("predictionToPoints: area too small (%.2f%%).", 100.0 * area / imgArea));
-            return null;
-        }
-
-        final double minSide = 0.02 * Math.min(outW, outH);
-        for (int i = 0; i < 4; i++) {
-            Point a = pts[i], b = pts[(i + 1) % 4];
-            if (Math.hypot(a.x - b.x, a.y - b.y) < minSide) {
-                Log.w(TAG, "predictionToPoints: side too small.");
-                return null;
-            }
-        }
-        return pts;
-    }
-
-    /**
-     * Parses the given prediction array into an array of {@code Point} objects, adjusting coordinates
-     * based on the specified output width and height. The method supports two formats of prediction
-     * data: one with 8 elements (bounding box coordinates) and another with 4 times 128x128 elements
-     * (detected points over a grid).
-     *
-     * @param pred the prediction array containing coordinate or grid data. Can be null or of specific lengths.
-     * @param outW the output width used to scale and constrain the x-coordinates.
-     * @param outH the output height used to scale and constrain the y-coordinates.
-     * @return an array of {@code Point} objects after parsing, scaling, and sorting the prediction data.
-     * Returns {@code null} if the input array is unsupported or invalid.
+     * @param pred The prediction array, which could contain either 8 values for 4 points
+     *             or be a flattened grid of values representing 128x128 spatial resolution.
+     * @param outW The width of the output space used for scaling the prediction coordinates.
+     * @param outH The height of the output space used for scaling the prediction coordinates.
+     * @return An array of Points representing the parsed coordinates, or null if the input
+     * array is null or unsupported in length.
      */
     private static Point[] parsePrediction(float[] pred, int outW, int outH) {
         if (pred == null) return null;
-
+        Log.i(TAG, "Pred len=" + pred.length + " → " +
+                (pred.length == 4 * 128 * 128 ? "heatmap" : pred.length == 8 ? "coords8" : "unknown"));
         if (pred.length == 8) {
             Point[] pts = new Point[4];
             for (int i = 0; i < 4; i++) {
@@ -833,19 +757,93 @@ public class OpenCVUtils {
     }
 
     /**
-     * Validates and sorts an array of four points representing a quadrilateral. The method
-     * ensures that the points form a valid quadrilateral within specified constraints
-     * and sorts them in a clockwise order.
+     * Converts a prediction heatmap into a set of points corresponding to specific coordinates
+     * in the output image. The method performs peak detection in each channel of the heatmap,
+     * applies subpixel refinement, rescales the coordinates to the target output resolution,
+     * and validates the resulting quadrilateral for minimum area and side length constraints.
      *
-     * @param pts  an array of four points representing a quadrilateral. Must not be null and must have a length of 4.
-     * @param outW the width of the bounding area used for validation.
-     * @param outH the height of the bounding area used for validation.
-     * @return a sorted array of points in clockwise order if validation is successful,
-     * or null if the points do not meet validation criteria.
+     * @param pred The predicted heatmap values as a flattened array of size 4 * 128 * 128.
+     *             Each channel corresponds to a specific corner of a quadrilateral.
+     * @param outW The width of the target output image.
+     * @param outH The height of the target output image.
+     * @return An array of 4 points representing the refined and validated coordinates of the
+     * quadrilateral corners in the output image. Returns null if the input prediction is
+     * invalid, contains insufficient peak data, or produces a quadrilateral that fails
+     * validation checks.
+     */
+    private static Point[] predictionToPoints(float[] pred, int outW, int outH) {
+        if (pred == null || pred.length != 4 * 128 * 128) {
+            Log.w(TAG, "predictionToPoints: unexpected pred length " + (pred == null ? -1 : pred.length));
+            return null;
+        }
+        final int C = 4, H = 128, W = 128;
+        Point[] pts = new Point[C];
+
+        for (int c = 0; c < C; c++) {
+            int base = c * H * W;
+
+            int maxIdx = base;
+            float maxVal = -Float.MAX_VALUE;
+            for (int i = 0; i < H * W; i++) {
+                float v = pred[base + i];
+                if (v > maxVal) {
+                    maxVal = v;
+                    maxIdx = base + i;
+                }
+            }
+
+            // dynamische Peak-Schwelle (robuster in Low-Light)
+            float dynamicMin = Math.max(1e-5f, 0.15f * maxVal);
+            if (maxVal < dynamicMin) {
+                Log.w(TAG, "Heatmap peak too low for corner " + c + " → rejecting ONNX");
+                return null;
+            }
+
+            int peak = maxIdx - base;
+            int py = peak / W;
+            int px = peak % W;
+
+            // Subpixel-Refinement (quadratisch)
+            Point2d sub = refinePeakQuadratic(pred, base, W, H, px, py);
+            double fx = sub.x, fy = sub.y;
+
+            Point pOrig = mapFromHeatmapToOrig(fx, fy, outW, outH);
+            pts[c] = pOrig;
+        }
+
+        pts = sortPointsRobust(pts);
+        double area = quadArea(pts);
+        double imgArea = (double) outW * outH;
+        if (area < 0.05 * imgArea) {
+            Log.w(TAG, String.format("predictionToPoints: area too small (%.2f%%).", 100.0 * area / imgArea));
+            return null;
+        }
+        final double minSide = 0.02 * Math.min(outW, outH);
+        for (int i = 0; i < 4; i++) {
+            Point a = pts[i], b = pts[(i + 1) % 4];
+            if (Math.hypot(a.x - b.x, a.y - b.y) < minSide) {
+                Log.w(TAG, "predictionToPoints: side too small.");
+                return null;
+            }
+        }
+        return pts;
+    }
+
+    /**
+     * Validates a set of four points and sorts them into a consistent order if they form a valid
+     * quadrilateral based on specified conditions. The method checks whether the quadrilateral's
+     * area is significant compared to the image area, and whether the side lengths are above
+     * a minimum threshold.
+     *
+     * @param pts  an array of four points representing a quadrilateral
+     * @param outW the width of the output image
+     * @param outH the height of the output image
+     * @return a sorted array of four points if validation succeeds, or null if the points do not form
+     * a valid quadrilateral under the given conditions
      */
     private static Point[] validateAndSort(Point[] pts, int outW, int outH) {
         if (pts == null || pts.length != 4) return null;
-        pts = sortPointsClockwise(pts);
+        pts = sortPointsRobust(pts);
         double area = quadArea(pts);
         double imgArea = (double) outW * outH;
         if (area < 0.05 * imgArea) return null;
@@ -877,15 +875,50 @@ public class OpenCVUtils {
     }
 
     /**
-     * Detects the corners of a document within a given bitmap using OpenCV operations.
-     * This method processes the bitmap to identify contours and determines the best
-     * quadrilateral representing the document, based on certain criteria such as
-     * aspect ratio and area.
+     * Refines the location of a peak in a 2D map using quadratic interpolation.
+     * This method adjusts the peak location to sub-pixel accuracy based on the surrounding pixel values.
      *
-     * @param context the context used for saving debug images during the corner detection process.
-     * @param bitmap  the input bitmap image, representing the photograph of a document.
-     * @return an array of four {@link Point} objects representing the detected corners
-     * of the document in clockwise order, or a fallback rectangle if no suitable contour is found.
+     * @param mapAll The flattened array representing the 2D map.
+     *               Values within this array are used for quadratic interpolation.
+     * @param base   The starting index in the array, used as an offset for the map.
+     * @param W      The width of the 2D map.
+     * @param H      The height of the 2D map.
+     * @param px     The x-coordinate of the initial peak location in the map.
+     * @param py     The y-coordinate of the initial peak location in the map.
+     * @return A Point2d object representing the refined peak location with sub-pixel adjustments.
+     */
+    private static Point2d refinePeakQuadratic(float[] mapAll, int base, int W, int H, int px, int py) {
+        if (px <= 0 || py <= 0 || px >= W - 1 || py >= H - 1) return new Point2d(px, py);
+        float l = mapAll[base + py * W + (px - 1)];
+        float m = mapAll[base + py * W + px];
+        float r = mapAll[base + py * W + (px + 1)];
+        double denomX = (l - 2 * m + r);
+        double dx = (denomX == 0) ? 0 : 0.5 * (l - r) / denomX;
+
+        float t = mapAll[base + (py - 1) * W + px];
+        float b = mapAll[base + (py + 1) * W + px];
+        double denomY = (t - 2 * m + b);
+        double dy = (denomY == 0) ? 0 : 0.5 * (t - b) / denomY;
+
+        return new Point2d(px + dx, py + dy);
+    }
+
+    /**
+     * Represents a point in a two-dimensional space.
+     * This class encapsulates the x and y coordinates of the point.
+     */
+    private record Point2d(double x, double y) {
+    }
+
+    /**
+     * Detects the corners of a document in a given image using OpenCV image processing techniques.
+     * This method processes the input bitmap, applies multiple filters, and identifies contours to extract
+     * the best quadrilateral representing a document.
+     *
+     * @param context The Android context used for saving debug images during processing.
+     * @param bitmap  The input image in the form of a Bitmap, from which the document corners are to be detected.
+     * @return An array of Points representing the four corners of the detected document. If no suitable document
+     * corners are detected, a fallback rectangle is returned.
      */
     private static Point[] detectDocumentCornersWithOpenCV(Context context, Bitmap bitmap) {
         Log.i(TAG, "Starting detectDocumentCornersWithOpenCV()");
@@ -916,24 +949,44 @@ public class OpenCVUtils {
             Imgproc.Canny(morph, edges, 50, 150);
             saveDebugImage(context, edges, "debug_edges.png");
 
+            // Low-light: zusätzlich adaptiv erzeugte Kanten mergen
+            boolean low;
+            {
+                Mat probe = new Mat();
+                Imgproc.cvtColor(rgba, probe, Imgproc.COLOR_RGBA2GRAY);
+                low = isLowLight(probe);
+                probe.release();
+            }
+            if (low) {
+                Mat ll = rgba.clone();
+                preprocessLowLight(ll);
+                Mat llGray = new Mat();
+                Imgproc.cvtColor(ll, llGray, Imgproc.COLOR_RGBA2GRAY);
+                Mat edges2 = new Mat();
+                edgesAdaptive(llGray, edges2);
+                Mat k3 = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+                Imgproc.dilate(edges2, edges2, k3);
+                Core.max(edges, edges2, edges); // Best-of fusion
+                k3.release();
+                saveDebugImage(context, edges, "debug_edges_lowlight.png");
+                edges2.release();
+                llGray.release();
+                ll.release();
+            }
+
             edgesCopy = edges.clone();
             Imgproc.findContours(edgesCopy, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
             if (USE_DEBUG_IMAGES) {
                 debug = Mat.zeros(edges.size(), CvType.CV_8UC3);
-                // Safely draw contours for debugging (guard against oversized/invalid lists)
                 try {
                     if (contours != null && !contours.isEmpty()) {
-                        int maxToDraw = Math.min(contours.size(), 256); // cap to reduce conversion pressure
+                        int maxToDraw = Math.min(contours.size(), 256);
                         for (int i = 0; i < maxToDraw; i++) {
                             MatOfPoint c = contours.get(i);
                             if (c == null || c.empty()) continue;
-                            java.util.List<MatOfPoint> one = java.util.Collections.singletonList(c);
-                            try {
-                                Imgproc.drawContours(debug, one, 0, new Scalar(0, 255, 0), 2);
-                            } catch (Throwable t) {
-                                Log.w(TAG, "drawContours skipped for index " + i + ": " + t.getMessage());
-                            }
+                            List<MatOfPoint> one = Collections.singletonList(c);
+                            Imgproc.drawContours(debug, one, 0, new Scalar(0, 255, 0), 2);
                         }
                     }
                 } catch (Throwable t) {
@@ -943,7 +996,7 @@ public class OpenCVUtils {
             }
 
             double imgArea = rgba.width() * rgba.height();
-            double maxArea = 0;
+            double bestScore = -1;
             Point[] bestQuad = null;
 
             for (MatOfPoint contour : contours) {
@@ -961,18 +1014,23 @@ public class OpenCVUtils {
 
                         if (approx.total() == 4 && isConvex) {
                             Point[] quad = approx.toArray();
+                            quad = sortPointsRobust(quad);
 
-                            double w1 = Math.hypot(quad[0].x - quad[1].x, quad[0].y - quad[1].y);
-                            double w2 = Math.hypot(quad[2].x - quad[3].x, quad[2].y - quad[3].y);
-                            double h1 = Math.hypot(quad[1].x - quad[2].x, quad[1].y - quad[2].y);
-                            double h2 = Math.hypot(quad[3].x - quad[0].x, quad[3].y - quad[0].y);
+                            double w1 = distance(quad[0], quad[1]);
+                            double w2 = distance(quad[2], quad[3]);
+                            double h1 = distance(quad[1], quad[2]);
+                            double h2 = distance(quad[3], quad[0]);
                             double avgWidth = (w1 + w2) / 2.0;
                             double avgHeight = (h1 + h2) / 2.0;
-                            double aspectRatio = avgHeight / avgWidth;
+                            double aspectRatio = avgHeight / (avgWidth + 1e-9);
 
-                            if (aspectRatio > 0.5 && aspectRatio < 2.5 && area > maxArea) {
-                                maxArea = area;
-                                bestQuad = sortPointsClockwise(quad);
+                            double areaNorm = area / imgArea;
+                            double rect = rectScore(quad) / 120.0;
+                            double score = 0.6 * areaNorm + 0.4 * rect;
+
+                            if (aspectRatio > 0.5 && aspectRatio < 2.5 && score > bestScore) {
+                                bestScore = score;
+                                bestQuad = quad;
                             }
                         }
                     } finally {
@@ -988,94 +1046,260 @@ public class OpenCVUtils {
                 Log.i(TAG, "Document contour found");
                 return bestQuad;
             }
-
-            Log.w(TAG, "No suitable document contour found, returning fallback rectangle");
-            return getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight());
+            Log.w(TAG, "No suitable document contour found (OpenCV) → returning null");
+            return null;
         } finally {
             release(rgba, gray, threshold, morph, kernel, edges, edgesCopy, hierarchy, debug);
         }
     }
 
+    private static Point mapFromHeatmapToOrig(double fx, double fy, int outW, int outH) {
+        // fx, fy: Subpixel-Koordinaten im Heatmap-Raster (0..127)
+        final int INPUT = 256, HM = 128;
+        final double stride = (double) INPUT / HM; // 2.0
+
+        // Letterbox-Parameter erneut berechnen
+        double s = Math.min(INPUT / (double) outW, INPUT / (double) outH);
+        double nw = outW * s, nh = outH * s;
+        double padX = (INPUT - nw) * 0.5;
+        double padY = (INPUT - nh) * 0.5;
+
+        // Heatmap -> Input(256) -> Padding entfernen -> zurück ins Original
+        double x = ((fx * stride) - padX) / s;
+        double y = ((fy * stride) - padY) / s;
+
+        // clamp
+        x = Math.max(0, Math.min(x, outW - 1));
+        y = Math.max(0, Math.min(y, outH - 1));
+        return new Point(x, y);
+    }
+
     /**
-     * Detects the corners of a document in the given bitmap.
-     * This method processes the image to find contours and returns the best matching quadrilateral.
+     * Applies adaptive edge detection on the provided grayscale image and stores the result.
+     * This method uses a combination of median blur, mean and standard deviation calculations,
+     * and Canny edge detection to adaptively determine the edge detection thresholds.
      *
-     * @param context The application context for saving debug images.
-     * @param bitmap  The input bitmap image.
-     * @return An array of Points representing the corners of the detected document, or a fallback rectangle if no suitable contour is found.
+     * @param srcGray The source image in grayscale format (Mat object).
+     * @param out     The output matrix (Mat object, CV_8U) where the edges will be stored.
+     */
+    private static void edgesAdaptive(Mat srcGray, Mat out /* CV_8U */) {
+        Mat med = new Mat();
+        MatOfDouble mean = new MatOfDouble(), sd = new MatOfDouble();
+        try {
+            Imgproc.medianBlur(srcGray, med, 3);
+            Core.meanStdDev(med, mean, sd);
+            double v = Core.mean(med).val[0];
+            double lower = Math.max(0, (1.0 - 0.33) * v);
+            double upper = Math.min(255, (1.0 + 0.33) * v);
+            Imgproc.Canny(med, out, lower, upper, 3, true);
+        } finally {
+            med.release();
+            mean.release();
+            sd.release();
+        }
+    }
+
+    /**
+     * Detects the corners of a document present in the given bitmap image.
+     * This method uses multiple techniques internally to identify the
+     * best possible corner points of the document in the image.
+     *
+     * @param context the Android context required for certain operations, such as OpenCV initialization
+     * @param bitmap  the bitmap image within which the document's corners need to be detected
+     * @return an array of Point objects representing the detected corners of the document
      */
     public static Point[] detectDocumentCorners(Context context, Bitmap bitmap) {
         Log.i(TAG, "Starting detectDocumentCorners()");
         Point[] onnx = detectDocumentCornersWithOnnx(bitmap);
         Point[] cv = detectDocumentCornersWithOpenCV(context, bitmap);
-        return getBestCorners(onnx, cv, bitmap.getWidth(), bitmap.getHeight());
+        Point[] best = getBestCorners(onnx, cv, bitmap.getWidth(), bitmap.getHeight());
+        if (best == null) {
+            // Only apply fallback if BOTH detectors failed
+            best = getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight());
+        }
+        return best;
     }
 
     /**
-     * Determines the most suitable set of quadrilateral corners for document processing
-     * by evaluating and comparing corners detected through ONNX and OpenCV methods.
-     * The comparison takes into account certain validity and area-based conditions,
-     * falling back to the better option when necessary.
+     * Selects the best set of corner points between two provided sets of corners,
+     * one detected by ONNX and the other by OpenCV, based on confidence and robustness.
+     * The fallback option is triggered if neither of the sets is valid.
      *
-     * @param cornersOnnx   An array of 4 points representing the document corners detected using ONNX.
-     * @param cornersOpenCV An array of 4 points representing the document corners detected using OpenCV.
-     * @param w             The width of the image within which the corners were detected.
-     * @param h             The height of the image within which the corners were detected.
-     * @return An array of 4 points representing the best set of corners for the document,
-     * chosen based on a comparison between the ONNX and OpenCV results.
-     * Will return one of the arrays, depending on the conditions evaluated within the method.
+     * @param cornersOnnx   An array of points representing the corners detected by the ONNX model.
+     *                      The array must contain exactly 4 points to be considered valid.
+     * @param cornersOpenCV An array of points representing the corners detected by the OpenCV model.
+     *                      The array must contain exactly 4 points to be considered valid.
+     * @param w             The width of the rectangle or frame.
+     * @param h             The height of the rectangle or frame.
+     * @return An array of 4 points representing the selected best corners.
+     * This could be from ONNX or OpenCV, or a fallback rectangle if both inputs are invalid.
      */
     private static Point[] getBestCorners(Point[] cornersOnnx, Point[] cornersOpenCV, int w, int h) {
         Log.i(TAG, "getBestCorners()");
-        if (cornersOnnx == null || cornersOnnx.length != 4) return cornersOpenCV;
-        if (cornersOpenCV == null || cornersOpenCV.length != 4) return cornersOnnx;
-
-        // Fallback? → Prefer ONNX if valid
-        if (isFallback(cornersOpenCV, w, h)) {
-            Log.i(TAG, "OpenCV returned fallback → choosing ONNX");
-            return sortPointsClockwise(cornersOnnx);
+        if ((cornersOnnx == null || cornersOnnx.length != 4) && (cornersOpenCV == null || cornersOpenCV.length != 4)) {
+            Log.i(TAG, "Chosen source=none");
+            return null;
+        }
+        if (cornersOnnx == null || cornersOnnx.length != 4) {
+            Log.i(TAG, "Chosen source=OpenCV (ONNX null/invalid)");
+            return sortPointsRobust(cornersOpenCV);
+        }
+        if (cornersOpenCV == null || cornersOpenCV.length != 4) {
+            Log.i(TAG, "Chosen source=ONNX (OpenCV null/invalid)");
+            return sortPointsRobust(cornersOnnx);
         }
 
-        cornersOnnx = sortPointsClockwise(cornersOnnx);
-        cornersOpenCV = sortPointsClockwise(cornersOpenCV);
+        if (isFallback(cornersOpenCV, w, h)) {
+            Log.i(TAG, "OpenCV returned fallback → choosing ONNX");
+            return sortPointsRobust(cornersOnnx);
+        }
 
-        double aOnnx = quadArea(cornersOnnx);
-        double aCv = quadArea(cornersOpenCV);
+        cornersOnnx = sortPointsRobust(cornersOnnx);
+        cornersOpenCV = sortPointsRobust(cornersOpenCV);
 
-        if (aOnnx < 0.10 * aCv) return cornersOpenCV;
+        double cOnnx = quadConfidence(cornersOnnx, w, h);
+        double cCv = quadConfidence(cornersOpenCV, w, h);
 
-        if (aOnnx / aCv > 1.15) return cornersOnnx;
-        return cornersOpenCV;
+        if (cOnnx >= cCv) {
+            Log.i(TAG, String.format(java.util.Locale.US,
+                    "Chosen source=ONNX (conf %.3f vs %.3f)", cOnnx, cCv));
+            return cornersOnnx;
+        } else {
+            Log.i(TAG, String.format(java.util.Locale.US,
+                    "Chosen source=OpenCV (conf %.3f vs %.3f)", cCv, cOnnx));
+            return cornersOpenCV;
+        }
     }
 
     /**
-     * Sorts the points in clockwise order starting from the top-left corner.
-     * This is used to ensure the points are in a consistent order for perspective transformations.
+     * Sorts an array of four points in a robust manner. The points are arranged
+     * in clockwise order starting from the top-left point. The top-left point
+     * is determined as the point with the smallest (x + y) value. The method
+     * computes the centroid of the points and uses it to sort them by angle
+     * relative to the centroid, ensuring stable ordering.
      *
-     * @param src The source points to be sorted.
-     * @return An array of points sorted in clockwise order.
+     * @param src the input array of points. It must contain exactly four points.
+     *            If the input is null or does not contain four points, the method
+     *            will return the input array unchanged.
+     * @return a new array of points sorted in clockwise order starting from the
+     * top-left point, or the input array if it is null or has fewer or
+     * more than four points.
      */
-    private static Point[] sortPointsClockwise(Point[] src) {
+    private static Point[] sortPointsRobust(Point[] src) {
+        if (src == null || src.length != 4) return src;
+
         List<Point> pts = new ArrayList<>(Arrays.asList(src));
-        pts.sort(Comparator.comparingDouble(p -> p.x + p.y));
-        Point topLeft = pts.get(0);
-        Point bottomRight = pts.get(pts.size() - 1);
-        pts.sort(Comparator.comparingDouble(p -> p.y - p.x));
-        Point topRight = pts.get(0);
-        Point bottomLeft = pts.get(pts.size() - 1);
-        return new Point[]{topLeft, topRight, bottomRight, bottomLeft};
+
+        double cx = 0, cy = 0;
+        for (Point p : pts) {
+            cx += p.x;
+            cy += p.y;
+        }
+        cx /= 4.0;
+        cy /= 4.0;
+
+        final double fx = cx, fy = cy; // <- final Kopien für Lambda
+
+        // sortiere nach Winkel um den Schwerpunkt
+        pts.sort(Comparator.comparingDouble(p -> Math.atan2(p.y - fy, p.x - fx)));
+
+        // rotiere, damit Index 0 = top-left (min x+y)
+        int start = 0;
+        double best = Double.MAX_VALUE;
+        for (int i = 0; i < 4; i++) {
+            double s = pts.get(i).x + pts.get(i).y;
+            if (s < best) {
+                best = s;
+                start = i;
+            }
+        }
+
+        Point[] out = new Point[4];
+        for (int i = 0; i < 4; i++) out[i] = pts.get((start + i) % 4);
+        return out; // tl, tr, br, bl
+    }
+
+
+    /**
+     * Calculates the rectangularity score of a quadrilateral represented by an array of points.
+     * The score evaluates how close the angles of the quadrilateral are to 90 degrees.
+     *
+     * @param q an array of four points representing the vertices of a quadrilateral, listed in order.
+     * @return the computed rectangularity score, where a higher score indicates the quadrilateral is closer to a rectangle.
+     */
+    private static double rectScore(Point[] q) {
+        double score = 0;
+        for (int i = 0; i < 4; i++) {
+            Point a = q[i], b = q[(i + 1) % 4], c = q[(i + 2) % 4];
+            double ang = angle(b, a, c);
+            double dev = Math.abs(ang - 90.0);
+            score += Math.max(0, 30.0 - dev); // max 30 pro Ecke → 120 gesamt
+        }
+        return score;
     }
 
     /**
-     * Provides a fallback rectangle in case no suitable document contour is found.
-     * This rectangle is positioned with a margin of 100 pixels from the edges of the image.
+     * Calculates the angle (in degrees) formed at point a by the line segments a-b and a-c.
      *
-     * @param width  The width of the image.
-     * @param height The height of the image.
-     * @return An array of points representing the corners of the fallback rectangle.
+     * @param b the first point defining the line segment a-b
+     * @param a the vertex point where the angle is measured
+     * @param c the second point defining the line segment a-c
+     * @return the angle in degrees between the line segments a-b and a-c
+     */
+    private static double angle(Point b, Point a, Point c) {
+        double abx = b.x - a.x, aby = b.y - a.y;
+        double acx = c.x - a.x, acy = c.y - a.y;
+        double num = abx * acx + aby * acy;
+        double den = Math.hypot(abx, aby) * Math.hypot(acx, acy) + 1e-9;
+        return Math.toDegrees(Math.acos(Math.max(-1.0, Math.min(1.0, num / den))));
+    }
+
+    /**
+     * Calculates the confidence score of a quadrilateral based on its area, rectangularity,
+     * and symmetry relative to provided width and height values.
+     *
+     * @param q an array of four points representing the quadrilateral. The array must have exactly four points.
+     * @param w the width of the reference boundary for calculating normalized area.
+     * @param h the height of the reference boundary for calculating normalized area.
+     * @return a confidence score as a double value, where the score is higher for well-shaped quadrilaterals
+     * meeting the criteria of area, rectangularity, and symmetry. Returns 0 if input is invalid or
+     * calculated area is below the threshold.
+     */
+    private static double quadConfidence(Point[] q, int w, int h) {
+        if (q == null || q.length != 4) return 0;
+        q = sortPointsRobust(q);
+        double area = quadArea(q) / (w * (double) h);
+        if (area < 0.03) return 0;
+
+        double rect = rectScore(q) / 120.0;
+        double w1 = distance(q[0], q[1]), w2 = distance(q[2], q[3]);
+        double h1 = distance(q[1], q[2]), h2 = distance(q[3], q[0]);
+        double sym = 1.0 - Math.min(1.0, (Math.abs(w1 - w2) + Math.abs(h1 - h2)) / (w1 + w2 + h1 + h2) + 1e-6);
+
+        return 0.5 * area + 0.3 * rect + 0.2 * sym;
+    }
+
+    /**
+     * Generates a fallback rectangle defined by four corner points,
+     * adjusted based on the input width and height. The size of the
+     * rectangle is calculated to be approximately 10% away from the
+     * edges of the given dimensions, with a minimum margin of 20 units.
+     *
+     * @param width  the width of the area within which the rectangle is
+     *               to be defined
+     * @param height the height of the area within which the rectangle is
+     *               to be defined
+     * @return an array of four {@link Point} objects representing the
+     * four corners of the rectangle
      */
     private static Point[] getFallbackRectangle(int width, int height) {
-        return new Point[]{new Point(100, 100), new Point(width - 100, 100), new Point(width - 100, height - 100), new Point(100, height - 100)};
+        int m = Math.max(20, Math.min(width, height) / 10); // ~10% Rand
+        return new Point[]{
+                new Point(m, m),
+                new Point(width - m, m),
+                new Point(width - m, height - m),
+                new Point(m, height - m)
+        };
     }
 
     /**
@@ -1219,5 +1443,86 @@ public class OpenCVUtils {
      */
     private static double distance(Point a, Point b) {
         return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    /**
+     * Determines if the given grayscale image is considered to be in low light.
+     * <p>
+     * A histogram is computed for the image, and the median intensity value is
+     * calculated. If the median intensity value is below a specific threshold,
+     * the image is determined to be in low light conditions.
+     *
+     * @param gray the input image in grayscale format (CV_8U). This matrix (Mat)
+     *             represents the intensity values of the image.
+     * @return true if the median intensity value of the grayscale image indicates
+     * low light conditions; false otherwise.
+     */
+    private static boolean isLowLight(Mat gray /* CV_8U */) {
+        Mat hist = new Mat();
+        try {
+            Imgproc.calcHist(Collections.singletonList(gray), new MatOfInt(0), new Mat(), hist, new MatOfInt(256), new MatOfFloat(0, 256));
+            double cum = 0, target = gray.total() * 0.5;
+            int median = 127;
+            for (int i = 0; i < 256; i++) {
+                cum += hist.get(i, 0)[0];
+                if (cum >= target) {
+                    median = i;
+                    break;
+                }
+            }
+            return median < 60; // Heuristik
+        } finally {
+            hist.release();
+        }
+    }
+
+    /**
+     * Applies preprocessing steps to enhance low-light images. This method processes the
+     * input image to improve visibility and clarity under low-light conditions using techniques
+     * like noise reduction, gamma correction, contrast limiting adaptive histogram equalization (CLAHE),
+     * and sharpening.
+     *
+     * @param rgbaOrGray the input image to be preprocessed. This can either be a grayscale or RGBA image.
+     *                   The same object will be modified and will contain the preprocessed output.
+     */
+    private static void preprocessLowLight(Mat rgbaOrGray /* in/out */) {
+        Mat gray = new Mat();
+        try {
+            if (rgbaOrGray.channels() == 4 || rgbaOrGray.channels() == 3) {
+                Imgproc.cvtColor(rgbaOrGray, gray, Imgproc.COLOR_RGBA2GRAY);
+            } else {
+                gray = rgbaOrGray;
+            }
+
+            try {
+                Mat tmp = new Mat();
+                Photo.fastNlMeansDenoising(gray, tmp, 7, 7, 21);
+                tmp.copyTo(gray);
+                tmp.release();
+            } catch (Throwable ignore) {
+            }
+
+            Mat f = new Mat();
+            gray.convertTo(f, CvType.CV_32F, 1.0 / 255.0);
+            Core.pow(f, 0.75, f); // Gamma 0.75
+            Core.multiply(f, new Scalar(255.0), f);
+            f.convertTo(gray, CvType.CV_8U);
+
+            CLAHE clahe = Imgproc.createCLAHE(2.0, new Size(8, 8));
+            clahe.apply(gray, gray);
+
+            Mat sharp = new Mat();
+            Imgproc.GaussianBlur(gray, sharp, new Size(0, 0), 1.2);
+            Core.addWeighted(gray, 1.6, sharp, -0.6, 0, gray);
+            sharp.release();
+
+            if (rgbaOrGray.channels() != 1) {
+                Imgproc.cvtColor(gray, rgbaOrGray, Imgproc.COLOR_GRAY2RGBA);
+            } else {
+                gray.copyTo(rgbaOrGray);
+            }
+        } finally {
+            if (gray != rgbaOrGray) gray.release();
+        }
     }
 }

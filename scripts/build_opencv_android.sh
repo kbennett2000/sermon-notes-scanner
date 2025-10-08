@@ -213,7 +213,7 @@ build_for_arch(){
     -DBUILD_opencv_imgproc=ON -DBUILD_opencv_imgcodecs=ON -DBUILD_opencv_video=ON -DBUILD_opencv_videoio=ON \
     -DBUILD_opencv_flann=OFF -DBUILD_opencv_calib3d=OFF -DBUILD_opencv_features2d=OFF -DBUILD_opencv_objdetect=OFF \
     -DBUILD_opencv_dnn=OFF -DBUILD_opencv_gapi=OFF -DBUILD_opencv_ml=OFF -DBUILD_opencv_highgui=OFF \
-    -DBUILD_opencv_photo=OFF -DBUILD_opencv_stitching=OFF \
+    -DBUILD_opencv_photo=ON -DBUILD_opencv_stitching=OFF \
     -DWITH_OPENCL=OFF -DWITH_IPP=OFF \
     -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_STANDARD_REQUIRED=ON \
     "$OPENCV_DIR" >> "$arch_log" 2>&1 || { echo "ERROR: CMake config for $arch failed ($arch_log)"; return 1; }
