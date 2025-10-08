@@ -45,6 +45,12 @@ public class OpenCVUtils {
     private static volatile OrtEnvironment ortEnv;
     private static volatile OrtSession ortSession;
 
+    // ---- thresholds (tuned) ----
+    private static final double AREA_FRAC_MIN_ONNX = 0.008; // 0.8% der Bildfläche statt 5%
+    private static final double SIDE_FRAC_MIN      = 0.010; // 1% der kurzen Bildkante statt 2%
+    private static final double CONF_MIN_AREA_FRAC = 0.008; // gleiche Untergrenze für die Confidence
+
+
     private OpenCVUtils() {
         // Utility class, no instances allowed
     }
@@ -814,11 +820,17 @@ public class OpenCVUtils {
         pts = sortPointsRobust(pts);
         double area = quadArea(pts);
         double imgArea = (double) outW * outH;
-        if (area < 0.05 * imgArea) {
-            Log.w(TAG, String.format("predictionToPoints: area too small (%.2f%%).", 100.0 * area / imgArea));
+
+        // --- weichere Fläche ---
+        if (area < AREA_FRAC_MIN_ONNX * imgArea) {
+            Log.w(TAG, String.format(java.util.Locale.US,
+                    "predictionToPoints: area too small (%.2f%%).",
+                    100.0 * area / imgArea));
             return null;
         }
-        final double minSide = 0.02 * Math.min(outW, outH);
+
+        // --- weichere Mindest-Seitenlänge ---
+        final double minSide = SIDE_FRAC_MIN * Math.min(outW, outH);
         for (int i = 0; i < 4; i++) {
             Point a = pts[i], b = pts[(i + 1) % 4];
             if (Math.hypot(a.x - b.x, a.y - b.y) < minSide) {
@@ -844,10 +856,12 @@ public class OpenCVUtils {
     private static Point[] validateAndSort(Point[] pts, int outW, int outH) {
         if (pts == null || pts.length != 4) return null;
         pts = sortPointsRobust(pts);
+
         double area = quadArea(pts);
         double imgArea = (double) outW * outH;
-        if (area < 0.05 * imgArea) return null;
-        final double minSide = 0.02 * Math.min(outW, outH);
+        if (area < AREA_FRAC_MIN_ONNX * imgArea) return null;
+
+        final double minSide = SIDE_FRAC_MIN * Math.min(outW, outH);
         for (int i = 0; i < 4; i++) {
             Point a = pts[i], b = pts[(i + 1) % 4];
             if (Math.hypot(a.x - b.x, a.y - b.y) < minSide) return null;
@@ -947,9 +961,16 @@ public class OpenCVUtils {
             saveDebugImage(context, morph, "debug_morph.png");
 
             Imgproc.Canny(morph, edges, 50, 150);
+
+            // Always compute adaptive edges from the (pre-smoothed) grayscale image and merge them.
+            Mat edgesAuto = new Mat();
+            edgesAdaptive(gray, edgesAuto);
+            Core.max(edges, edgesAuto, edges);
+            edgesAuto.release();
+
             saveDebugImage(context, edges, "debug_edges.png");
 
-            // Low-light: zusätzlich adaptiv erzeugte Kanten mergen
+            // Low-light addition: best-of fusion with low-light preprocessing.
             boolean low;
             {
                 Mat probe = new Mat();
@@ -1002,13 +1023,14 @@ public class OpenCVUtils {
             for (MatOfPoint contour : contours) {
                 try {
                     double area = Imgproc.contourArea(contour);
-                    if (area < imgArea * 0.20) continue;
+                    if (area < imgArea * 0.08) continue; // vorher 0.20
 
                     MatOfPoint2f curve = new MatOfPoint2f(contour.toArray());
                     MatOfPoint2f approx = new MatOfPoint2f();
                     MatOfPoint approxAsPoints = null;
                     try {
-                        Imgproc.approxPolyDP(curve, approx, Imgproc.arcLength(curve, true) * 0.02, true);
+                        // slightly finer approximation
+                        Imgproc.approxPolyDP(curve, approx, Imgproc.arcLength(curve, true) * 0.015, true);
                         approxAsPoints = new MatOfPoint(approx.toArray());
                         boolean isConvex = Imgproc.isContourConvex(approxAsPoints);
 
@@ -1268,15 +1290,15 @@ public class OpenCVUtils {
     private static double quadConfidence(Point[] q, int w, int h) {
         if (q == null || q.length != 4) return 0;
         q = sortPointsRobust(q);
-        double area = quadArea(q) / (w * (double) h);
-        if (area < 0.03) return 0;
+        double areaFrac = quadArea(q) / (w * (double) h);
+        if (areaFrac < CONF_MIN_AREA_FRAC) return 0; // vorher 3%, jetzt 0.8%
 
         double rect = rectScore(q) / 120.0;
         double w1 = distance(q[0], q[1]), w2 = distance(q[2], q[3]);
         double h1 = distance(q[1], q[2]), h2 = distance(q[3], q[0]);
         double sym = 1.0 - Math.min(1.0, (Math.abs(w1 - w2) + Math.abs(h1 - h2)) / (w1 + w2 + h1 + h2) + 1e-6);
 
-        return 0.5 * area + 0.3 * rect + 0.2 * sym;
+        return 0.5 * areaFrac + 0.3 * rect + 0.2 * sym;
     }
 
     /**
