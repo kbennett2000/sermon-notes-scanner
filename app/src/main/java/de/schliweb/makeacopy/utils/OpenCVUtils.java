@@ -47,7 +47,7 @@ public class OpenCVUtils {
 
     // ---- thresholds (tuned) ----
     private static final double AREA_FRAC_MIN_ONNX = 0.008; // 0.8% der Bildfläche statt 5%
-    private static final double SIDE_FRAC_MIN      = 0.010; // 1% der kurzen Bildkante statt 2%
+    private static final double SIDE_FRAC_MIN = 0.010; // 1% der kurzen Bildkante statt 2%
     private static final double CONF_MIN_AREA_FRAC = 0.008; // gleiche Untergrenze für die Confidence
 
 
@@ -1075,22 +1075,36 @@ public class OpenCVUtils {
         }
     }
 
+    /**
+     * Maps a point from a 128x128 heatmap coordinate system to the original image coordinate system,
+     * considering the original image dimensions and potential padding.
+     *
+     * @param fx   the x-coordinate in the heatmap coordinate system
+     * @param fy   the y-coordinate in the heatmap coordinate system
+     * @param outW the width of the original image
+     * @param outH the height of the original image
+     * @return a Point object representing the transformed coordinates in the original image coordinate system
+     */
     private static Point mapFromHeatmapToOrig(double fx, double fy, int outW, int outH) {
-        // fx, fy: Subpixel-Koordinaten im Heatmap-Raster (0..127)
+        // Heatmap (128x128) -> Input(256x256)
         final int INPUT = 256, HM = 128;
         final double stride = (double) INPUT / HM; // 2.0
 
-        // Letterbox-Parameter erneut berechnen
+        // IMPORTANT: use the same rounding as in letterboxBGR()
         double s = Math.min(INPUT / (double) outW, INPUT / (double) outH);
-        double nw = outW * s, nh = outH * s;
-        double padX = (INPUT - nw) * 0.5;
-        double padY = (INPUT - nh) * 0.5;
+        int nw = (int) Math.round(outW * s);
+        int nh = (int) Math.round(outH * s);
+        int padX = (INPUT - nw) / 2;
+        int padY = (INPUT - nh) / 2;
 
-        // Heatmap -> Input(256) -> Padding entfernen -> zurück ins Original
-        double x = ((fx * stride) - padX) / s;
-        double y = ((fy * stride) - padY) / s;
+        // Account for pixel center (+0.5)
+        double x256 = ((fx + 0.5) * stride) - padX;
+        double y256 = ((fy + 0.5) * stride) - padY;
 
-        // clamp
+        double x = x256 / s;
+        double y = y256 / s;
+
+        // clamp to image bounds
         x = Math.max(0, Math.min(x, outW - 1));
         y = Math.max(0, Math.min(y, outH - 1));
         return new Point(x, y);
