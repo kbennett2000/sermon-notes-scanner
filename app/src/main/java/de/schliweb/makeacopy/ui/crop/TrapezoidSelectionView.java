@@ -10,8 +10,11 @@ import android.widget.Magnifier;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import de.schliweb.makeacopy.utils.OpenCVUtils;
-import org.opencv.core.Mat;
 import org.opencv.core.Point;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Custom view for selecting a trapezoid area on an image
@@ -22,6 +25,7 @@ public class TrapezoidSelectionView extends View {
     private static final int CORNER_RADIUS = 35; // Increased radius of the corner handles for better visibility
     private static final int CORNER_TOUCH_RADIUS = 70; // Increased touch area for easier interaction
     private static final long ANIMATION_DURATION = 300; // Animation duration in milliseconds
+
     private Paint trapezoidPaint; // Paint for the trapezoid lines
     private Paint cornerPaint; // Paint for the corner handles
     private Paint activePaint; // Paint for the active corner handle
@@ -45,13 +49,24 @@ public class TrapezoidSelectionView extends View {
 
     private Bitmap imageBitmap = null; // The image bitmap for edge detection
 
+    // ==== Async corner detection state ====
+    private final ExecutorService cornerExec = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "CornerDetect");
+        t.setDaemon(true);
+        t.setPriority(Thread.NORM_PRIORITY - 1);
+        return t;
+    });
+    @Nullable
+    private Future<?> cornerTask;
+    private volatile int requestedInitSeq = 0; // debouncing/cancellation token
+
     // Debounced initialization runnable to avoid synchronous heavy work in onSizeChanged
     private final Runnable initCornersRunnable = new Runnable() {
         @Override
         public void run() {
             if (getWidth() <= 0 || getHeight() <= 0) return;
             try {
-                initializeCorners();
+                initializeCornersAsync();
             } catch (Throwable t) {
                 Log.e(TAG, "initializeCorners runnable failed", t);
             }
@@ -206,275 +221,150 @@ public class TrapezoidSelectionView extends View {
         }
     }
 
-    /**
-     * Initialize the corners of the trapezoid based on the view dimensions
-     * If an image bitmap is available, tries to detect document edges
-     * Otherwise, creates a default trapezoid that covers most of the image
-     */
-    private void initializeCorners() {
-        int width = getWidth();
-        int height = getHeight();
+    // ========================= ASYNC INITIALIZATION =========================
 
-        Log.d(TAG, "initializeCorners called, dimensions: " + width + "x" + height + ", attempt: " + (++initializationAttempts));
+    /**
+     * Kicks off async corner initialization (idempotent/debounced).
+     */
+    private void initializeCornersAsync() {
+        final int width = getWidth();
+        final int height = getHeight();
+
+        Log.d(TAG, "initializeCornersAsync called, dimensions: " + width + "x" + height + ", attempt: " + (++initializationAttempts));
 
         if (width == 0 || height == 0) {
             Log.w(TAG, "Cannot initialize corners, view has zero dimensions");
-            // Schedule a retry after a delay if dimensions are zero
-            postDelayed(this::initializeCorners, 100);
+            removeCallbacks(initCornersRunnable);
+            postDelayed(this::initializeCornersAsync, 100);
             return;
         }
 
-        boolean cornersDetected = false;
+        // Cancel any running task
+        if (cornerTask != null) {
+            cornerTask.cancel(true);
+            cornerTask = null;
+        }
+        final int seq = ++requestedInitSeq;
+        final Bitmap bmp = imageBitmap; // capture
 
-        // Try to detect document edges if an image bitmap is available
-        if (imageBitmap != null) {
-            Log.d(TAG, "Attempting to detect document edges from bitmap: " + imageBitmap.getWidth() + "x" + imageBitmap.getHeight());
+        cornerTask = cornerExec.submit(() -> {
+            long start = android.os.SystemClock.uptimeMillis();
+            try {
+                Point[] resultViewCorners = null;
 
-            // First try using OpenCV if it's available
-            if (OpenCVUtils.isInitialized()) {
-                Log.d(TAG, "OpenCV is initialized, attempting to use it for edge detection");
-
-                boolean openCVSuccess = false;
-                Mat srcMat = null;
-
-                try {
-                    // Convert bitmap to Mat
-                    srcMat = new Mat();
-                    org.opencv.android.Utils.bitmapToMat(imageBitmap, srcMat);
-                    Log.d(TAG, "Converted bitmap to Mat: " + srcMat.width() + "x" + srcMat.height());
-
-                    // Detect document corners with enhanced error handling
-                    Log.d(TAG, "Calling OpenCVUtils.detectDocumentCorners");
-                    Point[] detectedCorners = null;
-
-                    try {
-                        detectedCorners = OpenCVUtils.detectDocumentCorners(getContext(), imageBitmap);
-                    } catch (Throwable e) {
-                        // Use Throwable instead of Exception to catch more error types
-                        Log.e(TAG, "Error in detectDocumentCorners", e);
-                        // Continue with detectedCorners = null
+                if (bmp != null && OpenCVUtils.isInitialized()) {
+                    // cheap pre-scale for detection
+                    Bitmap work = bmp;
+                    int maxEdge = 1280; // budget-friendly
+                    int bw = bmp.getWidth(), bh = bmp.getHeight();
+                    float s = Math.min(1f, maxEdge / (float) Math.max(bw, bh));
+                    if (s < 1f) {
+                        work = Bitmap.createScaledBitmap(bmp, Math.round(bw * s), Math.round(bh * s), true);
                     }
 
-                    // If corners were detected successfully
-                    if (detectedCorners != null && detectedCorners.length == 4) {
-                        Log.d(TAG, "Document edges detected successfully with OpenCV");
+                    // time budget (~600 ms)
+                    final long budgetMs = 600;
+                    resultViewCorners = detectCornersWithBudget(work, s, width, height, budgetMs);
+                    if (work != bmp) work.recycle();
+                }
 
-                        try {
-                            // Log the detected corners
-                            Log.d(TAG, "Detected corners in image space:");
-                            Log.d(TAG, "  Top-left: (" + detectedCorners[0].x + ", " + detectedCorners[0].y + ")");
-                            Log.d(TAG, "  Top-right: (" + detectedCorners[1].x + ", " + detectedCorners[1].y + ")");
-                            Log.d(TAG, "  Bottom-right: (" + detectedCorners[2].x + ", " + detectedCorners[2].y + ")");
-                            Log.d(TAG, "  Bottom-left: (" + detectedCorners[3].x + ", " + detectedCorners[3].y + ")");
+                if (Thread.currentThread().isInterrupted()) return;
 
-                            // Transform the coordinates from image space to view space
-                            Log.d(TAG, "Transforming coordinates from image space to view space");
-                            Point[] viewCorners = null;
+                if (resultViewCorners == null) {
+                    // heuristic fallback
+                    resultViewCorners = fallbackCorners(width, height, bmp);
+                }
 
-                            try {
-                                viewCorners = transformImageToViewCoordinates(detectedCorners, imageBitmap);
-
-                                if (viewCorners != null && viewCorners.length == 4) {
-                                    // Log the transformed corners
-                                    Log.d(TAG, "Transformed corners in view space:");
-                                    Log.d(TAG, "  Top-left: (" + viewCorners[0].x + ", " + viewCorners[0].y + ")");
-                                    Log.d(TAG, "  Top-right: (" + viewCorners[1].x + ", " + viewCorners[1].y + ")");
-                                    Log.d(TAG, "  Bottom-right: (" + viewCorners[2].x + ", " + viewCorners[2].y + ")");
-                                    Log.d(TAG, "  Bottom-left: (" + viewCorners[3].x + ", " + viewCorners[3].y + ")");
-
-                                    // Validate the transformed corners
-                                    boolean validCorners = true;
-                                    for (Point p : viewCorners) {
-                                        if (Double.isNaN(p.x) || Double.isInfinite(p.x) || Double.isNaN(p.y) || Double.isInfinite(p.y)) {
-                                            Log.w(TAG, "Invalid corner coordinates detected: (" + p.x + "," + p.y + ")");
-                                            validCorners = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if (validCorners) {
-                                        try {
-                                            // Check if the corners form a non-rectangular trapezoid by comparing slopes
-                                            double topSlope = Math.abs((viewCorners[1].y - viewCorners[0].y) / (viewCorners[1].x - viewCorners[0].x + 0.0001));
-                                            double bottomSlope = Math.abs((viewCorners[2].y - viewCorners[3].y) / (viewCorners[2].x - viewCorners[3].x + 0.0001));
-                                            double leftSlope = Math.abs((viewCorners[3].y - viewCorners[0].y) / (viewCorners[3].x - viewCorners[0].x + 0.0001));
-                                            double rightSlope = Math.abs((viewCorners[2].y - viewCorners[1].y) / (viewCorners[2].x - viewCorners[1].x + 0.0001));
-
-                                            boolean isNearlyRectangular = Math.abs(topSlope - bottomSlope) < 0.1 && Math.abs(leftSlope - rightSlope) < 0.1;
-
-                                            Log.d(TAG, "Slopes - top: " + topSlope + ", bottom: " + bottomSlope + ", left: " + leftSlope + ", right: " + rightSlope);
-                                            Log.d(TAG, "Detected corners form a " + (isNearlyRectangular ? "nearly rectangular" : "non-rectangular") + " shape");
-
-                                            // If the detected shape is too rectangular, make it non-rectangular
-                                            if (isNearlyRectangular) {
-                                                Log.d(TAG, "Making the detected corners non-rectangular");
-                                                try {
-                                                    makeNonRectangular(viewCorners);
-                                                } catch (Exception e) {
-                                                    Log.w(TAG, "Error making corners non-rectangular: " + e.getMessage());
-                                                    // Continue with the original corners
-                                                }
-                                            }
-
-                                            // Update the corners
-                                            for (int i = 0; i < 4; i++) {
-                                                updateCorner(i, (float) viewCorners[i].x, (float) viewCorners[i].y);
-                                            }
-
-                                            Log.d(TAG, "Corners set from detected edges: " + "(" + corners[0].x + "," + corners[0].y + "), " + "(" + corners[1].x + "," + corners[1].y + "), " + "(" + corners[2].x + "," + corners[2].y + "), " + "(" + corners[3].x + "," + corners[3].y + ")");
-
-                                            cornersDetected = true;
-                                            openCVSuccess = true;
-                                        } catch (Exception e) {
-                                            Log.w(TAG, "Error calculating slopes or updating corners: " + e.getMessage());
-                                        }
-                                    } else {
-                                        Log.w(TAG, "Transformed corners contain invalid coordinates, using default corners");
-                                    }
-                                } else {
-                                    Log.w(TAG, "Invalid transformed corners array, using default corners");
-                                }
-                            } catch (Exception e) {
-                                Log.w(TAG, "Error transforming coordinates: " + e.getMessage());
-                            }
-                        } catch (Exception e) {
-                            Log.w(TAG, "Error processing detected corners: " + e.getMessage());
+                final Point[] cornersFinal = resultViewCorners;
+                post(() -> {
+                    if (seq != requestedInitSeq) return;
+                    if (cornersFinal != null && cornersFinal.length == 4) {
+                        for (int i = 0; i < 4; i++) {
+                            updateCorner(i, (float) cornersFinal[i].x, (float) cornersFinal[i].y);
                         }
                     } else {
-                        Log.d(TAG, "OpenCV document edge detection failed or returned null");
+                        setDefaultCorners(width, height);
                     }
-                } catch (Throwable e) {
-                    Log.e(TAG, "Error in OpenCV document edge detection process", e);
-                } finally {
-                    // Clean up OpenCV resources
-                    try {
-                        if (srcMat != null) {
-                            srcMat.release();
-                        }
-                    } catch (Exception e) {
-                        Log.w(TAG, "Error releasing srcMat: " + e.getMessage());
-                    }
-                }
-
-                // If OpenCV succeeded, we're done with edge detection
-                if (openCVSuccess) {
-                    Log.d(TAG, "OpenCV edge detection was successful, skipping fallback methods");
-
-                    // Store current dimensions
                     lastWidth = width;
                     lastHeight = height;
-
-                    // Set the initialized flag to true
                     initialized = true;
-
-                    // Force multiple redraws to ensure the trapezoid is displayed
                     invalidate();
-                    postInvalidate();
-
-                    // Schedule another redraw after a short delay as a fallback
-                    postDelayed(() -> {
-                        Log.d(TAG, "Performing delayed redraw after successful OpenCV detection");
-                        invalidate();
-                        postInvalidate();
-                    }, 200);
-
-                    return;
-                }
-
-                // If we get here, OpenCV failed, so we'll try the fallback method
-                Log.d(TAG, "OpenCV edge detection failed, trying fallback method");
-            } else {
-                Log.d(TAG, "OpenCV not initialized, using fallback edge detection");
+                });
+            } catch (Throwable t) {
+                Log.e(TAG, "Async corner init failed", t);
+                post(() -> {
+                    if (seq != requestedInitSeq) return;
+                    setDefaultCorners(width, height);
+                    lastWidth = width;
+                    lastHeight = height;
+                    initialized = true;
+                    invalidate();
+                });
+            } finally {
+                long dur = android.os.SystemClock.uptimeMillis() - start;
+                Log.d(TAG, "initializeCornersAsync finished in " + dur + "ms");
             }
-
-            // Fallback: Use Android's built-in image processing capabilities
-            try {
-                Log.d(TAG, "Using Android fallback method for edge detection");
-
-                // Get image dimensions
-                int imgWidth = imageBitmap.getWidth();
-                int imgHeight = imageBitmap.getHeight();
-
-                // Create a simple heuristic-based edge detection
-                // This is a very basic approach that assumes the document is roughly centered
-                // and has good contrast with the background
-
-                // Calculate view dimensions
-                int viewWidth = getWidth();
-                int viewHeight = getHeight();
-
-                // Create points for a trapezoid that's slightly inset from the image edges
-                // This creates a more natural document-like shape
-                float insetX = imgWidth * 0.15f;
-                float insetY = imgHeight * 0.15f;
-
-                // Create points in image space
-                android.graphics.PointF[] imageCorners = new android.graphics.PointF[4];
-                imageCorners[0] = new android.graphics.PointF(insetX, insetY); // Top-left
-                imageCorners[1] = new android.graphics.PointF(imgWidth - insetX, insetY * 0.8f); // Top-right
-                imageCorners[2] = new android.graphics.PointF(imgWidth - insetX * 0.8f, imgHeight - insetY); // Bottom-right
-                imageCorners[3] = new android.graphics.PointF(insetX * 0.8f, imgHeight - insetY * 0.8f); // Bottom-left
-
-                Log.d(TAG, "Created fallback corners in image space: " + "(" + imageCorners[0].x + "," + imageCorners[0].y + "), " + "(" + imageCorners[1].x + "," + imageCorners[1].y + "), " + "(" + imageCorners[2].x + "," + imageCorners[2].y + "), " + "(" + imageCorners[3].x + "," + imageCorners[3].y + ")");
-
-                // Transform to view space
-                float scaleX = (float) viewWidth / imgWidth;
-                float scaleY = (float) viewHeight / imgHeight;
-                float scale = Math.min(scaleX, scaleY);
-
-                float offsetX = (viewWidth - imgWidth * scale) / 2;
-                float offsetY = (viewHeight - imgHeight * scale) / 2;
-
-                for (int i = 0; i < 4; i++) {
-                    float viewX = imageCorners[i].x * scale + offsetX;
-                    float viewY = imageCorners[i].y * scale + offsetY;
-                    updateCorner(i, viewX, viewY);
-                }
-
-                Log.d(TAG, "Fallback corners set in view space: " + "(" + corners[0].x + "," + corners[0].y + "), " + "(" + corners[1].x + "," + corners[1].y + "), " + "(" + corners[2].x + "," + corners[2].y + "), " + "(" + corners[3].x + "," + corners[3].y + ")");
-
-                cornersDetected = true;
-            } catch (Exception e) {
-                Log.e(TAG, "Error in fallback edge detection", e);
-                // If fallback fails, we'll use the default corners below
-            }
-        } else {
-            Log.d(TAG, "No bitmap available, using default corners");
-        }
-
-        // If edge detection failed or wasn't attempted, use default corners
-        if (!cornersDetected) {
-            // Set default corners to a trapezoid that covers most of the image
-            // Using larger area (10% from edges instead of 20%) for better visibility
-            // Top-left
-            updateCorner(0, width * 0.1f, height * 0.1f);
-            // Top-right
-            updateCorner(1, width * 0.9f, height * 0.1f);
-            // Bottom-right
-            updateCorner(2, width * 0.9f, height * 0.9f);
-            // Bottom-left
-            updateCorner(3, width * 0.1f, height * 0.9f);
-
-            Log.d(TAG, "Corners initialized to default values: " + "(" + corners[0].x + "," + corners[0].y + "), " + "(" + corners[1].x + "," + corners[1].y + "), " + "(" + corners[2].x + "," + corners[2].y + "), " + "(" + corners[3].x + "," + corners[3].y + ")");
-        }
-
-        // Store current dimensions
-        lastWidth = width;
-        lastHeight = height;
-
-        initialized = true;
-
-        // Force multiple redraws to ensure the trapezoid is displayed
-        invalidate();
-        postInvalidate();
-
-        // Schedule another redraw after a short delay as a fallback
-        postDelayed(() -> {
-            Log.d(TAG, "Performing delayed redraw");
-            invalidate();
-            postInvalidate();
-        }, 200);
+        });
     }
+
+    /**
+     * Detect corners under a time budget; returns view-space points or null.
+     */
+    @Nullable
+    private Point[] detectCornersWithBudget(Bitmap work, float scaleToOrig, int viewW, int viewH, long budgetMs) {
+        long t0 = android.os.SystemClock.uptimeMillis();
+        try {
+            org.opencv.core.Point[] imgCorners = OpenCVUtils.detectDocumentCorners(getContext(), work);
+            if (imgCorners == null || imgCorners.length != 4) return null;
+
+            // back-project to original image scale if we downscaled
+            if (scaleToOrig < 1f) {
+                double inv = 1.0 / scaleToOrig;
+                for (org.opencv.core.Point p : imgCorners) {
+                    p.x *= inv;
+                    p.y *= inv;
+                }
+            }
+
+            // Transform to view-space using existing helper
+            Point[] viewPts = transformImageToViewCoordinates(imgCorners, imageBitmap != null ? imageBitmap : work);
+            if (viewPts == null || viewPts.length != 4) return null;
+
+            // Validate quickly
+            if (!validateViewCoordinates(viewPts, viewW, viewH)) {
+                adjustViewCoordinates(viewPts, viewW, viewH);
+            }
+            return viewPts;
+        } catch (Throwable e) {
+            Log.w(TAG, "detectCornersWithBudget: detection failed", e);
+            return null;
+        } finally {
+            long dt = android.os.SystemClock.uptimeMillis() - t0;
+            if (dt > budgetMs) Log.w(TAG, "Corner detection over budget: " + dt + "ms");
+        }
+    }
+
+    /**
+     * Builds a heuristic trapezoid in view space (used as fallback).
+     */
+    private Point[] fallbackCorners(int viewW, int viewH, @Nullable Bitmap bmp) {
+        Point[] pts = new Point[4];
+        pts[0] = new Point(viewW * 0.1, viewH * 0.1);
+        pts[1] = new Point(viewW * 0.9, viewH * 0.1);
+        pts[2] = new Point(viewW * 0.9, viewH * 0.9);
+        pts[3] = new Point(viewW * 0.1, viewH * 0.9);
+        return pts;
+    }
+
+    private void setDefaultCorners(int width, int height) {
+        updateCorner(0, width * 0.1f, height * 0.1f);
+        updateCorner(1, width * 0.9f, height * 0.1f);
+        updateCorner(2, width * 0.9f, height * 0.9f);
+        updateCorner(3, width * 0.1f, height * 0.9f);
+        Log.d(TAG, "Corners set to default");
+    }
+
+    // ========================= END ASYNC =========================
 
     /**
      * Modifies the given corners to ensure they form a non-rectangular trapezoid
@@ -928,68 +818,37 @@ public class TrapezoidSelectionView extends View {
             removeCallbacks(initCornersRunnable);
             post(initCornersRunnable);
         } else if ((w != oldw || h != oldh) && w > 0 && h > 0) {
-            // If size changed and we're already initialized, scale the corners proportionally
-
-            // Check if this is a dramatic aspect ratio change (like portrait to landscape)
-            boolean isAspectRatioChange = false;
-            if (oldw > 0 && oldh > 0) {
-                float oldAspect = (float) oldw / oldh;
-                float newAspect = (float) w / h;
-
-                // If aspect ratio changed significantly (e.g., portrait to landscape)
-                if (Math.abs(oldAspect - newAspect) > 0.5) {
-                    isAspectRatioChange = true;
-                    Log.d(TAG, "Detected significant aspect ratio change: " + oldAspect + " -> " + newAspect);
-                }
+            // cancel any pending detection and reschedule/guard
+            if (cornerTask != null) {
+                cornerTask.cancel(true);
+                cornerTask = null;
             }
+            requestedInitSeq++; // invalidate older tasks
 
-            Log.d(TAG, "Size changed, scaling corners proportionally" + (isAspectRatioChange ? " (significant aspect ratio change detected)" : ""));
-
-            // Log the current corners before scaling
-            Log.d(TAG, "Corners before scaling: " + "(" + corners[0].x + "," + corners[0].y + "), " + "(" + corners[1].x + "," + corners[1].y + "), " + "(" + corners[2].x + "," + corners[2].y + "), " + "(" + corners[3].x + "," + corners[3].y + ")");
-
-            // Log the relative corners for debugging
-            Log.d(TAG, "Relative corners before scaling: " + "(" + relativeCorners[0][0] + "," + relativeCorners[0][1] + "), " + "(" + relativeCorners[1][0] + "," + relativeCorners[1][1] + "), " + "(" + relativeCorners[2][0] + "," + relativeCorners[2][1] + "), " + "(" + relativeCorners[3][0] + "," + relativeCorners[3][1] + ")");
-
-            // Scale each corner based on its relative position
+            // Proportional scaling of existing corners
+            Log.d(TAG, "Size changed, scaling corners proportionally");
             for (int i = 0; i < 4; i++) {
                 PointF newPos = relativeToAbsolute(relativeCorners[i][0], relativeCorners[i][1], w, h);
                 corners[i].set(newPos.x, newPos.y);
             }
 
-            // Log the scaled corners
-            Log.d(TAG, "Corners after scaling: " + "(" + corners[0].x + "," + corners[0].y + "), " + "(" + corners[1].x + "," + corners[1].y + "), " + "(" + corners[2].x + "," + corners[2].y + "), " + "(" + corners[3].x + "," + corners[3].y + ")");
-
-            // For dramatic aspect ratio changes, verify the corners are within bounds
-            if (isAspectRatioChange) {
-                // Ensure corners are within the view bounds
-                for (int i = 0; i < 4; i++) {
-                    corners[i].x = Math.max(0, Math.min(corners[i].x, w));
-                    corners[i].y = Math.max(0, Math.min(corners[i].y, h));
-
-                    // Update relative coordinates after clamping
-                    relativeCorners[i] = absoluteToRelative(corners[i].x, corners[i].y, w, h);
-                }
-
-                Log.d(TAG, "Corners after boundary check: " + "(" + corners[0].x + "," + corners[0].y + "), " + "(" + corners[1].x + "," + corners[1].y + "), " + "(" + corners[2].x + "," + corners[2].y + "), " + "(" + corners[3].x + "," + corners[3].y + ")");
-
-                // Schedule a verification check after a short delay
-                postDelayed(() -> {
-                    Log.d(TAG, "Post-orientation change verification: dimensions=" + getWidth() + "x" + getHeight());
-
-                    // Force another redraw to ensure the trapezoid is displayed correctly
-                    invalidate();
-                    postInvalidate();
-                }, 100);
-            }
-
-            // Update the last known dimensions
+            // Update last known dimensions
             lastWidth = w;
             lastHeight = h;
 
             // Force a redraw with the scaled corners
             invalidate();
             postInvalidate();
+
+            // Option: bei starkem AR-Wechsel neu erkennen (billiger & stabiler)
+            if (oldw > 0 && oldh > 0) {
+                float oldAspect = oldw / (float) oldh;
+                float newAspect = w / (float) h;
+                if (Math.abs(oldAspect - newAspect) > 0.5f) {
+                    removeCallbacks(initCornersRunnable);
+                    post(initCornersRunnable);
+                }
+            }
         }
     }
 
@@ -998,6 +857,11 @@ public class TrapezoidSelectionView extends View {
         super.onDetachedFromWindow();
         // Cancel any pending initialization callbacks to avoid running after detach
         removeCallbacks(initCornersRunnable);
+        if (cornerTask != null) {
+            cornerTask.cancel(true);
+            cornerTask = null;
+        }
+        requestedInitSeq++;
         if (magnifier != null) {
             try {
                 magnifier.dismiss();
@@ -1375,18 +1239,10 @@ public class TrapezoidSelectionView extends View {
             OpenCVUtils.init(getContext());
         }
 
-        // If the view is already initialized, we don't need to do anything else
-        if (initialized) {
-            Log.d(TAG, "View already initialized, not updating corners");
-            return;
-        }
-
-        // If the view has valid dimensions, initialize corners with edge detection
-        int width = getWidth();
-        int height = getHeight();
-        if (width > 0 && height > 0) {
-            Log.d(TAG, "View has valid dimensions, initializing corners with edge detection");
-            initializeCorners();
+        // (Re)trigger async init when we have dimensions
+        if (getWidth() > 0 && getHeight() > 0) {
+            removeCallbacks(initCornersRunnable);
+            post(initCornersRunnable);
         }
     }
 
@@ -1505,7 +1361,7 @@ public class TrapezoidSelectionView extends View {
         // Check if the view is initialized
         if (!initialized) {
             Log.d(TAG, "View not initialized during verification, initializing now");
-            initializeCorners();
+            initializeCornersAsync();
             return;
         }
 
@@ -1624,7 +1480,7 @@ public class TrapezoidSelectionView extends View {
                         // Handle initialization or scaling based on the current state
                         if (!initialized) {
                             Log.d(TAG, "Initializing corners after layout completion");
-                            initializeCorners();
+                            initializeCornersAsync();
                         } else if (newWidth != lastWidth || newHeight != lastHeight || newOrientation != initialOrientation) {
                             // Dimensions or orientation have changed, scale corners
                             Log.d(TAG, "Scaling corners after layout completion: " + lastWidth + "x" + lastHeight + " -> " + newWidth + "x" + newHeight + ", orientation: " + (initialOrientation == android.content.res.Configuration.ORIENTATION_PORTRAIT ? "portrait" : "landscape") + " -> " + newOrientationName);
@@ -1658,7 +1514,7 @@ public class TrapezoidSelectionView extends View {
             postDelayed(() -> {
                 if (getWidth() > 0 && getHeight() > 0 && !initialized) {
                     Log.d(TAG, "Fallback initialization after delay");
-                    initializeCorners();
+                    initializeCornersAsync();
                 }
             }, 500);
 
@@ -1670,9 +1526,7 @@ public class TrapezoidSelectionView extends View {
         // Check if we need to initialize corners or just ensure they're properly scaled
         if (!initialized) {
             Log.d(TAG, "View not initialized, initializing corners directly");
-            // Call initializeCorners directly instead of resetCorners to avoid potential infinite loop
-            // resetCorners sets initialized=false which can cause onDraw to return early
-            initializeCorners();
+            initializeCornersAsync();
         } else if (currentWidth > 0 && currentHeight > 0 && (currentWidth != lastWidth || currentHeight != lastHeight)) {
             // Dimensions have changed (likely due to rotation), scale corners
             Log.d(TAG, "Dimensions changed from " + lastWidth + "x" + lastHeight + " to " + currentWidth + "x" + currentHeight + ", scaling corners");
@@ -1717,7 +1571,7 @@ public class TrapezoidSelectionView extends View {
                     requestLayout();
 
                     if (!initialized && hasValidDimensions) {
-                        initializeCorners();
+                        initializeCornersAsync();
                     } else if (initialized && hasValidDimensions && (getWidth() != lastWidth || getHeight() != lastHeight)) {
                         // Dimensions have changed again, rescale corners
                         Log.d(TAG, "Dimensions changed again in verification check, rescaling corners");
