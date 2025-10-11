@@ -1,0 +1,158 @@
+<resources>
+    <string name="app_name">MakeACopy</string>
+
+    <!-- New menu items for document scanner -->
+    <string name="title_camera">Kamera</string>
+    <string name="title_crop">Beskär</string>
+    <string name="title_ocr">OCR</string>
+    <string name="title_export">Exportera</string>
+
+    <!-- Button labels -->
+    <string name="btn_scan">Skanna</string>
+    <string name="btn_crop">Beskär</string>
+    <string name="btn_process">Bearbeta</string>
+    <string name="btn_export">Exportera</string>
+    <string name="btn_share">Dela</string>
+    <string name="next">Nästa</string>
+    <string name="back">Tillbaka</string>
+
+    <!-- Messages -->
+    <string name="msg_camera_permission_required">Kamerabehörighet krävs för att skanna dokument</string>
+    <string name="confirm">Bekräfta</string>
+    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Granska din skanning. Tryck på Nästa för att fortsätta eller Tillbaka för att försöka igen.</string>
+    <string name="camera_ready_tap_the_button_to_scan_a_document">Kameran är klar. Tryck på knappen för att skanna ett dokument.</string>
+    <string name="captured_image">Fångad bild</string>
+    <string name="retake">Ta om</string>
+    <string name="image_to_crop">Bild att beskära</string>
+    <string name="cropped_image">Beskuren bild</string>
+    <string name="recrop">Beskär igen</string>
+    <string name="document_preview">Förhandsgranskning av dokument</string>
+    <string name="include_ocr_text">Inkludera OCR-text</string>
+    <string name="language">Språk:</string>
+    <string name="ocr_results_will_appear_here">OCR-resultaten visas här</string>
+    <string name="no_image_loaded_capture_an_image_first">Ingen bild inläst. Ta först en bild.</string>
+    <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Justera trapetskanten för att välja området att beskära och tryck sedan på Beskär.</string>
+    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Granska din beskurna bild. Tryck på Nästa för att fortsätta eller Tillbaka för att försöka igen.</string>
+    <string name="no_document_ready_process_ocr_first">Inget dokument redo. Kör OCR först.</string>
+    <string name="document_ready_for_export">Dokument redo för export</string>
+    <string name="processing_image">Bearbetar bild…</string>
+    <string name="no_image_processed_crop_an_image_first">Ingen bild bearbetad. Beskär en bild först.</string>
+    <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR-bearbetning klar. Tryck på knappen för att fortsätta till export.</string>
+
+    <string name="initializing_camera">Initierar kamera…</string>
+    <string name="resetting_camera">Återställer kamera…</string>
+    <string name="error_initializing_camera">Fel vid initiering av kamera: %1$s</string>
+    <string name="error_camera_provider_null">Misslyckades med att initiera kamera – leverantören är null</string>
+    <string name="error_camera_not_initialized">Kameran är inte initierad. Försök igen.</string>
+    <string name="error_image_capture_failed">Bildtagning misslyckades: %1$s</string>
+    <string name="error_displaying_image">Fel vid visning av bild: %1$s</string>
+    <string name="error_resetting_camera">Fel vid återställning av kamera: %1$s</string>
+    <string name="error_toggling_flashlight">Fel vid växling av ficklampa: %1$s</string>
+    <string name="error_camera_preview_failed">Kameraförhandsvisning kunde inte startas. Försök igen.</string>
+
+    <!-- Export options -->
+    <string name="convert_to_grayscale">Konvertera till gråskala</string>
+    <string name="convert_to_blackwhite_pdf">Konvertera till svartvitt</string>
+    <string name="export_as_jpeg">Exportera som JPEG</string>
+    <string name="export_as_pdf">Exportera som PDF (standard)</string>
+
+    <!-- Flashlight options -->
+    <string name="toggle_flashlight">Växla ficklampa</string>
+    <string name="flashlight_on">Ficklampa på</string>
+    <string name="flashlight_off">Ficklampa av</string>
+    <string name="flashlight_not_available">Ficklampa inte tillgänglig på den här enheten</string>
+    <string name="low_light_detected">Svagt ljus upptäckt. Vill du slå på ficklampan?</string>
+
+    <!-- JPEG mode labels -->
+    <string name="jpeg_mode_none">Ingen förbättring (JPEG)</string>
+    <string name="jpeg_mode_auto">Automatisk förbättring (JPEG)</string>
+    <string name="jpeg_mode_bw_text">Svartvitt (klassiskt) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">Svartvitt (robust) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">S/V (robust)</string>
+    <string name="pdf_bw_mode_classic">S/V (klassiskt)</string>
+    <string name="skip_ocr_export_only">Hoppa över OCR (endast export)</string>
+    <string name="btn_pick_image">Ladda</string>
+    <string name="pick_image_cd">Ladda befintlig bild</string>
+    <string name="error_selected_file_is_not_an_image">Den valda filen är inte en bild</string>
+
+    <!-- Multipage Export -->
+    <string name="pages_header">Sidor (%1$d)</string>
+    <string name="add_another_page">Lägg till</string>
+    <string name="clear_all_pages">Rensa alla</string>
+    <string name="remove_this_page">Ta bort denna sida</string>
+    <string name="multipage_not_implemented">Flersidig export är ännu inte implementerad</string>
+
+    <!-- Reorder controls -->
+    <string name="move_page_left">Flytta sidan åt vänster</string>
+    <string name="move_page_right">Flytta sidan åt höger</string>
+
+    <!-- Back confirmation -->
+    <string name="confirm_clear_multipage_title">Radera sidor?</string>
+    <string name="confirm_clear_multipage_message">Flera sidor har lagts till. Vill du radera alla och gå tillbaka?</string>
+    <string name="cancel">Avbryt</string>
+
+    <!-- Clear all confirmation -->
+    <string name="confirm_clear_pages_title">Rensa alla sidor?</string>
+    <string name="confirm_clear_pages_message">Vill du ta bort alla sidor från filmremsan?</string>
+
+    <!-- Registry Picker -->
+    <string name="picker_title_completed_scans">Välj från slutförda skanningar</string>
+    <string name="picker_empty">Inga slutförda skanningar hittades</string>
+    <string name="done">Nästa</string>
+    <string name="thumbnail">Miniatyr</string>
+    <string name="delete">Radera</string>
+
+    <!-- Picker bulk actions -->
+    <string name="select_all">Markera alla</string>
+    <string name="deselect_all">Avmarkera alla</string>
+
+    <string name="added_pages_from_registry">Lade till %1$d sida/or från registret</string>
+
+    <!-- Add page options -->
+    <string name="add_page_option_choose_completed">Välj från slutförda skanningar</string>
+    <string name="add_page_option_capture_new">Fånga ny sida</string>
+
+    <!-- Picker states -->
+    <string name="missing_file">Saknad fil</string>
+
+    <!-- Inline OCR -->
+    <string name="ocr_processing_started">Kör OCR…</string>
+    <string name="ocr_processing_finished">OCR tillagd för denna sida</string>
+    <string name="ocr_processing_failed">Inbäddad OCR misslyckades</string>
+
+    <!-- Registry Picker: context action -->
+    <string name="remove_from_registry_title">Ta bort från register</string>
+    <string name="remove_from_registry_message">Vill du radera denna post och dess tillhörande filer?</string>
+    <string name="remove">Ta bort</string>
+    <string name="removed_from_registry_toast">Post borttagen</string>
+
+    <!-- PDF quality presets -->
+    <string name="pdf_quality_title">PDF-kvalitet / storlek</string>
+    <string name="pdf_preset_high">Hög (300 dpi, q85)</string>
+    <string name="pdf_preset_standard">Standard (200 dpi, q72)</string>
+    <string name="pdf_preset_small">Liten (150 dpi, q62)</string>
+    <string name="pdf_preset_very_small">Mycket liten (110 dpi, q52)</string>
+    <string name="export_options_title">Exportalternativ</string>
+    <string name="jpeg_enhancement_title">JPEG-förbättring</string>
+    <string name="btn_options">Alternativ</string>
+    <string name="btn_save">Spara</string>
+    <string name="btn_new">Ny</string>
+
+    <!-- Rotation -->
+    <string name="rotate_left_cd">Rotera sidan 90 grader moturs</string>
+    <string name="rotate_right_cd">Rotera sidan 90 grader medurs</string>
+
+    <!-- OCR models management -->
+    <string name="ocr_models_manage">OCR-modeller</string>
+    <string name="ocr_import_manual">Importera .traineddata…</string>
+    <string name="ocr_discover_packs">Upptäck språkpaket</string>
+    <string name="ocr_no_packs_found">Inga språkpaket hittades</string>
+    <string name="ocr_choose_pack">Välj språkpaket</string>
+    <string name="ocr_no_models_in_pack">Inga modeller hittades i detta paket</string>
+    <string name="ocr_choose_model">Välj modell att importera</string>
+    <string name="ocr_import_success">Modell importerad</string>
+    <string name="ocr_import_failed">Importen misslyckades</string>
+
+    <!-- OCR models hint -->
+    <string name="ocr_models_hint">För snabbare igenkänning ingår kompakta modeller. För högre noggrannhet kan du installera större "Best"-modeller. Ingen internetanslutning krävs.</string>
+</resources>
