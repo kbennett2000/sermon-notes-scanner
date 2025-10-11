@@ -1,0 +1,158 @@
+<resources>
+    <string name="app_name">MakeACopy</string>
+
+    <!-- New menu items for document scanner -->
+    <string name="title_camera">Kamera</string>
+    <string name="title_crop">Kivágás</string>
+    <string name="title_ocr">OCR</string>
+    <string name="title_export">Exportálás</string>
+
+    <!-- Button labels -->
+    <string name="btn_scan">Szkennelés</string>
+    <string name="btn_crop">Kivágás</string>
+    <string name="btn_process">Feldolgozás</string>
+    <string name="btn_export">Exportálás</string>
+    <string name="btn_share">Megosztás</string>
+    <string name="next">Tovább</string>
+    <string name="back">Vissza</string>
+
+    <!-- Messages -->
+    <string name="msg_camera_permission_required">A dokumentumok szkenneléséhez kameraengedély szükséges</string>
+    <string name="confirm">Megerősítés</string>
+    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Ellenőrizze a szkennelt képet. Nyomja meg a Tovább gombot a folytatáshoz vagy a Vissza gombot az újrapróbálkozáshoz.</string>
+    <string name="camera_ready_tap_the_button_to_scan_a_document">A kamera készen áll. Nyomja meg a gombot a dokumentum szkenneléséhez.</string>
+    <string name="captured_image">Rögzített kép</string>
+    <string name="retake">Újra</string>
+    <string name="image_to_crop">Kép kivágáshoz</string>
+    <string name="cropped_image">Kivágott kép</string>
+    <string name="recrop">Újrakivágás</string>
+    <string name="document_preview">Dokumentum előnézete</string>
+    <string name="include_ocr_text">OCR szöveg beillesztése</string>
+    <string name="language">Nyelv:</string>
+    <string name="ocr_results_will_appear_here">Az OCR eredményei itt jelennek meg</string>
+    <string name="no_image_loaded_capture_an_image_first">Nincs kép betöltve. Először készítsen egy képet.</string>
+    <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Állítsa be a trapéz sarkait a kivágandó terület kijelöléséhez, majd nyomja meg a Kivágás gombot.</string>
+    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Ellenőrizze a kivágott képet. Nyomja meg a Tovább gombot a folytatáshoz vagy a Vissza gombot az újrakivágáshoz.</string>
+    <string name="no_document_ready_process_ocr_first">Nincs dokumentum készen. Először futtassa az OCR-t.</string>
+    <string name="document_ready_for_export">A dokumentum exportálásra kész</string>
+    <string name="processing_image">Kép feldolgozása…</string>
+    <string name="no_image_processed_crop_an_image_first">Nincs feldolgozott kép. Először vágjon ki egy képet.</string>
+    <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Az OCR feldolgozás befejeződött. Nyomja meg a gombot az exportáláshoz.</string>
+
+    <string name="initializing_camera">Kamera inicializálása…</string>
+    <string name="resetting_camera">Kamera visszaállítása…</string>
+    <string name="error_initializing_camera">Hiba a kamera inicializálásakor: %1$s</string>
+    <string name="error_camera_provider_null">A kamera inicializálása sikertelen – a szolgáltató null</string>
+    <string name="error_camera_not_initialized">A kamera nincs inicializálva. Próbálja újra.</string>
+    <string name="error_image_capture_failed">A kép rögzítése nem sikerült: %1$s</string>
+    <string name="error_displaying_image">Hiba a kép megjelenítésekor: %1$s</string>
+    <string name="error_resetting_camera">Hiba a kamera visszaállításakor: %1$s</string>
+    <string name="error_toggling_flashlight">Hiba a vaku kapcsolásakor: %1$s</string>
+    <string name="error_camera_preview_failed">A kamera előnézete nem indítható el. Próbálja újra.</string>
+
+    <!-- Export options -->
+    <string name="convert_to_grayscale">Átalakítás szürkeárnyalatossá</string>
+    <string name="convert_to_blackwhite_pdf">Átalakítás fekete-fehérré</string>
+    <string name="export_as_jpeg">Exportálás JPEG-ként</string>
+    <string name="export_as_pdf">Exportálás PDF-ként (alapértelmezett)</string>
+
+    <!-- Flashlight options -->
+    <string name="toggle_flashlight">Vaku be/ki</string>
+    <string name="flashlight_on">Vaku bekapcsolva</string>
+    <string name="flashlight_off">Vaku kikapcsolva</string>
+    <string name="flashlight_not_available">A vaku nem érhető el ezen az eszközön</string>
+    <string name="low_light_detected">Gyenge fényviszonyok észlelve. Bekapcsolja a vakut?</string>
+
+    <!-- JPEG mode labels -->
+    <string name="jpeg_mode_none">Nincs javítás (JPEG)</string>
+    <string name="jpeg_mode_auto">Automatikus javítás (JPEG)</string>
+    <string name="jpeg_mode_bw_text">Fekete-fehér (klasszikus) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">Fekete-fehér (robosztus) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">F/F (robosztus)</string>
+    <string name="pdf_bw_mode_classic">F/F (klasszikus)</string>
+    <string name="skip_ocr_export_only">OCR kihagyása (csak exportálás)</string>
+    <string name="btn_pick_image">Betöltés</string>
+    <string name="pick_image_cd">Meglévő kép betöltése</string>
+    <string name="error_selected_file_is_not_an_image">A kiválasztott fájl nem kép</string>
+
+    <!-- Multipage Export -->
+    <string name="pages_header">Oldalak (%1$d)</string>
+    <string name="add_another_page">Hozzáadás</string>
+    <string name="clear_all_pages">Összes törlése</string>
+    <string name="remove_this_page">Oldal eltávolítása</string>
+    <string name="multipage_not_implemented">Többoldalas exportálás még nem elérhető</string>
+
+    <!-- Reorder controls -->
+    <string name="move_page_left">Oldal balra mozgatása</string>
+    <string name="move_page_right">Oldal jobbra mozgatása</string>
+
+    <!-- Back confirmation -->
+    <string name="confirm_clear_multipage_title">Oldalak törlése?</string>
+    <string name="confirm_clear_multipage_message">Több oldalt adott hozzá. Törli az összeset és visszalép?</string>
+    <string name="cancel">Mégse</string>
+
+    <!-- Clear all confirmation -->
+    <string name="confirm_clear_pages_title">Összes oldal törlése?</string>
+    <string name="confirm_clear_pages_message">Eltávolítja az összes oldalt az előnézetből?</string>
+
+    <!-- Registry Picker -->
+    <string name="picker_title_completed_scans">Válasszon a befejezett szkennelések közül</string>
+    <string name="picker_empty">Nincs befejezett szkennelés</string>
+    <string name="done">Tovább</string>
+    <string name="thumbnail">Előnézet</string>
+    <string name="delete">Törlés</string>
+
+    <!-- Picker bulk actions -->
+    <string name="select_all">Összes kijelölése</string>
+    <string name="deselect_all">Kijelölés megszüntetése</string>
+
+    <string name="added_pages_from_registry">%1$d oldal hozzáadva a listából</string>
+
+    <!-- Add page options -->
+    <string name="add_page_option_choose_completed">Válasszon a befejezett szkennelések közül</string>
+    <string name="add_page_option_capture_new">Új oldal rögzítése</string>
+
+    <!-- Picker states -->
+    <string name="missing_file">Hiányzó fájl</string>
+
+    <!-- Inline OCR -->
+    <string name="ocr_processing_started">OCR futtatása…</string>
+    <string name="ocr_processing_finished">OCR hozzáadva ehhez az oldalhoz</string>
+    <string name="ocr_processing_failed">Beágyazott OCR sikertelen</string>
+
+    <!-- Registry Picker: context action -->
+    <string name="remove_from_registry_title">Eltávolítás a listából</string>
+    <string name="remove_from_registry_message">Törli ezt a bejegyzést és a hozzá tartozó fájlokat?</string>
+    <string name="remove">Eltávolítás</string>
+    <string name="removed_from_registry_toast">Bejegyzés eltávolítva</string>
+
+    <!-- PDF quality presets -->
+    <string name="pdf_quality_title">PDF minőség / méret</string>
+    <string name="pdf_preset_high">Magas (300 dpi, q85)</string>
+    <string name="pdf_preset_standard">Normál (200 dpi, q72)</string>
+    <string name="pdf_preset_small">Kicsi (150 dpi, q62)</string>
+    <string name="pdf_preset_very_small">Nagyon kicsi (110 dpi, q52)</string>
+    <string name="export_options_title">Exportálási beállítások</string>
+    <string name="jpeg_enhancement_title">JPEG javítás</string>
+    <string name="btn_options">Beállítások</string>
+    <string name="btn_save">Mentés</string>
+    <string name="btn_new">Új</string>
+
+    <!-- Rotation -->
+    <string name="rotate_left_cd">Oldal elforgatása 90°-kal balra</string>
+    <string name="rotate_right_cd">Oldal elforgatása 90°-kal jobbra</string>
+
+    <!-- OCR models management -->
+    <string name="ocr_models_manage">OCR modellek</string>
+    <string name="ocr_import_manual">.traineddata importálása…</string>
+    <string name="ocr_discover_packs">Nyelvi csomagok keresése</string>
+    <string name="ocr_no_packs_found">Nem találhatók nyelvi csomagok</string>
+    <string name="ocr_choose_pack">Válasszon nyelvi csomagot</string>
+    <string name="ocr_no_models_in_pack">Nincsenek modellek ebben a csomagban</string>
+    <string name="ocr_choose_model">Válasszon modellt importáláshoz</string>
+    <string name="ocr_import_success">Modell importálva</string>
+    <string name="ocr_import_failed">Importálás sikertelen</string>
+
+    <!-- OCR models hint -->
+    <string name="ocr_models_hint">A gyorsabb felismeréshez kompakt modellek tartoznak a csomaghoz. A nagyobb pontossághoz telepíthet nagyobb „Best” modelleket. Internetkapcsolat nem szükséges.</string>
+</resources>
