@@ -1,0 +1,158 @@
+<resources>
+    <string name="app_name">MakeACopy</string>
+
+    <!-- New menu items for document scanner -->
+    <string name="title_camera">Fotoaparát</string>
+    <string name="title_crop">Oříznout</string>
+    <string name="title_ocr">OCR</string>
+    <string name="title_export">Exportovat</string>
+
+    <!-- Button labels -->
+    <string name="btn_scan">Skenovat</string>
+    <string name="btn_crop">Oříznout</string>
+    <string name="btn_process">Zpracovat</string>
+    <string name="btn_export">Exportovat</string>
+    <string name="btn_share">Sdílet</string>
+    <string name="next">Další</string>
+    <string name="back">Zpět</string>
+
+    <!-- Messages -->
+    <string name="msg_camera_permission_required">K skenování dokumentů je vyžadováno povolení fotoaparátu</string>
+    <string name="confirm">Potvrdit</string>
+    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Zkontrolujte svůj sken. Klepnutím na „Další“ pokračujte nebo na „Zpět“ zopakujte pokus.</string>
+    <string name="camera_ready_tap_the_button_to_scan_a_document">Fotoaparát je připraven. Klepněte na tlačítko pro skenování dokumentu.</string>
+    <string name="captured_image">Zachycený obrázek</string>
+    <string name="retake">Znovu</string>
+    <string name="image_to_crop">Obrázek k oříznutí</string>
+    <string name="cropped_image">Oříznutý obrázek</string>
+    <string name="recrop">Znovu oříznout</string>
+    <string name="document_preview">Náhled dokumentu</string>
+    <string name="include_ocr_text">Zahrnout OCR text</string>
+    <string name="language">Jazyk:</string>
+    <string name="ocr_results_will_appear_here">Výsledky OCR se zobrazí zde</string>
+    <string name="no_image_loaded_capture_an_image_first">Žádný obrázek nebyl načten. Nejprve zachyťte obrázek.</string>
+    <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Upravte rohy lichoběžníku pro výběr oblasti k oříznutí a poté klepněte na tlačítko Oříznout.</string>
+    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Zkontrolujte oříznutý obrázek. Klepněte na „Další“ pro pokračování nebo na „Zpět“ pro opakování.</string>
+    <string name="no_document_ready_process_ocr_first">Žádný dokument není připraven. Nejprve spusťte OCR.</string>
+    <string name="document_ready_for_export">Dokument je připraven k exportu</string>
+    <string name="processing_image">Zpracovávám obrázek…</string>
+    <string name="no_image_processed_crop_an_image_first">Žádný obrázek nebyl zpracován. Nejprve ořízněte obrázek.</string>
+    <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Zpracování OCR dokončeno. Klepněte na tlačítko pro pokračování k exportu.</string>
+
+    <string name="initializing_camera">Inicializuji fotoaparát…</string>
+    <string name="resetting_camera">Obnovuji fotoaparát…</string>
+    <string name="error_initializing_camera">Chyba při inicializaci fotoaparátu: %1$s</string>
+    <string name="error_camera_provider_null">Nepodařilo se inicializovat fotoaparát – poskytovatel je null</string>
+    <string name="error_camera_not_initialized">Fotoaparát nebyl inicializován. Zkuste to znovu.</string>
+    <string name="error_image_capture_failed">Zachycení obrázku selhalo: %1$s</string>
+    <string name="error_displaying_image">Chyba při zobrazování obrázku: %1$s</string>
+    <string name="error_resetting_camera">Chyba při obnově fotoaparátu: %1$s</string>
+    <string name="error_toggling_flashlight">Chyba při přepínání svítilny: %1$s</string>
+    <string name="error_camera_preview_failed">Náhled fotoaparátu se nepodařilo spustit. Zkuste to znovu.</string>
+
+    <!-- Export options -->
+    <string name="convert_to_grayscale">Převést na odstíny šedi</string>
+    <string name="convert_to_blackwhite_pdf">Převést na černobílý</string>
+    <string name="export_as_jpeg">Exportovat jako JPEG</string>
+    <string name="export_as_pdf">Exportovat jako PDF (výchozí)</string>
+
+    <!-- Flashlight options -->
+    <string name="toggle_flashlight">Přepnout svítilnu</string>
+    <string name="flashlight_on">Svítilna zapnuta</string>
+    <string name="flashlight_off">Svítilna vypnuta</string>
+    <string name="flashlight_not_available">Svítilna není na tomto zařízení dostupná</string>
+    <string name="low_light_detected">Zjištěno slabé osvětlení. Zapnout svítilnu?</string>
+
+    <!-- JPEG mode labels -->
+    <string name="jpeg_mode_none">Bez vylepšení (JPEG)</string>
+    <string name="jpeg_mode_auto">Automatické vylepšení (JPEG)</string>
+    <string name="jpeg_mode_bw_text">Černobílý (klasický) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">Černobílý (robustní) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">Č/B (robustní)</string>
+    <string name="pdf_bw_mode_classic">Č/B (klasický)</string>
+    <string name="skip_ocr_export_only">Přeskočit OCR (pouze export)</string>
+    <string name="btn_pick_image">Načíst</string>
+    <string name="pick_image_cd">Načíst existující obrázek</string>
+    <string name="error_selected_file_is_not_an_image">Vybraný soubor není obrázek</string>
+
+    <!-- Multipage Export -->
+    <string name="pages_header">Stránky (%1$d)</string>
+    <string name="add_another_page">Přidat</string>
+    <string name="clear_all_pages">Vymazat vše</string>
+    <string name="remove_this_page">Odebrat tuto stránku</string>
+    <string name="multipage_not_implemented">Vícestránkový export zatím není implementován</string>
+
+    <!-- Reorder controls -->
+    <string name="move_page_left">Posunout stránku doleva</string>
+    <string name="move_page_right">Posunout stránku doprava</string>
+
+    <!-- Back confirmation -->
+    <string name="confirm_clear_multipage_title">Smazat stránky?</string>
+    <string name="confirm_clear_multipage_message">Bylo přidáno více stránek. Chcete všechny smazat a vrátit se zpět?</string>
+    <string name="cancel">Zrušit</string>
+
+    <!-- Clear all confirmation -->
+    <string name="confirm_clear_pages_title">Vymazat všechny stránky?</string>
+    <string name="confirm_clear_pages_message">Chcete odstranit všechny stránky z náhledu?</string>
+
+    <!-- Registry Picker -->
+    <string name="picker_title_completed_scans">Vyberte z dokončených skenů</string>
+    <string name="picker_empty">Nebyly nalezeny žádné dokončené skeny</string>
+    <string name="done">Další</string>
+    <string name="thumbnail">Náhled</string>
+    <string name="delete">Smazat</string>
+
+    <!-- Picker bulk actions -->
+    <string name="select_all">Vybrat vše</string>
+    <string name="deselect_all">Zrušit výběr</string>
+
+    <string name="added_pages_from_registry">Přidáno %1$d stránek z registru</string>
+
+    <!-- Add page options -->
+    <string name="add_page_option_choose_completed">Vybrat z dokončených skenů</string>
+    <string name="add_page_option_capture_new">Zachytit novou stránku</string>
+
+    <!-- Picker states -->
+    <string name="missing_file">Chybějící soubor</string>
+
+    <!-- Inline OCR -->
+    <string name="ocr_processing_started">Probíhá OCR…</string>
+    <string name="ocr_processing_finished">OCR přidáno pro tuto stránku</string>
+    <string name="ocr_processing_failed">OCR selhalo</string>
+
+    <!-- Registry Picker: context action -->
+    <string name="remove_from_registry_title">Odebrat z registru</string>
+    <string name="remove_from_registry_message">Odstranit tuto položku a související soubory?</string>
+    <string name="remove">Odebrat</string>
+    <string name="removed_from_registry_toast">Položka odstraněna</string>
+
+    <!-- PDF quality presets -->
+    <string name="pdf_quality_title">Kvalita / velikost PDF</string>
+    <string name="pdf_preset_high">Vysoká (300 dpi, q85)</string>
+    <string name="pdf_preset_standard">Standardní (200 dpi, q72)</string>
+    <string name="pdf_preset_small">Malá (150 dpi, q62)</string>
+    <string name="pdf_preset_very_small">Velmi malá (110 dpi, q52)</string>
+    <string name="export_options_title">Možnosti exportu</string>
+    <string name="jpeg_enhancement_title">Vylepšení JPEG</string>
+    <string name="btn_options">Možnosti</string>
+    <string name="btn_save">Uložit</string>
+    <string name="btn_new">Nový</string>
+
+    <!-- Rotation -->
+    <string name="rotate_left_cd">Otočit stránku o 90° doleva</string>
+    <string name="rotate_right_cd">Otočit stránku o 90° doprava</string>
+
+    <!-- OCR models management -->
+    <string name="ocr_models_manage">Modely OCR</string>
+    <string name="ocr_import_manual">Importovat .traineddata…</string>
+    <string name="ocr_discover_packs">Najít jazykové balíčky</string>
+    <string name="ocr_no_packs_found">Nebyl nalezen žádný jazykový balíček</string>
+    <string name="ocr_choose_pack">Vyberte jazykový balíček</string>
+    <string name="ocr_no_models_in_pack">V tomto balíčku nebyly nalezeny žádné modely</string>
+    <string name="ocr_choose_model">Vyberte model k importu</string>
+    <string name="ocr_import_success">Model importován</string>
+    <string name="ocr_import_failed">Import selhal</string>
+
+    <!-- OCR models hint -->
+    <string name="ocr_models_hint">Pro rychlejší rozpoznávání jsou zahrnuty kompaktní modely. Pro vyšší přesnost můžete nainstalovat větší „Best“ modely. Není vyžadováno internetové připojení.</string>
+</resources>
