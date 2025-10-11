@@ -1,0 +1,158 @@
+<resources>
+    <string name="app_name">MakeACopy</string>
+    
+    <!-- New menu items for document scanner -->
+    <string name="title_camera">Camera</string>
+    <string name="title_crop">Bijsnijden</string>
+    <string name="title_ocr">OCR</string>
+    <string name="title_export">Exporteren</string>
+    
+    <!-- Button labels -->
+    <string name="btn_scan">Scannen</string>
+    <string name="btn_crop">Bijsnijden</string>
+    <string name="btn_process">Verwerken</string>
+    <string name="btn_export">Exporteren</string>
+    <string name="btn_share">Delen</string>
+    <string name="next">Verder</string>
+    <string name="back">Terug</string>
+    
+    <!-- Messages -->
+    <string name="msg_camera_permission_required">Cameratoestemming is vereist om documenten te scannen</string>
+    <string name="confirm">Bevestigen</string>
+    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Controleer je scan. Tik op Verder om door te gaan of op Terug om opnieuw te proberen.</string>
+    <string name="camera_ready_tap_the_button_to_scan_a_document">Camera klaar. Tik op de knop om een document te scannen.</string>
+    <string name="captured_image">Vastgelegde afbeelding</string>
+    <string name="retake">Opnieuw nemen</string>
+    <string name="image_to_crop">Afbeelding om bij te snijden</string>
+    <string name="cropped_image">Bijsneden afbeelding</string>
+    <string name="recrop">Opnieuw bijsnijden</string>
+    <string name="document_preview">Documentvoorbeeld</string>
+    <string name="include_ocr_text">OCR‑tekst opnemen</string>
+    <string name="language">Taal:</string>
+    <string name="ocr_results_will_appear_here">OCR‑resultaten verschijnen hier</string>
+    <string name="no_image_loaded_capture_an_image_first">Geen afbeelding geladen. Maak eerst een foto.</string>
+    <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Pas de hoeken van het trapezium aan om het gebied te selecteren en tik daarna op Bijsnijden.</string>
+    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Controleer je bijgesneden afbeelding. Tik op Verder om door te gaan of op Terug om opnieuw te proberen.</string>
+    <string name="no_document_ready_process_ocr_first">Geen document gereed. Voer eerst OCR uit.</string>
+    <string name="document_ready_for_export">Document klaar om te exporteren</string>
+    <string name="processing_image">Afbeelding verwerken...</string>
+    <string name="no_image_processed_crop_an_image_first">Geen afbeelding verwerkt. Snijd eerst een afbeelding bij.</string>
+    <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR voltooid. Tik op de knop om door te gaan naar exporteren.</string>
+
+    <string name="initializing_camera">Camera initialiseren…</string>
+    <string name="resetting_camera">Camera resetten…</string>
+    <string name="error_initializing_camera">Fout bij initialiseren camera: %1$s</string>
+    <string name="error_camera_provider_null">Initialiseren mislukt – provider is null</string>
+    <string name="error_camera_not_initialized">Camera niet geïnitialiseerd. Probeer het opnieuw.</string>
+    <string name="error_image_capture_failed">Opname mislukt: %1$s</string>
+    <string name="error_displaying_image">Fout bij weergeven afbeelding: %1$s</string>
+    <string name="error_resetting_camera">Fout bij resetten camera: %1$s</string>
+    <string name="error_toggling_flashlight">Fout bij schakelen zaklamp: %1$s</string>
+    <string name="error_camera_preview_failed">Voorbeeld van de camera kon niet starten. Probeer opnieuw.</string>
+
+    <!-- Export options -->
+    <string name="convert_to_grayscale">Omzetten naar grijstinten</string>
+    <string name="convert_to_blackwhite_pdf">Omzetten naar Z/W</string>
+    <string name="export_as_jpeg">Exporteren als JPEG</string>
+    <string name="export_as_pdf">Exporteren als PDF (standaard)</string>
+    
+    <!-- Flashlight options -->
+    <string name="toggle_flashlight">Zaklamp schakelen</string>
+    <string name="flashlight_on">Zaklamp aan</string>
+    <string name="flashlight_off">Zaklamp uit</string>
+    <string name="flashlight_not_available">Zaklamp niet beschikbaar op dit apparaat</string>
+    <string name="low_light_detected">Weinig licht gedetecteerd. Zaklamp inschakelen?</string>
+
+    <!-- JPEG mode labels -->
+    <string name="jpeg_mode_none">Geen verbetering (JPEG)</string>
+    <string name="jpeg_mode_auto">Automatisch verbeteren (JPEG)</string>
+    <string name="jpeg_mode_bw_text">Zwart-wit (klassiek) (JPEG)</string>
+    <string name="jpeg_mode_bw_robust">Zwart-wit (robuust) (JPEG)</string>
+    <string name="pdf_bw_mode_robust">Z/W (robuust)</string>
+    <string name="pdf_bw_mode_classic">Z/W (klassiek)</string>
+    <string name="skip_ocr_export_only">OCR overslaan (alleen exporteren)</string>
+    <string name="btn_pick_image">Laden</string>
+    <string name="pick_image_cd">Bestaande afbeelding laden</string>
+    <string name="error_selected_file_is_not_an_image">Het geselecteerde bestand is geen afbeelding</string>
+    
+    <!-- Multipage Export (v1 increment) -->
+    <string name="pages_header">Pagina\'s (%1$d)</string>
+    <string name="add_another_page">Toevoegen</string>
+    <string name="clear_all_pages">Alles wissen</string>
+    <string name="remove_this_page">Deze pagina verwijderen</string>
+    <string name="multipage_not_implemented">Meerdere pagina\'s exporteren is nog niet geïmplementeerd</string>
+    
+    <!-- Reorder A11y controls -->
+    <string name="move_page_left">Pagina naar links verplaatsen</string>
+    <string name="move_page_right">Pagina naar rechts verplaatsen</string>
+    
+    <!-- Back confirmation for clearing multipage session -->
+    <string name="confirm_clear_multipage_title">Pagina\'s verwijderen?</string>
+    <string name="confirm_clear_multipage_message">Er zijn meerdere pagina\'s toegevoegd. Wil je alle pagina\'s verwijderen en teruggaan?</string>
+    <string name="cancel">Annuleren</string>
+    
+    <!-- Clear-all confirmation for trash icon in multipage -->
+    <string name="confirm_clear_pages_title">Alle pagina\'s wissen?</string>
+    <string name="confirm_clear_pages_message">Wil je alle pagina\'s verwijderen uit de filmstrip?</string>
+    
+    <!-- Registry Picker -->
+    <string name="picker_title_completed_scans">Kies uit voltooide scans</string>
+    <string name="picker_empty">Geen voltooide scans gevonden</string>
+    <string name="done">Verder</string>
+    <string name="thumbnail">Miniatuur</string>
+    <string name="delete">Verwijderen</string>
+    
+    <!-- Picker bulk actions -->
+    <string name="select_all">Alles selecteren</string>
+    <string name="deselect_all">Alles deselecteren</string>
+
+    <string name="added_pages_from_registry">%1$d pagina(\'s) toegevoegd uit register</string>
+    
+    <!-- Add page options dialog -->
+    <string name="add_page_option_choose_completed">Kiezen uit voltooide scans</string>
+    <string name="add_page_option_capture_new">Nieuwe pagina vastleggen</string>
+
+    <!-- Picker states -->
+    <string name="missing_file">Bestand ontbreekt</string>
+
+    <!-- Inline OCR cues -->
+    <string name="ocr_processing_started">OCR uitvoeren…</string>
+    <string name="ocr_processing_finished">OCR toegevoegd voor deze pagina</string>
+    <string name="ocr_processing_failed">Inline OCR mislukt</string>
+
+    <!-- Registry Picker: context action -->
+    <string name="remove_from_registry_title">Uit register verwijderen</string>
+    <string name="remove_from_registry_message">Dit item en de bijbehorende bestanden verwijderen?</string>
+    <string name="remove">Verwijderen</string>
+    <string name="removed_from_registry_toast">Item verwijderd</string>
+
+    <!-- PDF quality presets (Phase 1) -->
+    <string name="pdf_quality_title">PDF‑kwaliteit / -grootte</string>
+    <string name="pdf_preset_high">Hoog (300 dpi, q85)</string>
+    <string name="pdf_preset_standard">Standaard (200 dpi, q72)</string>
+    <string name="pdf_preset_small">Klein (150 dpi, q62)</string>
+    <string name="pdf_preset_very_small">Zeer klein (110 dpi, q52)</string>
+    <string name="export_options_title">Exportopties</string>
+    <string name="jpeg_enhancement_title">JPEG‑verbetering</string>
+    <string name="btn_options">Opties</string>
+    <string name="btn_save">Opslaan</string>
+    <string name="btn_new">Nieuw</string>
+
+    <!-- Rotation (post-crop) -->
+    <string name="rotate_left_cd">Pagina 90 graden tegen de klok in draaien</string>
+    <string name="rotate_right_cd">Pagina 90 graden met de klok mee draaien</string>
+
+    <!-- OCR models management (prototype) -->
+    <string name="ocr_models_manage">OCR‑modellen</string>
+    <string name="ocr_import_manual">.traineddata importeren…</string>
+    <string name="ocr_discover_packs">Taalpakketten ontdekken</string>
+    <string name="ocr_no_packs_found">Geen talpakketten gevonden</string>
+    <string name="ocr_choose_pack">Taalpakket kiezen</string>
+    <string name="ocr_no_models_in_pack">Geen modellen gevonden in dit pakket</string>
+    <string name="ocr_choose_model">Model kiezen om te importeren</string>
+    <string name="ocr_import_success">Model geïmporteerd</string>
+    <string name="ocr_import_failed">Importeren mislukt</string>
+
+    <!-- OCR models hint -->
+    <string name="ocr_models_hint">Voor snellere herkenning zijn compacte modellen inbegrepen. Voor hogere nauwkeurigheid kun je grotere "Best"‑modellen installeren. Er is geen internetverbinding nodig.</string>
+</resources>
