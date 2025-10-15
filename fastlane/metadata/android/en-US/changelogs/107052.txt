@@ -1,4 +1,4 @@
-MakeACopy 1.7.5 (Release Candidate)
+MakeACopy 1.7.5 (Release)
 
 - Live corner preview: While scanning, a trapezoid overlay shows detected document edges in real time.
 - Tap-to-focus restored: Taps on the overlay now properly trigger CameraX AF/AE/AWB focus and metering.
