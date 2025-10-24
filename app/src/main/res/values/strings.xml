@@ -213,4 +213,34 @@
     
     <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">Please enter a value</string>
+    
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">New collection</string>
+    <string name="collection_name_hint">Collection name</string>
+    <string name="create">Create</string>
+    <string name="collection_not_empty">Collection is not empty</string>
+    <string name="collection_items_count">%1$d item(s)</string>
+    <string name="deleted">Deleted</string>
+    <string name="open_collections">Collections</string>
+    <string name="index_existing_scans">Index existing scans</string>
+    <string name="rename">Rename</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">No scans yet</string>
+    <string name="rename_collection_title">Rename collection</string>
+    <string name="new_name">New name</string>
+    <string name="scan_saved">Scan saved</string>
+    <string name="action_add_to_collection">Add to collection…</string>
+    <string name="place_in_collection_title">Add to collection</string>
+    <string name="create_new_collection">Create new collection…</string>
+    <string name="scan_added_to_collection">Scan added to "%1$s"</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Library actions</string>
+    <string name="library_actions_title">Library</string>
+    <string name="open_library">Open library</string>
+    <string name="add_current_scan_to_library">Add current scan to library</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">In: %1$s</string>
+    <string name="in_collections_count">In %1$d collections</string>
 </resources>

@@ -14,13 +14,16 @@ android {
         applicationId "de.schliweb.makeacopy"
         minSdk = 29
         targetSdk = 36
-        versionCode 10706
-        versionName "1.7.6"
+        versionCode 20000
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Add a note about OpenCV being built from source
         buildConfigField "String", "OPENCV_VERSION", "\"4.12.0\""
+        // Feature flags
+        buildConfigField "boolean", "FEATURE_SCAN_LIBRARY", "true"
+        buildConfigField "boolean", "FEATURE_REVIEW_OCR", "false"
     }
 
     dependenciesInfo {
@@ -142,6 +145,10 @@ dependencies {
     implementation libs.pdfbox.android
     implementation libs.exifinterface
 
+    // Room (for scan index)
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
+
     testImplementation libs.junit
     androidTestImplementation(libs.ext.junit) {
         exclude group: 'org.hamcrest', module: 'hamcrest-core'
@@ -158,7 +165,7 @@ dependencies {
     // fragment-testing must be in the target (debug) APK to provide EmptyFragmentActivity
     debugImplementation(libs.fragment.testing)
     // Align Hamcrest to a single modern version to avoid duplicate classes
-    androidTestImplementation 'org.hamcrest:hamcrest:2.2'
+    androidTestImplementation libs.hamcrest
     androidTestImplementation libs.awaitility
 }
 

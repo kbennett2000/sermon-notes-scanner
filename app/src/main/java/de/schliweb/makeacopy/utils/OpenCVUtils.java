@@ -49,6 +49,9 @@ public class OpenCVUtils {
     private static final double AREA_FRAC_MIN_ONNX = 0.008; // 0.8% of the image area instead of 5%
     private static final double SIDE_FRAC_MIN = 0.010; // 1% of the short image side instead of 2%
     private static final double CONF_MIN_AREA_FRAC = 0.008; // same lower bound for the confidence
+    // Corner-angle sanity bounds: reject quads with too acute or too obtuse internal angles
+    private static final double MIN_CORNER_ANGLE_DEG = 28.0; // threshold
+    private static final double MAX_CORNER_ANGLE_DEG = 152.0; // avoid near-straight or reflex
 
 
     private OpenCVUtils() {
@@ -838,6 +841,11 @@ public class OpenCVUtils {
                 return null;
             }
         }
+        // --- corner angle sanity check ---
+        if (hasAcuteOrReflexAngles(pts)) {
+            Log.w(TAG, "predictionToPoints: rejected due to acute/obtuse corner angle");
+            return null;
+        }
         return pts;
     }
 
@@ -866,6 +874,7 @@ public class OpenCVUtils {
             Point a = pts[i], b = pts[(i + 1) % 4];
             if (Math.hypot(a.x - b.x, a.y - b.y) < minSide) return null;
         }
+        if (hasAcuteOrReflexAngles(pts)) return null;
         return pts;
     }
 
@@ -1196,15 +1205,28 @@ public class OpenCVUtils {
         double cOnnx = quadConfidence(cornersOnnx, w, h);
         double cCv = quadConfidence(cornersOpenCV, w, h);
 
-        if (cOnnx >= cCv) {
+        Point[] chosen;
+        boolean chosenIsOnnx = cOnnx >= cCv;
+        if (chosenIsOnnx) {
             Log.i(TAG, String.format(java.util.Locale.US,
                     "Chosen source=ONNX (conf %.3f vs %.3f)", cOnnx, cCv));
-            return cornersOnnx;
+            chosen = cornersOnnx;
         } else {
             Log.i(TAG, String.format(java.util.Locale.US,
                     "Chosen source=OpenCV (conf %.3f vs %.3f)", cCv, cOnnx));
-            return cornersOpenCV;
+            chosen = cornersOpenCV;
         }
+        // Final safety: reject quads with too acute/obtuse angles and prefer the other candidate if sane
+        if (hasAcuteOrReflexAngles(chosen)) {
+            Log.w(TAG, "Chosen candidate has acute/obtuse corner → trying the other");
+            Point[] other = chosenIsOnnx ? cornersOpenCV : cornersOnnx;
+            if (other != null && other.length == 4 && !hasAcuteOrReflexAngles(other)) {
+                return other;
+            } else {
+                return null; // let caller fallback to standard rectangle
+            }
+        }
+        return chosen;
     }
 
     /**
@@ -1288,6 +1310,24 @@ public class OpenCVUtils {
         double num = abx * acx + aby * acy;
         double den = Math.hypot(abx, aby) * Math.hypot(acx, acy) + 1e-9;
         return Math.toDegrees(Math.acos(Math.max(-1.0, Math.min(1.0, num / den))));
+    }
+
+    /**
+     * Returns true if the quadrilateral contains any corner with an acute (< MIN) or
+     * overly obtuse/reflex (> MAX) internal angle. Assumes points are ordered (tl,tr,br,bl).
+     */
+    private static boolean hasAcuteOrReflexAngles(Point[] q) {
+        if (q == null || q.length != 4) return true;
+        Point[] p = sortPointsRobust(q);
+        for (int i = 0; i < 4; i++) {
+            Point a = p[i];
+            Point prev = p[(i + 3) % 4];
+            Point next = p[(i + 1) % 4];
+            double ang = angle(prev, a, next);
+            if (Double.isNaN(ang) || Double.isInfinite(ang)) return true;
+            if (ang < MIN_CORNER_ANGLE_DEG || ang > MAX_CORNER_ANGLE_DEG) return true;
+        }
+        return false;
     }
 
     /**

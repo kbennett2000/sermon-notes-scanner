@@ -60,15 +60,14 @@
                 app:iconPadding="8dp" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    <!-- Bottom App Bar direkt im Root; Insets nur hier -->
-    <com.google.android.material.bottomappbar.BottomAppBar
+    <!-- Bottom actions toolbar at bottom (replaces BottomAppBar to avoid CoordinatorLayout requirement) -->
+    <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/bottom_app_bar"
-            style="@style/Widget.Material3.BottomAppBar"
-            app:materialThemeOverlay="@style/ThemeOverlay.Material3.BottomAppBar"
+            style="@style/Widget.Material3.Toolbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:menu="@menu/menu_ocr_review_bottom"
-            app:backgroundTint="?attr/colorSurface"
+            android:background="?attr/colorSurface"
             app:paddingBottomSystemWindowInsets="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

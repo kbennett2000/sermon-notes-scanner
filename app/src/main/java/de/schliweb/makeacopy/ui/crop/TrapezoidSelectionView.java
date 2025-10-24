@@ -80,8 +80,8 @@ public class TrapezoidSelectionView extends View {
     private Matrix overlayToSource; // inverse from imageToOverlay matrix
     @Nullable
     private Magnifier magnifier;
-    private boolean magnifierEnabled = true;
-    private float magnifierZoom = 2.5f; // 2.0..4.0
+    private final boolean magnifierEnabled = true;
+    private final float magnifierZoom = 2.5f; // 2.0..4.0
     private int magnifierSizePx = 0;
     private boolean isDraggingWithMagnifier = false;
 
@@ -171,6 +171,49 @@ public class TrapezoidSelectionView extends View {
     }
 
     /**
+     * Updates the system gesture exclusion regions to minimize interference from system gestures
+     * when interacting with crop handles. This method is applicable for API level 29 and above.
+     * <p>
+     * The method defines small rectangular regions around the four corner handles of the crop overlay.
+     * These regions are excluded from edge system gestures, ensuring that touch interactions in
+     * these areas are not intercepted by system edge gestures.
+     * <p>
+     * If the dimensions of the view are not valid or corners are not defined, the system gesture
+     * exclusion regions are cleared.
+     * <p>
+     * Any exceptions thrown during the execution of this method are silently ignored to prevent
+     * unintended crashes or disruptions.
+     */
+    private void updateSystemGestureExclusion() {
+        try {
+            int w = getWidth();
+            int h = getHeight();
+            if (w <= 0 || h <= 0) {
+                setSystemGestureExclusionRects(java.util.Collections.emptyList());
+                return;
+            }
+            // Small squares around the 4 corner handles
+            int pad = (int) (24f * getResources().getDisplayMetrics().density + 0.5f);
+            java.util.ArrayList<android.graphics.Rect> rects = new java.util.ArrayList<>(4);
+            if (corners != null) {
+                for (int i = 0; i < 4; i++) {
+                    float cx = corners[i].x;
+                    float cy = corners[i].y;
+                    int left = Math.max(0, Math.round(cx - pad));
+                    int top = Math.max(0, Math.round(cy - pad));
+                    int right = Math.min(w, Math.round(cx + pad));
+                    int bottom = Math.min(h, Math.round(cy + pad));
+                    if (right > left && bottom > top) {
+                        rects.add(new android.graphics.Rect(left, top, right, bottom));
+                    }
+                }
+            }
+            setSystemGestureExclusionRects(rects);
+        } catch (Throwable ignore) {
+        }
+    }
+
+    /**
      * Converts absolute coordinates to relative coordinates (percentages of view dimensions)
      *
      * @param x      X coordinate in pixels
@@ -219,6 +262,8 @@ public class TrapezoidSelectionView extends View {
         if (width > 0 && height > 0) {
             relativeCorners[index] = absoluteToRelative(x, y, width, height);
         }
+        // Keep gesture exclusion rects in sync while corners move
+        updateSystemGestureExclusion();
     }
 
     // ========================= ASYNC INITIALIZATION =========================
@@ -365,114 +410,6 @@ public class TrapezoidSelectionView extends View {
     }
 
     // ========================= END ASYNC =========================
-
-    /**
-     * Modifies the given corners to ensure they form a non-rectangular trapezoid
-     * Creates a more natural-looking perspective effect by applying asymmetrical adjustments
-     *
-     * @param corners Array of 4 points to modify
-     */
-    private void makeNonRectangular(Point[] corners) {
-        if (corners == null || corners.length != 4) {
-            Log.e(TAG, "Invalid corners array in makeNonRectangular");
-            return;
-        }
-
-        // Calculate the rectangle dimensions
-        double rectWidth = Math.max(Math.abs(corners[1].x - corners[0].x), Math.abs(corners[2].x - corners[3].x));
-        double rectHeight = Math.max(Math.abs(corners[3].y - corners[0].y), Math.abs(corners[2].y - corners[1].y));
-
-        // Calculate aspect ratio to inform our adjustments
-        double aspectRatio = rectWidth / Math.max(rectHeight, 1);
-        Log.d(TAG, "Document aspect ratio: " + aspectRatio);
-
-        // Log the original corners
-        Log.d(TAG, "Original corners before making non-rectangular:");
-        Log.d(TAG, "  Top-left: (" + corners[0].x + ", " + corners[0].y + ")");
-        Log.d(TAG, "  Top-right: (" + corners[1].x + ", " + corners[1].y + ")");
-        Log.d(TAG, "  Bottom-right: (" + corners[2].x + ", " + corners[2].y + ")");
-        Log.d(TAG, "  Bottom-left: (" + corners[3].x + ", " + corners[3].y + ")");
-
-        // Create a more natural perspective effect with asymmetrical adjustments
-
-        // Base inset values (as percentage of dimensions)
-        double baseHorizontalInset = rectWidth * 0.12; // Increased from 10% to 12%
-        double baseVerticalInset = rectHeight * 0.08;
-
-        // Use random values for natural appearance
-        boolean leftSideCloser;
-        double randomFactor1, randomFactor2, randomFactor3, randomFactor4, randomFactor5, randomFactor6;
-
-        java.util.Random random = new java.util.Random();
-        leftSideCloser = random.nextBoolean();
-        randomFactor1 = random.nextDouble() * 0.3;
-        randomFactor2 = random.nextDouble();
-        randomFactor3 = random.nextDouble();
-        randomFactor4 = random.nextDouble();
-        randomFactor5 = random.nextDouble();
-        randomFactor6 = random.nextDouble();
-
-        // Create perspective effect - simulate viewing from slight angle
-        if (leftSideCloser) {
-            // Left side appears closer (right side appears farther)
-            // Top-left: move slightly right and down
-            corners[0].x += baseHorizontalInset * 0.7 * (1 + randomFactor1);
-            corners[0].y += baseVerticalInset * 0.5 * randomFactor2;
-
-            // Top-right: move more left and down
-            corners[1].x -= baseHorizontalInset * 1.2 * (1 + randomFactor3);
-            corners[1].y += baseVerticalInset * 0.8 * randomFactor4;
-
-            // Bottom-right: move slightly left
-            corners[2].x -= baseHorizontalInset * 0.3 * randomFactor5;
-
-            // Bottom-left: move slightly right
-            corners[3].x += baseHorizontalInset * 0.2 * randomFactor6;
-        } else {
-            // Right side appears closer (left side appears farther)
-            // Top-left: move more right and down
-            corners[0].x += baseHorizontalInset * 1.2 * (1 + randomFactor1);
-            corners[0].y += baseVerticalInset * 0.8 * randomFactor2;
-
-            // Top-right: move slightly left and down
-            corners[1].x -= baseHorizontalInset * 0.7 * (1 + randomFactor3);
-            corners[1].y += baseVerticalInset * 0.5 * randomFactor4;
-
-            // Bottom-right: move slightly right
-            corners[2].x -= baseHorizontalInset * 0.2 * randomFactor5;
-
-            // Bottom-left: move slightly left
-            corners[3].x += baseHorizontalInset * 0.3 * randomFactor6;
-        }
-
-        // For very wide documents (like receipts), exaggerate the vertical perspective
-        if (aspectRatio > 1.5) {
-            // Add more vertical perspective for wide documents
-            double verticalAdjustment = baseVerticalInset * 0.5 * (aspectRatio - 1);
-
-            // Make top edge appear shorter than bottom edge
-            if (leftSideCloser) {
-                corners[1].y += verticalAdjustment;
-            } else {
-                corners[0].y += verticalAdjustment;
-            }
-        }
-
-        // Ensure corners stay within view boundaries
-        int width = getWidth();
-        int height = getHeight();
-        for (int i = 0; i < 4; i++) {
-            corners[i].x = Math.max(0, Math.min(corners[i].x, width));
-            corners[i].y = Math.max(0, Math.min(corners[i].y, height));
-        }
-
-        // Log the modified corners
-        Log.d(TAG, "Modified corners to create natural trapezoid shape:");
-        Log.d(TAG, "  Top-left: (" + corners[0].x + ", " + corners[0].y + ")");
-        Log.d(TAG, "  Top-right: (" + corners[1].x + ", " + corners[1].y + ")");
-        Log.d(TAG, "  Bottom-right: (" + corners[2].x + ", " + corners[2].y + ")");
-        Log.d(TAG, "  Bottom-left: (" + corners[3].x + ", " + corners[3].y + ")");
-    }
 
     /**
      * Transforms coordinates from image space to view space with enhanced accuracy and robustness
@@ -804,6 +741,8 @@ public class TrapezoidSelectionView extends View {
             }
         }
         magnifier = null;
+        // Update system gesture exclusion rects for new size
+        updateSystemGestureExclusion();
 
         // Get the current orientation
         int orientation = getResources().getConfiguration().orientation;
@@ -1270,42 +1209,6 @@ public class TrapezoidSelectionView extends View {
         magnifier = null;
     }
 
-    public void setMagnifierEnabled(boolean enabled) {
-        this.magnifierEnabled = enabled;
-        if (!enabled && magnifier != null) {
-            try {
-                magnifier.dismiss();
-            } catch (Throwable ignore) {
-            }
-            magnifier = null;
-        }
-    }
-
-    public void setMagnifierZoom(float zoom) {
-        // clamp 2.0 .. 4.0
-        float clamped = Math.max(2.0f, Math.min(4.0f, zoom));
-        this.magnifierZoom = clamped;
-        // Rebuild lazily
-        if (magnifier != null) {
-            try {
-                magnifier.dismiss();
-            } catch (Throwable ignore) {
-            }
-            magnifier = null;
-        }
-    }
-
-    public void setMagnifierSizePx(int sizePx) {
-        this.magnifierSizePx = Math.max(80, sizePx);
-        if (magnifier != null) {
-            try {
-                magnifier.dismiss();
-            } catch (Throwable ignore) {
-            }
-            magnifier = null;
-        }
-    }
-
     // ===== Magnifier helpers (private) =====
     private void ensureMagnifier() {
         if (magnifier == null && magnifierSourceView != null && magnifierEnabled) {
@@ -1338,90 +1241,6 @@ public class TrapezoidSelectionView extends View {
             return new PointF(screenX - srcLoc[0], screenY - srcLoc[1]);
         }
         return new PointF(overlayX, overlayY);
-    }
-
-    /**
-     * Verifies that the trapezoid is properly displayed and makes any necessary adjustments
-     * This is a final safeguard to ensure the trapezoid is visible and correctly positioned
-     */
-    public void verifyTrapezoidDisplay() {
-        int width = getWidth();
-        int height = getHeight();
-        int orientation = getResources().getConfiguration().orientation;
-        String orientationName = (orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT) ? "portrait" : "landscape";
-
-        Log.d(TAG, "verifyTrapezoidDisplay called: dimensions=" + width + "x" + height + ", orientation=" + orientationName + ", initialized=" + initialized);
-
-        // Check if the view has valid dimensions
-        if (width <= 0 || height <= 0) {
-            Log.w(TAG, "Cannot verify trapezoid, view has invalid dimensions");
-            return;
-        }
-
-        // Check if the view is initialized
-        if (!initialized) {
-            Log.d(TAG, "View not initialized during verification, initializing now");
-            initializeCornersAsync();
-            return;
-        }
-
-        // Check if the corners are within the view bounds
-        boolean needsAdjustment = false;
-        for (int i = 0; i < 4; i++) {
-            if (corners[i].x < 0 || corners[i].x > width || corners[i].y < 0 || corners[i].y > height) {
-                Log.w(TAG, "Corner " + i + " is outside view bounds: (" + corners[i].x + "," + corners[i].y + ")");
-                needsAdjustment = true;
-                break;
-            }
-        }
-
-        // If any corner is outside the bounds, adjust all corners
-        if (needsAdjustment) {
-            Log.d(TAG, "Adjusting corners to fit within view bounds");
-
-            // Clamp corners to view bounds
-            for (int i = 0; i < 4; i++) {
-                float oldX = corners[i].x;
-                float oldY = corners[i].y;
-
-                corners[i].x = Math.max(0, Math.min(corners[i].x, width));
-                corners[i].y = Math.max(0, Math.min(corners[i].y, height));
-
-                // Update relative coordinates
-                relativeCorners[i] = absoluteToRelative(corners[i].x, corners[i].y, width, height);
-
-                Log.d(TAG, "Adjusted corner " + i + ": (" + oldX + "," + oldY + ") -> (" + corners[i].x + "," + corners[i].y + ")");
-            }
-
-            // Update last dimensions
-            lastWidth = width;
-            lastHeight = height;
-
-            // Force a redraw
-            invalidate();
-            postInvalidate();
-        } else {
-            Log.d(TAG, "All corners are within view bounds, no adjustment needed");
-        }
-
-        // Check if the dimensions match the last known dimensions
-        if (width != lastWidth || height != lastHeight) {
-            Log.d(TAG, "Dimensions changed since last update: " + lastWidth + "x" + lastHeight + " -> " + width + "x" + height + ", updating");
-
-            // Scale corners based on relative positions
-            for (int i = 0; i < 4; i++) {
-                PointF newPos = relativeToAbsolute(relativeCorners[i][0], relativeCorners[i][1], width, height);
-                corners[i].set(newPos.x, newPos.y);
-            }
-
-            // Update last dimensions
-            lastWidth = width;
-            lastHeight = height;
-
-            // Force a redraw
-            invalidate();
-            postInvalidate();
-        }
     }
 
     /**

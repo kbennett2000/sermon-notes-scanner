@@ -1,5 +1,7 @@
 package de.schliweb.makeacopy.ui.ocr.review;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -17,9 +19,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.ui.crop.CropViewModel;
 import de.schliweb.makeacopy.ui.ocr.review.model.OcrDoc;
 import de.schliweb.makeacopy.ui.ocr.review.view.MinimapView;
 import de.schliweb.makeacopy.ui.ocr.review.view.OcrOverlayView;
+
+import java.io.File;
 
 /**
  * OcrReviewFragment is a subclass of Fragment that provides functionality
@@ -36,6 +41,10 @@ public class OcrReviewFragment extends Fragment {
 
     private static final String TAG = "OcrReview";
 
+    // Holds current minimap thumbnail to allow recycling on replacement
+    @Nullable
+    private Bitmap minimapBitmap;
+
     private void dbgWarn(String msg, Throwable t) {
         if (BuildConfig.DEBUG) Log.w(TAG, msg, t);
     }
@@ -44,11 +53,11 @@ public class OcrReviewFragment extends Fragment {
      * Applies the given scale to various UI components, ensuring that the overlay, text layer, zoom bar,
      * and zoom chip remain synchronized.
      *
-     * @param s       The scale factor to be applied.
-     * @param overlay The overlay view to apply the scale to.
+     * @param s         The scale factor to be applied.
+     * @param overlay   The overlay view to apply the scale to.
      * @param textLayer The text layer view to apply the scale to.
-     * @param zoomBar The zoom bar (seek bar) to update with the scaled value.
-     * @param chipZoom The chip component to display the scale percentage and update its content description.
+     * @param zoomBar   The zoom bar (seek bar) to update with the scaled value.
+     * @param chipZoom  The chip component to display the scale percentage and update its content description.
      */
     // Centralized scale/UI application to keep overlay, text layer, zoom bar and zoom chip in sync
     private void applyScale(float s, OcrOverlayView overlay, de.schliweb.makeacopy.ui.ocr.review.view.OcrTextLayerView textLayer,
@@ -81,13 +90,95 @@ public class OcrReviewFragment extends Fragment {
     }
 
     /**
+     * Loads and sets a small thumbnail bitmap into the minimap from the current scan directory,
+     * preferring thumb.jpg and falling back to page.jpg. Decodes with downsampling to limit memory.
+     */
+    private void updateMinimapThumbnail(@NonNull MinimapView minimap) {
+        try {
+            String id = null;
+            try {
+                id = viewModel != null ? viewModel.getTargetScanId() : null;
+            } catch (Throwable ignore) {
+            }
+            if (id == null || id.trim().isEmpty() || getContext() == null) return;
+            File dir = new File(requireContext().getFilesDir(), "scans/" + id);
+            File thumb = new File(dir, "thumb.jpg");
+            File page = new File(dir, "page.jpg");
+            File src = thumb.exists() ? thumb : (page.exists() ? page : null);
+            if (src == null) {
+                // Fallback: use in-memory bitmap from CropViewModel for brand-new scans (files not yet persisted)
+                try {
+                    CropViewModel cvm = new androidx.lifecycle.ViewModelProvider(requireActivity()).get(CropViewModel.class);
+                    Bitmap bm = cvm != null ? cvm.getImageBitmap().getValue() : null;
+                    if (bm != null && !bm.isRecycled()) {
+                        int w0 = bm.getWidth();
+                        int h0 = bm.getHeight();
+                        if (w0 > 0 && h0 > 0) {
+                            int maxDim0 = 512;
+                            int long0 = Math.max(w0, h0);
+                            float scale0 = long0 > maxDim0 ? (maxDim0 / (float) long0) : 1f;
+                            int tw = Math.max(1, Math.round(w0 * scale0));
+                            int th = Math.max(1, Math.round(h0 * scale0));
+                            Bitmap tiny = Bitmap.createScaledBitmap(bm, tw, th, true);
+                            if (tiny != null) {
+                                Bitmap prev = minimapBitmap;
+                                minimapBitmap = tiny;
+                                minimap.setThumbnail(tiny);
+                                if (prev != null && prev != tiny && !prev.isRecycled()) {
+                                    try {
+                                        prev.recycle();
+                                    } catch (Throwable ignore2) {
+                                    }
+                                }
+                                return; // done via fallback
+                            }
+                        }
+                    }
+                } catch (Throwable ignore2) {
+                }
+                return;
+            }
+
+            // Decode bounds first
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(src.getAbsolutePath(), opts);
+            int w = opts.outWidth;
+            int h = opts.outHeight;
+            if (w <= 0 || h <= 0) return;
+            int maxDim = 512; // cap long edge
+            int sample = 1;
+            int longEdge = Math.max(w, h);
+            while (longEdge / (sample * 2) > maxDim) sample *= 2;
+            BitmapFactory.Options opts2 = new BitmapFactory.Options();
+            opts2.inSampleSize = Math.max(1, sample);
+            opts2.inPreferredConfig = Bitmap.Config.RGB_565; // lighter
+            Bitmap bmp = BitmapFactory.decodeFile(src.getAbsolutePath(), opts2);
+            if (bmp == null) return;
+
+            // Swap and recycle previous
+            Bitmap prev = minimapBitmap;
+            minimapBitmap = bmp;
+            minimap.setThumbnail(bmp);
+            if (prev != null && prev != bmp && !prev.isRecycled()) {
+                try {
+                    prev.recycle();
+                } catch (Throwable ignore) {
+                }
+            }
+        } catch (Throwable t) {
+            dbgWarn("Loading minimap thumbnail failed", t);
+        }
+    }
+
+    /**
      * Computes the user scale factor required to achieve a "fit to screen" effect with padding,
      * clamped to a range of [0.5 .. 4.0].
      *
      * @param container The container view used for calculating the available dimensions. If null, a default scale of 1.0 is returned.
-     * @param pageW The width of the content (e.g., page or image) to fit within the container, in pixels. Must be positive.
-     * @param pageH The height of the content (e.g., page or image) to fit within the container, in pixels. Must be positive.
-     * @param padPx The padding, in pixels, to be applied around the content when fitting to the container.
+     * @param pageW     The width of the content (e.g., page or image) to fit within the container, in pixels. Must be positive.
+     * @param pageH     The height of the content (e.g., page or image) to fit within the container, in pixels. Must be positive.
+     * @param padPx     The padding, in pixels, to be applied around the content when fitting to the container.
      * @return The computed scale factor in the range [0.5 .. 4.0]. Returns 1.0 if the input dimensions are invalid or the container is null.
      */
     // Computes the userScale that achieves a real "fit to screen" with padding, clamped to [0.5 .. 4.0].
@@ -118,11 +209,11 @@ public class OcrReviewFragment extends Fragment {
      *
      * @param container The container view used for calculating the scaling. If null or has invalid dimensions,
      *                  the userScale value is returned as is.
-     * @param pageW The width of the page or content being scaled, in pixels. Must be greater than 0.
-     * @param pageH The height of the page or content being scaled, in pixels. Must be greater than 0.
+     * @param pageW     The width of the page or content being scaled, in pixels. Must be greater than 0.
+     * @param pageH     The height of the page or content being scaled, in pixels. Must be greater than 0.
      * @param userScale The scale factor set by the user, typically used to determine the zoom level or fit.
      * @return The computed absolute scale factor as a float, representing view pixels per image pixels.
-     *         If any parameters are invalid, the userScale is returned unchanged.
+     * If any parameters are invalid, the userScale is returned unchanged.
      */
     // Converts a userScale to absolute scale (view px per image px) for the given container and page size.
     private float toAbsoluteScale(View container, int pageW, int pageH, float userScale) {
@@ -182,27 +273,27 @@ public class OcrReviewFragment extends Fragment {
      * to a file, ensuring data persistence and consistency. This is executed asynchronously
      * through an {@code Executor}, with main-thread operations limited to resolving the file
      * location.
-     *
+     * <p>
      * The autosave process performs the following:
      * - Validates required components such as the context, the autosave executor, and the view model.
      * - Resolves the autosave file location safely on the main thread using the {@code resolveAutosaveFile}
-     *   method.
+     * method.
      * - Executes the file-saving logic on the background executor, creating required directories when
-     *   necessary, and calling {@code viewModel.save} to perform file I/O operations to persist data.
-     *
+     * necessary, and calling {@code viewModel.save} to perform file I/O operations to persist data.
+     * <p>
      * Error handling includes:
      * - Catching and logging exceptions during scheduling or execution through the {@code dbgWarn}
-     *   method to ensure the task does not disrupt application flow.
-     *
+     * method to ensure the task does not disrupt application flow.
+     * <p>
      * Preconditions:
      * - The context, {@code autosaveExecutor}, and {@code viewModel} must not be null.
      * - The {@code autosaveExecutor} must not be shut down.
-     *
+     * <p>
      * Postconditions:
      * - If the file is resolved successfully and all prerequisites are met, the view model state
-     *   is saved to the file. Any directory paths required are created if they do not exist.
+     * is saved to the file. Any directory paths required are created if they do not exist.
      * - Any exceptions encountered during execution or I/O operations are gracefully
-     *   logged for debugging purposes.
+     * logged for debugging purposes.
      */
     private final Runnable autosaveRunnable = () -> {
         try {
@@ -232,9 +323,9 @@ public class OcrReviewFragment extends Fragment {
      * It also manages configuration settings for components like the toolbar, overlay, minimap,
      * and segmented controls.
      *
-     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment.
-     * @param container The parent view that this fragment's UI should be attached to (if not null).
-     *                  This value can be used to determine layout parameters for the inflated view.
+     * @param inflater           The LayoutInflater object that can be used to inflate any views in the fragment.
+     * @param container          The parent view that this fragment's UI should be attached to (if not null).
+     *                           This value can be used to determine layout parameters for the inflated view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous
      *                           saved state as given here.
      * @return The root View of the fragment's layout, or null if the inflater or container is null.
@@ -291,6 +382,8 @@ public class OcrReviewFragment extends Fragment {
             }
             // Apply current visibility state
             minimapCard.setVisibility(minimapVisible ? View.VISIBLE : View.GONE);
+            // Try to load thumbnail preview for minimap
+            updateMinimapThumbnail(minimap);
             // Navigation from minimap back to overlay/text layer
             minimap.setOnNavigateListener(new MinimapView.OnNavigateListener() {
                 @Override
@@ -371,6 +464,8 @@ public class OcrReviewFragment extends Fragment {
                     if (minimapCard != null) {
                         // minimap variable exists in scope
                         minimap.setPageSize(doc.imageSize.w, doc.imageSize.h);
+                        // Refresh thumbnail preview if available on disk
+                        updateMinimapThumbnail(minimap);
                         // Provide simplified OCR boxes for optional minimap layer
                         if (doc.words != null) {
                             java.util.ArrayList<int[]> boxes = new java.util.ArrayList<>(doc.words.size());
@@ -439,8 +534,8 @@ public class OcrReviewFragment extends Fragment {
             }
         });
 
-        // Bottom App Bar menu wiring (Undo/Redo/Export)
-        com.google.android.material.bottomappbar.BottomAppBar bottomAppBar = root.findViewById(R.id.bottom_app_bar);
+        // Bottom actions toolbar menu wiring (Undo/Redo/Export)
+        com.google.android.material.appbar.MaterialToolbar bottomAppBar = root.findViewById(R.id.bottom_app_bar);
         if (bottomAppBar != null) {
             android.view.Menu menu = bottomAppBar.getMenu();
             final android.view.MenuItem miUndo = menu != null ? menu.findItem(R.id.action_undo) : null;
@@ -794,7 +889,7 @@ public class OcrReviewFragment extends Fragment {
      * Otherwise, it falls back to using a default file within the app's persistent storage.
      *
      * @return The autosave file corresponding to the current context and scan ID.
-     *         Returns null if the context is invalid or unavailable.
+     * Returns null if the context is invalid or unavailable.
      */
     private java.io.File resolveAutosaveFile() {
         String id = null;
@@ -1006,12 +1101,12 @@ public class OcrReviewFragment extends Fragment {
     /**
      * Merges the given word with the succeeding word in the OCR document, updating
      * text, bounding box, and confidence score while maintaining document structure.
-     *
+     * <p>
      * Adjusts the current word's text by concatenating it with the succeeding word's text.
      * Updates the bounding box and recalculates confidence using area-based weighting.
      * Removes the succeeding word from the document after merging.
      *
-     * @param word  The word object to be merged with its immediately succeeding word in the OCR document.
+     * @param word The word object to be merged with its immediately succeeding word in the OCR document.
      */
     private void mergeWithNext(OcrDoc.Word word) {
         OcrDoc doc = viewModel.getDoc().getValue();
@@ -1117,7 +1212,7 @@ public class OcrReviewFragment extends Fragment {
      * Finds the index of a word in the given OcrDoc that matches the specified ID.
      *
      * @param doc the OcrDoc object containing a list of words
-     * @param id the ID of the word to search for
+     * @param id  the ID of the word to search for
      * @return the index of the word with the specified ID, or -1 if the word is not found
      */
     private int indexOfWord(OcrDoc doc, int id) {
@@ -1162,7 +1257,7 @@ public class OcrReviewFragment extends Fragment {
     /**
      * Handles the propagation of the current document within the ViewModel
      * and schedules an autosave operation if the current document is not null.
-     *
+     * <p>
      * This method retrieves the current document from the ViewModel. If a document is
      * present, it updates the ViewModel with the same document and invokes the
      * method to schedule an autosave for it.
@@ -1191,7 +1286,7 @@ public class OcrReviewFragment extends Fragment {
      * language detected in the OCR document. The chips are updated dynamically with this information.
      *
      * @param doc the OcrDoc object containing OCR results, including words and their related information. Can be null.
-     *             If null or if the document does not contain words, the chips will display default or placeholder values.
+     *            If null or if the document does not contain words, the chips will display default or placeholder values.
      */
     private void updateStatusChips(@Nullable OcrDoc doc) {
         try {
@@ -1245,7 +1340,7 @@ public class OcrReviewFragment extends Fragment {
      *
      * @param doc the OCR document containing lines and words. Can be null.
      * @return the constructed full text representation as a String. Returns an empty string if the input is null
-     *         or if the content cannot be processed.
+     * or if the content cannot be processed.
      */
     private String buildFullText(@Nullable OcrDoc doc) {
         if (doc == null) return "";
@@ -1295,18 +1390,18 @@ public class OcrReviewFragment extends Fragment {
 
     /**
      * Called when the fragment's view is destroyed.
-     *
+     * <p>
      * This method is part of the fragment lifecycle and is invoked to allow
      * cleanup of resources tied to the fragment's UI, such as removing callbacks
      * and references from handlers, executors, and other UI components.
-     *
+     * <p>
      * - Removes pending callbacks from the handler and editorHandler to prevent
-     *   memory leaks or undesired behavior after the view is destroyed.
+     * memory leaks or undesired behavior after the view is destroyed.
      * - Stops background autosave tasks safely by shutting down the executor,
-     *   ensuring no new tasks are accepted and allowing ongoing tasks to complete
-     *   within a specified timeout.
+     * ensuring no new tasks are accepted and allowing ongoing tasks to complete
+     * within a specified timeout.
      * - Releases references to toolbar chips to avoid leaking UI components tied to the action view.
-     *
+     * <p>
      * Always calls the superclass implementation to ensure proper cleanup
      * in the fragment's lifecycle.
      */
@@ -1331,16 +1426,24 @@ public class OcrReviewFragment extends Fragment {
         chipWords = null;
         chipLow = null;
         chipLang = null;
+        // Recycle minimap bitmap to free memory
+        try {
+            if (minimapBitmap != null && !minimapBitmap.isRecycled()) {
+                minimapBitmap.recycle();
+            }
+        } catch (Throwable ignore) {
+        }
+        minimapBitmap = null;
     }
 
     /**
      * This lifecycle method is called when the activity is paused.
      * It performs the following operations:
      * 1. Removes any pending callbacks associated with the autosaveRunnable
-     *    from the handler to ensure they are not executed when the activity is paused.
+     * from the handler to ensure they are not executed when the activity is paused.
      * 2. Posts the autosaveRunnable back to the handler, ensuring the autosave operation
-     *    is scheduled immediately after removing any previous callbacks.
-     *
+     * is scheduled immediately after removing any previous callbacks.
+     * <p>
      * This ensures proper handling of the autosave functionality when transitioning
      * between different lifecycle states of the activity.
      */
@@ -1388,7 +1491,7 @@ public class OcrReviewFragment extends Fragment {
      * It also handles restoring scale, offsets, and visibility of certain components from the saved
      * instance state.
      *
-     * @param view The root view associated with the fragment, used to find UI components within the layout.
+     * @param view               The root view associated with the fragment, used to find UI components within the layout.
      * @param savedInstanceState A Bundle object containing the saved state of the fragment, which is
      *                           used to restore UI state, such as scale, offsets, visibility settings,
      *                           and mode selections.
@@ -1396,6 +1499,25 @@ public class OcrReviewFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Apply edge-to-edge insets for the AppBar without using legacy fitsSystemWindows
+        /*try {
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+                int top = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.statusBars()).top;
+                // Apply top inset to the Toolbar only to avoid increasing AppBarLayout's measured height
+                View toolbar = v.findViewById(R.id.top_app_bar);
+                if (toolbar != null && toolbar.getPaddingTop() != top) {
+                    toolbar.setPadding(toolbar.getPaddingLeft(), top, toolbar.getPaddingRight(), toolbar.getPaddingBottom());
+                }
+                // Ensure AppBar itself has no extra top padding so it stays flush at the top
+                View appBar = v.findViewById(R.id.app_bar);
+                if (appBar != null && appBar.getPaddingTop() != 0) {
+                    appBar.setPadding(appBar.getPaddingLeft(), 0, appBar.getPaddingRight(), appBar.getPaddingBottom());
+                }
+                return insets;
+            });
+            androidx.core.view.ViewCompat.requestApplyInsets(view);
+        } catch (Throwable ignore) {
+        }`*/
         if (savedInstanceState == null) return;
         try {
             com.google.android.material.button.MaterialButtonToggleGroup segmented = view.findViewById(R.id.segmented_group);

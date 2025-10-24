@@ -139,6 +139,21 @@
     <string name="btn_options">ตัวเลือก</string>
     <string name="btn_save">บันทึก</string>
     <string name="btn_new">ใหม่</string>
+    <string name="btn_review">ตรวจทาน</string>
+    <string name="edit_word_title">แก้ไขคำ</string>
+    <string name="review_summary_format">คำ: %1$d  •  ความมั่นใจต่ำ: %2$d</string>
+    <string name="cm_edit">แก้ไข…</string>
+    <string name="cm_merge_next">รวมกับคำถัดไป</string>
+    <string name="cm_split">แยก</string>
+    <string name="cm_delete">ลบ</string>
+    <string name="cm_case">ตัวพิมพ์ใหญ่/เล็ก</string>
+    <string name="cm_lang">ภาษา…</string>
+    <string name="case_upper">ตัวพิมพ์ใหญ่</string>
+    <string name="case_lower">ตัวพิมพ์เล็ก</string>
+    <string name="case_title">ตัวอักษรแรกเป็นตัวพิมพ์ใหญ่</string>
+    <string name="dialog_language_title">ตั้งรหัสภาษา</string>
+    <string name="dialog_language_hint">เช่น eng, deu, fra, ita, spa…</string>
+
 
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">หมุนหน้า 90° ทวนเข็มนาฬิกา</string>
@@ -159,18 +174,73 @@
     <!-- คำแนะนำเกี่ยวกับโมเดล OCR -->
     <string name="ocr_models_hint">เพื่อการรู้จำที่เร็วขึ้น มีโมเดลแบบกะทัดรัดรวมมาให้แล้ว หากต้องการความแม่นยำสูงขึ้น คุณสามารถติดตั้งโมเดล "Best" ที่มีขนาดใหญ่กว่าได้ โดยไม่ต้องเชื่อมต่ออินเทอร์เน็ต</string>
 
-    <string name="btn_review">ตรวจทาน</string>
-    <string name="edit_word_title">แก้ไขคำ</string>
-    <string name="review_summary_format">คำ: %1$d  •  ความมั่นใจต่ำ: %2$d</string>
-    <string name="cm_edit">แก้ไข…</string>
-    <string name="cm_merge_next">ผสานกับคำถัดไป</string>
-    <string name="cm_split">แยก</string>
-    <string name="cm_delete">ลบ</string>
-    <string name="cm_case">ตัวพิมพ์ใหญ่/เล็ก</string>
-    <string name="cm_lang">ภาษา…</string>
-    <string name="case_upper">ตัวพิมพ์ใหญ่</string>
-    <string name="case_lower">ตัวพิมพ์เล็ก</string>
-    <string name="case_title">ตัวพิมพ์แบบหัวเรื่อง</string>
-    <string name="dialog_language_title">ตั้งค่ารหัสภาษา</string>
-    <string name="dialog_language_hint">เช่น eng, deu, fra, ita, spa…</string>
+    <!-- Labels -->
+    <string name="label_language">ภาษา</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">เลย์เอาต์</string>
+    <string name="label_text">ข้อความ</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d คำ</string>
+    <string name="low_percent_format">ความมั่นใจต่ำ %1$d%%</string>
+    <string name="low_placeholder">ต่ำ —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 คำ</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">ปิด</string>
+    <string name="cd_fab_edit">แก้ไขข้อความ</string>
+    <string name="cd_zoom_chip_format">ซูม %1$d%% แตะเพื่อรีเซ็ตเป็น 100%%</string>
+    <string name="cd_zoom_chip_tap_reset">การควบคุมการซูม แตะเพื่อรีเซ็ตเป็น 100%</string>
+    <string name="cd_zoom_chip_open_menu">เปิดเมนูการซูม</string>
+    <string name="cd_minimap">ภาพรวมของเอกสาร แตะเพื่อไปยังตำแหน่ง</string>
+    <string name="cd_undo">ยกเลิกการเปลี่ยนแปลงล่าสุด</string>
+    <string name="cd_redo">ทำซ้ำการเปลี่ยนแปลงล่าสุด</string>
+    <string name="cd_export">ส่งออก</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">ขยาย</string>
+    <string name="zoom_out">ย่อ</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">พอดีหน้าจอ</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">ค้นหา</string>
+    <string name="cd_action_export">ส่งออกเอกสาร</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">กรุณากรอกค่า</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">คอลเลกชันใหม่</string>
+    <string name="collection_name_hint">ชื่อคอลเลกชัน</string>
+    <string name="create">สร้าง</string>
+    <string name="collection_not_empty">คอลเลกชันนี้ไม่ว่างเปล่า</string>
+    <string name="collection_items_count">%1$d รายการ</string>
+    <string name="deleted">ลบแล้ว</string>
+    <string name="open_collections">คอลเลกชัน</string>
+    <string name="index_existing_scans">จัดทำดัชนีการสแกนที่มีอยู่</string>
+    <string name="rename">เปลี่ยนชื่อ</string>
+    <string name="ok">ตกลง</string>
+    <string name="no_scans_yet">ยังไม่มีการสแกน</string>
+    <string name="rename_collection_title">เปลี่ยนชื่อคอลเลกชัน</string>
+    <string name="new_name">ชื่อใหม่</string>
+    <string name="scan_saved">บันทึกการสแกนแล้ว</string>
+    <string name="action_add_to_collection">เพิ่มไปยังคอลเลกชัน…</string>
+    <string name="place_in_collection_title">เพิ่มไปยังคอลเลกชัน</string>
+    <string name="create_new_collection">สร้างคอลเลกชันใหม่…</string>
+    <string name="scan_added_to_collection">เพิ่มการสแกนไปยัง “%1$s” แล้ว</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">การทำงานของไลบรารี</string>
+    <string name="library_actions_title">ไลบรารี</string>
+    <string name="open_library">เปิดไลบรารี</string>
+    <string name="add_current_scan_to_library">เพิ่มการสแกนปัจจุบันไปยังไลบรารี</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">อยู่ใน: %1$s</string>
+    <string name="in_collections_count">อยู่ใน %1$d คอลเลกชัน</string>
+
 </resources>

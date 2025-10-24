@@ -139,6 +139,21 @@
     <string name="btn_options">Možnosti</string>
     <string name="btn_save">Uložiť</string>
     <string name="btn_new">Nový</string>
+    <string name="btn_review">Kontrola</string>
+    <string name="edit_word_title">Upraviť slovo</string>
+    <string name="review_summary_format">Slová: %1$d  •  Nízka spoľahlivosť: %2$d</string>
+    <string name="cm_edit">Upraviť…</string>
+    <string name="cm_merge_next">Zlúčiť s nasledujúcim</string>
+    <string name="cm_split">Rozdeliť</string>
+    <string name="cm_delete">Odstrániť</string>
+    <string name="cm_case">Veľké/malé písmená</string>
+    <string name="cm_lang">Jazyk…</string>
+    <string name="case_upper">VEĽKÉ PÍSMENÁ</string>
+    <string name="case_lower">malé písmená</string>
+    <string name="case_title">Veľké začiatočné písmená</string>
+    <string name="dialog_language_title">Nastaviť kód jazyka</string>
+    <string name="dialog_language_hint">napr. eng, deu, fra, ita, spa…</string>
+
 
     <!-- Rotation -->
     <string name="rotate_left_cd">Otočiť stránku o 90° doľava</string>
@@ -157,4 +172,75 @@
 
     <!-- OCR models hint -->
     <string name="ocr_models_hint">Pre rýchlejšie rozpoznávanie sú zahrnuté kompaktné modely. Pre vyššiu presnosť môžete nainštalovať väčšie „Best“ modely. Internetové pripojenie nie je potrebné.</string>
+
+    <!-- Labels -->
+    <string name="label_language">Jazyk</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Rozloženie</string>
+    <string name="label_text">Text</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d S</string>
+    <string name="low_percent_format">Nízka %1$d%%</string>
+    <string name="low_placeholder">Nízka —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 S</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Zavrieť</string>
+    <string name="cd_fab_edit">Upraviť text</string>
+    <string name="cd_zoom_chip_format">Zväčšenie %1$d%%. Klepnite pre obnovenie na 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Ovládanie priblíženia. Klepnite pre obnovenie na 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Otvoriť ponuku priblíženia</string>
+    <string name="cd_minimap">Prehľad dokumentu, klepnite pre preskočenie</string>
+    <string name="cd_undo">Vrátiť poslednú zmenu</string>
+    <string name="cd_redo">Zopakovať poslednú zmenu</string>
+    <string name="cd_export">Exportovať</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Priblížiť</string>
+    <string name="zoom_out">Oddialiť</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Prispôsobiť</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Hľadať</string>
+    <string name="cd_action_export">Exportovať dokument</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Zadajte prosím hodnotu</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Nová kolekcia</string>
+    <string name="collection_name_hint">Názov kolekcie</string>
+    <string name="create">Vytvoriť</string>
+    <string name="collection_not_empty">Kolekcia nie je prázdna</string>
+    <string name="collection_items_count">%1$d položka(y)</string>
+    <string name="deleted">Odstránené</string>
+    <string name="open_collections">Kolekcie</string>
+    <string name="index_existing_scans">Indexovať existujúce skeny</string>
+    <string name="rename">Premenovať</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Zatiaľ žiadne skeny</string>
+    <string name="rename_collection_title">Premenovať kolekciu</string>
+    <string name="new_name">Nový názov</string>
+    <string name="scan_saved">Sken uložený</string>
+    <string name="action_add_to_collection">Pridať do kolekcie…</string>
+    <string name="place_in_collection_title">Pridať do kolekcie</string>
+    <string name="create_new_collection">Vytvoriť novú kolekciu…</string>
+    <string name="scan_added_to_collection">Sken pridaný do „%1$s“</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Akcie knižnice</string>
+    <string name="library_actions_title">Knižnica</string>
+    <string name="open_library">Otvoriť knižnicu</string>
+    <string name="add_current_scan_to_library">Pridať aktuálny sken do knižnice</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">V: %1$s</string>
+    <string name="in_collections_count">V %1$d kolekciách</string>
+
+
 </resources>

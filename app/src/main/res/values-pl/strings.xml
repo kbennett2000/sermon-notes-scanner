@@ -139,6 +139,21 @@
     <string name="btn_options">Opcje</string>
     <string name="btn_save">Zapisz</string>
     <string name="btn_new">Nowy</string>
+    <string name="btn_review">Przegląd</string>
+    <string name="edit_word_title">Edytuj słowo</string>
+    <string name="review_summary_format">Słowa: %1$d  •  Niska pewność: %2$d</string>
+    <string name="cm_edit">Edytuj…</string>
+    <string name="cm_merge_next">Połącz z następnym</string>
+    <string name="cm_split">Podziel</string>
+    <string name="cm_delete">Usuń</string>
+    <string name="cm_case">Wielkość liter</string>
+    <string name="cm_lang">Język…</string>
+    <string name="case_upper">WIELKIE LITERY</string>
+    <string name="case_lower">małe litery</string>
+    <string name="case_title">Pierwsza litera wielka</string>
+    <string name="dialog_language_title">Ustaw kod języka</string>
+    <string name="dialog_language_hint">np. eng, deu, fra, ita, spa…</string>
+
 
     <!-- Obrót -->
     <string name="rotate_left_cd">Obróć stronę o 90° w lewo</string>
@@ -157,5 +172,74 @@
 
     <!-- Wskazówka OCR -->
     <string name="ocr_models_hint">Dla szybszego rozpoznawania dołączono kompaktowe modele. Dla większej dokładności możesz zainstalować większe modele „Best”. Połączenie z internetem nie jest wymagane.</string>
+
+    <!-- Labels -->
+    <string name="label_language">Język</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Układ</string>
+    <string name="label_text">Tekst</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d W</string>
+    <string name="low_percent_format">Niska %1$d%%</string>
+    <string name="low_placeholder">Niska —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 W</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Zamknij</string>
+    <string name="cd_fab_edit">Edytuj tekst</string>
+    <string name="cd_zoom_chip_format">Powiększenie %1$d%%. Dotknij, aby zresetować do 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Sterowanie powiększeniem. Dotknij, aby zresetować do 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Otwórz menu powiększenia</string>
+    <string name="cd_minimap">Podgląd dokumentu, dotknij, aby przejść</string>
+    <string name="cd_undo">Cofnij ostatnią zmianę</string>
+    <string name="cd_redo">Ponów ostatnią zmianę</string>
+    <string name="cd_export">Eksportuj</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Powiększ</string>
+    <string name="zoom_out">Pomniejsz</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Dopasuj</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Szukaj</string>
+    <string name="cd_action_export">Eksportuj dokument</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Wprowadź wartość</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Nowa kolekcja</string>
+    <string name="collection_name_hint">Nazwa kolekcji</string>
+    <string name="create">Utwórz</string>
+    <string name="collection_not_empty">Kolekcja nie jest pusta</string>
+    <string name="collection_items_count">%1$d element(ów)</string>
+    <string name="deleted">Usunięto</string>
+    <string name="open_collections">Kolekcje</string>
+    <string name="index_existing_scans">Indeksuj istniejące skany</string>
+    <string name="rename">Zmień nazwę</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Brak skanów</string>
+    <string name="rename_collection_title">Zmień nazwę kolekcji</string>
+    <string name="new_name">Nowa nazwa</string>
+    <string name="scan_saved">Skan zapisany</string>
+    <string name="action_add_to_collection">Dodaj do kolekcji…</string>
+    <string name="place_in_collection_title">Dodaj do kolekcji</string>
+    <string name="create_new_collection">Utwórz nową kolekcję…</string>
+    <string name="scan_added_to_collection">Skan dodany do „%1$s”</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Akcje biblioteki</string>
+    <string name="library_actions_title">Biblioteka</string>
+    <string name="open_library">Otwórz bibliotekę</string>
+    <string name="add_current_scan_to_library">Dodaj bieżący skan do biblioteki</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">W: %1$s</string>
+    <string name="in_collections_count">W %1$d kolekcjach</string>
 
 </resources>

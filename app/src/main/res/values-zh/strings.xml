@@ -140,6 +140,21 @@
     <string name="btn_options">选项</string>
     <string name="btn_save">保存</string>
     <string name="btn_new">新建</string>
+    <string name="btn_review">检查</string>
+    <string name="edit_word_title">编辑单词</string>
+    <string name="review_summary_format">词语: %1$d  •  低置信度: %2$d</string>
+    <string name="cm_edit">编辑…</string>
+    <string name="cm_merge_next">与下一个合并</string>
+    <string name="cm_split">拆分</string>
+    <string name="cm_delete">删除</string>
+    <string name="cm_case">大小写</string>
+    <string name="cm_lang">语言…</string>
+    <string name="case_upper">大写</string>
+    <string name="case_lower">小写</string>
+    <string name="case_title">首字母大写</string>
+    <string name="dialog_language_title">设置语言代码</string>
+    <string name="dialog_language_hint">例如：eng, deu, fra, ita, spa…</string>
+
 
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">将页面逆时针旋转 90 度</string>
@@ -159,18 +174,73 @@
     <!-- OCR 模型提示 -->
     <string name="ocr_models_hint">为加快识别速度，已包含紧凑型模型。若需更高精度，可以安装更大的“Best”模型。无需互联网连接。</string>
 
-    <string name="btn_review">复核</string>
-    <string name="edit_word_title">编辑单词</string>
-    <string name="review_summary_format">词数：%1$d  •  低置信度：%2$d</string>
-    <string name="cm_edit">编辑…</string>
-    <string name="cm_merge_next">与下一个合并</string>
-    <string name="cm_split">拆分</string>
-    <string name="cm_delete">删除</string>
-    <string name="cm_case">大小写</string>
-    <string name="cm_lang">语言…</string>
-    <string name="case_upper">大写</string>
-    <string name="case_lower">小写</string>
-    <string name="case_title">标题大小写</string>
-    <string name="dialog_language_title">设置语言代码</string>
-    <string name="dialog_language_hint">例如：eng、deu、fra、ita、spa…</string>
+    <!-- Labels -->
+    <string name="label_language">语言</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">布局</string>
+    <string name="label_text">文本</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d 词</string>
+    <string name="low_percent_format">低置信度 %1$d%%</string>
+    <string name="low_placeholder">低 —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 词</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">关闭</string>
+    <string name="cd_fab_edit">编辑文本</string>
+    <string name="cd_zoom_chip_format">缩放 %1$d%%。点击恢复到 100%%。</string>
+    <string name="cd_zoom_chip_tap_reset">缩放控制。点击恢复到 100%。</string>
+    <string name="cd_zoom_chip_open_menu">打开缩放菜单</string>
+    <string name="cd_minimap">文档概览，点击跳转</string>
+    <string name="cd_undo">撤销上次更改</string>
+    <string name="cd_redo">重做上次更改</string>
+    <string name="cd_export">导出</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">放大</string>
+    <string name="zoom_out">缩小</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">适应</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">搜索</string>
+    <string name="cd_action_export">导出文档</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">请输入一个值</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">新建收藏集</string>
+    <string name="collection_name_hint">收藏集名称</string>
+    <string name="create">创建</string>
+    <string name="collection_not_empty">收藏集不为空</string>
+    <string name="collection_items_count">%1$d 个项目</string>
+    <string name="deleted">已删除</string>
+    <string name="open_collections">收藏集</string>
+    <string name="index_existing_scans">索引现有扫描</string>
+    <string name="rename">重命名</string>
+    <string name="ok">确定</string>
+    <string name="no_scans_yet">暂无扫描</string>
+    <string name="rename_collection_title">重命名收藏集</string>
+    <string name="new_name">新名称</string>
+    <string name="scan_saved">扫描已保存</string>
+    <string name="action_add_to_collection">添加到收藏集…</string>
+    <string name="place_in_collection_title">添加到收藏集</string>
+    <string name="create_new_collection">创建新收藏集…</string>
+    <string name="scan_added_to_collection">已将扫描添加到“%1$s”</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">库操作</string>
+    <string name="library_actions_title">库</string>
+    <string name="open_library">打开库</string>
+    <string name="add_current_scan_to_library">将当前扫描添加到库</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">属于：%1$s</string>
+    <string name="in_collections_count">属于 %1$d 个收藏集</string>
+
 </resources>

@@ -139,6 +139,21 @@
     <string name="btn_options">Indstillinger</string>
     <string name="btn_save">Gem</string>
     <string name="btn_new">Ny</string>
+    <string name="btn_review">Gennemse</string>
+    <string name="edit_word_title">Rediger ord</string>
+    <string name="review_summary_format">Ord: %1$d  •  Lav selvsikkerhed: %2$d</string>
+    <string name="cm_edit">Rediger…</string>
+    <string name="cm_merge_next">Flet med næste</string>
+    <string name="cm_split">Opdel</string>
+    <string name="cm_delete">Slet</string>
+    <string name="cm_case">Store/små bogstaver</string>
+    <string name="cm_lang">Sprog…</string>
+    <string name="case_upper">STORE BOGSTAVER</string>
+    <string name="case_lower">små bogstaver</string>
+    <string name="case_title">Store begyndelsesbogstaver</string>
+    <string name="dialog_language_title">Angiv sprogkode</string>
+    <string name="dialog_language_hint">f.eks. eng, deu, fra, ita, spa…</string>
+
 
     <!-- Rotation -->
     <string name="rotate_left_cd">Drej siden 90 grader mod uret</string>
@@ -157,4 +172,75 @@
 
     <!-- OCR models hint -->
     <string name="ocr_models_hint">For hurtigere genkendelse medfølger kompakte modeller. For højere nøjagtighed kan du installere større “Best”-modeller. Ingen internetforbindelse er påkrævet.</string>
+
+    <!-- Labels -->
+    <string name="label_language">Sprog</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Layout</string>
+    <string name="label_text">Tekst</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d O</string>
+    <string name="low_percent_format">Lav %1$d%%</string>
+    <string name="low_placeholder">Lav —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 O</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Luk</string>
+    <string name="cd_fab_edit">Rediger tekst</string>
+    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tryk for at nulstille til 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Zoomkontrol. Tryk for at nulstille til 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Åbn zoommenu</string>
+    <string name="cd_minimap">Dokumentoversigt, tryk for at hoppe</string>
+    <string name="cd_undo">Fortryd sidste ændring</string>
+    <string name="cd_redo">Gentag sidste ændring</string>
+    <string name="cd_export">Eksportér</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Zoom ind</string>
+    <string name="zoom_out">Zoom ud</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Tilpas</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Søg</string>
+    <string name="cd_action_export">Eksportér dokument</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Indtast venligst en værdi</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Ny samling</string>
+    <string name="collection_name_hint">Navn på samling</string>
+    <string name="create">Opret</string>
+    <string name="collection_not_empty">Samlingen er ikke tom</string>
+    <string name="collection_items_count">%1$d element(er)</string>
+    <string name="deleted">Slettet</string>
+    <string name="open_collections">Samlinger</string>
+    <string name="index_existing_scans">Indekser eksisterende scanninger</string>
+    <string name="rename">Omdøb</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Ingen scanninger endnu</string>
+    <string name="rename_collection_title">Omdøb samling</string>
+    <string name="new_name">Nyt navn</string>
+    <string name="scan_saved">Scanning gemt</string>
+    <string name="action_add_to_collection">Føj til samling…</string>
+    <string name="place_in_collection_title">Føj til samling</string>
+    <string name="create_new_collection">Opret ny samling…</string>
+    <string name="scan_added_to_collection">Scanning tilføjet til "%1$s"</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Bibliotekshandlinger</string>
+    <string name="library_actions_title">Bibliotek</string>
+    <string name="open_library">Åbn bibliotek</string>
+    <string name="add_current_scan_to_library">Føj aktuel scanning til bibliotek</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">I: %1$s</string>
+    <string name="in_collections_count">I %1$d samlinger</string>
+
+
 </resources>

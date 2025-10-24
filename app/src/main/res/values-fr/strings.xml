@@ -137,7 +137,22 @@
     <string name="btn_options">Options</string>
     <string name="btn_save">Enregistrer</string>
     <string name="btn_new">Nouveau</string>
-    
+    <string name="btn_review">Vérifier</string>
+    <string name="edit_word_title">Modifier le mot</string>
+    <string name="review_summary_format">Mots : %1$d  •  Faible confiance : %2$d</string>
+    <string name="cm_edit">Modifier…</string>
+    <string name="cm_merge_next">Fusionner avec le suivant</string>
+    <string name="cm_split">Diviser</string>
+    <string name="cm_delete">Supprimer</string>
+    <string name="cm_case">Majuscules/minuscules</string>
+    <string name="cm_lang">Langue…</string>
+    <string name="case_upper">MAJUSCULES</string>
+    <string name="case_lower">minuscules</string>
+    <string name="case_title">Première lettre en majuscule</string>
+    <string name="dialog_language_title">Définir le code de langue</string>
+    <string name="dialog_language_hint">par ex. : eng, deu, fra, ita, spa…</string>
+
+
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">Faire pivoter la page de 90° dans le sens antihoraire</string>
     <string name="rotate_right_cd">Faire pivoter la page de 90° dans le sens horaire</string>
@@ -156,18 +171,73 @@
     <!-- Astuce sur les modèles OCR -->
     <string name="ocr_models_hint">Pour une reconnaissance plus rapide, des modèles compacts sont inclus. Pour une meilleure précision, vous pouvez installer des modèles « Best » plus volumineux. Aucune connexion Internet n’est requise.</string>
 
-    <string name="btn_review">Relecture</string>
-    <string name="edit_word_title">Modifier le mot</string>
-    <string name="review_summary_format">Mots: %1$d  •  Faible confiance: %2$d</string>
-    <string name="cm_edit">Modifier…</string>
-    <string name="cm_merge_next">Fusionner avec le suivant</string>
-    <string name="cm_split">Scinder</string>
-    <string name="cm_delete">Supprimer</string>
-    <string name="cm_case">Casse</string>
-    <string name="cm_lang">Langue…</string>
-    <string name="case_upper">MAJUSCULES</string>
-    <string name="case_lower">minuscules</string>
-    <string name="case_title">Casse de titre</string>
-    <string name="dialog_language_title">Définir le code langue</string>
-    <string name="dialog_language_hint">p. ex. eng, deu, fra, ita, spa…</string>
+    <!-- Labels -->
+    <string name="label_language">Langue</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Mise en page</string>
+    <string name="label_text">Texte</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d M</string>
+    <string name="low_percent_format">Faible %1$d%%</string>
+    <string name="low_placeholder">Faible —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 M</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Fermer</string>
+    <string name="cd_fab_edit">Modifier le texte</string>
+    <string name="cd_zoom_chip_format">Zoom %1$d%%. Touchez pour réinitialiser à 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Contrôle du zoom. Touchez pour réinitialiser à 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Ouvrir le menu du zoom</string>
+    <string name="cd_minimap">Aperçu du document, touchez pour naviguer</string>
+    <string name="cd_undo">Annuler la dernière modification</string>
+    <string name="cd_redo">Rétablir la dernière modification</string>
+    <string name="cd_export">Exporter</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Agrandir</string>
+    <string name="zoom_out">Réduire</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Adapter</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Rechercher</string>
+    <string name="cd_action_export">Exporter le document</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Veuillez saisir une valeur</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Nouvelle collection</string>
+    <string name="collection_name_hint">Nom de la collection</string>
+    <string name="create">Créer</string>
+    <string name="collection_not_empty">La collection n’est pas vide</string>
+    <string name="collection_items_count">%1$d élément(s)</string>
+    <string name="deleted">Supprimé</string>
+    <string name="open_collections">Collections</string>
+    <string name="index_existing_scans">Indexer les numérisations existantes</string>
+    <string name="rename">Renommer</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Aucune numérisation pour le moment</string>
+    <string name="rename_collection_title">Renommer la collection</string>
+    <string name="new_name">Nouveau nom</string>
+    <string name="scan_saved">Numérisation enregistrée</string>
+    <string name="action_add_to_collection">Ajouter à la collection…</string>
+    <string name="place_in_collection_title">Ajouter à la collection</string>
+    <string name="create_new_collection">Créer une nouvelle collection…</string>
+    <string name="scan_added_to_collection">Numérisation ajoutée à « %1$s »</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Actions de la bibliothèque</string>
+    <string name="library_actions_title">Bibliothèque</string>
+    <string name="open_library">Ouvrir la bibliothèque</string>
+    <string name="add_current_scan_to_library">Ajouter la numérisation actuelle à la bibliothèque</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">Dans : %1$s</string>
+    <string name="in_collections_count">Dans %1$d collections</string>
+
 </resources>

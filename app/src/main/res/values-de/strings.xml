@@ -137,6 +137,21 @@
     <string name="btn_options">Optionen</string>
     <string name="btn_save">Speichern</string>
     <string name="btn_new">Neu</string>
+    <string name="btn_review">Überprüfen</string>
+    <string name="edit_word_title">Wort bearbeiten</string>
+    <string name="review_summary_format">Wörter: %1$d  •  Geringe Erkennungssicherheit: %2$d</string>
+    <string name="cm_edit">Bearbeiten…</string>
+    <string name="cm_merge_next">Mit nächstem zusammenführen</string>
+    <string name="cm_split">Teilen</string>
+    <string name="cm_delete">Löschen</string>
+    <string name="cm_case">Groß-/Kleinschreibung</string>
+    <string name="cm_lang">Sprache…</string>
+    <string name="case_upper">GROẞBUCHSTABEN</string>
+    <string name="case_lower">kleinbuchstaben</string>
+    <string name="case_title">Groß am Wortanfang</string>
+    <string name="dialog_language_title">Sprachcode festlegen</string>
+    <string name="dialog_language_hint">z. B. eng, deu, fra, ita, spa…</string>
+
 
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">Seite um 90 Grad gegen den Uhrzeigersinn drehen</string>
@@ -156,24 +171,76 @@
     <!-- Hinweis zu OCR-Modellen -->
     <string name="ocr_models_hint">Für schnellere Erkennung sind kompakte Modelle enthalten. Für höhere Genauigkeit kannst du größere \"Best\"-Modelle installieren. Es ist keine Internetverbindung erforderlich.</string>
 
-    <string name="btn_review">Review</string>
-    <string name="edit_word_title">Wort bearbeiten</string>
-    <string name="review_summary_format">Wörter: %1$d  •  Niedrige Konfidenz: %2$d</string>
-    <string name="cm_edit">Bearbeiten…</string>
-    <string name="cm_merge_next">Mit nächstem zusammenführen</string>
-    <string name="cm_split">Teilen</string>
-    <string name="cm_delete">Löschen</string>
-    <string name="cm_case">Groß-/Kleinschreibung</string>
-    <string name="cm_lang">Sprache…</string>
-    <string name="case_upper">GROẞSCHRIFT</string>
-    <string name="case_lower">kleinschrift</string>
-    <string name="case_title">Titel-Schreibung</string>
-    <string name="dialog_language_title">Sprachcode setzen</string>
-    <string name="dialog_language_hint">z. B. eng, deu, fra, ita, spa…</string>
-
     <!-- Labels -->
     <string name="label_language">Sprache</string>
     
     <!-- OCR Review: Text mode editor tooltip documenting current behavior -->
     <string name="tip_text_mode_editing">Textmodus: Zeilenumbrüche/Interpunktion werden derzeit zu Leerzeichen normalisiert. Wenn weniger Wörter eingegeben werden als erkannt wurden, bleiben die restlichen OCR‑Wörter unverändert. Änderungen werden nach kurzer Pause übernommen.</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Layout</string>
+    <string name="label_text">Text</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d W</string>
+    <string name="low_percent_format">Niedrig %1$d%%</string>
+    <string name="low_placeholder">Niedrig —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 W</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Schließen</string>
+    <string name="cd_fab_edit">Text bearbeiten</string>
+    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tippen zum Zurücksetzen auf 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Zoom-Steuerung. Tippen zum Zurücksetzen auf 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Zoom-Menü öffnen</string>
+    <string name="cd_minimap">Dokumentenübersicht, tippen zum Springen</string>
+    <string name="cd_undo">Letzte Änderung rückgängig machen</string>
+    <string name="cd_redo">Letzte Änderung wiederholen</string>
+    <string name="cd_export">Exportieren</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Vergrößern</string>
+    <string name="zoom_out">Verkleinern</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Anpassen</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Suchen</string>
+    <string name="cd_action_export">Dokument exportieren</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Bitte einen Wert eingeben</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Neue Sammlung</string>
+    <string name="collection_name_hint">Name der Sammlung</string>
+    <string name="create">Erstellen</string>
+    <string name="collection_not_empty">Sammlung ist nicht leer</string>
+    <string name="collection_items_count">%1$d Element(e)</string>
+    <string name="deleted">Gelöscht</string>
+    <string name="open_collections">Sammlungen</string>
+    <string name="index_existing_scans">Vorhandene Scans indizieren</string>
+    <string name="rename">Umbenennen</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Noch keine Scans</string>
+    <string name="rename_collection_title">Sammlung umbenennen</string>
+    <string name="new_name">Neuer Name</string>
+    <string name="scan_saved">Scan gespeichert</string>
+    <string name="action_add_to_collection">Zu Sammlung hinzufügen…</string>
+    <string name="place_in_collection_title">Zu Sammlung hinzufügen</string>
+    <string name="create_new_collection">Neue Sammlung erstellen…</string>
+    <string name="scan_added_to_collection">Scan zu „%1$s“ hinzugefügt</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Bibliotheksaktionen</string>
+    <string name="library_actions_title">Bibliothek</string>
+    <string name="open_library">Bibliothek öffnen</string>
+    <string name="add_current_scan_to_library">Aktuellen Scan zur Bibliothek hinzufügen</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">In: %1$s</string>
+    <string name="in_collections_count">In %1$d Sammlungen</string>
+
 </resources>

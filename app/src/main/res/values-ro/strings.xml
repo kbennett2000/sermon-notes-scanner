@@ -139,6 +139,20 @@
     <string name="btn_options">Opțiuni</string>
     <string name="btn_save">Salvează</string>
     <string name="btn_new">Nou</string>
+    <string name="btn_review">Revizuire</string>
+    <string name="edit_word_title">Editează cuvântul</string>
+    <string name="review_summary_format">Cuvinte: %1$d  •  Încredere scăzută: %2$d</string>
+    <string name="cm_edit">Editează…</string>
+    <string name="cm_merge_next">Combină cu următorul</string>
+    <string name="cm_split">Împarte</string>
+    <string name="cm_delete">Șterge</string>
+    <string name="cm_case">Majuscule/minuscule</string>
+    <string name="cm_lang">Limbă…</string>
+    <string name="case_upper">MAJUSCULE</string>
+    <string name="case_lower">minuscule</string>
+    <string name="case_title">Inițiale majuscule</string>
+    <string name="dialog_language_title">Setează codul limbii</string>
+    <string name="dialog_language_hint">ex.: eng, deu, fra, ita, spa…</string>
 
     <!-- Rotation -->
     <string name="rotate_left_cd">Rotește pagina 90° spre stânga</string>
@@ -157,4 +171,74 @@
 
     <!-- OCR models hint -->
     <string name="ocr_models_hint">Pentru recunoaștere mai rapidă sunt incluse modele compacte. Pentru o acuratețe mai mare, poți instala modele mai mari „Best”. Nu este necesară conexiunea la internet.</string>
+
+    <!-- Labels -->
+    <string name="label_language">Limbă</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Aspect</string>
+    <string name="label_text">Text</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d C</string>
+    <string name="low_percent_format">Scăzut %1$d%%</string>
+    <string name="low_placeholder">Scăzut —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 C</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Închide</string>
+    <string name="cd_fab_edit">Editează textul</string>
+    <string name="cd_zoom_chip_format">Zoom %1$d%%. Atinge pentru a reseta la 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Control zoom. Atinge pentru a reseta la 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Deschide meniul de zoom</string>
+    <string name="cd_minimap">Previzualizare document, atinge pentru a naviga</string>
+    <string name="cd_undo">Anulează ultima modificare</string>
+    <string name="cd_redo">Refă ultima modificare</string>
+    <string name="cd_export">Exportă</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Mărește</string>
+    <string name="zoom_out">Micșorează</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Potrivește</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Caută</string>
+    <string name="cd_action_export">Exportă documentul</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Introduceți o valoare</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Colecție nouă</string>
+    <string name="collection_name_hint">Numele colecției</string>
+    <string name="create">Creează</string>
+    <string name="collection_not_empty">Colecția nu este goală</string>
+    <string name="collection_items_count">%1$d element(e)</string>
+    <string name="deleted">Șters</string>
+    <string name="open_collections">Colecții</string>
+    <string name="index_existing_scans">Indexează scanările existente</string>
+    <string name="rename">Redenumește</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Nicio scanare deocamdată</string>
+    <string name="rename_collection_title">Redenumește colecția</string>
+    <string name="new_name">Nume nou</string>
+    <string name="scan_saved">Scanare salvată</string>
+    <string name="action_add_to_collection">Adaugă la colecție…</string>
+    <string name="place_in_collection_title">Adaugă la colecție</string>
+    <string name="create_new_collection">Creează o nouă colecție…</string>
+    <string name="scan_added_to_collection">Scanare adăugată la „%1$s”</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Acțiuni bibliotecă</string>
+    <string name="library_actions_title">Bibliotecă</string>
+    <string name="open_library">Deschide biblioteca</string>
+    <string name="add_current_scan_to_library">Adaugă scanarea curentă la bibliotecă</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">În: %1$s</string>
+    <string name="in_collections_count">În %1$d colecții</string>
+
 </resources>

@@ -95,6 +95,19 @@
                 android:src="@drawable/ic_build"
                 app:tint="?attr/colorControlNormal"
                 android:background="@android:color/transparent"/>
+
+        <!-- Library entry icon (feature-flagged) -->
+        <ImageButton
+                android:id="@+id/button_open_library_cam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="8dp"
+                android:contentDescription="@string/open_collections"
+                android:src="@drawable/ic_library"
+                android:visibility="gone"
+                app:tint="?attr/colorControlNormal"
+                android:background="@android:color/transparent"/>
     </LinearLayout>
 
     <!-- Scan buttons -->

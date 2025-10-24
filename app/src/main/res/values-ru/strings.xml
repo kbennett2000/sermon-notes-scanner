@@ -139,6 +139,21 @@
     <string name="btn_options">Параметры</string>
     <string name="btn_save">Сохранить</string>
     <string name="btn_new">Новый</string>
+    <string name="btn_review">Проверить</string>
+    <string name="edit_word_title">Редактировать слово</string>
+    <string name="review_summary_format">Слова: %1$d  •  Низкая уверенность: %2$d</string>
+    <string name="cm_edit">Редактировать…</string>
+    <string name="cm_merge_next">Объединить со следующим</string>
+    <string name="cm_split">Разделить</string>
+    <string name="cm_delete">Удалить</string>
+    <string name="cm_case">Регистр</string>
+    <string name="cm_lang">Язык…</string>
+    <string name="case_upper">ПРОПИСНЫЕ БУКВЫ</string>
+    <string name="case_lower">строчные буквы</string>
+    <string name="case_title">Первая буква заглавная</string>
+    <string name="dialog_language_title">Указать код языка</string>
+    <string name="dialog_language_hint">например, eng, deu, fra, ita, spa…</string>
+
 
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">Повернуть страницу на 90° против часовой стрелки</string>
@@ -158,18 +173,73 @@
     <!-- Подсказка по моделям OCR -->
     <string name="ocr_models_hint">Для более быстрой распознаваемости включены компактные модели. Для большей точности вы можете установить более крупные модели «Best». Подключение к интернету не требуется.</string>
 
-    <string name="btn_review">Проверка</string>
-    <string name="edit_word_title">Редактировать слово</string>
-    <string name="review_summary_format">Слова: %1$d  •  Низкая уверенность: %2$d</string>
-    <string name="cm_edit">Изменить…</string>
-    <string name="cm_merge_next">Объединить со следующим</string>
-    <string name="cm_split">Разделить</string>
-    <string name="cm_delete">Удалить</string>
-    <string name="cm_case">Регистр</string>
-    <string name="cm_lang">Язык…</string>
-    <string name="case_upper">ПРОПИСНЫЕ</string>
-    <string name="case_lower">строчные</string>
-    <string name="case_title">Как в заголовке</string>
-    <string name="dialog_language_title">Установить код языка</string>
-    <string name="dialog_language_hint">например, eng, deu, fra, ita, spa…</string>
+    <!-- Labels -->
+    <string name="label_language">Язык</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Макет</string>
+    <string name="label_text">Текст</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d С</string>
+    <string name="low_percent_format">Низкая %1$d%%</string>
+    <string name="low_placeholder">Низкая —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 С</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Закрыть</string>
+    <string name="cd_fab_edit">Редактировать текст</string>
+    <string name="cd_zoom_chip_format">Масштаб %1$d%%. Нажмите, чтобы сбросить до 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Управление масштабом. Нажмите, чтобы сбросить до 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Открыть меню масштаба</string>
+    <string name="cd_minimap">Обзор документа, нажмите, чтобы перейти</string>
+    <string name="cd_undo">Отменить последнее изменение</string>
+    <string name="cd_redo">Повторить последнее изменение</string>
+    <string name="cd_export">Экспорт</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Увеличить</string>
+    <string name="zoom_out">Уменьшить</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">По размеру</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Поиск</string>
+    <string name="cd_action_export">Экспортировать документ</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Введите значение</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Новая коллекция</string>
+    <string name="collection_name_hint">Название коллекции</string>
+    <string name="create">Создать</string>
+    <string name="collection_not_empty">Коллекция не пуста</string>
+    <string name="collection_items_count">%1$d элемент(ов)</string>
+    <string name="deleted">Удалено</string>
+    <string name="open_collections">Коллекции</string>
+    <string name="index_existing_scans">Индексировать существующие сканы</string>
+    <string name="rename">Переименовать</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Пока нет сканов</string>
+    <string name="rename_collection_title">Переименовать коллекцию</string>
+    <string name="new_name">Новое имя</string>
+    <string name="scan_saved">Скан сохранён</string>
+    <string name="action_add_to_collection">Добавить в коллекцию…</string>
+    <string name="place_in_collection_title">Добавить в коллекцию</string>
+    <string name="create_new_collection">Создать новую коллекцию…</string>
+    <string name="scan_added_to_collection">Скан добавлен в «%1$s»</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Действия библиотеки</string>
+    <string name="library_actions_title">Библиотека</string>
+    <string name="open_library">Открыть библиотеку</string>
+    <string name="add_current_scan_to_library">Добавить текущий скан в библиотеку</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">В: %1$s</string>
+    <string name="in_collections_count">В %1$d коллекциях</string>
+
 </resources>

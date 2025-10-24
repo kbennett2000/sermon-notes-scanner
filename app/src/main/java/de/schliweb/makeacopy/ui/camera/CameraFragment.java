@@ -316,6 +316,25 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             });
         }
 
+        // Library entry from Camera screen (feature-gated)
+        try {
+            if (binding.buttonOpenLibraryCam != null) {
+                if (de.schliweb.makeacopy.BuildConfig.FEATURE_SCAN_LIBRARY) {
+                    binding.buttonOpenLibraryCam.setVisibility(View.VISIBLE);
+                    binding.buttonOpenLibraryCam.setOnClickListener(v -> {
+                        try {
+                            Navigation.findNavController(requireView()).navigate(R.id.navigation_scans_library);
+                        } catch (Throwable t) {
+                            Log.w(TAG, "Navigation to scans library failed", t);
+                        }
+                    });
+                } else {
+                    binding.buttonOpenLibraryCam.setVisibility(View.GONE);
+                }
+            }
+        } catch (Throwable ignore) {
+        }
+
         // Set up retake and confirm button listeners
         binding.buttonRetake.setOnClickListener(v -> {
             try {

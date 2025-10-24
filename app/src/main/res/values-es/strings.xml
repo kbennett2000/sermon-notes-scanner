@@ -138,7 +138,22 @@
     <string name="btn_options">Opciones</string>
     <string name="btn_save">Guardar</string>
     <string name="btn_new">Nuevo</string>
-    
+    <string name="btn_review">Revisar</string>
+    <string name="edit_word_title">Editar palabra</string>
+    <string name="review_summary_format">Palabras: %1$d  •  Baja confianza: %2$d</string>
+    <string name="cm_edit">Editar…</string>
+    <string name="cm_merge_next">Unir con la siguiente</string>
+    <string name="cm_split">Dividir</string>
+    <string name="cm_delete">Eliminar</string>
+    <string name="cm_case">Mayúsculas/minúsculas</string>
+    <string name="cm_lang">Idioma…</string>
+    <string name="case_upper">MAYÚSCULAS</string>
+    <string name="case_lower">minúsculas</string>
+    <string name="case_title">Iniciales en mayúscula</string>
+    <string name="dialog_language_title">Establecer código de idioma</string>
+    <string name="dialog_language_hint">p. ej., eng, deu, fra, ita, spa…</string>
+
+
     <!-- Rotación (post-crop) -->
     <string name="rotate_left_cd">Girar la página 90 grados en sentido antihorario</string>
     <string name="rotate_right_cd">Girar la página 90 grados en el sentido de las agujas del reloj</string>
@@ -157,18 +172,74 @@
     <!-- Sugerencia sobre los modelos OCR -->
     <string name="ocr_models_hint">Para un reconocimiento más rápido se incluyen modelos compactos. Para una mayor precisión, puedes instalar modelos “Best” más grandes. No se requiere conexión a Internet.</string>
 
-    <string name="btn_review">Revisión</string>
-    <string name="edit_word_title">Editar palabra</string>
-    <string name="review_summary_format">Palabras: %1$d  •  Baja confianza: %2$d</string>
-    <string name="cm_edit">Editar…</string>
-    <string name="cm_merge_next">Unir con la siguiente</string>
-    <string name="cm_split">Dividir</string>
-    <string name="cm_delete">Eliminar</string>
-    <string name="cm_case">Mayúsc./minúsc.</string>
-    <string name="cm_lang">Idioma…</string>
-    <string name="case_upper">MAYÚSCULAS</string>
-    <string name="case_lower">minúsculas</string>
-    <string name="case_title">Mayúsculas tipo título</string>
-    <string name="dialog_language_title">Establecer código de idioma</string>
-    <string name="dialog_language_hint">p. ej., eng, deu, fra, ita, spa…</string>
+    <!-- Labels -->
+    <string name="label_language">Idioma</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Diseño</string>
+    <string name="label_text">Texto</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d P</string>
+    <string name="low_percent_format">Bajo %1$d%%</string>
+    <string name="low_placeholder">Bajo —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 P</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Cerrar</string>
+    <string name="cd_fab_edit">Editar texto</string>
+    <string name="cd_zoom_chip_format">Zoom %1$d%%. Toca para restablecer al 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Control de zoom. Toca para restablecer al 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Abrir menú de zoom</string>
+    <string name="cd_minimap">Vista general del documento, toca para saltar</string>
+    <string name="cd_undo">Deshacer último cambio</string>
+    <string name="cd_redo">Rehacer último cambio</string>
+    <string name="cd_export">Exportar</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Acercar</string>
+    <string name="zoom_out">Alejar</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Ajustar</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Buscar</string>
+    <string name="cd_action_export">Exportar documento</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Por favor, introduce un valor</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Nueva colección</string>
+    <string name="collection_name_hint">Nombre de la colección</string>
+    <string name="create">Crear</string>
+    <string name="collection_not_empty">La colección no está vacía</string>
+    <string name="collection_items_count">%1$d elemento(s)</string>
+    <string name="deleted">Eliminado</string>
+    <string name="open_collections">Colecciones</string>
+    <string name="index_existing_scans">Indexar escaneos existentes</string>
+    <string name="rename">Renombrar</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Aún no hay escaneos</string>
+    <string name="rename_collection_title">Renombrar colección</string>
+    <string name="new_name">Nuevo nombre</string>
+    <string name="scan_saved">Escaneo guardado</string>
+    <string name="action_add_to_collection">Añadir a colección…</string>
+    <string name="place_in_collection_title">Añadir a colección</string>
+    <string name="create_new_collection">Crear nueva colección…</string>
+    <string name="scan_added_to_collection">Escaneo añadido a "%1$s"</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Acciones de biblioteca</string>
+    <string name="library_actions_title">Biblioteca</string>
+    <string name="open_library">Abrir biblioteca</string>
+    <string name="add_current_scan_to_library">Añadir escaneo actual a la biblioteca</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">En: %1$s</string>
+    <string name="in_collections_count">En %1$d colecciones</string>
+
+
 </resources>

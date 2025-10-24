@@ -139,6 +139,20 @@
     <string name="btn_options">Alternativ</string>
     <string name="btn_save">Spara</string>
     <string name="btn_new">Ny</string>
+    <string name="btn_review">Granska</string>
+    <string name="edit_word_title">Redigera ord</string>
+    <string name="review_summary_format">Ord: %1$d  •  Låg tillförlitlighet: %2$d</string>
+    <string name="cm_edit">Redigera…</string>
+    <string name="cm_merge_next">Slå ihop med nästa</string>
+    <string name="cm_split">Dela</string>
+    <string name="cm_delete">Ta bort</string>
+    <string name="cm_case">Versaler/gemener</string>
+    <string name="cm_lang">Språk…</string>
+    <string name="case_upper">VERSALER</string>
+    <string name="case_lower">gemener</string>
+    <string name="case_title">Inledande versaler</string>
+    <string name="dialog_language_title">Ange språkkod</string>
+    <string name="dialog_language_hint">t.ex. eng, deu, fra, ita, spa…</string>
 
     <!-- Rotation -->
     <string name="rotate_left_cd">Rotera sidan 90 grader moturs</string>
@@ -157,4 +171,75 @@
 
     <!-- OCR models hint -->
     <string name="ocr_models_hint">För snabbare igenkänning ingår kompakta modeller. För högre noggrannhet kan du installera större "Best"-modeller. Ingen internetanslutning krävs.</string>
+
+    <!-- Labels -->
+    <string name="label_language">Språk</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Layout</string>
+    <string name="label_text">Text</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d O</string>
+    <string name="low_percent_format">Låg %1$d%%</string>
+    <string name="low_placeholder">Låg —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 O</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Stäng</string>
+    <string name="cd_fab_edit">Redigera text</string>
+    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tryck för att återställa till 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Zoomkontroll. Tryck för att återställa till 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Öppna zoommeny</string>
+    <string name="cd_minimap">Dokumentöversikt, tryck för att hoppa</string>
+    <string name="cd_undo">Ångra senaste ändring</string>
+    <string name="cd_redo">Gör om senaste ändring</string>
+    <string name="cd_export">Exportera</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Zooma in</string>
+    <string name="zoom_out">Zooma ut</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Anpassa</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Sök</string>
+    <string name="cd_action_export">Exportera dokument</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Ange ett värde</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Ny samling</string>
+    <string name="collection_name_hint">Samlingsnamn</string>
+    <string name="create">Skapa</string>
+    <string name="collection_not_empty">Samlingen är inte tom</string>
+    <string name="collection_items_count">%1$d objekt</string>
+    <string name="deleted">Raderad</string>
+    <string name="open_collections">Samlingar</string>
+    <string name="index_existing_scans">Indexera befintliga skanningar</string>
+    <string name="rename">Byt namn</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Inga skanningar ännu</string>
+    <string name="rename_collection_title">Byt namn på samling</string>
+    <string name="new_name">Nytt namn</string>
+    <string name="scan_saved">Skanning sparad</string>
+    <string name="action_add_to_collection">Lägg till i samling…</string>
+    <string name="place_in_collection_title">Lägg till i samling</string>
+    <string name="create_new_collection">Skapa ny samling…</string>
+    <string name="scan_added_to_collection">Skanning tillagd i ”%1$s”</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Biblioteksåtgärder</string>
+    <string name="library_actions_title">Bibliotek</string>
+    <string name="open_library">Öppna bibliotek</string>
+    <string name="add_current_scan_to_library">Lägg till aktuell skanning i biblioteket</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">I: %1$s</string>
+    <string name="in_collections_count">I %1$d samlingar</string>
+
+
 </resources>

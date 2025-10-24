@@ -127,14 +127,19 @@ public class OCRFragment extends Fragment {
                     ? getString(R.string.ocr_results_will_appear_here)
                     : state.ocrText());
 
-            // Enable review button only when OCR finished and we have words
-            /*
+            // Enable review button only when OCR finished and we have words (and feature enabled)
             if (binding.buttonOcrReview != null) {
-                boolean hasWords = state.words() != null && !state.words().isEmpty();
-                boolean enableReview = state.imageProcessed() && !state.processing() && hasWords;
-                binding.buttonOcrReview.setEnabled(enableReview);
-                binding.buttonOcrReview.setAlpha(enableReview ? 1f : 0.4f);
-            }*/
+                if (!de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled()) {
+                    // When feature is disabled, hide the review button completely
+                    binding.buttonOcrReview.setVisibility(View.GONE);
+                } else {
+                    boolean hasWords = state.words() != null && !state.words().isEmpty();
+                    boolean enableReview = state.imageProcessed() && !state.processing() && hasWords;
+                    binding.buttonOcrReview.setEnabled(enableReview);
+                    binding.buttonOcrReview.setAlpha(enableReview ? 1f : 0.4f);
+                    binding.buttonOcrReview.setVisibility(View.VISIBLE);
+                }
+            }
 
             // Proceed to Export
             binding.buttonProcess.setOnClickListener(v ->
@@ -185,39 +190,45 @@ public class OCRFragment extends Fragment {
         if (binding.buttonOcrOptions != null) {
             binding.buttonOcrOptions.setOnClickListener(v -> showOcrOptionsDialog());
         }
-        // OCR Review icon (optional)
-        /*
+        // OCR Review icon (optional, feature-flagged)
         if (binding.buttonOcrReview != null) {
-            binding.buttonOcrReview.setOnClickListener(v -> {
-                // Prefer loading last edits from autosave if present; otherwise fall back to current OCR state
-                de.schliweb.makeacopy.ui.ocr.review.OcrReviewViewModel rv = new androidx.lifecycle.ViewModelProvider(requireActivity()).get(de.schliweb.makeacopy.ui.ocr.review.OcrReviewViewModel.class);
-                java.io.File autosave = null;
-                try {
-                    String id = de.schliweb.makeacopy.utils.SessionIds.getOrCreateCurrentScanId(requireContext().getApplicationContext());
-                    rv.setTargetScanId(id);
-                    java.io.File dir = new java.io.File(requireContext().getFilesDir(), "scans/" + id);
-                    autosave = new java.io.File(dir, "page.ocr.json");
-                } catch (Throwable ignore) {
+            if (!de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled()) {
+                binding.buttonOcrReview.setVisibility(View.GONE);
+            } else {
+                binding.buttonOcrReview.setVisibility(View.VISIBLE);
+                binding.buttonOcrReview.setOnClickListener(v -> {
+                    // Prefer loading last edits from autosave if present; otherwise fall back to current OCR state
+                    de.schliweb.makeacopy.ui.ocr.review.OcrReviewViewModel rv = new androidx.lifecycle.ViewModelProvider(requireActivity()).get(de.schliweb.makeacopy.ui.ocr.review.OcrReviewViewModel.class);
+                    java.io.File autosave = null;
                     try {
-                        autosave = new java.io.File(requireContext().getFilesDir(), "review_autosave.json");
-                    } catch (Throwable ignore2) {}
-                }
-                boolean loaded = false;
-                if (autosave != null && autosave.exists()) {
-                    try {
-                        rv.load(autosave);
-                        loaded = true;
-                    } catch (Throwable ignore) {}
-                }
-                if (!loaded) {
-                    // Build OcrDoc from current OCR state and pass to Review VM as fallback
-                    de.schliweb.makeacopy.ui.ocr.OCRViewModel.OcrUiState s = ocrViewModel.getState().getValue();
-                    de.schliweb.makeacopy.ui.ocr.review.model.OcrDoc doc = de.schliweb.makeacopy.ui.ocr.review.model.OcrDocMapper.fromState(s);
-                    rv.setDoc(doc);
-                }
-                Navigation.findNavController(requireView()).navigate(R.id.navigation_review);
-            });
-        }*/
+                        String id = de.schliweb.makeacopy.utils.SessionIds.getOrCreateCurrentScanId(requireContext().getApplicationContext());
+                        rv.setTargetScanId(id);
+                        java.io.File dir = new java.io.File(requireContext().getFilesDir(), "scans/" + id);
+                        autosave = new java.io.File(dir, "page.ocr.json");
+                    } catch (Throwable ignore) {
+                        try {
+                            autosave = new java.io.File(requireContext().getFilesDir(), "review_autosave.json");
+                        } catch (Throwable ignore2) {
+                        }
+                    }
+                    boolean loaded = false;
+                    if (autosave != null && autosave.exists()) {
+                        try {
+                            rv.load(autosave);
+                            loaded = true;
+                        } catch (Throwable ignore) {
+                        }
+                    }
+                    if (!loaded) {
+                        // Build OcrDoc from current OCR state and pass to Review VM as fallback
+                        de.schliweb.makeacopy.ui.ocr.OCRViewModel.OcrUiState s = ocrViewModel.getState().getValue();
+                        de.schliweb.makeacopy.ui.ocr.review.model.OcrDoc doc = de.schliweb.makeacopy.ui.ocr.review.model.OcrDocMapper.fromState(s);
+                        rv.setDoc(doc);
+                    }
+                    Navigation.findNavController(requireView()).navigate(R.id.navigation_review);
+                });
+            }
+        }
 
         // Language selection
         setupLanguageSpinner();
@@ -229,6 +240,9 @@ public class OCRFragment extends Fragment {
      * Language spinner now only updates ViewModel language and UI.
      * We do NOT touch any long-lived TessBaseAPI here.
      */
+    private static final String PREFS_NAME = "export_options";
+    private static final String PREF_KEY_OCR_LANG = "ocr_language";
+
     private void setupLanguageSpinner() {
         AutoCompleteTextView dropdown = binding.languageSpinner;
         String[] codes = getAvailableLanguages();
@@ -237,14 +251,36 @@ public class OCRFragment extends Fragment {
                 android.R.layout.simple_list_item_1, displayNames);
         dropdown.setAdapter(adapter);
 
+        // Determine preferred language: saved preference (if available and installed) else system default
         String systemLang = OCRUtils.mapSystemLanguageToTesseract(java.util.Locale.getDefault().getLanguage());
-        int defaultPos = IntStream.range(0, codes.length)
-                .filter(i -> codes[i].equals(systemLang)).findFirst().orElse(0);
-        String defaultCode = codes[defaultPos];
+        android.content.SharedPreferences sp = requireContext().getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE);
+        String savedCodeTmp = null;
+        try {
+            savedCodeTmp = sp.getString(PREF_KEY_OCR_LANG, null);
+        } catch (Throwable ignore) {
+        }
+        final String savedCode = savedCodeTmp;
 
-        // Set default selection without triggering listeners and update VM
-        dropdown.setText(displayNames[defaultPos], false);
-        ocrViewModel.setLanguage(defaultCode);
+        // Pick target code
+        String targetCodeTmp;
+        if (savedCode != null && IntStream.range(0, codes.length).anyMatch(i -> codes[i].equals(savedCode)) && isLanguageAvailableSafe(savedCode)) {
+            targetCodeTmp = savedCode;
+        } else {
+            targetCodeTmp = systemLang;
+            final String sysLangFinal = systemLang;
+            boolean systemInList = IntStream.range(0, codes.length).anyMatch(i -> codes[i].equals(sysLangFinal));
+            if (!systemInList) {
+                targetCodeTmp = codes.length > 0 ? codes[0] : systemLang;
+            }
+        }
+        final String targetCode = targetCodeTmp;
+        // Find index for target
+        final int targetPos = IntStream.range(0, codes.length)
+                .filter(i -> codes[i].equals(targetCode)).findFirst().orElse(0);
+
+        // Apply selection without triggering listeners and update VM
+        dropdown.setText(displayNames[targetPos], false);
+        ocrViewModel.setLanguage(targetCode);
 
         // Initial auto-run logic (only if not already processed)
         Bitmap bitmap = cropViewModel.getImageBitmap().getValue();
@@ -257,7 +293,7 @@ public class OCRFragment extends Fragment {
             performOCR();
         }
 
-        final int defaultIndex = defaultPos;
+        final int defaultIndex = targetPos;
         dropdown.setOnItemClickListener((parent, view, pos, id) -> {
             String selectedCode = codes[pos];
 
@@ -274,6 +310,12 @@ public class OCRFragment extends Fragment {
             } catch (Throwable ignore) {
             }
             ocrViewModel.setLanguage(selectedCode);
+            // Persist selected language like other settings
+            try {
+                android.content.SharedPreferences sp2 = requireContext().getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE);
+                sp2.edit().putString(PREF_KEY_OCR_LANG, selectedCode).apply();
+            } catch (Throwable ignore) {
+            }
 
             de.schliweb.makeacopy.ui.ocr.OCRViewModel.OcrUiState st = ocrViewModel.getState().getValue();
             boolean processed = (st != null && st.imageProcessed());

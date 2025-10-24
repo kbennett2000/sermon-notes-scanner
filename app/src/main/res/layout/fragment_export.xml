@@ -98,6 +98,18 @@
                 app:tint="?attr/colorControlNormal"
                 android:background="@android:color/transparent"/>
 
+        <!-- Library actions icon placed to the left of the trash icon -->
+        <ImageButton
+                android:id="@+id/button_library_actions"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:contentDescription="@string/library_actions"
+                android:src="@drawable/ic_library"
+                app:tint="?attr/colorControlNormal"
+                android:background="@android:color/transparent"/>
+
         <ImageButton
                 android:id="@+id/button_clear_pages"
                 android:layout_width="0dp"
@@ -209,6 +221,7 @@
             android:visibility="gone"
             android:max="100"
             android:indeterminate="false" />
+
 
     </LinearLayout>
 

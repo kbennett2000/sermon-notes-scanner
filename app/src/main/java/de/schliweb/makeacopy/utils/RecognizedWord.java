@@ -35,8 +35,8 @@ public class RecognizedWord {
 
     /**
      * Represents the confidence level of recognition for a recognized word.
-     * The value is typically a float between 0 and 1, where higher values
-     * indicate greater confidence in the recognition result.
+     * Scale: 0..100 (Tesseract hOCR x_wconf). Higher values indicate greater
+     * confidence in the recognition result.
      */
     private final float confidence;
 
@@ -47,7 +47,7 @@ public class RecognizedWord {
      * @param text        The recognized text. Cannot be null.
      * @param boundingBox The bounding box of the recognized text, represented as a {@code RectF}.
      *                    The box is normalized within this constructor to ensure consistency.
-     * @param confidence  The confidence score of the recognition, ranging from 0.0 to 1.0.
+     * @param confidence  The confidence score of the recognition, in 0..100 (x_wconf).
      */
     public RecognizedWord(String text, RectF boundingBox, float confidence) {
         this.text = text;

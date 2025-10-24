@@ -139,6 +139,20 @@
     <string name="btn_options">Opties</string>
     <string name="btn_save">Opslaan</string>
     <string name="btn_new">Nieuw</string>
+    <string name="btn_review">Beoordelen</string>
+    <string name="edit_word_title">Woord bewerken</string>
+    <string name="review_summary_format">Woorden: %1$d  •  Lage betrouwbaarheid: %2$d</string>
+    <string name="cm_edit">Bewerken…</string>
+    <string name="cm_merge_next">Samenvoegen met volgende</string>
+    <string name="cm_split">Splitsen</string>
+    <string name="cm_delete">Verwijderen</string>
+    <string name="cm_case">Hoofd-/kleine letters</string>
+    <string name="cm_lang">Taal…</string>
+    <string name="case_upper">HOOFDLETTERS</string>
+    <string name="case_lower">kleine letters</string>
+    <string name="case_title">Hoofdletters aan het begin</string>
+    <string name="dialog_language_title">Taalcode instellen</string>
+    <string name="dialog_language_hint">bijv. eng, deu, fra, ita, spa…</string>
 
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">Pagina 90 graden tegen de klok in draaien</string>
@@ -157,4 +171,75 @@
 
     <!-- OCR models hint -->
     <string name="ocr_models_hint">Voor snellere herkenning zijn compacte modellen inbegrepen. Voor hogere nauwkeurigheid kun je grotere "Best"‑modellen installeren. Er is geen internetverbinding nodig.</string>
+
+    <!-- Labels -->
+    <string name="label_language">Taal</string>
+
+    <!-- Segmented control labels -->
+    <string name="label_layout">Indeling</string>
+    <string name="label_text">Tekst</string>
+
+    <!-- OCR Review: Status chips formatting -->
+    <string name="words_count_suffix_format">%1$d W</string>
+    <string name="low_percent_format">Laag %1$d%%</string>
+    <string name="low_placeholder">Laag —</string>
+    <!-- Initial placeholders for status chips -->
+    <string name="words_count_initial">0 W</string>
+    <string name="lang_placeholder">—</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_close">Sluiten</string>
+    <string name="cd_fab_edit">Tekst bewerken</string>
+    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tik om terug te zetten naar 100%%.</string>
+    <string name="cd_zoom_chip_tap_reset">Zoomregeling. Tik om terug te zetten naar 100%.</string>
+    <string name="cd_zoom_chip_open_menu">Zoommenu openen</string>
+    <string name="cd_minimap">Documentoverzicht, tik om te springen</string>
+    <string name="cd_undo">Laatste wijziging ongedaan maken</string>
+    <string name="cd_redo">Laatste wijziging opnieuw uitvoeren</string>
+    <string name="cd_export">Exporteren</string>
+
+    <!-- Zoom popover -->
+    <string name="zoom_in">Inzoomen</string>
+    <string name="zoom_out">Uitzoomen</string>
+    <string name="zoom_100">100%</string>
+    <string name="zoom_fit">Passend maken</string>
+
+    <!-- A11y content descriptions for menu items -->
+    <string name="cd_action_search">Zoeken</string>
+    <string name="cd_action_export">Document exporteren</string>
+
+    <!-- Inline edit bottom sheet validation -->
+    <string name="error_empty_input">Voer een waarde in</string>
+
+    <!-- Collections / Library (feature-flagged) -->
+    <string name="new_collection_title">Nieuwe verzameling</string>
+    <string name="collection_name_hint">Naam van de verzameling</string>
+    <string name="create">Aanmaken</string>
+    <string name="collection_not_empty">Verzameling is niet leeg</string>
+    <string name="collection_items_count">%1$d item(s)</string>
+    <string name="deleted">Verwijderd</string>
+    <string name="open_collections">Verzamelingen</string>
+    <string name="index_existing_scans">Bestaande scans indexeren</string>
+    <string name="rename">Hernoemen</string>
+    <string name="ok">OK</string>
+    <string name="no_scans_yet">Nog geen scans</string>
+    <string name="rename_collection_title">Verzameling hernoemen</string>
+    <string name="new_name">Nieuwe naam</string>
+    <string name="scan_saved">Scan opgeslagen</string>
+    <string name="action_add_to_collection">Toevoegen aan verzameling…</string>
+    <string name="place_in_collection_title">Toevoegen aan verzameling</string>
+    <string name="create_new_collection">Nieuwe verzameling aanmaken…</string>
+    <string name="scan_added_to_collection">Scan toegevoegd aan “%1$s”</string>
+
+    <!-- Export: Library actions dialog -->
+    <string name="library_actions">Bibliotheekacties</string>
+    <string name="library_actions_title">Bibliotheek</string>
+    <string name="open_library">Bibliotheek openen</string>
+    <string name="add_current_scan_to_library">Huidige scan toevoegen aan bibliotheek</string>
+
+    <!-- Library list: collections membership -->
+    <string name="in_collections_prefix">In: %1$s</string>
+    <string name="in_collections_count">In %1$d verzamelingen</string>
+
+
 </resources>

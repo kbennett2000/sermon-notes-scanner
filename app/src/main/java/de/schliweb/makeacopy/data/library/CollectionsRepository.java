@@ -1,0 +1,40 @@
+package de.schliweb.makeacopy.data.library;
+
+import android.content.Context;
+
+import java.util.List;
+
+/**
+ * Interface for managing collections of scans within the application.
+ * Provides methods to create, retrieve, modify, and delete collections,
+ * as well as to manage the relationships between collections and scans.
+ */
+public interface CollectionsRepository {
+    CollectionEntity createCollection(Context context, String name);
+
+    List<CollectionEntity> getAllCollections(Context context);
+
+    void assignScanToCollection(Context context, String scanId, String collectionId);
+
+    void removeScanFromCollection(Context context, String scanId, String collectionId);
+
+    /**
+     * Deletes the collection only if it contains no scans. Returns true if deleted, false otherwise.
+     */
+    boolean deleteCollectionIfEmpty(Context context, String collectionId);
+
+    /**
+     * Returns the number of scans in a collection.
+     */
+    int countItems(Context context, String collectionId);
+
+    /**
+     * Renames a collection. Returns true if the collection was found and renamed.
+     */
+    boolean renameCollection(Context context, String collectionId, String newName);
+
+    /**
+     * Returns all collections that contain the given scan.
+     */
+    List<CollectionEntity> getCollectionsForScan(Context context, String scanId);
+}
