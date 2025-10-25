@@ -240,4 +240,38 @@
     <string name="in_collections_prefix">In: %1$s</string>
     <string name="in_collections_count">In %1$d raccolte</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Il file verrà eliminato dal dispositivo. Questa azione non può essere annullata.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Nessun documento da esportare</string>
+    <string name="failed_to_export_document">Impossibile esportare il documento</string>
+    <string name="error_during_export_with_reason">Errore durante l’esportazione: %1$s</string>
+    <string name="document_exported">Documento %1$s esportato</string>
+    <string name="document_multipage_exported">Documento (multi-pagina) %1$s esportato</string>
+    <string name="no_target_selected">Nessuna destinazione selezionata</string>
+    <string name="image_exported">Immagine %1$s esportata</string>
+    <string name="failed_to_export_image">Impossibile esportare l’immagine</string>
+    <string name="error_during_jpeg_export_with_reason">Errore durante l’esportazione JPEG: %1$s</string>
+    <string name="zip_exported">File ZIP %1$s esportato</string>
+    <string name="failed_to_export_zip">Impossibile esportare il file ZIP</string>
+    <string name="error_during_zip_export_with_reason">Errore durante l’esportazione ZIP: %1$s</string>
+    <string name="ocr_text_exported_as_txt">Testo OCR esportato come TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Errore durante l’esportazione del testo OCR: %1$s</string>
+    <string name="no_document_to_share_export_first">Nessun documento da condividere. Esporta prima un documento.</string>
+    <string name="error_sharing_document_with_reason">Errore durante la condivisione del documento: %1$s</string>
+    <string name="feature_scan_library_disabled">La funzione della libreria di scansioni è disattivata</string>
+    <string name="navigation_failed">Navigazione non riuscita</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">ID della scansione mancante</string>
+    <string name="picker_failed">Selezione non riuscita</string>
+    <string name="share_failed">Condivisione non riuscita</string>
+    <string name="no_app_found_to_open_file">Nessuna app trovata per aprire questo file</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Rimuovere da questa raccolta?</string>
+    <string name="removed_from_collection">Rimosso dalla raccolta</string>
+    <string name="indexed_new_items">%1$d nuovo/i elemento/i indicizzato/i</string>
+    <string name="nothing_new_to_index">Nessun nuovo elemento da indicizzare</string>
 </resources>

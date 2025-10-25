@@ -242,4 +242,39 @@
     <string name="in_collections_prefix">I: %1$s</string>
     <string name="in_collections_count">I %1$d samlinger</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Filen vil bli slettet fra enheten. Denne handlingen kan ikke angres.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Ingen dokumenter å eksportere</string>
+    <string name="failed_to_export_document">Kunne ikke eksportere dokumentet</string>
+    <string name="error_during_export_with_reason">Feil under eksport: %1$s</string>
+    <string name="document_exported">Dokument %1$s eksportert</string>
+    <string name="document_multipage_exported">Dokument (flersidig) %1$s eksportert</string>
+    <string name="no_target_selected">Ingen mål valgt</string>
+    <string name="image_exported">Bilde %1$s eksportert</string>
+    <string name="failed_to_export_image">Kunne ikke eksportere bildet</string>
+    <string name="error_during_jpeg_export_with_reason">Feil under JPEG-eksport: %1$s</string>
+    <string name="zip_exported">ZIP %1$s eksportert</string>
+    <string name="failed_to_export_zip">Kunne ikke eksportere ZIP</string>
+    <string name="error_during_zip_export_with_reason">Feil under ZIP-eksport: %1$s</string>
+    <string name="ocr_text_exported_as_txt">OCR-tekst eksportert som TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Feil ved eksport av OCR-tekst: %1$s</string>
+    <string name="no_document_to_share_export_first">Ingen dokumenter å dele. Eksporter et dokument først.</string>
+    <string name="error_sharing_document_with_reason">Feil ved deling av dokument: %1$s</string>
+    <string name="feature_scan_library_disabled">Funksjonen for skannebibliotek er deaktivert</string>
+    <string name="navigation_failed">Navigering mislyktes</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Mangler skanne-ID</string>
+    <string name="picker_failed">Valg mislyktes</string>
+    <string name="share_failed">Deling mislyktes</string>
+    <string name="no_app_found_to_open_file">Ingen app funnet for å åpne denne filen</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Fjerne fra denne samlingen?</string>
+    <string name="removed_from_collection">Fjernet fra samlingen</string>
+    <string name="indexed_new_items">Indekserte %1$d nye element(er)</string>
+    <string name="nothing_new_to_index">Ingenting nytt å indeksere</string>
+
 </resources>

@@ -25,10 +25,25 @@ public final class LibraryServiceLocator {
     private LibraryServiceLocator() {
     }
 
+    /**
+     * Checks whether the "Scan Library" feature is enabled in the application.
+     * The feature flag is configured in the BuildConfig class during the build process.
+     *
+     * @return true if the "Scan Library" feature is enabled, false otherwise.
+     */
     private static boolean isFeatureEnabled() {
         return BuildConfig.FEATURE_SCAN_LIBRARY;
     }
 
+    /**
+     * Provides the instance of the {@link ScansRepository} implementation. If the "Scan Library"
+     * feature is disabled, it returns a no-op implementation of {@link ScansRepository}. Otherwise,
+     * it initializes and returns the default implementation of {@link ScansRepository}, ensuring
+     * that the database is initialized when required.
+     *
+     * @param context the application context used to initialize or retrieve the repository and database
+     * @return an instance of {@link ScansRepository}, either a no-op implementation or the default implementation
+     */
     public static ScansRepository getScansRepository(Context context) {
         if (!isFeatureEnabled()) {
             // Return a no-op implementation when feature disabled
@@ -76,6 +91,15 @@ public final class LibraryServiceLocator {
         return scansRepository;
     }
 
+    /**
+     * Provides the instance of the {@link CollectionsRepository} implementation. If the "Scan Library"
+     * feature is disabled, it returns a no-op implementation of {@link CollectionsRepository}.
+     * Otherwise, it initializes and returns the default implementation of {@link CollectionsRepository},
+     * ensuring that the database is initialized when required.
+     *
+     * @param context the application context used to initialize or retrieve the repository and database
+     * @return an instance of {@link CollectionsRepository}, either a no-op implementation or the default implementation
+     */
     public static CollectionsRepository getCollectionsRepository(Context context) {
         if (!isFeatureEnabled()) {
             return new CollectionsRepository() {
@@ -90,19 +114,27 @@ public final class LibraryServiceLocator {
                 }
 
                 @Override
-                public void assignScanToCollection(Context ctx, String scanId, String collectionId) { }
+                public void assignScanToCollection(Context ctx, String scanId, String collectionId) {
+                }
 
                 @Override
-                public void removeScanFromCollection(Context ctx, String scanId, String collectionId) { }
+                public void removeScanFromCollection(Context ctx, String scanId, String collectionId) {
+                }
 
                 @Override
-                public boolean deleteCollectionIfEmpty(Context ctx, String collectionId) { return false; }
+                public boolean deleteCollectionIfEmpty(Context ctx, String collectionId) {
+                    return false;
+                }
 
                 @Override
-                public int countItems(Context ctx, String collectionId) { return 0; }
+                public int countItems(Context ctx, String collectionId) {
+                    return 0;
+                }
 
                 @Override
-                public boolean renameCollection(Context ctx, String collectionId, String newName) { return false; }
+                public boolean renameCollection(Context ctx, String collectionId, String newName) {
+                    return false;
+                }
 
                 @Override
                 public java.util.List<CollectionEntity> getCollectionsForScan(Context ctx, String scanId) {

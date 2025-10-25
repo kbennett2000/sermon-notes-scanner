@@ -243,4 +243,39 @@
     <string name="in_collections_prefix">อยู่ใน: %1$s</string>
     <string name="in_collections_count">อยู่ใน %1$d คอลเลกชัน</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">ไฟล์จะถูกลบออกจากอุปกรณ์ การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">ไม่มีเอกสารสำหรับส่งออก</string>
+    <string name="failed_to_export_document">ไม่สามารถส่งออกเอกสารได้</string>
+    <string name="error_during_export_with_reason">เกิดข้อผิดพลาดระหว่างการส่งออก: %1$s</string>
+    <string name="document_exported">ส่งออกเอกสาร %1$s แล้ว</string>
+    <string name="document_multipage_exported">ส่งออกเอกสาร (หลายหน้า) %1$s แล้ว</string>
+    <string name="no_target_selected">ยังไม่ได้เลือกปลายทาง</string>
+    <string name="image_exported">ส่งออกภาพ %1$s แล้ว</string>
+    <string name="failed_to_export_image">ไม่สามารถส่งออกภาพได้</string>
+    <string name="error_during_jpeg_export_with_reason">เกิดข้อผิดพลาดระหว่างการส่งออก JPEG: %1$s</string>
+    <string name="zip_exported">ส่งออก ZIP %1$s แล้ว</string>
+    <string name="failed_to_export_zip">ไม่สามารถส่งออก ZIP ได้</string>
+    <string name="error_during_zip_export_with_reason">เกิดข้อผิดพลาดระหว่างการส่งออก ZIP: %1$s</string>
+    <string name="ocr_text_exported_as_txt">ส่งออกข้อความ OCR เป็น TXT แล้ว</string>
+    <string name="error_exporting_ocr_text_with_reason">เกิดข้อผิดพลาดในการส่งออกข้อความ OCR: %1$s</string>
+    <string name="no_document_to_share_export_first">ไม่มีเอกสารสำหรับแชร์ โปรดส่งออกเอกสารก่อน</string>
+    <string name="error_sharing_document_with_reason">เกิดข้อผิดพลาดในการแชร์เอกสาร: %1$s</string>
+    <string name="feature_scan_library_disabled">ฟีเจอร์คลังสแกนถูกปิดใช้งาน</string>
+    <string name="navigation_failed">การนำทางล้มเหลว</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">ไม่มีรหัสสแกน</string>
+    <string name="picker_failed">การเลือกไม่สำเร็จ</string>
+    <string name="share_failed">การแชร์ไม่สำเร็จ</string>
+    <string name="no_app_found_to_open_file">ไม่พบแอปสำหรับเปิดไฟล์นี้</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">ลบออกจากคอลเลกชันนี้หรือไม่?</string>
+    <string name="removed_from_collection">ลบออกจากคอลเลกชันแล้ว</string>
+    <string name="indexed_new_items">จัดทำดัชนี %1$d รายการใหม่แล้ว</string>
+    <string name="nothing_new_to_index">ไม่มีรายการใหม่สำหรับจัดทำดัชนี</string>
+
 </resources>

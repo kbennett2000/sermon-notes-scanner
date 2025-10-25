@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -51,18 +50,18 @@ import java.util.List;
  * - Provides feedback to users via Toast messages when features are unavailable or actions complete.
  */
 public class ScansLibraryFragment extends Fragment {
- 
-     private RecyclerView list;
-     private View progress;
-     private View emptyText;
-     private View buttonOpenCollections;
-     private View buttonContainer;
-     private View backButton;
-     private View buttonIndexExistingIcon;
-     private android.widget.TextView titleCollection;
-     private ScansAdapter adapter;
-     private String collectionIdArg;
-     private String collectionNameArg;
+
+    private RecyclerView list;
+    private View progress;
+    private View emptyText;
+    private View buttonOpenCollections;
+    private View buttonContainer;
+    private View backButton;
+    private View buttonIndexExistingIcon;
+    private android.widget.TextView titleCollection;
+    private ScansAdapter adapter;
+    private String collectionIdArg;
+    private String collectionNameArg;
 
     @Nullable
     @Override
@@ -76,7 +75,7 @@ public class ScansLibraryFragment extends Fragment {
         backButton = root.findViewById(R.id.button_back);
         titleCollection = root.findViewById(R.id.titleCollection);
         buttonIndexExistingIcon = root.findViewById(R.id.buttonIndexExistingIcon);
- 
+
         // Apply system insets: add status bar top inset to root padding and nav bar bottom inset to the bottom button container
         final int origPadLeft = root.getPaddingLeft();
         final int origPadTop = root.getPaddingTop();
@@ -94,8 +93,7 @@ public class ScansLibraryFragment extends Fragment {
             // Top inset for status bar
             v.setPadding(origPadLeft, origPadTop + sb.top, origPadRight, origPadBottom);
             // Bottom inset for nav bar on the bottom button container
-            if (bottomContainer != null && bottomContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) bottomContainer.getLayoutParams();
+            if (bottomContainer != null && bottomContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams mlp) {
                 mlp.bottomMargin = origBottomMargin + sb.bottom;
                 bottomContainer.setLayoutParams(mlp);
             }
@@ -108,7 +106,7 @@ public class ScansLibraryFragment extends Fragment {
                 args.putString("scanId", item.id);
                 androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.navigation_scan_details, args);
             } catch (Throwable t) {
-                Toast.makeText(requireContext(), "Navigation failed", Toast.LENGTH_SHORT).show();
+                de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.navigation_failed, android.widget.Toast.LENGTH_SHORT);
             }
         });
 
@@ -126,7 +124,7 @@ public class ScansLibraryFragment extends Fragment {
         list.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
 
         if (!BuildConfig.FEATURE_SCAN_LIBRARY) {
-            Toast.makeText(requireContext(), "Scan library feature is disabled", Toast.LENGTH_SHORT).show();
+            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.feature_scan_library_disabled, android.widget.Toast.LENGTH_SHORT);
             // Optionally navigate up if embedded in backstack
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
             return root;
@@ -149,9 +147,9 @@ public class ScansLibraryFragment extends Fragment {
         if (collectionIdArg != null) {
             adapter.setOnItemLongClickListener(item -> {
                 String display = (item.title != null && !item.title.trim().isEmpty()) ? item.title : item.id;
-                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                final androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                         .setTitle(display)
-                        .setMessage("Remove from this collection?")
+                        .setMessage(R.string.remove_from_collection_question)
                         .setPositiveButton(R.string.ok, (d, w) -> {
                             showLoading(true);
                             new Thread(() -> {
@@ -162,13 +160,20 @@ public class ScansLibraryFragment extends Fragment {
                                 }
                                 if (!isAdded()) return;
                                 requireActivity().runOnUiThread(() -> {
-                                    Toast.makeText(requireContext(), "Removed", Toast.LENGTH_SHORT).show();
+                                    de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.removed_from_collection, android.widget.Toast.LENGTH_SHORT);
                                     loadDataAsync();
                                 });
                             }).start();
                         })
                         .setNegativeButton(android.R.string.cancel, null)
-                        .show();
+                        .create();
+                dialog.setOnShowListener(d -> {
+                    try {
+                        de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext());
+                    } catch (Throwable ignore) {
+                    }
+                });
+                dialog.show();
             });
         }
 
@@ -176,7 +181,7 @@ public class ScansLibraryFragment extends Fragment {
             try {
                 Navigation.findNavController(requireView()).navigate(R.id.navigation_collections);
             } catch (Throwable t) {
-                Toast.makeText(requireContext(), "Navigation failed", Toast.LENGTH_SHORT).show();
+                de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.navigation_failed, android.widget.Toast.LENGTH_SHORT);
             }
         });
         if (buttonIndexExistingIcon != null) {
@@ -191,13 +196,17 @@ public class ScansLibraryFragment extends Fragment {
                     final int finalN = n;
                     if (!isAdded()) return;
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), finalN > 0 ? ("Indexed " + finalN + " new item(s)") : "Nothing new to index", Toast.LENGTH_SHORT).show();
+                        if (finalN > 0) {
+                            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), getString(R.string.indexed_new_items, finalN), android.widget.Toast.LENGTH_SHORT);
+                        } else {
+                            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.nothing_new_to_index, android.widget.Toast.LENGTH_SHORT);
+                        }
                         loadDataAsync();
                     });
                 }).start();
             });
         }
- 
+
         loadDataAsync();
         return root;
     }
@@ -233,7 +242,8 @@ public class ScansLibraryFragment extends Fragment {
                         }
                     }
                 }
-            } catch (Throwable ignore) {}
+            } catch (Throwable ignore) {
+            }
             if (!isAdded()) return;
             requireActivity().runOnUiThread(() -> {
                 adapter.setMemberships(memberships);

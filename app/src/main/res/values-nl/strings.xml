@@ -241,5 +241,39 @@
     <string name="in_collections_prefix">In: %1$s</string>
     <string name="in_collections_count">In %1$d verzamelingen</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Het bestand wordt van het apparaat verwijderd. Deze actie kan niet ongedaan worden gemaakt.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Geen document om te exporteren</string>
+    <string name="failed_to_export_document">Exporteren van document mislukt</string>
+    <string name="error_during_export_with_reason">Fout tijdens exporteren: %1$s</string>
+    <string name="document_exported">Document %1$s geëxporteerd</string>
+    <string name="document_multipage_exported">Document (meerdere pagina’s) %1$s geëxporteerd</string>
+    <string name="no_target_selected">Geen doel geselecteerd</string>
+    <string name="image_exported">Afbeelding %1$s geëxporteerd</string>
+    <string name="failed_to_export_image">Exporteren van afbeelding mislukt</string>
+    <string name="error_during_jpeg_export_with_reason">Fout tijdens JPEG-export: %1$s</string>
+    <string name="zip_exported">ZIP %1$s geëxporteerd</string>
+    <string name="failed_to_export_zip">Exporteren van ZIP mislukt</string>
+    <string name="error_during_zip_export_with_reason">Fout tijdens ZIP-export: %1$s</string>
+    <string name="ocr_text_exported_as_txt">OCR-tekst geëxporteerd als TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Fout bij exporteren van OCR-tekst: %1$s</string>
+    <string name="no_document_to_share_export_first">Geen document om te delen. Exporteer eerst een document.</string>
+    <string name="error_sharing_document_with_reason">Fout bij het delen van document: %1$s</string>
+    <string name="feature_scan_library_disabled">Scanbibliotheekfunctie is uitgeschakeld</string>
+    <string name="navigation_failed">Navigatie mislukt</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Scan-ID ontbreekt</string>
+    <string name="picker_failed">Selectie mislukt</string>
+    <string name="share_failed">Delen mislukt</string>
+    <string name="no_app_found_to_open_file">Geen app gevonden om dit bestand te openen</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Verwijderen uit deze collectie?</string>
+    <string name="removed_from_collection">Verwijderd uit collectie</string>
+    <string name="indexed_new_items">%1$d nieuw(e) item(s) geïndexeerd</string>
+    <string name="nothing_new_to_index">Niets nieuws om te indexeren</string>
 
 </resources>

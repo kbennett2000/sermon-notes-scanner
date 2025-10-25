@@ -243,4 +243,39 @@
     <!-- Library list: collections membership -->
     <string name="in_collections_prefix">In: %1$s</string>
     <string name="in_collections_count">In %1$d collections</string>
+    
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">The file will be deleted from the device. This action cannot be undone.</string>
+    
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">No document to export</string>
+    <string name="failed_to_export_document">Failed to export document</string>
+    <string name="error_during_export_with_reason">Error during export: %1$s</string>
+    <string name="document_exported">Document %1$s exported</string>
+    <string name="document_multipage_exported">Document (multi-page) %1$s exported</string>
+    <string name="no_target_selected">No target selected</string>
+    <string name="image_exported">Image %1$s exported</string>
+    <string name="failed_to_export_image">Failed to export image</string>
+    <string name="error_during_jpeg_export_with_reason">Error during JPEG export: %1$s</string>
+    <string name="zip_exported">ZIP %1$s exported</string>
+    <string name="failed_to_export_zip">Failed to export ZIP</string>
+    <string name="error_during_zip_export_with_reason">Error during ZIP export: %1$s</string>
+    <string name="ocr_text_exported_as_txt">OCR text exported as TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Error exporting OCR text: %1$s</string>
+    <string name="no_document_to_share_export_first">No document available to share. Export a document first.</string>
+    <string name="error_sharing_document_with_reason">Error sharing document: %1$s</string>
+    <string name="feature_scan_library_disabled">Scan library feature is disabled</string>
+    <string name="navigation_failed">Navigation failed</string>
+    
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Missing scan id</string>
+    <string name="picker_failed">Picker failed</string>
+    <string name="share_failed">Share failed</string>
+    <string name="no_app_found_to_open_file">No app found to open this file</string>
+    
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Remove from this collection?</string>
+    <string name="removed_from_collection">Removed from collection</string>
+    <string name="indexed_new_items">Indexed %1$d new item(s)</string>
+    <string name="nothing_new_to_index">Nothing new to index</string>
 </resources>

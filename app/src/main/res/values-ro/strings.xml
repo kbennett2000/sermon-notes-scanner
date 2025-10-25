@@ -241,4 +241,39 @@
     <string name="in_collections_prefix">În: %1$s</string>
     <string name="in_collections_count">În %1$d colecții</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Fișierul va fi șters de pe dispozitiv. Această acțiune nu poate fi anulată.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Niciun document de exportat</string>
+    <string name="failed_to_export_document">Nu s-a putut exporta documentul</string>
+    <string name="error_during_export_with_reason">Eroare în timpul exportului: %1$s</string>
+    <string name="document_exported">Documentul %1$s a fost exportat</string>
+    <string name="document_multipage_exported">Documentul (cu mai multe pagini) %1$s a fost exportat</string>
+    <string name="no_target_selected">Nicio destinație selectată</string>
+    <string name="image_exported">Imaginea %1$s a fost exportată</string>
+    <string name="failed_to_export_image">Nu s-a putut exporta imaginea</string>
+    <string name="error_during_jpeg_export_with_reason">Eroare în timpul exportului JPEG: %1$s</string>
+    <string name="zip_exported">Fișierul ZIP %1$s a fost exportat</string>
+    <string name="failed_to_export_zip">Nu s-a putut exporta fișierul ZIP</string>
+    <string name="error_during_zip_export_with_reason">Eroare în timpul exportului ZIP: %1$s</string>
+    <string name="ocr_text_exported_as_txt">Textul OCR a fost exportat ca TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Eroare la exportul textului OCR: %1$s</string>
+    <string name="no_document_to_share_export_first">Niciun document disponibil pentru partajare. Exportați mai întâi un document.</string>
+    <string name="error_sharing_document_with_reason">Eroare la partajarea documentului: %1$s</string>
+    <string name="feature_scan_library_disabled">Funcția bibliotecii de scanări este dezactivată</string>
+    <string name="navigation_failed">Navigarea a eșuat</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">ID-ul scanării lipsește</string>
+    <string name="picker_failed">Selectarea a eșuat</string>
+    <string name="share_failed">Partajarea a eșuat</string>
+    <string name="no_app_found_to_open_file">Nu a fost găsită nicio aplicație pentru a deschide acest fișier</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Eliminați din această colecție?</string>
+    <string name="removed_from_collection">Eliminat din colecție</string>
+    <string name="indexed_new_items">Au fost indexate %1$d element(e) noi</string>
+    <string name="nothing_new_to_index">Nimic nou de indexat</string>
+
 </resources>

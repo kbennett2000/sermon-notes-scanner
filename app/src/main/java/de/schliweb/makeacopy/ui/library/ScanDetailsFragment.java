@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -175,14 +174,12 @@ public class ScanDetailsFragment extends Fragment {
             // Keep root padding unchanged
             v.setPadding(origPadLeft, origPadTop, origPadRight, origPadBottom);
             // Apply status bar inset to the header content only
-            if (content != null && content.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                ViewGroup.MarginLayoutParams clp = (ViewGroup.MarginLayoutParams) content.getLayoutParams();
+            if (content != null && content.getLayoutParams() instanceof ViewGroup.MarginLayoutParams clp) {
                 clp.topMargin = origContentTopMargin + sb.top;
                 content.setLayoutParams(clp);
             }
             // Bottom inset for nav bar on the bottom button container
-            if (bottomContainer != null && bottomContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) bottomContainer.getLayoutParams();
+            if (bottomContainer != null && bottomContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams mlp) {
                 mlp.bottomMargin = origBottomMargin + sb.bottom;
                 bottomContainer.setLayoutParams(mlp);
             }
@@ -190,7 +187,7 @@ public class ScanDetailsFragment extends Fragment {
         });
 
         if (!BuildConfig.FEATURE_SCAN_LIBRARY) {
-            Toast.makeText(requireContext(), "Scan library feature is disabled", Toast.LENGTH_SHORT).show();
+            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.feature_scan_library_disabled, android.widget.Toast.LENGTH_SHORT);
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
             return root;
         }
@@ -199,7 +196,7 @@ public class ScanDetailsFragment extends Fragment {
             scanId = getArguments().getString("scanId");
         }
         if (scanId == null || scanId.isEmpty()) {
-            Toast.makeText(requireContext(), "Missing scan id", Toast.LENGTH_SHORT).show();
+            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.missing_scan_id, android.widget.Toast.LENGTH_SHORT);
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
             return root;
         }
@@ -249,14 +246,14 @@ public class ScanDetailsFragment extends Fragment {
                     }
                     names[n] = getString(R.string.create_new_collection);
 
-                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    final androidx.appcompat.app.AlertDialog pickerDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                             .setTitle(getString(R.string.place_in_collection_title))
                             .setItems(names, (dialog, which) -> {
                                 if (which == n) {
                                     // Create new collection flow
                                     final android.widget.EditText input = new android.widget.EditText(requireContext());
                                     input.setHint(R.string.collection_name_hint);
-                                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                    final androidx.appcompat.app.AlertDialog createDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                                             .setTitle(R.string.new_collection_title)
                                             .setView(input)
                                             .setPositiveButton(R.string.create, (d, w) -> {
@@ -269,14 +266,21 @@ public class ScanDetailsFragment extends Fragment {
                                                         if (ce != null) {
                                                             repo.assignScanToCollection(appCtx, scanId, ce.id);
                                                             if (isAdded())
-                                                                requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), getString(R.string.scan_added_to_collection, name), Toast.LENGTH_SHORT).show());
+                                                                requireActivity().runOnUiThread(() -> de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, name), android.widget.Toast.LENGTH_SHORT));
                                                         }
                                                     } catch (Throwable ignore) {
                                                     }
                                                 }).start();
                                             })
                                             .setNegativeButton(android.R.string.cancel, null)
-                                            .show();
+                                            .create();
+                                    createDialog.setOnShowListener(d -> {
+                                        try {
+                                            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(createDialog, requireContext());
+                                        } catch (Throwable ignore) {
+                                        }
+                                    });
+                                    createDialog.show();
                                 } else if (which >= 0 && which < n) {
                                     final de.schliweb.makeacopy.data.library.CollectionEntity sel = finalCols.get(which);
                                     new Thread(() -> {
@@ -284,14 +288,21 @@ public class ScanDetailsFragment extends Fragment {
                                             de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
                                             repo.assignScanToCollection(appCtx, scanId, sel.id);
                                             if (isAdded())
-                                                requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), getString(R.string.scan_added_to_collection, sel.name), Toast.LENGTH_SHORT).show());
+                                                requireActivity().runOnUiThread(() -> de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, sel.name), android.widget.Toast.LENGTH_SHORT));
                                         } catch (Throwable ignore) {
                                         }
                                     }).start();
                                 }
                             })
                             .setNegativeButton(android.R.string.cancel, null)
-                            .show();
+                            .create();
+                    pickerDialog.setOnShowListener(d -> {
+                        try {
+                            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(pickerDialog, requireContext());
+                        } catch (Throwable ignore) {
+                        }
+                    });
+                    pickerDialog.show();
                 } catch (Throwable ignore) {
                 }
             });
@@ -316,7 +327,7 @@ public class ScanDetailsFragment extends Fragment {
     private void bind(@Nullable ScanEntity e) {
         this.entity = e;
         if (e == null) {
-            Toast.makeText(requireContext(), getString(R.string.missing_file), Toast.LENGTH_SHORT).show();
+            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.missing_file, android.widget.Toast.LENGTH_SHORT);
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
             return;
         }
@@ -341,15 +352,20 @@ public class ScanDetailsFragment extends Fragment {
             if (exportUri != null) {
                 try {
                     fileName = de.schliweb.makeacopy.utils.FileUtils.getDisplayNameFromUri(requireContext(), exportUri);
-                } catch (Throwable ignore) {}
+                } catch (Throwable ignore) {
+                }
                 if (fileName == null || fileName.trim().isEmpty()) {
-                    try { fileName = exportUri.getLastPathSegment(); } catch (Throwable ignore) {}
+                    try {
+                        fileName = exportUri.getLastPathSegment();
+                    } catch (Throwable ignore) {
+                    }
                 }
             }
             if (fileName != null && !fileName.trim().isEmpty()) {
                 subtitle.append(" • ").append("File: ").append(fileName);
             }
-        } catch (Throwable ignore) {}
+        } catch (Throwable ignore) {
+        }
         if (!canOpen) {
             subtitle.append(" • ").append(getString(R.string.missing_file));
         }
@@ -371,7 +387,7 @@ public class ScanDetailsFragment extends Fragment {
                     try {
                         restoreAccessLauncher.launch(types);
                     } catch (Throwable t) {
-                        Toast.makeText(requireContext(), "Picker failed", Toast.LENGTH_SHORT).show();
+                        de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.picker_failed, android.widget.Toast.LENGTH_SHORT);
                     }
                 });
             } else {
@@ -390,7 +406,8 @@ public class ScanDetailsFragment extends Fragment {
                 try {
                     String mime = requireContext().getContentResolver().getType(primaryUri);
                     looksPdf = (mime != null && ("application/pdf".equalsIgnoreCase(mime) || mime.toLowerCase(java.util.Locale.ROOT).contains("pdf")));
-                } catch (Throwable ignore) {}
+                } catch (Throwable ignore) {
+                }
             }
             if (looksPdf && canOpen) {
                 showPdfPager = true;
@@ -425,164 +442,176 @@ public class ScanDetailsFragment extends Fragment {
         return false;
     }
 
-        // Extract first URI string from a simple JSON array like ["content://..."]
-        private static String firstUriFromJson(String json) {
-            if (json == null) return null;
-            try {
-                int i = json.indexOf('"');
-                while (i >= 0 && i + 1 < json.length()) {
-                    if (i > 0 && json.charAt(i - 1) == '\\') { // skip escaped
-                        i = json.indexOf('"', i + 1);
-                        continue;
-                    }
-                    int j = json.indexOf('"', i + 1);
-                    while (j > i && json.charAt(j - 1) == '\\') {
-                        j = json.indexOf('"', j + 1);
-                    }
-                    if (j > i) {
-                        return json.substring(i + 1, j);
-                    } else {
-                        break;
-                    }
+    // Extract first URI string from a simple JSON array like ["content://..."]
+    private static String firstUriFromJson(String json) {
+        if (json == null) return null;
+        try {
+            int i = json.indexOf('"');
+            while (i >= 0 && i + 1 < json.length()) {
+                if (i > 0 && json.charAt(i - 1) == '\\') { // skip escaped
+                    i = json.indexOf('"', i + 1);
+                    continue;
                 }
-            } catch (Throwable ignore) {
+                int j = json.indexOf('"', i + 1);
+                while (j > i && json.charAt(j - 1) == '\\') {
+                    j = json.indexOf('"', j + 1);
+                }
+                if (j > i) {
+                    return json.substring(i + 1, j);
+                } else {
+                    break;
+                }
             }
-            return null;
+        } catch (Throwable ignore) {
         }
+        return null;
+    }
 
-        private String makeSingleUriArrayJson(@NonNull android.net.Uri uri) {
+    private String makeSingleUriArrayJson(@NonNull android.net.Uri uri) {
+        try {
+            String s = uri.toString();
+            String esc = s.replace("\"", "\\\"");
+            return "[\"" + esc + "\"]";
+        } catch (Throwable t) {
+            return "[\"" + uri + "\"]";
+        }
+    }
+
+    private void loadPreviewAsync(@Nullable String pathOrUri) {
+        if (previewView == null) return;
+        if (pathOrUri == null || pathOrUri.isEmpty()) {
+            previewView.setVisibility(View.GONE);
+            return;
+        }
+        previewView.setVisibility(View.VISIBLE);
+        new Thread(() -> {
+            android.graphics.Bitmap bmp = null;
             try {
-                String s = uri.toString();
-                String esc = s.replace("\"", "\\\"");
-                return "[\"" + esc + "\"]";
-            } catch (Throwable t) {
-                return "[\"" + String.valueOf(uri) + "\"]";
-            }
-        }
-
-        private void loadPreviewAsync(@Nullable String pathOrUri) {
-            if (previewView == null) return;
-            if (pathOrUri == null || pathOrUri.isEmpty()) {
-                previewView.setVisibility(View.GONE);
-                return;
-            }
-            previewView.setVisibility(View.VISIBLE);
-            new Thread(() -> {
-                android.graphics.Bitmap bmp = null;
-                try {
-                    // Try as file path first
-                    java.io.File f = new java.io.File(pathOrUri);
-                    if (f.exists() && f.isFile()) {
-                        bmp = decodeSampledBitmapFromFile(pathOrUri, 1080, 1080);
+                // Try as file path first
+                java.io.File f = new java.io.File(pathOrUri);
+                if (f.exists() && f.isFile()) {
+                    bmp = decodeSampledBitmapFromFile(pathOrUri, 1080, 1080);
+                } else {
+                    // Try as content URI
+                    android.net.Uri uri = android.net.Uri.parse(pathOrUri);
+                    android.content.ContentResolver cr = requireContext().getContentResolver();
+                    String mime = null;
+                    try {
+                        mime = cr.getType(uri);
+                    } catch (Throwable ignore) {
+                    }
+                    boolean isPdf = (mime != null && ("application/pdf".equalsIgnoreCase(mime) || mime.toLowerCase(java.util.Locale.ROOT).contains("pdf")))
+                            || isLikelyPdfUri(uri);
+                    if (isPdf) {
+                        bmp = renderPdfFirstPage(uri, 1080);
                     } else {
-                        // Try as content URI
-                        android.net.Uri uri = android.net.Uri.parse(pathOrUri);
-                        android.content.ContentResolver cr = requireContext().getContentResolver();
-                        String mime = null;
-                        try { mime = cr.getType(uri); } catch (Throwable ignore) {}
-                        boolean isPdf = (mime != null && ("application/pdf".equalsIgnoreCase(mime) || mime.toLowerCase(java.util.Locale.ROOT).contains("pdf")))
-                                || isLikelyPdfUri(uri);
-                        if (isPdf) {
-                            bmp = renderPdfFirstPage(uri, 1080);
-                        } else {
-                            try (java.io.InputStream is = cr.openInputStream(uri)) {
-                                if (is != null) {
-                                    android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
-                                    opts.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
-                                    opts.inSampleSize = 2;
-                                    bmp = android.graphics.BitmapFactory.decodeStream(is, null, opts);
-                                }
+                        try (java.io.InputStream is = cr.openInputStream(uri)) {
+                            if (is != null) {
+                                android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
+                                opts.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
+                                opts.inSampleSize = 2;
+                                bmp = android.graphics.BitmapFactory.decodeStream(is, null, opts);
                             }
                         }
                     }
+                }
+            } catch (Throwable ignore) {
+            }
+            final android.graphics.Bitmap finalBmp = bmp;
+            if (!isAdded()) return;
+            requireActivity().runOnUiThread(() -> {
+                if (previewView == null) return;
+                if (finalBmp != null) {
+                    previewView.setImageBitmap(finalBmp);
+                    previewView.setVisibility(View.VISIBLE);
+                } else {
+                    previewView.setImageDrawable(null);
+                    previewView.setVisibility(View.GONE);
+                }
+            });
+        }).start();
+    }
+
+    private static android.graphics.Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
+        try {
+            final android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            android.graphics.BitmapFactory.decodeFile(path, options);
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+            options.inJustDecodeBounds = false;
+            options.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
+            return android.graphics.BitmapFactory.decodeFile(path, options);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static int calculateInSampleSize(android.graphics.BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        int height = options.outHeight;
+        int width = options.outWidth;
+        int inSampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = Math.max(1, height / 2);
+            final int halfWidth = Math.max(1, width / 2);
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+
+    private boolean isLikelyPdfUri(@NonNull android.net.Uri uri) {
+        try {
+            String s = uri.toString();
+            if (s == null) return false;
+            String lower = s.toLowerCase(java.util.Locale.ROOT);
+            return lower.endsWith(".pdf") || lower.contains("/pdf");
+        } catch (Throwable ignore) {
+            return false;
+        }
+    }
+
+    private android.graphics.Bitmap renderPdfFirstPage(@NonNull android.net.Uri uri, int targetW) {
+        android.os.ParcelFileDescriptor pfd = null;
+        android.graphics.pdf.PdfRenderer renderer = null;
+        try {
+            pfd = requireContext().getContentResolver().openFileDescriptor(uri, "r");
+            if (pfd == null) return null;
+            renderer = new android.graphics.pdf.PdfRenderer(pfd);
+            if (renderer.getPageCount() <= 0) return null;
+            android.graphics.pdf.PdfRenderer.Page page = renderer.openPage(0);
+            try {
+                int pageW = page.getWidth();
+                int pageH = page.getHeight();
+                int targetH = (pageW > 0) ? Math.max(1, (int) (targetW * (pageH / (float) pageW))) : targetW;
+                android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(targetW, targetH, android.graphics.Bitmap.Config.ARGB_8888);
+                android.graphics.Canvas canvas = new android.graphics.Canvas(bmp);
+                canvas.drawColor(android.graphics.Color.WHITE);
+                android.graphics.Matrix m = new android.graphics.Matrix();
+                float scaleX = targetW / (float) pageW;
+                float scaleY = targetH / (float) pageH;
+                m.setScale(scaleX, scaleY);
+                page.render(bmp, null, m, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                return bmp;
+            } finally {
+                try {
+                    page.close();
                 } catch (Throwable ignore) {
                 }
-                final android.graphics.Bitmap finalBmp = bmp;
-                if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> {
-                    if (previewView == null) return;
-                    if (finalBmp != null) {
-                        previewView.setImageBitmap(finalBmp);
-                        previewView.setVisibility(View.VISIBLE);
-                    } else {
-                        previewView.setImageDrawable(null);
-                        previewView.setVisibility(View.GONE);
-                    }
-                });
-            }).start();
-        }
-
-        private static android.graphics.Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
-            try {
-                final android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                android.graphics.BitmapFactory.decodeFile(path, options);
-                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-                options.inJustDecodeBounds = false;
-                options.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
-                return android.graphics.BitmapFactory.decodeFile(path, options);
-            } catch (Throwable t) {
-                return null;
             }
-        }
-
-        private static int calculateInSampleSize(android.graphics.BitmapFactory.Options options, int reqWidth, int reqHeight) {
-            int height = options.outHeight;
-            int width = options.outWidth;
-            int inSampleSize = 1;
-            if (height > reqHeight || width > reqWidth) {
-                final int halfHeight = Math.max(1, height / 2);
-                final int halfWidth = Math.max(1, width / 2);
-                while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
-                    inSampleSize *= 2;
-                }
-            }
-            return inSampleSize;
-        }
-
-        private boolean isLikelyPdfUri(@NonNull android.net.Uri uri) {
+        } catch (Throwable ignore) {
+            return null;
+        } finally {
             try {
-                String s = uri.toString();
-                if (s == null) return false;
-                String lower = s.toLowerCase(java.util.Locale.ROOT);
-                return lower.endsWith(".pdf") || lower.contains("/pdf");
+                if (renderer != null) renderer.close();
             } catch (Throwable ignore) {
-                return false;
             }
-        }
-
-        private android.graphics.Bitmap renderPdfFirstPage(@NonNull android.net.Uri uri, int targetW) {
-            android.os.ParcelFileDescriptor pfd = null;
-            android.graphics.pdf.PdfRenderer renderer = null;
             try {
-                pfd = requireContext().getContentResolver().openFileDescriptor(uri, "r");
-                if (pfd == null) return null;
-                renderer = new android.graphics.pdf.PdfRenderer(pfd);
-                if (renderer.getPageCount() <= 0) return null;
-                android.graphics.pdf.PdfRenderer.Page page = renderer.openPage(0);
-                try {
-                    int pageW = page.getWidth();
-                    int pageH = page.getHeight();
-                    int targetH = (pageW > 0) ? Math.max(1, (int) (targetW * (pageH / (float) pageW))) : targetW;
-                    android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(targetW, targetH, android.graphics.Bitmap.Config.ARGB_8888);
-                    android.graphics.Canvas canvas = new android.graphics.Canvas(bmp);
-                    canvas.drawColor(android.graphics.Color.WHITE);
-                    android.graphics.Matrix m = new android.graphics.Matrix();
-                    float scaleX = targetW / (float) pageW;
-                    float scaleY = targetH / (float) pageH;
-                    m.setScale(scaleX, scaleY);
-                    page.render(bmp, null, m, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                    return bmp;
-                } finally {
-                    try { page.close(); } catch (Throwable ignore) {}
-                }
+                if (pfd != null) pfd.close();
             } catch (Throwable ignore) {
-                return null;
-            } finally {
-                try { if (renderer != null) renderer.close(); } catch (Throwable ignore) {}
-                try { if (pfd != null) pfd.close(); } catch (Throwable ignore) {}
             }
         }
+    }
 
     @Nullable
     private android.net.Uri getPrimaryExportUri() {
@@ -606,14 +635,19 @@ public class ScanDetailsFragment extends Fragment {
         try {
             String mime = requireContext().getContentResolver().getType(uri);
             if (mime != null && !mime.trim().isEmpty()) return mime;
-        } catch (Throwable ignore) {}
+        } catch (Throwable ignore) {
+        }
         // Derive from file name or path segment
         String name = null;
         try {
             name = de.schliweb.makeacopy.utils.FileUtils.getDisplayNameFromUri(requireContext(), uri);
-        } catch (Throwable ignore) {}
+        } catch (Throwable ignore) {
+        }
         if (name == null) {
-            try { name = uri.getLastPathSegment(); } catch (Throwable ignore) {}
+            try {
+                name = uri.getLastPathSegment();
+            } catch (Throwable ignore) {
+            }
         }
         if (name != null) {
             String lower = name.toLowerCase(java.util.Locale.ROOT);
@@ -643,13 +677,15 @@ public class ScanDetailsFragment extends Fragment {
                 try {
                     cr.takePersistableUriPermission(newUri,
                             android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION | android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                } catch (Throwable ignore) {}
+                } catch (Throwable ignore) {
+                }
                 String json = makeSingleUriArrayJson(newUri);
                 try {
                     de.schliweb.makeacopy.data.library.LibraryServiceLocator
                             .getScansRepository(requireContext())
                             .updateExportPathsJson(requireContext(), scanId, json);
-                } catch (Throwable ignore) {}
+                } catch (Throwable ignore) {
+                }
             }
         } catch (Throwable t) {
             // Provider may not support rename; ignore to keep operation best-effort only
@@ -698,7 +734,10 @@ public class ScanDetailsFragment extends Fragment {
                 }
             } catch (Throwable ignore) {
             } finally {
-                if (c != null) try { c.close(); } catch (Throwable ignore) {}
+                if (c != null) try {
+                    c.close();
+                } catch (Throwable ignore) {
+                }
             }
 
             // DocumentsContract: parse documentId to infer parent path
@@ -753,7 +792,7 @@ public class ScanDetailsFragment extends Fragment {
         final android.widget.EditText input = new android.widget.EditText(requireContext());
         input.setHint(R.string.collection_name_hint);
         input.setText(entity.title != null ? entity.title : "");
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        final androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle(R.string.rename)
                 .setView(input)
                 .setPositiveButton(R.string.ok, (d, w) -> {
@@ -771,17 +810,31 @@ public class ScanDetailsFragment extends Fragment {
                     }).start();
                 })
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        dialog.setOnShowListener(d -> {
+            try {
+                de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext());
+            } catch (Throwable ignore) {
+            }
+        });
+        dialog.show();
     }
 
     private void confirmDelete() {
         if (entity == null) return;
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        final androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle(R.string.confirm)
-                .setMessage(R.string.delete)
+                .setMessage(R.string.delete_warning_irreversible)
                 .setPositiveButton(R.string.delete, (d, w) -> doDelete())
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        dialog.setOnShowListener(d -> {
+            try {
+                de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext());
+            } catch (Throwable ignore) {
+            }
+        });
+        dialog.show();
     }
 
     private void doDelete() {
@@ -792,7 +845,7 @@ public class ScanDetailsFragment extends Fragment {
             }
             if (!isAdded()) return;
             requireActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), getString(R.string.deleted), Toast.LENGTH_SHORT).show();
+                de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.deleted, android.widget.Toast.LENGTH_SHORT);
                 requireActivity().getOnBackPressedDispatcher().onBackPressed();
             });
         }).start();
@@ -801,7 +854,7 @@ public class ScanDetailsFragment extends Fragment {
     private void share() {
         android.net.Uri uri = getPrimaryExportUri();
         if (uri == null) {
-            Toast.makeText(requireContext(), getString(R.string.missing_file), Toast.LENGTH_SHORT).show();
+            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.missing_file, android.widget.Toast.LENGTH_SHORT);
             return;
         }
         try {
@@ -817,7 +870,7 @@ public class ScanDetailsFragment extends Fragment {
                 send.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(android.content.Intent.createChooser(send, getString(R.string.btn_share)));
             } catch (Throwable t2) {
-                Toast.makeText(requireContext(), "Share failed", Toast.LENGTH_SHORT).show();
+                de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.share_failed, android.widget.Toast.LENGTH_SHORT);
             }
         }
     }
@@ -825,7 +878,7 @@ public class ScanDetailsFragment extends Fragment {
     private void openInExport() {
         android.net.Uri uri = getPrimaryExportUri();
         if (uri == null) {
-            Toast.makeText(requireContext(), getString(R.string.missing_file), Toast.LENGTH_SHORT).show();
+            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.missing_file, android.widget.Toast.LENGTH_SHORT);
             return;
         }
         try {
@@ -835,7 +888,7 @@ public class ScanDetailsFragment extends Fragment {
             view.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(android.content.Intent.createChooser(view, getString(R.string.title_export)));
         } catch (Throwable t) {
-            Toast.makeText(requireContext(), "No app found to open this file", Toast.LENGTH_SHORT).show();
+            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.no_app_found_to_open_file, android.widget.Toast.LENGTH_SHORT);
         }
     }
 
@@ -865,8 +918,14 @@ public class ScanDetailsFragment extends Fragment {
                     updateNavUi();
                 });
             } catch (Throwable t) {
-                try { if (rendererLocal != null) rendererLocal.close(); } catch (Throwable ignore) {}
-                try { if (pfdLocal != null) pfdLocal.close(); } catch (Throwable ignore) {}
+                try {
+                    if (rendererLocal != null) rendererLocal.close();
+                } catch (Throwable ignore) {
+                }
+                try {
+                    if (pfdLocal != null) pfdLocal.close();
+                } catch (Throwable ignore) {
+                }
                 pdfRenderer = null;
                 pdfPfd = null;
                 if (!isAdded()) return;
@@ -896,7 +955,8 @@ public class ScanDetailsFragment extends Fragment {
                 buttonNextPage.setEnabled(currentPageIndex < totalPages - 1);
                 buttonNextPage.setOnClickListener(v -> goToPage(currentPageIndex + 1));
             }
-        } catch (Throwable ignore) {}
+        } catch (Throwable ignore) {
+        }
     }
 
     private void goToPage(int index) {
@@ -936,7 +996,10 @@ public class ScanDetailsFragment extends Fragment {
                 page.render(bmp, null, m, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
                 return bmp;
             } finally {
-                try { page.close(); } catch (Throwable ignore) {}
+                try {
+                    page.close();
+                } catch (Throwable ignore) {
+                }
             }
         } catch (Throwable t) {
             return null;
@@ -944,8 +1007,14 @@ public class ScanDetailsFragment extends Fragment {
     }
 
     private void closePdfRenderer() {
-        try { if (pdfRenderer != null) pdfRenderer.close(); } catch (Throwable ignore) {}
-        try { if (pdfPfd != null) pdfPfd.close(); } catch (Throwable ignore) {}
+        try {
+            if (pdfRenderer != null) pdfRenderer.close();
+        } catch (Throwable ignore) {
+        }
+        try {
+            if (pdfPfd != null) pdfPfd.close();
+        } catch (Throwable ignore) {
+        }
         pdfRenderer = null;
         pdfPfd = null;
         totalPages = 0;

@@ -240,4 +240,39 @@
     <string name="in_collections_prefix">Dans : %1$s</string>
     <string name="in_collections_count">Dans %1$d collections</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Le fichier sera supprimé de l’appareil. Cette action est irréversible.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Aucun document à exporter</string>
+    <string name="failed_to_export_document">Échec de l’exportation du document</string>
+    <string name="error_during_export_with_reason">Erreur lors de l’exportation : %1$s</string>
+    <string name="document_exported">Document %1$s exporté</string>
+    <string name="document_multipage_exported">Document (multi-page) %1$s exporté</string>
+    <string name="no_target_selected">Aucune destination sélectionnée</string>
+    <string name="image_exported">Image %1$s exportée</string>
+    <string name="failed_to_export_image">Échec de l’exportation de l’image</string>
+    <string name="error_during_jpeg_export_with_reason">Erreur lors de l’exportation JPEG : %1$s</string>
+    <string name="zip_exported">Fichier ZIP %1$s exporté</string>
+    <string name="failed_to_export_zip">Échec de l’exportation du ZIP</string>
+    <string name="error_during_zip_export_with_reason">Erreur lors de l’exportation ZIP : %1$s</string>
+    <string name="ocr_text_exported_as_txt">Texte OCR exporté en TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Erreur lors de l’exportation du texte OCR : %1$s</string>
+    <string name="no_document_to_share_export_first">Aucun document à partager. Exportez d’abord un document.</string>
+    <string name="error_sharing_document_with_reason">Erreur lors du partage du document : %1$s</string>
+    <string name="feature_scan_library_disabled">La fonction de bibliothèque de numérisations est désactivée</string>
+    <string name="navigation_failed">Échec de la navigation</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">ID de numérisation manquant</string>
+    <string name="picker_failed">Échec de la sélection</string>
+    <string name="share_failed">Échec du partage</string>
+    <string name="no_app_found_to_open_file">Aucune application trouvée pour ouvrir ce fichier</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Retirer de cette collection ?</string>
+    <string name="removed_from_collection">Retiré de la collection</string>
+    <string name="indexed_new_items">%1$d nouvel(s) élément(s) indexé(s)</string>
+    <string name="nothing_new_to_index">Aucun nouvel élément à indexer</string>
+
 </resources>

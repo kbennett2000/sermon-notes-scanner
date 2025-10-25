@@ -72,10 +72,11 @@ public final class ExistingScansIndexer {
                             String better = deriveTitle(s);
                             if ((curTitle == null || curTitle.trim().isEmpty() || isGenericPlaceholder(curTitle))
                                     && better != null && !better.trim().isEmpty() && !isGenericPlaceholder(better)
-                                    && (curTitle == null || !better.equals(curTitle))) {
+                                    && (!better.equals(curTitle))) {
                                 repo.updateTitle(app, id, better);
                             }
-                        } catch (Throwable ignoreRepair) { }
+                        } catch (Throwable ignoreRepair) {
+                        }
                         // Repair missing export path if registry has a readable file path
                         try {
                             if (isNullOrEmpty(existing.exportPathsJson)) {
@@ -85,7 +86,8 @@ public final class ExistingScansIndexer {
                                     repo.updateExportPathsJson(app, id, exportJsonFix);
                                 }
                             }
-                        } catch (Throwable ignoreRepair2) { }
+                        } catch (Throwable ignoreRepair2) {
+                        }
                         continue;
                     }
                 } catch (Throwable ignore) {
@@ -151,7 +153,8 @@ public final class ExistingScansIndexer {
             if (p == null || p.trim().isEmpty()) return null;
             java.io.File f = new java.io.File(p);
             if (f.exists() && f.isFile()) return f.getAbsolutePath();
-        } catch (Throwable ignore) {}
+        } catch (Throwable ignore) {
+        }
         return null;
     }
 
@@ -169,6 +172,21 @@ public final class ExistingScansIndexer {
         }
     }
 
+    /**
+     * Derives a meaningful title for a completed scan based on its associated file or thumbnail paths,
+     * or falls back to the scan's unique identifier or a default value if necessary.
+     * <p>
+     * The method prioritizes deriving the title from the file name of the `filePath` if it is available
+     * and non-generic. If the file name is deemed generic (e.g., "page" or "thumb"), it attempts to use
+     * the parent directory name. As a next fallback, the file name from the scan's thumbnail path is
+     * used if available and valid. If no meaningful title can be derived from these sources, it defaults
+     * to the scan's identifier. A final fallback of "scan" is used if all other options are unavailable or invalid.
+     *
+     * @param s The completed scan object containing details such as file paths, thumbnail paths,
+     *          and a unique scan identifier.
+     * @return A derived meaningful title for the scan. If no meaningful title can be determined, the
+     * method returns a fallback identifier or "scan".
+     */
     private static String deriveTitle(CompletedScan s) {
         // Prefer a meaningful file/dir-based title; avoid generic placeholders like "page".
         try {
@@ -215,6 +233,15 @@ public final class ExistingScansIndexer {
         return (id != null && !id.isEmpty()) ? id : "scan";
     }
 
+    /**
+     * Determines if the input string represents a generic placeholder name.
+     * A generic placeholder is considered as one of the following case-insensitive
+     * strings: "page", "thumb", "image", or "img".
+     *
+     * @param name The input string to check. This may be null or empty.
+     * @return True if the input string matches one of the predefined placeholder names,
+     * otherwise false.
+     */
     private static boolean isGenericPlaceholder(String name) {
         String n = name == null ? "" : name.trim().toLowerCase(java.util.Locale.ROOT);
         return n.equals("page") || n.equals("thumb") || n.equals("image") || n.equals("img");

@@ -241,5 +241,39 @@
     <string name="in_collections_prefix">I: %1$s</string>
     <string name="in_collections_count">I %1$d samlingar</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Filen kommer att tas bort från enheten. Denna åtgärd kan inte ångras.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Inget dokument att exportera</string>
+    <string name="failed_to_export_document">Kunde inte exportera dokumentet</string>
+    <string name="error_during_export_with_reason">Fel vid export: %1$s</string>
+    <string name="document_exported">Dokument %1$s har exporterats</string>
+    <string name="document_multipage_exported">Dokument (flera sidor) %1$s har exporterats</string>
+    <string name="no_target_selected">Ingen målplats vald</string>
+    <string name="image_exported">Bild %1$s har exporterats</string>
+    <string name="failed_to_export_image">Kunde inte exportera bilden</string>
+    <string name="error_during_jpeg_export_with_reason">Fel vid JPEG-export: %1$s</string>
+    <string name="zip_exported">ZIP %1$s har exporterats</string>
+    <string name="failed_to_export_zip">Kunde inte exportera ZIP</string>
+    <string name="error_during_zip_export_with_reason">Fel vid ZIP-export: %1$s</string>
+    <string name="ocr_text_exported_as_txt">OCR-text exporterad som TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Fel vid export av OCR-text: %1$s</string>
+    <string name="no_document_to_share_export_first">Inget dokument att dela. Exportera ett dokument först.</string>
+    <string name="error_sharing_document_with_reason">Fel vid delning av dokument: %1$s</string>
+    <string name="feature_scan_library_disabled">Funktionen för skanningsbibliotek är inaktiverad</string>
+    <string name="navigation_failed">Navigering misslyckades</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Saknat skannings-ID</string>
+    <string name="picker_failed">Val misslyckades</string>
+    <string name="share_failed">Delning misslyckades</string>
+    <string name="no_app_found_to_open_file">Ingen app hittades för att öppna denna fil</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Ta bort från denna samling?</string>
+    <string name="removed_from_collection">Borttagen från samling</string>
+    <string name="indexed_new_items">Indexerade %1$d nya objekt</string>
+    <string name="nothing_new_to_index">Inget nytt att indexera</string>
 
 </resources>

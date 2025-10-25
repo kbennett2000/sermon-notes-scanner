@@ -243,4 +243,39 @@
     <string name="in_collections_prefix">属于：%1$s</string>
     <string name="in_collections_count">属于 %1$d 个收藏集</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">文件将从设备中删除。此操作无法撤销。</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">没有可导出的文档</string>
+    <string name="failed_to_export_document">文档导出失败</string>
+    <string name="error_during_export_with_reason">导出时出错：%1$s</string>
+    <string name="document_exported">文档 %1$s 已导出</string>
+    <string name="document_multipage_exported">文档（多页）%1$s 已导出</string>
+    <string name="no_target_selected">未选择目标位置</string>
+    <string name="image_exported">图像 %1$s 已导出</string>
+    <string name="failed_to_export_image">图像导出失败</string>
+    <string name="error_during_jpeg_export_with_reason">导出 JPEG 时出错：%1$s</string>
+    <string name="zip_exported">ZIP 文件 %1$s 已导出</string>
+    <string name="failed_to_export_zip">ZIP 导出失败</string>
+    <string name="error_during_zip_export_with_reason">导出 ZIP 时出错：%1$s</string>
+    <string name="ocr_text_exported_as_txt">OCR 文本已导出为 TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">导出 OCR 文本时出错：%1$s</string>
+    <string name="no_document_to_share_export_first">没有可分享的文档。请先导出文档。</string>
+    <string name="error_sharing_document_with_reason">共享文档时出错：%1$s</string>
+    <string name="feature_scan_library_disabled">扫描库功能已禁用</string>
+    <string name="navigation_failed">导航失败</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">缺少扫描 ID</string>
+    <string name="picker_failed">选择失败</string>
+    <string name="share_failed">共享失败</string>
+    <string name="no_app_found_to_open_file">未找到可打开此文件的应用程序</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">从此集合中移除？</string>
+    <string name="removed_from_collection">已从集合中移除</string>
+    <string name="indexed_new_items">已索引 %1$d 个新项目</string>
+    <string name="nothing_new_to_index">没有新的项目可索引</string>
+
 </resources>

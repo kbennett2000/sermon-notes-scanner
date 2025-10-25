@@ -121,7 +121,7 @@ public class ScansAdapter extends RecyclerView.Adapter<ScansAdapter.VH> {
             Boolean unread = unreadableMap.get(e.id);
             if (Boolean.TRUE.equals(unread)) {
                 try {
-                    android.widget.Toast.makeText(v.getContext(), v.getContext().getString(R.string.missing_file), android.widget.Toast.LENGTH_SHORT).show();
+                    de.schliweb.makeacopy.utils.UIUtils.showToast(v.getContext(), R.string.missing_file, android.widget.Toast.LENGTH_SHORT);
                 } catch (Throwable ignore) {}
             }
             listener.onItemClick(e);

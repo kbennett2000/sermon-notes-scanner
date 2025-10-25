@@ -242,5 +242,40 @@
     <string name="in_collections_prefix">V: %1$s</string>
     <string name="in_collections_count">V %1$d kolekcích</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Soubor bude odstraněn ze zařízení. Tuto akci nelze vrátit zpět.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Žádný dokument k exportu</string>
+    <string name="failed_to_export_document">Export dokumentu se nezdařil</string>
+    <string name="error_during_export_with_reason">Chyba při exportu: %1$s</string>
+    <string name="document_exported">Dokument %1$s exportován</string>
+    <string name="document_multipage_exported">Dokument (vícestránkový) %1$s exportován</string>
+    <string name="no_target_selected">Nebyl vybrán cíl</string>
+    <string name="image_exported">Obrázek %1$s exportován</string>
+    <string name="failed_to_export_image">Export obrázku se nezdařil</string>
+    <string name="error_during_jpeg_export_with_reason">Chyba při exportu JPEG: %1$s</string>
+    <string name="zip_exported">Soubor ZIP %1$s exportován</string>
+    <string name="failed_to_export_zip">Export ZIP se nezdařil</string>
+    <string name="error_during_zip_export_with_reason">Chyba při exportu ZIP: %1$s</string>
+    <string name="ocr_text_exported_as_txt">OCR text exportován jako TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Chyba při exportu OCR textu: %1$s</string>
+    <string name="no_document_to_share_export_first">Žádný dokument k sdílení. Nejprve dokument exportujte.</string>
+    <string name="error_sharing_document_with_reason">Chyba při sdílení dokumentu: %1$s</string>
+    <string name="feature_scan_library_disabled">Funkce knihovny skenů je deaktivována</string>
+    <string name="navigation_failed">Navigace se nezdařila</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Chybí ID skenu</string>
+    <string name="picker_failed">Výběr se nezdařil</string>
+    <string name="share_failed">Sdílení se nezdařilo</string>
+    <string name="no_app_found_to_open_file">Nebyla nalezena aplikace pro otevření tohoto souboru</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Odebrat z této kolekce?</string>
+    <string name="removed_from_collection">Odebráno z kolekce</string>
+    <string name="indexed_new_items">Indexováno %1$d nových položek</string>
+    <string name="nothing_new_to_index">Žádné nové položky k indexování</string>
+
 
 </resources>

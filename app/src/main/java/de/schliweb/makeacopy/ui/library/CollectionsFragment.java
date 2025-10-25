@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,6 +15,7 @@ import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.data.library.CollectionEntity;
 import de.schliweb.makeacopy.data.library.LibraryServiceLocator;
+import de.schliweb.makeacopy.utils.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,8 +63,7 @@ public class CollectionsFragment extends Fragment {
             // Top inset for status bar
             v.setPadding(origPadLeft, origPadTop + sb.top, origPadRight, origPadBottom);
             // Bottom inset for nav bar on the bottom button container
-            if (bottomContainer != null && bottomContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) bottomContainer.getLayoutParams();
+            if (bottomContainer != null && bottomContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams mlp) {
                 mlp.bottomMargin = origBottomMargin + sb.bottom;
                 bottomContainer.setLayoutParams(mlp);
             }
@@ -86,7 +85,7 @@ public class CollectionsFragment extends Fragment {
         }
 
         if (!BuildConfig.FEATURE_SCAN_LIBRARY) {
-            Toast.makeText(requireContext(), "Scan library feature is disabled", Toast.LENGTH_SHORT).show();
+            UIUtils.showToast(requireContext(), R.string.feature_scan_library_disabled, android.widget.Toast.LENGTH_SHORT);
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
             return root;
         }
@@ -101,7 +100,7 @@ public class CollectionsFragment extends Fragment {
                     args.putString("collectionName", row.name);
                     Navigation.findNavController(requireView()).navigate(R.id.navigation_scans_library, args);
                 } catch (Throwable t) {
-                    Toast.makeText(requireContext(), "Navigation failed", Toast.LENGTH_SHORT).show();
+                    UIUtils.showToast(requireContext(), R.string.navigation_failed, android.widget.Toast.LENGTH_SHORT);
                 }
             }
 
@@ -134,7 +133,7 @@ public class CollectionsFragment extends Fragment {
                                                 if (!isAdded()) return;
                                                 requireActivity().runOnUiThread(() -> {
                                                     if (!finalOk) {
-                                                        Toast.makeText(requireContext(), R.string.error_empty_input, Toast.LENGTH_SHORT).show();
+                                                        UIUtils.showToast(requireContext(), R.string.error_empty_input, android.widget.Toast.LENGTH_SHORT);
                                                     }
                                                     loadDataAsync();
                                                 });
@@ -155,10 +154,10 @@ public class CollectionsFragment extends Fragment {
                                     if (!isAdded()) return;
                                     requireActivity().runOnUiThread(() -> {
                                         if (finalDeleted) {
-                                            Toast.makeText(requireContext(), getString(R.string.deleted), Toast.LENGTH_SHORT).show();
+                                            UIUtils.showToast(requireContext(), R.string.deleted, android.widget.Toast.LENGTH_SHORT);
                                             loadDataAsync();
                                         } else {
-                                            Toast.makeText(requireContext(), getString(R.string.collection_not_empty), Toast.LENGTH_SHORT).show();
+                                            UIUtils.showToast(requireContext(), R.string.collection_not_empty, android.widget.Toast.LENGTH_SHORT);
                                         }
                                     });
                                 }).start();

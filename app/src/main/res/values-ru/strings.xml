@@ -242,4 +242,39 @@
     <string name="in_collections_prefix">В: %1$s</string>
     <string name="in_collections_count">В %1$d коллекциях</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Файл будет удалён с устройства. Это действие нельзя отменить.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Нет документа для экспорта</string>
+    <string name="failed_to_export_document">Не удалось экспортировать документ</string>
+    <string name="error_during_export_with_reason">Ошибка при экспорте: %1$s</string>
+    <string name="document_exported">Документ %1$s экспортирован</string>
+    <string name="document_multipage_exported">Документ (многостраничный) %1$s экспортирован</string>
+    <string name="no_target_selected">Цель не выбрана</string>
+    <string name="image_exported">Изображение %1$s экспортировано</string>
+    <string name="failed_to_export_image">Не удалось экспортировать изображение</string>
+    <string name="error_during_jpeg_export_with_reason">Ошибка при экспорте JPEG: %1$s</string>
+    <string name="zip_exported">ZIP %1$s экспортирован</string>
+    <string name="failed_to_export_zip">Не удалось экспортировать ZIP</string>
+    <string name="error_during_zip_export_with_reason">Ошибка при экспорте ZIP: %1$s</string>
+    <string name="ocr_text_exported_as_txt">Текст OCR экспортирован как TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Ошибка при экспорте текста OCR: %1$s</string>
+    <string name="no_document_to_share_export_first">Нет документа для общего доступа. Сначала экспортируйте документ.</string>
+    <string name="error_sharing_document_with_reason">Ошибка при обмене документом: %1$s</string>
+    <string name="feature_scan_library_disabled">Функция библиотеки сканов отключена</string>
+    <string name="navigation_failed">Ошибка навигации</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Отсутствует идентификатор скана</string>
+    <string name="picker_failed">Ошибка выбора</string>
+    <string name="share_failed">Ошибка при обмене</string>
+    <string name="no_app_found_to_open_file">Не найдено приложение для открытия этого файла</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Удалить из этой коллекции?</string>
+    <string name="removed_from_collection">Удалено из коллекции</string>
+    <string name="indexed_new_items">Проиндексировано %1$d новых элемент(ов)</string>
+    <string name="nothing_new_to_index">Нет новых элементов для индексирования</string>
+
 </resources>

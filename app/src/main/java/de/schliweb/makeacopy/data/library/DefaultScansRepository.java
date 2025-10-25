@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-
 import org.json.JSONArray;
 
 import java.io.File;
@@ -31,6 +30,15 @@ import java.util.Set;
 public class DefaultScansRepository implements ScansRepository {
     private static final String TAG = "ScansRepo";
 
+    /**
+     * Indexes or updates the metadata of an exported scan in the database. This method ensures
+     * that the scan represented by the given metadata is persisted in the database. If the scan
+     * already exists, its basic fields are updated with any new information provided in the
+     * metadata. If the scan does not exist, it is inserted as a new entry.
+     *
+     * @param context the application context used to access the database
+     * @param meta    the metadata of the scan to be indexed or updated, represented as a {@code ScanIndexMeta}
+     */
     @Override
     public void indexExportedScan(Context context, ScanIndexMeta meta) {
         try {
@@ -64,6 +72,14 @@ public class DefaultScansRepository implements ScansRepository {
         }
     }
 
+    /**
+     * Retrieves all saved scans from the database in descending order of their creation timestamp.
+     * This method returns an empty list if the query fails or if no scans exist in the database.
+     *
+     * @param context the application context used to access the database.
+     * @return a list of {@code ScanEntity} objects representing all saved scans from the database.
+     * Returns an empty list if the query fails or no scans are found.
+     */
     @Override
     public List<ScanEntity> getAllScans(Context context) {
         try {
@@ -74,6 +90,15 @@ public class DefaultScansRepository implements ScansRepository {
         }
     }
 
+    /**
+     * Retrieves all scans associated with a specific collection from the database.
+     * If the query fails or no scans are found for the given collection, an empty list is returned.
+     *
+     * @param context      the application context used to access the database
+     * @param collectionId the unique identifier of the collection for which scans are being retrieved
+     * @return a list of {@code ScanEntity} objects associated with the specified collection.
+     * Returns an empty list if the query fails or no scans are found for the given collection.
+     */
     @Override
     public List<ScanEntity> getScansForCollection(Context context, String collectionId) {
         try {
@@ -84,6 +109,15 @@ public class DefaultScansRepository implements ScansRepository {
         }
     }
 
+    /**
+     * Retrieves a specific scan from the database using its unique identifier.
+     * If the query fails or the scan is not found, this method returns null.
+     *
+     * @param context the application context used to access the database
+     * @param id      the unique identifier of the scan to be retrieved
+     * @return the {@code ScanEntity} associated with the given identifier,
+     * or null if the query fails or the scan cannot be found
+     */
     @Override
     public ScanEntity getScanById(Context context, String id) {
         try {
@@ -94,6 +128,14 @@ public class DefaultScansRepository implements ScansRepository {
         }
     }
 
+    /**
+     * Deletes a scan with the specified unique identifier from the database, including associated
+     * data and physical artifacts. This method performs cleanup on related entries, files, and joins
+     * associated with the scan to ensure data integrity and avoid orphaned references or artifacts.
+     *
+     * @param context the application context used to access the underlying database and perform cleanup operations
+     * @param id      the unique identifier of the scan to be deleted from the database
+     */
     @Override
     public void deleteScan(Context context, String id) {
         try {

@@ -48,6 +48,13 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
         }
     }
 
+    /**
+     * Retrieves all collections from the database ordered by their sort order and creation timestamp.
+     * If an error occurs during the database operation, an empty list is returned.
+     *
+     * @param context the Context of the application or activity, required to initialize the database.
+     * @return a list of {@code CollectionEntity} objects representing all collections in the database.
+     */
     @Override
     public List<CollectionEntity> getAllCollections(Context context) {
         try {
@@ -58,6 +65,15 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
         }
     }
 
+    /**
+     * Assigns a scan to a collection by creating a relationship between the specified scan and collection
+     * in the database. This method inserts a record into the {@code scan_collection_join} table,
+     * associating the given scan and collection IDs with the current timestamp.
+     *
+     * @param context      the application or activity context, required to initialize the database instance.
+     * @param scanId       the unique identifier of the scan to be added to the collection.
+     * @param collectionId the unique identifier of the collection to which the scan is to be assigned.
+     */
     @Override
     public void assignScanToCollection(Context context, String scanId, String collectionId) {
         try {
@@ -68,6 +84,16 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
         }
     }
 
+    /**
+     * Removes the association between a specific scan and a collection from the database.
+     * <p>
+     * This method deletes the relationship in the {@code scan_collection_join} table
+     * for the provided scan and collection identifiers.
+     *
+     * @param context      the application or activity context, required to initialize the database instance.
+     * @param scanId       the unique identifier of the scan to be dissociated from the collection.
+     * @param collectionId the unique identifier of the collection from which the scan is to be removed.
+     */
     @Override
     public void removeScanFromCollection(Context context, String scanId, String collectionId) {
         try {
@@ -78,6 +104,14 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
         }
     }
 
+    /**
+     * Deletes a collection from the database if it contains no items. This method checks the item
+     * count for the collection and removes the collection only if the count is zero.
+     *
+     * @param context      the application or activity context, used to initialize the database.
+     * @param collectionId the unique identifier of the collection to be deleted.
+     * @return {@code true} if the collection was empty and successfully deleted, {@code false} otherwise.
+     */
     @Override
     public boolean deleteCollectionIfEmpty(Context context, String collectionId) {
         try {
@@ -135,7 +169,8 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
                 try {
                     CollectionEntity ce = cdao.getById(id);
                     if (ce != null) list.add(ce);
-                } catch (Throwable ignore) {}
+                } catch (Throwable ignore) {
+                }
             }
             // Optional: sort by sortOrder then name
             try {
@@ -146,7 +181,8 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
                     String bn = (b.name == null ? "" : b.name);
                     return an.compareToIgnoreCase(bn);
                 });
-            } catch (Throwable ignore) {}
+            } catch (Throwable ignore) {
+            }
             return list;
         } catch (Throwable t) {
             Log.e(TAG, "getCollectionsForScan failed", t);

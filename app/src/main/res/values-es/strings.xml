@@ -241,5 +241,39 @@
     <string name="in_collections_prefix">En: %1$s</string>
     <string name="in_collections_count">En %1$d colecciones</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">El archivo se eliminará del dispositivo. Esta acción no se puede deshacer.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">No hay documento para exportar</string>
+    <string name="failed_to_export_document">Error al exportar el documento</string>
+    <string name="error_during_export_with_reason">Error durante la exportación: %1$s</string>
+    <string name="document_exported">Documento %1$s exportado</string>
+    <string name="document_multipage_exported">Documento (de varias páginas) %1$s exportado</string>
+    <string name="no_target_selected">No se ha seleccionado un destino</string>
+    <string name="image_exported">Imagen %1$s exportada</string>
+    <string name="failed_to_export_image">Error al exportar la imagen</string>
+    <string name="error_during_jpeg_export_with_reason">Error durante la exportación JPEG: %1$s</string>
+    <string name="zip_exported">ZIP %1$s exportado</string>
+    <string name="failed_to_export_zip">Error al exportar el ZIP</string>
+    <string name="error_during_zip_export_with_reason">Error durante la exportación ZIP: %1$s</string>
+    <string name="ocr_text_exported_as_txt">Texto OCR exportado como TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Error al exportar el texto OCR: %1$s</string>
+    <string name="no_document_to_share_export_first">No hay documento disponible para compartir. Exporta un documento primero.</string>
+    <string name="error_sharing_document_with_reason">Error al compartir el documento: %1$s</string>
+    <string name="feature_scan_library_disabled">La función de biblioteca de escaneos está desactivada</string>
+    <string name="navigation_failed">Error de navegación</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Falta el ID del escaneo</string>
+    <string name="picker_failed">Error al seleccionar</string>
+    <string name="share_failed">Error al compartir</string>
+    <string name="no_app_found_to_open_file">No se encontró ninguna aplicación para abrir este archivo</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">¿Eliminar de esta colección?</string>
+    <string name="removed_from_collection">Eliminado de la colección</string>
+    <string name="indexed_new_items">Se indexaron %1$d nuevos elemento(s)</string>
+    <string name="nothing_new_to_index">No hay nada nuevo para indexar</string>
 
 </resources>

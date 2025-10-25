@@ -780,7 +780,7 @@ public class ExportFragment extends Fragment {
 
         final Bitmap documentBitmap = exportViewModel.getDocumentBitmap().getValue();
         if (!isMulti && documentBitmap == null) {
-            UIUtils.showToast(requireContext(), "No document to export", Toast.LENGTH_SHORT);
+            UIUtils.showToast(requireContext(), getString(R.string.no_document_to_export), Toast.LENGTH_SHORT);
             return;
         }
 
@@ -1058,9 +1058,8 @@ public class ExportFragment extends Fragment {
                         lastExportedPdfName = displayName;
                         setShareButtonsEnabled(true);
                         if (!de.schliweb.makeacopy.BuildConfig.FEATURE_SCAN_LIBRARY) {
-                            UIUtils.showToast(appContext,
-                                    (isMulti ? "Document (multi-page) " : "Document ") + lastExportedPdfName + " exported",
-                                    Toast.LENGTH_LONG);
+                            String msg = getString(isMulti ? R.string.document_multipage_exported : R.string.document_exported, lastExportedPdfName);
+                            UIUtils.showToast(appContext, msg, Toast.LENGTH_LONG);
                         }
                         // Begin: index exported PDF into scan library (feature-guarded via service locator)
                         try {
@@ -1080,7 +1079,7 @@ public class ExportFragment extends Fragment {
                         lastExportedDocumentUri = null;
                         exportViewModel.setTxtExportUri(null);
                         setShareButtonsEnabled(false);
-                        UIUtils.showToast(appContext, "Failed to export document", Toast.LENGTH_SHORT);
+                        UIUtils.showToast(appContext, getString(R.string.failed_to_export_document), Toast.LENGTH_SHORT);
                     }
                 });
             } catch (Exception e) {
@@ -1089,7 +1088,7 @@ public class ExportFragment extends Fragment {
                     lastExportedDocumentUri = null;
                     exportViewModel.setTxtExportUri(null);
                     setShareButtonsEnabled(false);
-                    UIUtils.showToast(appContext, "Error during export: " + e.getMessage(), Toast.LENGTH_SHORT);
+                    UIUtils.showToast(appContext, getString(R.string.error_during_export_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
                 });
             } finally {
                 postToUiSafe(() -> {
@@ -1201,12 +1200,12 @@ public class ExportFragment extends Fragment {
         }
         final Bitmap documentBitmap = exportViewModel.getDocumentBitmap().getValue();
         if (documentBitmap == null) {
-            UIUtils.showToast(requireContext(), "No document to export", Toast.LENGTH_SHORT);
+            UIUtils.showToast(requireContext(), getString(R.string.no_document_to_export), Toast.LENGTH_SHORT);
             return;
         }
         final Uri selectedLocation = exportViewModel.getSelectedFileLocation().getValue();
         if (selectedLocation == null) {
-            UIUtils.showToast(requireContext(), "No target selected", Toast.LENGTH_SHORT);
+            UIUtils.showToast(requireContext(), getString(R.string.no_target_selected), Toast.LENGTH_SHORT);
             return;
         }
         final Context appContext = requireContext().getApplicationContext();
@@ -1246,7 +1245,7 @@ public class ExportFragment extends Fragment {
                         lastExportedPdfName = displayName;
                         setShareButtonsEnabled(true);
                         if (!de.schliweb.makeacopy.BuildConfig.FEATURE_SCAN_LIBRARY) {
-                            UIUtils.showToast(appContext, "Image " + displayName + " exported", Toast.LENGTH_LONG);
+                            UIUtils.showToast(appContext, getString(R.string.image_exported, displayName), Toast.LENGTH_LONG);
                         }
 
                         // Begin: index exported scan in background (feature-guarded via service locator)
@@ -1262,7 +1261,7 @@ public class ExportFragment extends Fragment {
                     } else {
                         lastExportedDocumentUri = null;
                         setShareButtonsEnabled(false);
-                        UIUtils.showToast(appContext, "Failed to export image", Toast.LENGTH_SHORT);
+                        UIUtils.showToast(appContext, getString(R.string.failed_to_export_image), Toast.LENGTH_SHORT);
                     }
                 });
             } catch (Exception e) {
@@ -1270,7 +1269,7 @@ public class ExportFragment extends Fragment {
                 postToUiSafe(() -> {
                     lastExportedDocumentUri = null;
                     setShareButtonsEnabled(false);
-                    UIUtils.showToast(appContext, "Error during JPEG export: " + e.getMessage(), Toast.LENGTH_SHORT);
+                    UIUtils.showToast(appContext, getString(R.string.error_during_jpeg_export_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
                 });
             } finally {
                 postToUiSafe(() -> {
@@ -1298,7 +1297,7 @@ public class ExportFragment extends Fragment {
 
         final Uri selectedLocation = exportViewModel.getSelectedFileLocation().getValue();
         if (selectedLocation == null) {
-            UIUtils.showToast(requireContext(), "No target selected", Toast.LENGTH_SHORT);
+            UIUtils.showToast(requireContext(), getString(R.string.no_target_selected), Toast.LENGTH_SHORT);
             return;
         }
         final List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pages = exportSessionViewModel != null ? exportSessionViewModel.getPages().getValue() : null;
@@ -1402,7 +1401,7 @@ public class ExportFragment extends Fragment {
                         lastExportedPdfName = displayName;
                         setShareButtonsEnabled(true);
                         if (!de.schliweb.makeacopy.BuildConfig.FEATURE_SCAN_LIBRARY) {
-                            UIUtils.showToast(appContext, "ZIP " + displayName + " exported", Toast.LENGTH_LONG);
+                            UIUtils.showToast(appContext, getString(R.string.zip_exported, displayName), Toast.LENGTH_LONG);
                         }
                         // Begin: index exported multi-page scan in background (feature-guarded via service locator)
                         indexScanLibraryAsync(displayName, totalPages, exportUri);
@@ -1417,7 +1416,7 @@ public class ExportFragment extends Fragment {
                     } else {
                         lastExportedDocumentUri = null;
                         setShareButtonsEnabled(false);
-                        UIUtils.showToast(appContext, "Failed to export ZIP", Toast.LENGTH_SHORT);
+                        UIUtils.showToast(appContext, getString(R.string.failed_to_export_zip), Toast.LENGTH_SHORT);
                     }
                 });
             } catch (Exception e) {
@@ -1425,7 +1424,7 @@ public class ExportFragment extends Fragment {
                 postToUiSafe(() -> {
                     lastExportedDocumentUri = null;
                     setShareButtonsEnabled(false);
-                    UIUtils.showToast(appContext, "Error during ZIP export: " + e.getMessage(), Toast.LENGTH_SHORT);
+                    UIUtils.showToast(appContext, getString(R.string.error_during_zip_export_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
                 });
             } finally {
                 if (zos != null) {
@@ -1562,7 +1561,7 @@ public class ExportFragment extends Fragment {
                 os.close();
                 exportViewModel.setTxtExportUri(txtUri);
                 if (!de.schliweb.makeacopy.BuildConfig.FEATURE_SCAN_LIBRARY) {
-                    UIUtils.showToast(requireContext(), "OCR text exported as TXT", Toast.LENGTH_SHORT);
+                    UIUtils.showToast(requireContext(), getString(R.string.ocr_text_exported_as_txt), Toast.LENGTH_SHORT);
                 }
                 // If assignment snackbar was deferred until TXT save, show it now
                 if (deferAssignUntilTxt) {
@@ -1578,7 +1577,7 @@ public class ExportFragment extends Fragment {
             }
         } catch (Exception e) {
             Log.e(TAG, "exportOcrTextToTxt: Error exporting OCR text to TXT file", e);
-            UIUtils.showToast(requireContext(), "Error exporting OCR text: " + e.getMessage(), Toast.LENGTH_SHORT);
+            UIUtils.showToast(requireContext(), getString(R.string.error_exporting_ocr_text_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
         }
     }
 
@@ -1717,7 +1716,7 @@ public class ExportFragment extends Fragment {
      */
     private void shareDocument() {
         if (lastExportedDocumentUri == null) {
-            UIUtils.showToast(requireContext(), "No document available to share. Export a document first.", Toast.LENGTH_SHORT);
+            UIUtils.showToast(requireContext(), getString(R.string.no_document_to_share_export_first), Toast.LENGTH_SHORT);
             return;
         }
         try {
@@ -1726,7 +1725,7 @@ public class ExportFragment extends Fragment {
             de.schliweb.makeacopy.utils.ShareIntentHelper.shareDocument(this, lastExportedDocumentUri, txtUri, fileName);
         } catch (Exception e) {
             Log.e(TAG, "Error sharing document", e);
-            UIUtils.showToast(requireContext(), "Error sharing document: " + e.getMessage(), Toast.LENGTH_SHORT);
+            UIUtils.showToast(requireContext(), getString(R.string.error_sharing_document_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
         }
     }
 
@@ -1914,7 +1913,7 @@ public class ExportFragment extends Fragment {
                                             de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
                                             repo.assignScanToCollection(appCtx, scanId, sel.id);
                                             if (isAdded())
-                                                requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), "Scan zu \"" + sel.name + "\" hinzugefügt", Toast.LENGTH_SHORT));
+                                                requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, sel.name), Toast.LENGTH_SHORT));
                                         } catch (Throwable ignore) {
                                         }
                                     }).start();

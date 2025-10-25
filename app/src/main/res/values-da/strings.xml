@@ -242,5 +242,39 @@
     <string name="in_collections_prefix">I: %1$s</string>
     <string name="in_collections_count">I %1$d samlinger</string>
 
+    <!-- Delete confirmation (ScanDetails) -->
+    <string name="delete_warning_irreversible">Filen vil blive slettet fra enheden. Denne handling kan ikke fortrydes.</string>
+
+    <!-- ExportFragment toasts -->
+    <string name="no_document_to_export">Intet dokument at eksportere</string>
+    <string name="failed_to_export_document">Kunne ikke eksportere dokument</string>
+    <string name="error_during_export_with_reason">Fejl under eksport: %1$s</string>
+    <string name="document_exported">Dokument %1$s eksporteret</string>
+    <string name="document_multipage_exported">Dokument (flersidet) %1$s eksporteret</string>
+    <string name="no_target_selected">Ingen destination valgt</string>
+    <string name="image_exported">Billede %1$s eksporteret</string>
+    <string name="failed_to_export_image">Kunne ikke eksportere billede</string>
+    <string name="error_during_jpeg_export_with_reason">Fejl under JPEG-eksport: %1$s</string>
+    <string name="zip_exported">ZIP %1$s eksporteret</string>
+    <string name="failed_to_export_zip">Kunne ikke eksportere ZIP</string>
+    <string name="error_during_zip_export_with_reason">Fejl under ZIP-eksport: %1$s</string>
+    <string name="ocr_text_exported_as_txt">OCR-tekst eksporteret som TXT</string>
+    <string name="error_exporting_ocr_text_with_reason">Fejl ved eksport af OCR-tekst: %1$s</string>
+    <string name="no_document_to_share_export_first">Intet dokument at dele. Eksporter et dokument først.</string>
+    <string name="error_sharing_document_with_reason">Fejl ved deling af dokument: %1$s</string>
+    <string name="feature_scan_library_disabled">Funktionen for skanningsbibliotek er deaktiveret</string>
+    <string name="navigation_failed">Navigation mislykkedes</string>
+
+    <!-- ScanDetailsFragment toasts -->
+    <string name="missing_scan_id">Manglende skannings-ID</string>
+    <string name="picker_failed">Valg mislykkedes</string>
+    <string name="share_failed">Deling mislykkedes</string>
+    <string name="no_app_found_to_open_file">Ingen app fundet til at åbne denne fil</string>
+
+    <!-- ScansLibraryFragment toasts/dialogs -->
+    <string name="remove_from_collection_question">Fjern fra denne samling?</string>
+    <string name="removed_from_collection">Fjernet fra samling</string>
+    <string name="indexed_new_items">Indekserede %1$d nye element(er)</string>
+    <string name="nothing_new_to_index">Intet nyt at indeksere</string>
 
 </resources>
