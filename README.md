@@ -214,7 +214,14 @@ A big thank you to the people who make *MakeACopy* better:
 
 - **Special Mention 🐴** – A 1★ review claiming *MakeACopy* installs other apps and drains the battery.  
   Technically impossible (the app only uses the `CAMERA` permission).  
-  The profile picture was *Eeyore* – perfectly fitting for such overly pessimistic feedback. 😅  
+  The profile picture was *Eeyore* – perfectly fitting for such overly pessimistic feedback. 😅
+
+- **Special Mention 🔐** – An anonymous email appeared with the subject  
+  *“Are you out of your mind? 100 MEGABYTES for a scanner?”*  
+  It contained a “public key” and another email as attachments — but no message.  
+  Both were deleted unopened.  
+  A small reminder that open source sometimes attracts not only feedback,  
+  but also encrypted emotions.
 
 Want to join the Hall of Fame?  
 Contribute code, file helpful issues, or support the project.
