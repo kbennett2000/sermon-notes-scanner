@@ -211,6 +211,9 @@ A big thank you to the people who make *MakeACopy* better:
 - **tofg** – stayed persistent and helped track down a tricky SD card issue affecting some devices. Thanks to their patience and testing, the fix is now in and benefits all users. 💪
 - **Felix H.** – supported the project with a kind donation at a moment of self-doubt -  
   a reminder that *MakeACopy* truly means something to people out there. 💚
+- **teastrainer** – tested several release candidates with remarkable precision and patience,  
+  helping to refine the crop and rotation workflow step by step.  
+  A great example of constructive collaboration. 🙌
 
 - **Special Mention 🐴** – A 1★ review claiming *MakeACopy* installs other apps and drains the battery.  
   Technically impossible (the app only uses the `CAMERA` permission).  
