@@ -5,6 +5,8 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         tools:context=".ui.crop.CropFragment">
 
     <!-- Titel/Statusanzeige -->
@@ -44,7 +46,7 @@
             app:layout_constraintBottom_toBottomOf="@id/image_to_crop"
             app:layout_constraintStart_toStartOf="@id/image_to_crop"
             app:layout_constraintEnd_toEndOf="@id/image_to_crop"
-            android:visibility="visible" />
+            android:visibility="visible"/>
 
     <!-- Cropped Image (nur nach Zuschnitt sichtbar, identische Constraints!) -->
     <ImageView

@@ -10,6 +10,8 @@ import android.widget.Magnifier;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import de.schliweb.makeacopy.utils.OpenCVUtils;
+import lombok.Getter;
+import lombok.Setter;
 import org.opencv.core.Point;
 
 import java.util.concurrent.ExecutorService;
@@ -88,6 +90,57 @@ public class TrapezoidSelectionView extends View {
     private final float magnifierZoom = 2.5f; // 2.0..4.0
     private int magnifierSizePx = 0;
     private boolean isDraggingWithMagnifier = false;
+
+    // === Debug/diagnostics ===
+    @Setter
+    private boolean debugLogsEnabled = false;     // enable verbose logs
+    private boolean debugOverlayEnabled = false;  // draw overlay with rects
+    @Nullable
+    private java.util.List<Rect> lastExclusionRects = null; // last applied system gesture exclusion rects
+
+    // Public toggles for edge-glide configuration
+    // === Edge-glide state & config ===
+    @Getter
+    @Setter
+    private boolean edgeGlideEnabled = false; // user/dev configurable;
+    private boolean isEdgeGlide = false;      // true while pointer is gliding along left/right edge
+    private boolean edgeGlidePending = false; // true while waiting for engage delay
+    private long edgeGlideEligibleSinceMs = 0L; // timestamp when first became eligible to engage
+    private boolean edgeGlideLockLeft = true; // which edge is locked when gliding (true=left, false=right)
+    private float glideY = 0f;                // accumulated Y while locked to edge
+    private float lastRawY = Float.NaN;       // last rawY for delta computation
+    // Configurable epsilons/delay
+    private float edgeSnapEnterEpsDp = 3f;    // enter threshold in dp (soft)
+    private int edgeGlideEngageDelayMs = 120; // engage delay in ms
+
+    // Convert dp to px for entry epsilon
+    private float edgeSnapEnterEpsPx() {
+        return getResources().getDisplayMetrics().density * edgeSnapEnterEpsDp;
+    }
+
+    private float edgeSnapExitEpsPx() {
+        return edgeSnapEnterEpsPx() * 2f;
+    }
+
+    public void setEdgeSnapEpsDp(float dp) {
+        if (dp < 0f) dp = 0f;
+        this.edgeSnapEnterEpsDp = dp;
+    }
+
+    public float getEdgeSnapEpsDp() {
+        return this.edgeSnapEnterEpsDp;
+    }
+
+    public void setEdgeGlideEngageDelayMs(int ms) {
+        if (ms < 0) ms = 0;
+        this.edgeGlideEngageDelayMs = ms;
+    }
+
+    // Public toggles for debugging
+    public void setDebugOverlayEnabled(boolean enabled) {
+        this.debugOverlayEnabled = enabled;
+        invalidate();
+    }
 
     public TrapezoidSelectionView(Context context) {
         super(context);
@@ -196,23 +249,104 @@ public class TrapezoidSelectionView extends View {
                 setSystemGestureExclusionRects(java.util.Collections.emptyList());
                 return;
             }
-            // Small squares around the 4 corner handles
-            int pad = (int) (24f * getResources().getDisplayMetrics().density + 0.5f);
-            java.util.ArrayList<android.graphics.Rect> rects = new java.util.ArrayList<>(4);
+
+            float density = getResources().getDisplayMetrics().density;
+            int pad = (int) (24f * density + 0.5f); // default handle padding
+            int activePad = (int) (40f * density + 0.5f); // larger while dragging
+
+            // Always-on small side strips to reduce chance of edge gestures eating DOWN near edges
+            int alwaysOnSideStrip = (int) (24f * density + 0.5f);
+            // Larger strips while actively dragging
+            int draggingSideStrip = (int) (72f * density + 0.5f);
+
+            java.util.ArrayList<android.graphics.Rect> rects = new java.util.ArrayList<>();
+
+            // Exclude around handles (bigger for active one while dragging)
             if (corners != null) {
                 for (int i = 0; i < 4; i++) {
                     float cx = corners[i].x;
                     float cy = corners[i].y;
-                    int left = Math.max(0, Math.round(cx - pad));
-                    int top = Math.max(0, Math.round(cy - pad));
-                    int right = Math.min(w, Math.round(cx + pad));
-                    int bottom = Math.min(h, Math.round(cy + pad));
+                    int p = (i == activeCornerIndex && activeCornerIndex != -1) ? activePad : pad;
+                    int left = Math.max(0, Math.round(cx - p));
+                    int top = Math.max(0, Math.round(cy - p));
+                    int right = Math.min(w, Math.round(cx + p));
+                    int bottom = Math.min(h, Math.round(cy + p));
                     if (right > left && bottom > top) {
                         rects.add(new android.graphics.Rect(left, top, right, bottom));
                     }
                 }
             }
+
+            // Always-on thin strips at the extreme left/right of the view to protect initial touches
+            rects.add(new android.graphics.Rect(
+                    0,
+                    0,
+                    Math.min(w, alwaysOnSideStrip),
+                    h
+            ));
+            rects.add(new android.graphics.Rect(
+                    Math.max(0, w - alwaysOnSideStrip),
+                    0,
+                    w,
+                    h
+            ));
+
+            // Additionally, while dragging, exclude thin strips along the displayed image edges
+            if (activeCornerIndex != -1) {
+                android.graphics.RectF img = getDisplayedImageRectF(w, h);
+                if (img != null) {
+                    int strip = (int) (16f * density + 0.5f);
+                    // Top
+                    rects.add(new android.graphics.Rect(
+                            Math.max(0, Math.round(img.left)),
+                            Math.max(0, Math.round(img.top - strip)),
+                            Math.min(w, Math.round(img.right)),
+                            Math.max(0, Math.round(img.top + strip))
+                    ));
+                    // Bottom
+                    rects.add(new android.graphics.Rect(
+                            Math.max(0, Math.round(img.left)),
+                            Math.min(h, Math.round(img.bottom - strip)),
+                            Math.min(w, Math.round(img.right)),
+                            Math.min(h, Math.round(img.bottom + strip))
+                    ));
+                    // Left (image edge)
+                    rects.add(new android.graphics.Rect(
+                            Math.max(0, Math.round(img.left - strip)),
+                            Math.max(0, Math.round(img.top)),
+                            Math.max(0, Math.round(img.left + strip)),
+                            Math.min(h, Math.round(img.bottom))
+                    ));
+                    // Right (image edge)
+                    rects.add(new android.graphics.Rect(
+                            Math.min(w, Math.round(img.right - strip)),
+                            Math.max(0, Math.round(img.top)),
+                            Math.min(w, Math.round(img.right + strip)),
+                            Math.min(h, Math.round(img.bottom))
+                    ));
+                }
+
+                // Also exclude along the view's extreme left/right edges to counter system back gestures (wider while dragging)
+                rects.add(new android.graphics.Rect(
+                        0,
+                        0,
+                        Math.min(w, draggingSideStrip),
+                        h
+                ));
+                rects.add(new android.graphics.Rect(
+                        Math.max(0, w - draggingSideStrip),
+                        0,
+                        w,
+                        h
+                ));
+            }
+
             setSystemGestureExclusionRects(rects);
+            // Keep a copy for debug overlay and optional logging
+            lastExclusionRects = new java.util.ArrayList<>(rects);
+            if (debugLogsEnabled) {
+                Log.d(TAG, "updateSystemGestureExclusion applied rects=" + rects.size());
+            }
         } catch (Throwable ignore) {
         }
     }
@@ -290,6 +424,40 @@ public class TrapezoidSelectionView extends View {
         float cx = Math.max(left, Math.min(x, right));
         float cy = Math.max(top, Math.min(y, bottom));
         return new float[]{cx, cy};
+    }
+
+    /**
+     * Returns the displayed image rect in view coordinates using FIT_CENTER logic.
+     * If there is no bitmap, returns the full view rect.
+     */
+    @Nullable
+    private android.graphics.RectF getDisplayedImageRectF(int viewWidth, int viewHeight) {
+        if (viewWidth <= 0 || viewHeight <= 0) return null;
+        if (imageBitmap == null || imageBitmap.isRecycled()) {
+            return new android.graphics.RectF(0, 0, viewWidth, viewHeight);
+        }
+        int bw = imageBitmap.getWidth();
+        int bh = imageBitmap.getHeight();
+        if (bw <= 0 || bh <= 0) {
+            return new android.graphics.RectF(0, 0, viewWidth, viewHeight);
+        }
+        float bitmapAspect = (float) bw / (float) bh;
+        float viewAspect = (float) viewWidth / (float) viewHeight;
+        float scale;
+        float offsetX = 0f;
+        float offsetY = 0f;
+        if (bitmapAspect > viewAspect) {
+            scale = (float) viewWidth / (float) bw;
+            offsetY = (viewHeight - (bh * scale)) / 2f;
+        } else {
+            scale = (float) viewHeight / (float) bh;
+            offsetX = (viewWidth - (bw * scale)) / 2f;
+        }
+        float left = offsetX;
+        float top = offsetY;
+        float right = offsetX + bw * scale;
+        float bottom = offsetY + bh * scale;
+        return new android.graphics.RectF(left, top, right, bottom);
     }
 
     /**
@@ -939,7 +1107,59 @@ public class TrapezoidSelectionView extends View {
         // Draw user guidance hints
         drawUserGuidance(canvas);
 
+        // Debug overlay (image rect + exclusion rects + hit areas)
+        if (debugOverlayEnabled) {
+            drawDebugOverlay(canvas);
+        }
+
         Log.d(TAG, "Trapezoid drawn with dimensions: " + getWidth() + "x" + getHeight());
+    }
+
+    private void drawDebugOverlay(Canvas canvas) {
+        int w = getWidth();
+        int h = getHeight();
+        if (w <= 0 || h <= 0) return;
+
+        // Draw displayed image rect
+        RectF img = getDisplayedImageRectF(w, h);
+        if (img != null) {
+            Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(3f);
+            p.setColor(Color.argb(220, 0, 200, 0)); // green
+            canvas.drawRect(img, p);
+        }
+
+        // Draw system gesture exclusion rects
+        if (lastExclusionRects != null && !lastExclusionRects.isEmpty()) {
+            Paint p2 = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p2.setStyle(Paint.Style.STROKE);
+            p2.setStrokeWidth(2f);
+            p2.setColor(Color.argb(220, 220, 0, 0)); // red
+            for (Rect r : lastExclusionRects) {
+                canvas.drawRect(r, p2);
+            }
+        }
+
+        // Draw active handle touch area
+        if (activeCornerIndex != -1) {
+            float cx = corners[activeCornerIndex].x;
+            float cy = corners[activeCornerIndex].y;
+            Paint p3 = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p3.setStyle(Paint.Style.STROKE);
+            p3.setStrokeWidth(2f);
+            p3.setColor(Color.CYAN);
+            canvas.drawCircle(cx, cy, CORNER_TOUCH_RADIUS, p3);
+        }
+
+        // Draw edge-glide state text
+        if (isEdgeGlide) {
+            Paint tp = new Paint(Paint.ANTI_ALIAS_FLAG);
+            tp.setColor(Color.WHITE);
+            tp.setTextSize(36f);
+            tp.setShadowLayer(4f, 0f, 0f, Color.BLACK);
+            canvas.drawText("[edge-glide]", 20f, h - 40f, tp);
+        }
     }
 
     /**
@@ -1128,9 +1348,30 @@ public class TrapezoidSelectionView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                // Prime exclusion even before we know if a handle is active
+                updateSystemGestureExclusion();
+                if (debugLogsEnabled) {
+                    Log.d(TAG, "ACTION_DOWN x=" + x + ", y=" + y + ", rawX=" + event.getRawX() + ", rawY=" + event.getRawY());
+                }
                 // Check if a corner was touched
                 activeCornerIndex = findCornerIndex(x, y);
                 if (activeCornerIndex != -1) {
+                    // Prevent parents (e.g., ViewPager/ScrollView) from intercepting during drag
+                    try {
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                    } catch (Throwable ignore) {
+                    }
+
+                    // Edge-glide initial state
+                    isEdgeGlide = false;
+                    edgeGlidePending = false;
+                    edgeGlideEligibleSinceMs = 0L;
+                    lastRawY = event.getRawY();
+                    glideY = corners[activeCornerIndex].y;
+
+                    // Expand gesture exclusion while dragging
+                    updateSystemGestureExclusion();
+
                     // Initialize and show magnifier if enabled and source is set
                     ensureMagnifier();
                     if (magnifier != null) {
@@ -1152,12 +1393,92 @@ public class TrapezoidSelectionView extends View {
             case MotionEvent.ACTION_MOVE:
                 // Move the active corner
                 if (activeCornerIndex != -1) {
+                    // Keep parents from intercepting during drag and keep gesture exclusion updated
+                    try {
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                    } catch (Throwable ignore) {
+                    }
+                    updateSystemGestureExclusion();
+
+                    // Edge-glide handling along left/right image edges
+                    RectF img = getDisplayedImageRectF(getWidth(), getHeight());
+                    float tx = x;
+                    float ty = y;
+                    if (img != null) {
+                        // Soft Edge-Glide: only engage when the pointer is actually OUTSIDE the image rect
+                        // by more than the enter epsilon. While inside, never force-lock X to the edge.
+                        if (edgeGlideEnabled) {
+                            float enterEps = edgeSnapEnterEpsPx();
+                            float exitEps = edgeSnapExitEpsPx();
+
+                            boolean outsideLeft = x < (img.left - enterEps);
+                            boolean outsideRight = x > (img.right + enterEps);
+                            boolean insideWithMargin = x >= (img.left + exitEps) && x <= (img.right - exitEps);
+
+                            long now = android.os.SystemClock.uptimeMillis();
+
+                            if (isEdgeGlide) {
+                                // While gliding, keep X locked to the chosen edge and accumulate Y by rawY deltas
+                                float lockX = edgeGlideLockLeft ? img.left : img.right;
+                                if (!Float.isNaN(lastRawY)) {
+                                    float dy = event.getRawY() - lastRawY;
+                                    glideY += dy;
+                                }
+                                lastRawY = event.getRawY();
+                                tx = lockX;
+                                ty = glideY;
+
+                                // Exit gliding when clearly back inside (beyond exit hysteresis)
+                                if (insideWithMargin) {
+                                    isEdgeGlide = false;
+                                    edgeGlidePending = false;
+                                    edgeGlideEligibleSinceMs = 0L;
+                                    if (debugLogsEnabled) Log.d(TAG, "Exit edge-glide (back inside), x=" + x);
+                                }
+                            } else {
+                                // Not yet gliding. Consider eligibility only if really outside.
+                                boolean eligible = outsideLeft || outsideRight;
+                                if (eligible) {
+                                    // Start or continue pending timer
+                                    if (!edgeGlidePending) {
+                                        edgeGlidePending = true;
+                                        edgeGlideEligibleSinceMs = now;
+                                        edgeGlideLockLeft = outsideLeft; // remember which edge we will lock to
+                                        if (debugLogsEnabled)
+                                            Log.d(TAG, "Edge-glide eligible (" + (outsideLeft ? "left" : "right") + ") starting delay at x=" + x);
+                                    }
+                                    // Engage after delay
+                                    if (edgeGlidePending && (now - edgeGlideEligibleSinceMs) >= edgeGlideEngageDelayMs) {
+                                        isEdgeGlide = true;
+                                        edgeGlidePending = false;
+                                        glideY = corners[activeCornerIndex].y; // start from current handle y
+                                        lastRawY = event.getRawY();
+                                        if (debugLogsEnabled)
+                                            Log.d(TAG, "Enter edge-glide after delay (" + (edgeGlideLockLeft ? "left" : "right") + ") at x=" + x);
+                                        // Lock immediately on engage
+                                        float lockX = edgeGlideLockLeft ? img.left : img.right;
+                                        tx = lockX;
+                                        ty = glideY;
+                                    }
+                                } else {
+                                    // No longer eligible -> cancel pending
+                                    if (edgeGlidePending) {
+                                        edgeGlidePending = false;
+                                        edgeGlideEligibleSinceMs = 0L;
+                                        if (debugLogsEnabled)
+                                            Log.d(TAG, "Cancel edge-glide pending (pointer not outside), x=" + x);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // Use updateCorner to maintain both absolute and relative coordinates
-                    updateCorner(activeCornerIndex, x, y);
+                    updateCorner(activeCornerIndex, tx, ty);
 
                     // Update magnifier position if active
                     if (isDraggingWithMagnifier && magnifier != null) {
-                        PointF src = toSourceCoords(x, y);
+                        PointF src = toSourceCoords(tx, ty);
                         try {
                             magnifier.show(src.x, src.y);
                         } catch (Throwable t) {
@@ -1166,7 +1487,12 @@ public class TrapezoidSelectionView extends View {
                     }
 
                     // Log the updated corner position
-                    Log.d(TAG, "Corner " + activeCornerIndex + " moved to: (" + x + "," + y + "), " + "relative: (" + relativeCorners[activeCornerIndex][0] + "," + relativeCorners[activeCornerIndex][1] + ")");
+                    if (debugLogsEnabled) {
+                        Log.d(TAG, "MOVE activeCorner=" + activeCornerIndex +
+                                ", x/y=(" + x + "," + y + "), tx/ty=(" + tx + "," + ty + ")" +
+                                ", rel=(" + relativeCorners[activeCornerIndex][0] + "," + relativeCorners[activeCornerIndex][1] + ")" +
+                                (isEdgeGlide ? " [edge-glide]" : ""));
+                    }
 
                     invalidate();
                     return true;
@@ -1175,6 +1501,11 @@ public class TrapezoidSelectionView extends View {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (debugLogsEnabled) {
+                    Log.d(TAG, (event.getAction() == MotionEvent.ACTION_UP ? "ACTION_UP" : "ACTION_CANCEL") +
+                            " activeCorner=" + activeCornerIndex +
+                            ", x=" + x + ", y=" + y + ", rawX=" + event.getRawX() + ", rawY=" + event.getRawY());
+                }
                 // Release the active corner
                 if (activeCornerIndex != -1) {
                     // Ensure relative coordinates are updated when touch ends
@@ -1189,8 +1520,19 @@ public class TrapezoidSelectionView extends View {
                         Log.w(TAG, "magnifier.dismiss failed: " + t.getMessage());
                     }
                 }
+                // Allow parents to intercept again and shrink gesture exclusion back to normal
+                try {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                } catch (Throwable ignore) {
+                }
                 isDraggingWithMagnifier = false;
                 activeCornerIndex = -1;
+                // Reset edge-glide state
+                isEdgeGlide = false;
+                edgeGlidePending = false;
+                edgeGlideEligibleSinceMs = 0L;
+                lastRawY = Float.NaN;
+                updateSystemGestureExclusion();
                 invalidate();
                 break;
         }

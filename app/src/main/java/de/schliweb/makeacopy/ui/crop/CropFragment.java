@@ -363,6 +363,17 @@ public class CropFragment extends Fragment {
         binding.trapezoidSelection.setVisibility(View.VISIBLE);
         binding.cropButtonContainer.setVisibility(View.VISIBLE);
         binding.rotationButtonBar.setVisibility(View.VISIBLE);
+
+        // Ensure the trapezoid overlay always renders above the bottom button container while remaining non-clickable
+        // (so taps still pass through to the buttons). This guards against OEM/CL quirks even if XML elevation is ignored.
+        try {
+            ViewCompat.setElevation(binding.trapezoidSelection, 100f);
+            ViewCompat.setTranslationZ(binding.trapezoidSelection, 100f);
+            // Ensure draw order is on top even if ConstraintLayout reorders children
+            binding.trapezoidSelection.bringToFront();
+        } catch (Throwable ignored) {
+        }
+
         // Ensure in crop mode the cropped_image (when later shown) would anchor to button_container to avoid overlap
         // Ensure overlay hints avoid bottom controls
         binding.getRoot().post(this::updateTrapezoidHintInset);
