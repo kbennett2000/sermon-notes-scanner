@@ -2,6 +2,7 @@ package de.schliweb.makeacopy.ui.crop;
 
 import android.content.Context;
 import android.graphics.*;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -54,6 +55,9 @@ public class TrapezoidSelectionView extends View {
     private int lastHeight = 0; // Last known height of the view
 
     private Bitmap imageBitmap = null; // The image bitmap for edge detection
+    // Track last bitmap dimensions to avoid redundant re-inits
+    private int lastBitmapWidth = -1;
+    private int lastBitmapHeight = -1;
 
     // ==== Async corner detection state ====
     private final ExecutorService cornerExec = Executors.newSingleThreadExecutor(r -> {
@@ -102,7 +106,7 @@ public class TrapezoidSelectionView extends View {
     // === Edge-glide state & config ===
     @Getter
     @Setter
-    private boolean edgeGlideEnabled = false; // user/dev configurable;
+    private boolean edgeGlideEnabled = false; // default OFF; user/dev configurable
     private boolean isEdgeGlide = false;      // true while pointer is gliding along left/right edge
     private boolean edgeGlidePending = false; // true while waiting for engage delay
     private long edgeGlideEligibleSinceMs = 0L; // timestamp when first became eligible to engage
@@ -134,6 +138,43 @@ public class TrapezoidSelectionView extends View {
     public void setEdgeGlideEngageDelayMs(int ms) {
         if (ms < 0) ms = 0;
         this.edgeGlideEngageDelayMs = ms;
+    }
+
+    // ===== User-adjustment/auto-init suppression state =====
+    private boolean isUserAdjusting = false;           // true while user is dragging a handle or shortly after release
+    private int autoInitIdleDelayMs = 400;             // idle time after release before auto-init may run
+    @Nullable
+    private Runnable adjustIdleClearRunnable = null;   // clears isUserAdjusting after idle
+
+    public void setAutoInitIdleDelayMs(int ms) {
+        if (ms < 0) ms = 0;
+        this.autoInitIdleDelayMs = ms;
+    }
+
+    private void cancelAdjustIdle() {
+        if (adjustIdleClearRunnable != null) {
+            try {
+                removeCallbacks(adjustIdleClearRunnable);
+            } catch (Throwable ignore) {
+            }
+            adjustIdleClearRunnable = null;
+        }
+    }
+
+    private void scheduleAdjustIdleClear() {
+        cancelAdjustIdle();
+        adjustIdleClearRunnable = new Runnable() {
+            @Override
+            public void run() {
+                isUserAdjusting = false;
+                if (debugLogsEnabled) Log.d(TAG, "User adjusting ended (idle)");
+                adjustIdleClearRunnable = null;
+            }
+        };
+        try {
+            postDelayed(adjustIdleClearRunnable, autoInitIdleDelayMs);
+        } catch (Throwable ignore) {
+        }
     }
 
     // Public toggles for debugging
@@ -254,10 +295,13 @@ public class TrapezoidSelectionView extends View {
             int pad = (int) (24f * density + 0.5f); // default handle padding
             int activePad = (int) (40f * density + 0.5f); // larger while dragging
 
+            // On newer Android (SDK>=34, Android 14/15), the back-edge gesture is wider/more aggressive on Pixels.
+            // Use broader exclusion strips there; keep legacy widths on older SDKs to avoid over-excluding.
+            final boolean modernBackGesture = (Build.VERSION.SDK_INT >= 34);
             // Always-on small side strips to reduce chance of edge gestures eating DOWN near edges
-            int alwaysOnSideStrip = (int) (24f * density + 0.5f);
+            int alwaysOnSideStrip = (int) ((modernBackGesture ? 40f : 24f) * density + 0.5f);
             // Larger strips while actively dragging
-            int draggingSideStrip = (int) (72f * density + 0.5f);
+            int draggingSideStrip = (int) ((modernBackGesture ? 112f : 72f) * density + 0.5f);
 
             java.util.ArrayList<android.graphics.Rect> rects = new java.util.ArrayList<>();
 
@@ -497,6 +541,18 @@ public class TrapezoidSelectionView extends View {
     private void initializeCornersAsync() {
         final int width = getWidth();
         final int height = getHeight();
+
+        if (isUserAdjusting) {
+            if (debugLogsEnabled)
+                Log.d(TAG, "initializeCornersAsync: suppressed (user adjusting), will retry after idle");
+            // coalesce via initCornersRunnable with a delay
+            removeCallbacks(initCornersRunnable);
+            try {
+                postDelayed(initCornersRunnable, autoInitIdleDelayMs);
+            } catch (Throwable ignore) {
+            }
+            return;
+        }
 
         Log.d(TAG, "initializeCornersAsync called, dimensions: " + width + "x" + height + ", attempt: " + (++initializationAttempts));
 
@@ -1356,6 +1412,9 @@ public class TrapezoidSelectionView extends View {
                 // Check if a corner was touched
                 activeCornerIndex = findCornerIndex(x, y);
                 if (activeCornerIndex != -1) {
+                    // Mark that the user is adjusting and cancel any pending idle-clear
+                    isUserAdjusting = true;
+                    cancelAdjustIdle();
                     // Prevent parents (e.g., ViewPager/ScrollView) from intercepting during drag
                     try {
                         getParent().requestDisallowInterceptTouchEvent(true);
@@ -1393,6 +1452,9 @@ public class TrapezoidSelectionView extends View {
             case MotionEvent.ACTION_MOVE:
                 // Move the active corner
                 if (activeCornerIndex != -1) {
+                    // Still adjusting while dragging; ensure idle-clear is cancelled
+                    isUserAdjusting = true;
+                    cancelAdjustIdle();
                     // Keep parents from intercepting during drag and keep gesture exclusion updated
                     try {
                         getParent().requestDisallowInterceptTouchEvent(true);
@@ -1532,6 +1594,8 @@ public class TrapezoidSelectionView extends View {
                 edgeGlidePending = false;
                 edgeGlideEligibleSinceMs = 0L;
                 lastRawY = Float.NaN;
+                // Keep user-adjusting true for a short idle window to suppress auto re-detection
+                scheduleAdjustIdleClear();
                 updateSystemGestureExclusion();
                 invalidate();
                 break;
@@ -1588,6 +1652,23 @@ public class TrapezoidSelectionView extends View {
     public void setImageBitmap(Bitmap bitmap) {
         this.imageBitmap = bitmap;
         Log.d(TAG, "Image bitmap set: " + (bitmap != null ? bitmap.getWidth() + "x" + bitmap.getHeight() : "null"));
+        // Update last bitmap dimensions; if unchanged and already initialized, avoid redundant auto-init
+        if (bitmap != null) {
+            int bw = bitmap.getWidth();
+            int bh = bitmap.getHeight();
+            boolean sameDims = (bw == lastBitmapWidth && bh == lastBitmapHeight);
+            lastBitmapWidth = bw;
+            lastBitmapHeight = bh;
+            if (sameDims && initialized) {
+                if (debugLogsEnabled)
+                    Log.d(TAG, "setImageBitmap: same bitmap dimensions and already initialized → skip re-init");
+                invalidate();
+                return;
+            }
+        } else {
+            lastBitmapWidth = -1;
+            lastBitmapHeight = -1;
+        }
 
         // If the bitmap is null, do not (re)start corner initialization. Just cancel pending work and redraw.
         if (bitmap == null) {
@@ -1613,6 +1694,13 @@ public class TrapezoidSelectionView extends View {
 
         // (Re)trigger async init when we have dimensions (unless suppressed once)
         if (getWidth() > 0 && getHeight() > 0) {
+            // If the user is currently adjusting, suppress auto-init for now
+            if (isUserAdjusting) {
+                suppressInitOnce = true;
+                if (debugLogsEnabled) Log.d(TAG, "setImageBitmap: suppressing auto-init during user adjustment");
+                invalidate();
+                return;
+            }
             removeCallbacks(initCornersRunnable);
             if (!suppressInitOnce) {
                 post(initCornersRunnable);
