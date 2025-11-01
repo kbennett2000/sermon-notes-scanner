@@ -119,6 +119,7 @@
     <p>En plus des APKs de <em>Language-Pack</em> optionnels, vous pouvez aussi ajouter les modèles <em>best</em> officiels de Tesseract depuis le dépôt : <a href="https://github.com/tesseract-ocr/tessdata_best">tessdata_best</a>. Voir le projet Tesseract : <a href="https://github.com/tesseract-ocr/tesseract">github.com/tesseract-ocr/tesseract</a>.</p>
     <p><strong>Language-Pack APK :</strong> MakeACopy OCR Latin (Best) – inclut des modèles haute précision pour l’anglais (eng), l’allemand (deu), le français (fra), l’italien (ita), l’espagnol (spa), le portugais (por), le néerlandais (nld), le polonais (pol), le tchèque (ces), le slovaque (slk), le hongrois (hun), le roumain (ron), le danois (dan), le norvégien (nor) et le suédois (swe). Téléchargez-le depuis la <a href="https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.1.0">page de publication du Language‑Pack</a>.</p>
     <div class="store-badges" style="margin: 6px 0 16px 0;">
+        <a href="https://f-droid.org/packages/de.schliweb.makeacopy.lang.latin.best/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Obtenir le pack de langue Latin Best sur F-Droid" height="60"></a>
         <a href="https://play.google.com/store/apps/details?id=de.schliweb.makeacopy.lang.latin.best"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Obtenir le pack de langue Latin Best sur Google Play" height="60"></a>
     </div>
     <p><em>Remarque :</em> pour le chinois, l’application inclut des polices CJK adaptées pour améliorer le rendu du texte PDF.</p>
@@ -248,12 +249,28 @@ appverifier verify MakeACopy-vX.Y.Z.apk
             - De meilleurs résultats avec une écriture claire et proche de l’imprimé ; sinon, envisagez une transcription manuelle.
         </li>
         <li><strong>Mauvaise rotation/orientation de l’OCR</strong><br>
-            - Faites pivoter l’image dans la bonne orientation avant l’OCR (0°, 90°, 180°, 270°). <br>
-            - Assurez des lignes de texte horizontales et éviter une forte perspective.
+            - L’application détecte automatiquement l’orientation : elle essaie l’OCR en interne par pas de 90° (0°, 90°, 180°, 270°) et retient le meilleur résultat. Si la page est déjà bien orientée, elle s’arrête plus tôt pour gagner du temps. <br>
+            - Si la page est très inclinée, faites-la pivoter avant l’OCR à l’aide des boutons de rotation par pas de 90°, jusqu’à ce que les lignes de texte soient horizontales. <br>
+            - Évitez une forte perspective ; alignez le document aussi droit que possible.
         </li>
         <li><strong>La recherche dans le PDF ne fonctionne pas</strong><br>
             - Vérifiez si la langue sélectionnée est correcte ; une mauvaise langue produit un texte reconnu non concordant. <br>
             - Vous pouvez aussi exporter le texte OCR séparément en fichier TXT.
+        </li>
+        <li><strong>Que signifient les modes de reconnaissance ?</strong><br>
+            Dans l’application, avant la reconnaissance de texte, vous pouvez choisir comment préparer l’image pour Tesseract :
+            <br>
+            - <strong>Original (sans prétraitement)</strong> : Le plus rapide. La photo est transmise telle quelle à l’OCR. Idéal pour des scans propres et très contrastés ; peut manquer du texte pâle ou « sale ». <br>
+            - <strong>OpenCV Rapide</strong> : Prétraitement léger et rapide (niveaux de gris, léger débruitage, noir/blanc automatique, éventuellement léger agrandissement). Bon réglage par défaut pour la plupart des photos — bon équilibre entre vitesse et qualité. <br>
+            - <strong>OpenCV Robuste</strong> : Précision maximale pour des pages difficiles (redressement/deskew, normalisation de l’éclairage, débruitage préservant les contours, agrandissement intelligent). Produit une image en niveaux de gris de haute qualité pour Tesseract. Meilleure précision, mais plus lent et plus gourmand en mémoire. <br>
+            <em>Remarque :</em> Pour la plupart des cas, « OpenCV Rapide » est recommandé ; pour des pages très difficiles, utilisez « OpenCV Robuste ».
+        </li>
+        <li><strong>Comment gérer les packs de langue / modèles OCR ?</strong><br>
+            - Ouvrez la vue OCR d’un scan et touchez le menu (⋮) → « Modèles OCR ». <br>
+            - « Importer .traineddata… » : importer un fichier modèle Tesseract unique depuis l’appareil/le stockage. <br>
+            - « Découvrir les packs de langue » : trouver les applications Language‑Pack installées (p. ex. « MakeACopy OCR Latin (Best) ») et y importer des modèles. <br>
+            - « Supprimer le modèle Best » : retirer un modèle Best précédemment importé pour la langue actuellement sélectionnée (le modèle rapide intégré reste disponible). <br>
+            <em>Astuce :</em> L’application inclut des modèles compacts et rapides. Pour une meilleure précision, vous pouvez installer en option des modèles « Best » plus volumineux via un Language‑Pack (lien en haut de cette page). Aucune connexion Internet n’est requise.
         </li>
     </ul>
 

@@ -162,6 +162,9 @@ How it works:
 
 📦 [GitHub Release Page](https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.1.0)
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+alt="Get it on F-Droid"
+height="40">](https://f-droid.org/packages/de.schliweb.makeacopy.lang.latin.best/)
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
 alt="Get it on Google Play"
 height="40">](https://play.google.com/store/apps/details?id=de.schliweb.makeacopy.lang.latin.best)

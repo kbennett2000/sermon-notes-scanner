@@ -127,6 +127,7 @@
     <p>Besides the optional Language-Pack APKs, you can also add the original Tesseract <em>best</em> models from the official repository: <a href="https://github.com/tesseract-ocr/tessdata_best">tessdata_best</a>. See the Tesseract project at <a href="https://github.com/tesseract-ocr/tesseract">github.com/tesseract-ocr/tesseract</a>.</p>
     <p><strong>Language-Pack APK:</strong> MakeACopy OCR Latin (Best) – includes high-accuracy models for English (eng), German (deu), French (fra), Italian (ita), Spanish (spa), Portuguese (por), Dutch (nld), Polish (pol), Czech (ces), Slovak (slk), Hungarian (hun), Romanian (ron), Danish (dan), Norwegian (nor), and Swedish (swe). Download from the <a href="https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.1.0">Language-Pack release page</a>.</p>
     <div class="store-badges" style="margin: 6px 0 16px 0;">
+        <a href="https://f-droid.org/packages/de.schliweb.makeacopy.lang.latin.best/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get the Latin Best Language Pack on F-Droid" height="60"></a>
         <a href="https://play.google.com/store/apps/details?id=de.schliweb.makeacopy.lang.latin.best"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get the Latin Best Language Pack on Google Play" height="60"></a>
     </div>
     <p><em>Note:</em> For Chinese, the app includes suitable CJK fonts to improve PDF text rendering.</p>
@@ -272,12 +273,28 @@ appverifier verify MakeACopy-vX.Y.Z.apk
             - Better results with clear, print-like handwriting; otherwise consider manual transcription.
         </li>
         <li><strong>OCR rotation/orientation is wrong</strong><br>
-            - Rotate the image to the correct orientation before OCR (0°, 90°, 180°, 270°). <br>
-            - Ensure clear horizontal text lines without strong perspective distortion.
+            - The app detects orientation automatically: it internally tries OCR at 90° steps (0°, 90°, 180°, 270°) and uses the best result. For pages that are already correctly aligned, it exits early to save time. <br>
+            - If the page is heavily skewed, rotate it before OCR using the rotate buttons in 90° steps until text lines are horizontal. <br>
+            - Avoid strong perspective; align the document as straight as possible.
         </li>
         <li><strong>Search in the PDF does not work</strong><br>
             - Check whether the selected language was correct; the wrong language produces mismatched recognized text. <br>
             - Alternatively, you can export the OCR text separately as a TXT file.
+        </li>
+        <li><strong>What do the recognition modes mean?</strong><br>
+            In the app, before text recognition you can choose how to prepare the image for Tesseract:
+            <br>
+            - <strong>Original (no pre-processing)</strong>: Fastest. The photo is passed to OCR unchanged. Good for already clean, high-contrast scans; may miss faint or "dirty" text. <br>
+            - <strong>OpenCV Quick</strong>: Fast, light pre-processing (grayscale, slight denoising, automatic black/white, optionally slight upscaling). A good default for most photos — a solid balance of speed and quality. <br>
+            - <strong>OpenCV Robust</strong>: Maximum accuracy for difficult pages (deskew, normalize lighting, edge-preserving denoising, smart upscaling). Produces a high-quality grayscale image for Tesseract. Best accuracy, but slower and more memory intensive. <br>
+            <em>Note:</em> For most cases, “OpenCV Quick” is recommended; for very tough pages use “OpenCV Robust”.
+        </li>
+        <li><strong>How do I manage language packs / OCR models?</strong><br>
+            - Open the OCR view of a scan and tap the menu (⋮) → “OCR models”. <br>
+            - “Import .traineddata…”: Import a single Tesseract model file from the device/storage. <br>
+            - “Discover language packs”: Find installed Language‑Pack apps (e.g., “MakeACopy OCR Latin (Best)”) and import models from them. <br>
+            - “Delete Best model”: Remove a previously imported Best model for the currently selected language (the built‑in fast model remains available). <br>
+            <em>Tip:</em> The app ships with compact, fast models. For higher accuracy you can optionally install larger “Best” models via a Language‑Pack (link above on this page). No internet connection is required.
         </li>
     </ul>
 

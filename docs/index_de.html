@@ -103,6 +103,7 @@
     <p>Neben den optionalen Language-Pack-APKs können auch die originalen Tesseract-<em>best</em>-Modelle aus dem offiziellen Repository hinzugefügt werden: <a href="https://github.com/tesseract-ocr/tessdata_best">tessdata_best</a>. Siehe das Tesseract-Projekt unter <a href="https://github.com/tesseract-ocr/tesseract">github.com/tesseract-ocr/tesseract</a>.</p>
     <p><strong>Language-Pack-APK:</strong> MakeACopy OCR Latin (Best) – enthält hochgenaue Modelle für Englisch (eng), Deutsch (deu), Französisch (fra), Italienisch (ita), Spanisch (spa), Portugiesisch (por), Niederländisch (nld), Polnisch (pol), Tschechisch (ces), Slowakisch (slk), Ungarisch (hun), Rumänisch (ron), Dänisch (dan), Norwegisch (nor) und Schwedisch (swe). Download über die <a href="https://github.com/egdels/makeacopy/releases/tag/langpack-latin-best-v1.1.0">Language-Pack‑Release‑Seite</a>.</p>
     <div class="store-badges" style="margin: 6px 0 16px 0;">
+        <a href="https://f-droid.org/packages/de.schliweb.makeacopy.lang.latin.best/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Language Pack Latin Best bei F-Droid" height="60"></a>
         <a href="https://play.google.com/store/apps/details?id=de.schliweb.makeacopy.lang.latin.best"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Language Pack Latin Best bei Google Play" height="60"></a>
     </div>
     <p><em>Hinweis:</em> Für Chinesisch sind geeignete CJK-Schriften enthalten, um die PDF-Textdarstellung zu verbessern.</p>
@@ -247,12 +248,28 @@ appverifier verify MakeACopy-vX.Y.Z.apk
             - Bessere Ergebnisse mit klarer, druckähnlicher Schrift; ansonsten manuelle Erfassung erwägen.
         </li>
         <li><strong>OCR-Drehung/Orientierung falsch</strong><br>
-            - Drehe das Bild vor der OCR korrekt ausgerichtet (0°, 90°, 180°, 270°). <br>
-            - Sorge für klare horizontale Textlinien ohne starke Perspektive.
+            - Die App erkennt die Ausrichtung automatisch: Sie testet die OCR intern in 90°‑Schritten (0°, 90°, 180°, 270°) und verwendet das beste Ergebnis. Bei bereits korrekt ausgerichteten Seiten wird aus Zeitgründen früh abgebrochen. <br>
+            - Falls die Seite stark schief ist, drehe sie vor der OCR mit den Dreh‑Tasten in 90°‑Schritten, bis die Textzeilen horizontal verlaufen. <br>
+            - Vermeide starke Perspektive; richte das Dokument möglichst gerade aus.
         </li>
         <li><strong>Suche im PDF funktioniert nicht</strong><br>
             - Prüfe, ob die gewählte Sprache korrekt war; falsche Sprache erzeugt unpassenden erkannten Text.<br>
             - Alternativ kannst du den OCR-Text auch separat als TXT exportieren.
+        </li>
+        <li><strong>Was bedeuten die Erkennungsmodi?</strong><br>
+            In der App kannst du vor der Texterkennung wählen, wie das Bild für Tesseract aufbereitet wird:
+            <br>
+            - <strong>Original (ohne Vorverarbeitung)</strong>: Am schnellsten. Das Foto wird unverändert an die OCR übergeben. Gut bei bereits sauberen, kontrastreichen Scans; kann blasse oder "schmutzige" Texte übersehen. <br>
+            - <strong>OpenCV Schnell</strong>: Schnelle, leichte Aufbereitung (Graustufen, leichtes Entrauschen, automatisches Schwarz/Weiß, ggf. etwas Vergrößern). Gute Standardeinstellung für die meisten Fotos – gutes Gleichgewicht aus Tempo und Qualität. <br>
+            - <strong>OpenCV Robust</strong>: Für schwierige Seiten maximale Genauigkeit (Begradigen/Deskew, Beleuchtung normalisieren, kanten‑erhaltendes Entrauschen, smartes Vergrößern). Liefert ein hochwertiges Graustufenbild für Tesseract. Beste Genauigkeit, aber langsamer und speicherintensiver. <br>
+            <em>Hinweis:</em> Für die meisten Fälle ist „OpenCV Schnell“ empfehlenswert; bei sehr schwierigen Vorlagen „OpenCV Robust“.
+        </li>
+        <li><strong>Wie verwalte ich Sprachpakete / OCR‑Modelle?</strong><br>
+            - Öffne die OCR‑Ansicht eines Scans und tippe oben rechts auf das Menü (⋮) → „OCR‑Modelle“. <br>
+            - „.traineddata importieren…“: Eine einzelne Tesseract‑Modelldatei vom Gerät/Speicher importieren. <br>
+            - „Sprachpakete entdecken“: Installierte Language‑Pack‑Apps finden (z. B. „MakeACopy OCR Latin (Best)“) und Modelle daraus importieren. <br>
+            - „Best‑Modell löschen“: Ein zuvor importiertes Best‑Modell der aktuell gewählten Sprache entfernen (das integrierte schnelle Modell bleibt erhalten). <br>
+            <em>Tipp:</em> Die App bringt kompakte, schnelle Modelle mit. Für höhere Genauigkeit kannst du optional größere „Best“-Modelle per Language‑Pack installieren (Link oben auf dieser Seite). Eine Internetverbindung ist dafür nicht erforderlich.
         </li>
     </ul>
 
