@@ -50,10 +50,10 @@
                 android:text="@string/pdf_quality_title" />
 
             <LinearLayout
-                android:id="@+id/dialog_pdf_bw_mode_group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+            android:id="@+id/dialog_pdf_bw_mode_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
                 <CheckBox
                     android:id="@+id/dialog_pdf_grayscale"
@@ -72,6 +72,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/pdf_bw_mode_classic" />
+
+                <CheckBox
+                    android:id="@+id/dialog_pdf_ocr_robust"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pdf_bw_mode_ocr_robust" />
             </LinearLayout>
 
             <RadioGroup
@@ -149,6 +155,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/jpeg_mode_bw_robust" />
+
+                <RadioButton
+                    android:id="@+id/dialog_radio_jpeg_ocr_robust"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/jpeg_mode_ocr_robust" />
             </RadioGroup>
         </LinearLayout>
 

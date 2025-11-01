@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.util.Log;
 import de.schliweb.makeacopy.utils.OpenCVUtils;
 import org.opencv.android.Utils;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -159,6 +158,39 @@ public final class JpegExporter {
                         Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
                     }
                     break;
+                case OCR_ROBUST:
+                    // Use robust OCR preprocessing pipeline with binaryOutput=false (analog zur OCR-Vorverarbeitung)
+                    try {
+                        Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+                        Utils.matToBitmap(work, tmpIn);
+                        Bitmap pre = OpenCVUtils.prepareForOCR(tmpIn, /*binaryOutput*/ false);
+                        if (pre != null) {
+                            Utils.bitmapToMat(pre, work);
+                            // Ensure grayscale-like JPEG container
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                        } else {
+                            // Fallback to robust BW, then classic
+                            Bitmap bw = OpenCVUtils.toBw(tmpIn);
+                            if (bw != null) {
+                                Utils.bitmapToMat(bw, work);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                            } else {
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2BGR);
+                                applyBwText(work);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                            }
+                        }
+                    } catch (Throwable t) {
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                        Imgproc.GaussianBlur(work, work, new Size(0, 0), 1.2);
+                        Imgproc.threshold(work, work, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                    }
+                    break;
 
                 case NONE:
                 default:
@@ -222,23 +254,31 @@ public final class JpegExporter {
      * Writes result back into the provided BGR Mat (content becomes black/white).
      */
     private static void applyBwText(Mat bgr) {
-        Mat gray = new Mat();
+        // Delegate B/W conversion to OpenCVUtils with OTSU-only mode to keep behavior consistent
+        Mat rgba = new Mat();
         try {
-            Imgproc.cvtColor(bgr, gray, Imgproc.COLOR_BGR2GRAY);
-            Imgproc.GaussianBlur(gray, gray, new Size(0, 0), 1.2);
-            Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
-            // Remove tiny speckles to improve compressibility of text regions
-            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
-            try {
-                Imgproc.morphologyEx(gray, gray, Imgproc.MORPH_OPEN, kernel);
-            } finally {
-                kernel.release();
+            Imgproc.cvtColor(bgr, rgba, Imgproc.COLOR_BGR2RGBA);
+            Bitmap tmpIn = Bitmap.createBitmap(rgba.cols(), rgba.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(rgba, tmpIn);
+
+            OpenCVUtils.BwOptions opt = new OpenCVUtils.BwOptions();
+            opt.mode = OpenCVUtils.BwOptions.Mode.OTSU_ONLY; // classic Otsu binarization per export option
+            // Keep mild CLAHE/shadow handling defaults from OpenCVUtils where applicable
+
+            Bitmap bw = OpenCVUtils.toBw(tmpIn, opt);
+            if (bw != null) {
+                Utils.bitmapToMat(bw, rgba); // rgba now contains binary image
+            } else {
+                // Fallback: simple Otsu on gray
+                Imgproc.cvtColor(bgr, rgba, Imgproc.COLOR_BGR2GRAY);
+                Imgproc.threshold(rgba, rgba, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+                Imgproc.cvtColor(rgba, rgba, Imgproc.COLOR_GRAY2RGBA);
             }
-            // Re-expand to BGR for consistent downstream handling
-            Imgproc.cvtColor(gray, bgr, Imgproc.COLOR_GRAY2BGR);
+            // Convert back into provided BGR Mat
+            Imgproc.cvtColor(rgba, bgr, Imgproc.COLOR_RGBA2BGR);
         } finally {
             try {
-                gray.release();
+                rgba.release();
             } catch (Throwable ignore) {
             }
         }
@@ -372,6 +412,37 @@ public final class JpegExporter {
                         Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
                     }
                     break;
+                case OCR_ROBUST:
+                    // Use robust OCR preprocessing pipeline with binaryOutput=false (analog zur OCR-Vorverarbeitung)
+                    try {
+                        Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+                        Utils.matToBitmap(work, tmpIn);
+                        Bitmap pre = OpenCVUtils.prepareForOCR(tmpIn, /*binaryOutput*/ false);
+                        if (pre != null) {
+                            Utils.bitmapToMat(pre, work);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+                            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                        } else {
+                            Bitmap bw = OpenCVUtils.toBw(tmpIn);
+                            if (bw != null) {
+                                Utils.bitmapToMat(bw, work);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                            } else {
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2BGR);
+                                applyBwText(work);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                                Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                            }
+                        }
+                    } catch (Throwable t) {
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+                        Imgproc.GaussianBlur(work, work, new Size(0, 0), 1.2);
+                        Imgproc.threshold(work, work, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+                        Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+                    }
+                    break;
                 case NONE:
                 default:
                     Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
@@ -392,9 +463,18 @@ public final class JpegExporter {
             Log.e(TAG, "exportToStream: error during processing", t);
             return false;
         } finally {
-            try { srcRgba.release(); } catch (Throwable ignore) {}
-            try { work.release(); } catch (Throwable ignore) {}
-            try { tmp.release(); } catch (Throwable ignore) {}
+            try {
+                srcRgba.release();
+            } catch (Throwable ignore) {
+            }
+            try {
+                work.release();
+            } catch (Throwable ignore) {
+            }
+            try {
+                tmp.release();
+            } catch (Throwable ignore) {
+            }
         }
     }
 

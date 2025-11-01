@@ -70,8 +70,12 @@
     <string name="jpeg_mode_auto">自动增强（JPEG）</string>
     <string name="jpeg_mode_bw_text">黑白（经典）（JPEG）</string>
     <string name="jpeg_mode_bw_robust">黑白（稳健）（JPEG）</string>
+    <string name="jpeg_mode_ocr_robust">稳健的 OCR 预处理 (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">黑白（稳健）</string>
     <string name="pdf_bw_mode_classic">黑白（经典）</string>
+    <string name="pdf_bw_mode_ocr_robust">稳健的 OCR 预处理 (PDF)</string>
+
     <string name="skip_ocr_export_only">跳过 OCR（仅导出）</string>
     <string name="skip_cropping">跳过裁剪</string>
     <string name="preview_corner_detection">角点检测预览</string>

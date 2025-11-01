@@ -208,6 +208,7 @@ public final class BitmapUtils {
             boolean toBw = false;
             boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
             boolean doAuto = false;
+            boolean doOcrRobustGray = false;
 
             if (exportAsJpeg) {
                 // Preview reflects JPEG options only
@@ -221,6 +222,9 @@ public final class BitmapUtils {
                     if (mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.BW_TEXT
                             || mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.BW_ROBUST) {
                         toBw = true;
+                    } else if (mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.OCR_ROBUST) {
+                        // Preview should mirror OCR preprocessing (grayscale), not binary
+                        doOcrRobustGray = true;
                     } else if (mode == de.schliweb.makeacopy.utils.jpeg.JpegExportOptions.Mode.AUTO) {
                         doAuto = true;
                     }
@@ -236,6 +240,11 @@ public final class BitmapUtils {
                     } else if ("ROBUST".equalsIgnoreCase(mode) || "CLASSIC".equalsIgnoreCase(mode)) {
                         toBw = true;
                         toGray = false;
+                    } else if ("OCR_ROBUST".equalsIgnoreCase(mode)) {
+                        // Preview should mirror OCR preprocessing (grayscale), not binary
+                        doOcrRobustGray = true;
+                        toGray = false;
+                        toBw = false;
                     } else {
                         toBw = false;
                         // keep toGray as-is (legacy or preset preview)
@@ -248,7 +257,7 @@ public final class BitmapUtils {
             Bitmap safe = BitmapUtils.ensureDisplaySafe(source);
             Bitmap out = safe;
 
-            if (toBw || toGray || doAuto) {
+            if (toBw || toGray || doAuto || doOcrRobustGray) {
                 try {
                     if (!OpenCVUtils.isInitialized()) {
                         OpenCVUtils.init(ctx.getApplicationContext());
@@ -285,6 +294,10 @@ public final class BitmapUtils {
                     } else if (toGray) {
                         Bitmap gr = OpenCVUtils.toGray(safe);
                         if (gr != null) out = gr;
+                    } else if (doOcrRobustGray) {
+                        // Mirror OCR robust preprocessing used in export (grayscale, not binary)
+                        Bitmap pre = OpenCVUtils.prepareForOCR(safe, /*binaryOutput*/ false);
+                        if (pre != null) out = pre;
                     } else if (doAuto) {
                         // Apply JPEG Auto enhance for preview: RGBA -> BGR, enhance, back to RGBA
                         Mat rgba = new Mat();

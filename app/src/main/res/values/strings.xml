@@ -70,8 +70,10 @@
     <string name="jpeg_mode_auto">Auto enhance (JPEG)</string>
     <string name="jpeg_mode_bw_text">Black &amp; White (classic) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Black &amp; White (robust) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">OCR robust preprocessing (JPEG)</string>
     <string name="pdf_bw_mode_robust">B&amp;W (robust)</string>
     <string name="pdf_bw_mode_classic">B&amp;W (classic)</string>
+    <string name="pdf_bw_mode_ocr_robust">OCR robust preprocessing (PDF)</string>
     <string name="skip_ocr_export_only">Skip OCR (export only)</string>
     <string name="preview_corner_detection">Preview corner detection</string>
     <string name="skip_cropping">Skip cropping</string>

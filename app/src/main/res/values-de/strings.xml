@@ -69,8 +69,12 @@
     <string name="jpeg_mode_auto">Automatisch verbessern (JPEG)</string>
     <string name="jpeg_mode_bw_text">S/W (klassisch) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">S/W (robust) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">Robuste OCR-Vorverarbeitung (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">S/W (robust)</string>
     <string name="pdf_bw_mode_classic">S/W (klassisch)</string>
+    <string name="pdf_bw_mode_ocr_robust">Robuste OCR-Vorverarbeitung (PDF)</string>
+
     <string name="skip_ocr_export_only">OCR überspringen (nur Export)</string>
     <string name="skip_cropping">Zuschneiden überspringen</string>
     <string name="preview_corner_detection">Vorschau Eckenerkennung</string>

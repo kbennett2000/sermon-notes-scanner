@@ -70,8 +70,12 @@
     <string name="jpeg_mode_auto">Îmbunătățire automată (JPEG)</string>
     <string name="jpeg_mode_bw_text">Alb-negru (clasic) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Alb-negru (robust) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">Preprocesare OCR robustă (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">A/N (robust)</string>
     <string name="pdf_bw_mode_classic">A/N (clasic)</string>
+    <string name="pdf_bw_mode_ocr_robust">Preprocesare OCR robustă (PDF)</string>
+
     <string name="skip_ocr_export_only">Omite OCR (doar export)</string>
     <string name="skip_cropping">Omite decuparea</string>
     <string name="preview_corner_detection">Previzualizare detecție colțuri</string>

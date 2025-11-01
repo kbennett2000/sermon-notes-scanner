@@ -211,6 +211,7 @@ jobs:
           name: "MakeACopy v${{ steps.extract_version.outputs.VERSION }}"
           tag_name: ${{ github.ref_name }}
           body: ${{ steps.release_notes.outputs.notes }}
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
           files: |
             app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-arm64-v8a-release.apk
             app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-armeabi-v7a-release.apk

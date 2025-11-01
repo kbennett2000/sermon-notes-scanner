@@ -70,8 +70,13 @@
     <string name="jpeg_mode_auto">Automatisk forbedring (JPEG)</string>
     <string name="jpeg_mode_bw_text">Svart/hvitt (klassisk) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Svart/hvitt (robust) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">Robust OCR-forbehandling (JPEG)</string>
+
+
     <string name="pdf_bw_mode_robust">S/H (robust)</string>
     <string name="pdf_bw_mode_classic">S/H (klassisk)</string>
+    <string name="pdf_bw_mode_ocr_robust">Robust OCR-forbehandling (PDF)</string>
+
     <string name="skip_ocr_export_only">Hopp over OCR (kun eksport)</string>
     <string name="skip_cropping">Hopp over beskjæring</string>
     <string name="preview_corner_detection">Forhåndsvisning av hjørnedeteksjon</string>

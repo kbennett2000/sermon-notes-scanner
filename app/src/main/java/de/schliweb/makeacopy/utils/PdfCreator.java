@@ -34,7 +34,7 @@ import java.util.List;
  * creation of both single-page and multi-page searchable PDFs.
  */
 public class PdfCreator {
-    public enum BwMode {ROBUST, CLASSIC}
+    public enum BwMode {ROBUST, CLASSIC, OCR_ROBUST}
 
     private static final String TAG = "PdfCreator";
     // Text sizing (relative to OCR box height in image space)
@@ -55,12 +55,7 @@ public class PdfCreator {
      * @param convertToGrayscale a flag indicating whether to convert the image to grayscale
      * @return the URI of the generated searchable PDF
      */
-    public static Uri createSearchablePdf(Context context,
-                                          Bitmap bitmap,
-                                          List<RecognizedWord> words,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale) {
+    public static Uri createSearchablePdf(Context context, Bitmap bitmap, List<RecognizedWord> words, Uri outputUri, int jpegQuality, boolean convertToGrayscale) {
         // Backward-compatible overload: no black-and-white flag -> false
         return createSearchablePdf(context, bitmap, words, outputUri, jpegQuality, convertToGrayscale, false, 300);
     }
@@ -80,14 +75,7 @@ public class PdfCreator {
      * @param targetDpi           the target DPI (dots per inch) at which the image should be rendered in the PDF
      * @return the URI of the generated searchable PDF file
      */
-    public static Uri createSearchablePdf(Context context,
-                                          Bitmap bitmap,
-                                          List<RecognizedWord> words,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          boolean convertToBlackWhite,
-                                          int targetDpi) {
+    public static Uri createSearchablePdf(Context context, Bitmap bitmap, List<RecognizedWord> words, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi) {
         // Back-compat: default to ROBUST when BW is requested
         return createSearchablePdf(context, bitmap, words, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, targetDpi, convertToBlackWhite ? BwMode.ROBUST : null);
     }
@@ -107,15 +95,7 @@ public class PdfCreator {
      * @param bwMode              The black-and-white conversion mode (e.g., robust or simple thresholding). Ignored if {@code convertToBlackWhite} is false.
      * @return The URI pointing to the created PDF, or null if the PDF creation failed.
      */
-    public static Uri createSearchablePdf(Context context,
-                                          Bitmap bitmap,
-                                          List<RecognizedWord> words,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          boolean convertToBlackWhite,
-                                          int targetDpi,
-                                          BwMode bwMode) {
+    public static Uri createSearchablePdf(Context context, Bitmap bitmap, List<RecognizedWord> words, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi, BwMode bwMode) {
         Log.d(TAG, "createSearchablePdf: uri=" + outputUri + ", words=" + (words == null ? 0 : words.size()));
         if (bitmap == null || outputUri == null) return null;
 
@@ -132,7 +112,7 @@ public class PdfCreator {
 
         Bitmap prepared = null;
         try {
-            prepared = processImageForPdf(bitmap, convertToGrayscale, convertToBlackWhite, targetDpi, convertToBlackWhite ? (bwMode != null ? bwMode : BwMode.ROBUST) : null);
+            prepared = processImageForPdf(bitmap, convertToGrayscale, convertToBlackWhite, targetDpi, bwMode);
             if (prepared == null) {
                 Log.e(TAG, "Image preparation via OpenCV failed");
                 return null;
@@ -170,9 +150,7 @@ public class PdfCreator {
                 float offsetY = (pageH - drawH) / 2f;
 
                 float q = Math.max(0f, Math.min(1f, jpegQuality / 100f));
-                PDImageXObject pdImg = (jpegQuality < 100)
-                        ? JPEGFactory.createFromImage(document, prepared, q)
-                        : LosslessFactory.createFromImage(document, prepared);
+                PDImageXObject pdImg = (jpegQuality < 100) ? JPEGFactory.createFromImage(document, prepared, q) : LosslessFactory.createFromImage(document, prepared);
 
                 // Load embedded fonts with fallbacks (file-based; subset-embedded by default)
                 List<PDFont> fonts = loadFontsWithFallbacks(document, context);
@@ -242,8 +220,7 @@ public class PdfCreator {
         // - Removed Symbols2 & CJKtc (largest memory hogs)
         // - File-based loading avoids MemoryTTFDataStream
         //   Note: In pdfbox-android, the File overload is subset-embedded by default.
-        String[] candidates = new String[]{
-                "fonts/NotoSans-Regular.ttf",          // Latin
+        String[] candidates = new String[]{"fonts/NotoSans-Regular.ttf",          // Latin
                 "fonts/NotoSansThai-Regular.ttf",      // Thai
                 "fonts/NotoSansCJKsc-Regular.ttf",     // CJK (Han) – one font is sufficient for the invisible layer
                 "fonts/NotoNaskhArabic-Regular.ttf",   // Arabic (optional)
@@ -286,8 +263,7 @@ public class PdfCreator {
     private static File copyAssetToCache(Context ctx, String assetPath) throws java.io.IOException {
         File out = new File(ctx.getCacheDir(), new File(assetPath).getName());
         if (out.exists() && out.length() > 0) return out;
-        try (InputStream in = ctx.getAssets().open(assetPath);
-             FileOutputStream os = new FileOutputStream(out)) {
+        try (InputStream in = ctx.getAssets().open(assetPath); FileOutputStream os = new FileOutputStream(out)) {
             byte[] buf = new byte[16 * 1024];
             int r;
             while ((r = in.read(buf)) != -1) os.write(buf, 0, r);
@@ -307,10 +283,7 @@ public class PdfCreator {
      * @throws Exception             if there is an error during text drawing or font operations
      * @throws IllegalStateException if the fonts list is null or empty
      */
-    private static void showTextWithFallbacks(PDPageContentStream cs,
-                                              String token,
-                                              float fontSize,
-                                              List<PDFont> fonts) throws Exception {
+    private static void showTextWithFallbacks(PDPageContentStream cs, String token, float fontSize, List<PDFont> fonts) throws Exception {
         if (token == null || token.isEmpty()) return;
         if (fonts == null || fonts.isEmpty()) throw new IllegalStateException("No fonts available");
 
@@ -387,11 +360,7 @@ public class PdfCreator {
      * @param imageHeight The height of the image, used to clamp and transform bounding box coordinates.
      * @throws Exception If there is an error while adding the text layer to the content stream.
      */
-    private static void addTextLayerImageSpace(PDPageContentStream cs,
-                                               List<RecognizedWord> words,
-                                               List<PDFont> fonts,
-                                               int imageWidth,
-                                               int imageHeight) throws Exception {
+    private static void addTextLayerImageSpace(PDPageContentStream cs, List<RecognizedWord> words, List<PDFont> fonts, int imageWidth, int imageHeight) throws Exception {
         if (words == null || words.isEmpty()) return;
 
         final float EPS_Y = 6f;
@@ -562,9 +531,7 @@ public class PdfCreator {
         int maxW = a4px[0];
         int maxH = a4px[1];
 
-        boolean preScaled =
-                Math.abs(original.getWidth() - maxW) <= 1 &&
-                        Math.abs(original.getHeight() - maxH) <= 1;
+        boolean preScaled = Math.abs(original.getWidth() - maxW) <= 1 && Math.abs(original.getHeight() - maxH) <= 1;
 
         Bitmap base = original;
 
@@ -601,6 +568,20 @@ public class PdfCreator {
                 }
             }
             return viaCv; // may be null → caller will handle
+        }
+
+        // OCR-robust preprocessing for PDF: use binary output to ensure B/W embedding (preview may remain grayscale)
+        if (bwMode == BwMode.OCR_ROBUST && !toBw) {
+            Bitmap pre = OpenCVUtils.prepareForOCR(base, /*binaryOutput*/ false);
+            if (base != original) {
+                try {
+                    base.recycle();
+                } catch (Throwable ignore) {
+                }
+            }
+            if (pre != null) return pre;
+            // Fallback: keep base as-is
+            return base;
         }
 
         if (!toGray) return base;
@@ -681,12 +662,7 @@ public class PdfCreator {
      * @param convertToGrayscale a flag indicating if the images should be converted to grayscale
      * @return the URI of the created searchable PDF
      */
-    public static Uri createSearchablePdf(Context context,
-                                          List<Bitmap> bitmaps,
-                                          List<List<RecognizedWord>> perPageWords,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale) {
+    public static Uri createSearchablePdf(Context context, List<Bitmap> bitmaps, List<List<RecognizedWord>> perPageWords, Uri outputUri, int jpegQuality, boolean convertToGrayscale) {
         // Backward-compatible: no BW flag
         return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, false);
     }
@@ -703,13 +679,7 @@ public class PdfCreator {
      * @param convertToBlackWhite whether to convert images to black-and-white before including them in the PDF
      * @return the URI of the generated searchable PDF file
      */
-    public static Uri createSearchablePdf(Context context,
-                                          List<Bitmap> bitmaps,
-                                          List<List<RecognizedWord>> perPageWords,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          boolean convertToBlackWhite) {
+    public static Uri createSearchablePdf(Context context, List<Bitmap> bitmaps, List<List<RecognizedWord>> perPageWords, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite) {
         // Default 300 dpi behavior
         return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, 300, null);
     }
@@ -730,15 +700,7 @@ public class PdfCreator {
      * @param listener            A listener to track and report the progress of the PDF creation process.
      * @return The URI of the generated searchable PDF.
      */
-    public static Uri createSearchablePdf(Context context,
-                                          List<Bitmap> bitmaps,
-                                          List<List<RecognizedWord>> perPageWords,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          boolean convertToBlackWhite,
-                                          int targetDpi,
-                                          ProgressListener listener) {
+    public static Uri createSearchablePdf(Context context, List<Bitmap> bitmaps, List<List<RecognizedWord>> perPageWords, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi, ProgressListener listener) {
         // Back-compat: default to ROBUST when BW is requested
         return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, targetDpi, listener, convertToBlackWhite ? BwMode.ROBUST : null);
     }
@@ -758,16 +720,7 @@ public class PdfCreator {
      * @param bwMode              the black-and-white processing mode to be used if convertToBlackWhite is true
      * @return the URI of the generated PDF file, or null if an error occurred
      */
-    public static Uri createSearchablePdf(Context context,
-                                          List<Bitmap> bitmaps,
-                                          List<List<RecognizedWord>> perPageWords,
-                                          Uri outputUri,
-                                          int jpegQuality,
-                                          boolean convertToGrayscale,
-                                          boolean convertToBlackWhite,
-                                          int targetDpi,
-                                          ProgressListener listener,
-                                          BwMode bwMode) {
+    public static Uri createSearchablePdf(Context context, List<Bitmap> bitmaps, List<List<RecognizedWord>> perPageWords, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi, ProgressListener listener, BwMode bwMode) {
         if (bitmaps == null || bitmaps.isEmpty() || outputUri == null) return null;
         try {
             PDFBoxResourceLoader.init(context);
@@ -806,7 +759,7 @@ public class PdfCreator {
                 }
                 Bitmap prepared = null;
                 try {
-                    prepared = processImageForPdf(src, convertToGrayscale, convertToBlackWhite, targetDpi, convertToBlackWhite ? (bwMode != null ? bwMode : BwMode.ROBUST) : null);
+                    prepared = processImageForPdf(src, convertToGrayscale, convertToBlackWhite, targetDpi, bwMode);
                     if (prepared == null) {
                         Log.e(TAG, "Image preparation via OpenCV failed for page " + (i + 1));
                         return null;
@@ -831,9 +784,7 @@ public class PdfCreator {
                     float offsetY = (pageH - drawH) / 2f;
 
                     float q = Math.max(0f, Math.min(1f, jpegQuality / 100f));
-                    PDImageXObject pdImg = (jpegQuality < 100)
-                            ? JPEGFactory.createFromImage(document, prepared, q)
-                            : LosslessFactory.createFromImage(document, prepared);
+                    PDImageXObject pdImg = (jpegQuality < 100) ? JPEGFactory.createFromImage(document, prepared, q) : LosslessFactory.createFromImage(document, prepared);
 
                     try (PDPageContentStream cs = new PDPageContentStream(document, page)) {
                         cs.drawImage(pdImg, offsetX, offsetY, drawW, drawH);

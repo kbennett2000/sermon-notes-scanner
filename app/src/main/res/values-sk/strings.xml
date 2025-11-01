@@ -70,8 +70,12 @@
     <string name="jpeg_mode_auto">Automatické vylepšenie (JPEG)</string>
     <string name="jpeg_mode_bw_text">Čiernobiely (klasický) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Čiernobiely (robustný) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">Robustné predspracovanie OCR (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">Č/B (robustný)</string>
     <string name="pdf_bw_mode_classic">Č/B (klasický)</string>
+    <string name="pdf_bw_mode_ocr_robust">Robustné predspracovanie OCR (PDF)</string>
+
     <string name="skip_ocr_export_only">Preskočiť OCR (iba export)</string>
     <string name="skip_cropping">Preskočiť orezanie</string>
     <string name="preview_corner_detection">Náhľad detekcie rohov</string>

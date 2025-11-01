@@ -70,8 +70,12 @@
     <string name="jpeg_mode_auto">Automatisch verbeteren (JPEG)</string>
     <string name="jpeg_mode_bw_text">Zwart-wit (klassiek) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Zwart-wit (robuust) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">Robuuste OCR-voorverwerking (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">Z/W (robuust)</string>
     <string name="pdf_bw_mode_classic">Z/W (klassiek)</string>
+    <string name="pdf_bw_mode_ocr_robust">Robuuste OCR-voorverwerking (PDF)</string>
+
     <string name="skip_ocr_export_only">OCR overslaan (alleen exporteren)</string>
     <string name="skip_cropping">Bijsnijden overslaan</string>
     <string name="preview_corner_detection">Voorbeeld van hoekdetectie</string>

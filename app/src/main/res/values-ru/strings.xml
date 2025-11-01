@@ -70,8 +70,12 @@
     <string name="jpeg_mode_auto">Автоулучшение (JPEG)</string>
     <string name="jpeg_mode_bw_text">Чёрно-белый (классический) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Чёрно-белый (устойчивый) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">Надёжная предварительная обработка OCR (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">Ч/Б (устойчивый)</string>
     <string name="pdf_bw_mode_classic">Ч/Б (классический)</string>
+    <string name="pdf_bw_mode_ocr_robust">Надёжная предварительная обработка OCR (PDF)</string>
+
     <string name="skip_ocr_export_only">Пропустить OCR (только экспорт)</string>
     <string name="skip_cropping">Пропустить обрезку</string>
     <string name="preview_corner_detection">Предпросмотр обнаружения углов</string>

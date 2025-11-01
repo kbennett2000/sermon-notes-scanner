@@ -9,6 +9,9 @@ MakeACopy 2.1.1 (Release Candidate)
 - Settings button is disabled while OCR is processing for fewer accidental taps
 - Dialog button contrast improved for Dark Mode
 - Minor stability and UI fixes
+- JPEG exporter cleaned up to consistently use OpenCVUtils across all modes, reducing duplicated image-processing code.
+- New export option for PDF/JPEG: "OCR robust preprocessing". Uses the same robust preprocessing as OCR; wired through the full export pipeline.
+
 
 Notes
 - “Best” models are detected via file presence/size in no_backup/tessdata; built-in assets are treated as “Fast”

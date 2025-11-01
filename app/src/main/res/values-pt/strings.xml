@@ -70,8 +70,12 @@
     <string name="jpeg_mode_auto">Melhorar automaticamente (JPEG)</string>
     <string name="jpeg_mode_bw_text">Preto e Branco (clássico) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Preto e Branco (robusto) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">Pré-processamento OCR robusto (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">P/B (robusto)</string>
     <string name="pdf_bw_mode_classic">P/B (clássico)</string>
+    <string name="pdf_bw_mode_ocr_robust">Pré-processamento OCR robusto (PDF)</string>
+
     <string name="skip_ocr_export_only">Pular OCR (apenas exportar)</string>
     <string name="skip_cropping">Pular corte</string>
     <string name="preview_corner_detection">Pré-visualização da deteção de cantos</string>

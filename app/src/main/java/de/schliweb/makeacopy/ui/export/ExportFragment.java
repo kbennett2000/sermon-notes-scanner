@@ -843,6 +843,10 @@ public class ExportFragment extends Fragment {
                     } else if ("CLASSIC".equalsIgnoreCase(pdfModeSel) || "ROBUST".equalsIgnoreCase(pdfModeSel)) {
                         convertGrayEffectiveLocal = false;
                         convertBwEffectiveLocal = true;
+                    } else if ("OCR_ROBUST".equalsIgnoreCase(pdfModeSel)) {
+                        // OCR robust preprocessing is grayscale-like but handled in PdfCreator via BwMode
+                        convertGrayEffectiveLocal = false;
+                        convertBwEffectiveLocal = false;
                     }
                 } catch (Throwable ignore) {
                 }
@@ -852,17 +856,15 @@ public class ExportFragment extends Fragment {
                 // Determine PDF BW mode (ROBUST/CLASSIC) if BW is enabled
                 de.schliweb.makeacopy.utils.PdfCreator.BwMode tmpBwMode;
                 try {
-                    if (convertBwEffective) {
-                        android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                        String bw = p.getString("pdf_bw_mode", null);
-                        if ("CLASSIC".equalsIgnoreCase(bw))
-                            tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.CLASSIC;
-                        else if ("ROBUST".equalsIgnoreCase(bw))
-                            tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.ROBUST;
-                        else tmpBwMode = null;
-                    } else {
-                        tmpBwMode = null;
-                    }
+                    android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                    String bw = p.getString("pdf_bw_mode", null);
+                    if ("CLASSIC".equalsIgnoreCase(bw))
+                        tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.CLASSIC;
+                    else if ("ROBUST".equalsIgnoreCase(bw))
+                        tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.ROBUST;
+                    else if ("OCR_ROBUST".equalsIgnoreCase(bw))
+                        tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.OCR_ROBUST;
+                    else tmpBwMode = null;
                 } catch (Throwable ignore) {
                     tmpBwMode = null;
                 }

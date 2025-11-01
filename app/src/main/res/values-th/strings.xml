@@ -70,8 +70,12 @@
     <string name="jpeg_mode_auto">ปรับแต่งอัตโนมัติ (JPEG)</string>
     <string name="jpeg_mode_bw_text">ขาวดำ (คลาสสิก) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">ขาวดำ (ทนทาน) (JPEG)</string>
+    <string name="jpeg_mode_ocr_robust">การประมวลผลล่วงหน้า OCR แบบทนทาน (JPEG)</string>
+
     <string name="pdf_bw_mode_robust">ขาวดำ (ทนทาน)</string>
     <string name="pdf_bw_mode_classic">ขาวดำ (คลาสสิก)</string>
+    <string name="pdf_bw_mode_ocr_robust">การประมวลผลล่วงหน้า OCR แบบทนทาน (PDF)</string>
+
     <string name="skip_ocr_export_only">ข้าม OCR (ส่งออกเท่านั้น)</string>
     <string name="skip_cropping">ข้ามการครอบตัด</string>
     <string name="preview_corner_detection">แสดงตัวอย่างการตรวจจับมุม</string>

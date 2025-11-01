@@ -24,7 +24,12 @@ public class JpegExportOptions {
         /**
          * Black/White robust mode (adaptive threshold + shadow removal + CLAHE).
          */
-        BW_ROBUST
+        BW_ROBUST,
+        /**
+         * Use the same robust preprocessing pipeline as OCR (prepareForOCR with binaryOutput=false).
+         * This yields the same grayscale-optimized input used for OCR.
+         */
+        OCR_ROBUST
     }
 
     /**
