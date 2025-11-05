@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Fout bij schakelen zaklamp: %1$s</string>
     <string name="error_camera_preview_failed">Voorbeeld van de camera kon niet starten. Probeer opnieuw.</string>
 
+    <string name="share_logs">Logbestanden delen</string>
+    <string name="share_logs_subject">MakeACopy diagnostische logbestanden</string>
+    <string name="share_logs_chooser_title">Logbestanden delen via…</string>
+    <string name="share_logs_error">Kon logbestanden niet voorbereiden: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Omzetten naar grijstinten</string>
     <string name="convert_to_blackwhite_pdf">Omzetten naar Z/W</string>

@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Błąd włączania latarki: %1$s</string>
     <string name="error_camera_preview_failed">Nie udało się uruchomić podglądu aparatu. Spróbuj ponownie.</string>
 
+    <string name="share_logs">Udostępnij logi</string>
+    <string name="share_logs_subject">Logi diagnostyczne MakeACopy</string>
+    <string name="share_logs_chooser_title">Udostępnij logi przez…</string>
+    <string name="share_logs_error">Nie udało się przygotować logów: %1$s</string>
+
     <!-- Opcje eksportu -->
     <string name="convert_to_grayscale">Konwertuj do skali szarości</string>
     <string name="convert_to_blackwhite_pdf">Konwertuj do czarno-białego</string>

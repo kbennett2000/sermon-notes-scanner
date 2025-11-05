@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Chyba pri prepínaní blesku: %1$s</string>
     <string name="error_camera_preview_failed">Náhľad fotoaparátu sa nepodarilo spustiť. Skúste to znova.</string>
 
+    <string name="share_logs">Zdieľať záznamy</string>
+    <string name="share_logs_subject">Diagnostické záznamy MakeACopy</string>
+    <string name="share_logs_chooser_title">Zdieľať záznamy cez…</string>
+    <string name="share_logs_error">Záznamy sa nepodarilo pripraviť: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Previesť na odtiene sivej</string>
     <string name="convert_to_blackwhite_pdf">Previesť na čiernobiely</string>

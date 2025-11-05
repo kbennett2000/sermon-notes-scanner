@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Errore durante l’attivazione della torcia: %1$s</string>
     <string name="error_camera_preview_failed">Impossibile avviare l’anteprima della fotocamera. Riprova.</string>
 
+    <string name="share_logs">Condividi i log</string>
+    <string name="share_logs_subject">Log diagnostici di MakeACopy</string>
+    <string name="share_logs_chooser_title">Condividi i log tramite…</string>
+    <string name="share_logs_error">Impossibile preparare i log: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Converti in scala di grigi</string>
     <string name="convert_to_blackwhite_pdf">Converti in B/N</string>

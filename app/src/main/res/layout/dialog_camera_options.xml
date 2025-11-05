@@ -6,7 +6,7 @@
     android:paddingStart="20dp"
     android:paddingEnd="20dp"
     android:paddingTop="16dp"
-    android:paddingBottom="4dp">
+    android:paddingBottom="12dp">
 
     <CheckBox
         android:id="@+id/dialog_checkbox_skip_ocr"
@@ -25,5 +25,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/preview_corner_detection" />
+
+    <!-- Share logs button placed directly under the options (de-emphasized) -->
+    <Button
+        android:id="@+id/button_share_logs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="start"
+        android:text="@string/share_logs"
+        android:textColor="?android:textColorSecondary"
+        android:textAllCaps="false"
+        android:textSize="14sp"
+        android:background="?attr/selectableItemBackgroundBorderless" />
 
 </LinearLayout>

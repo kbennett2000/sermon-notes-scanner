@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Feil ved veksling av lommelykt: %1$s</string>
     <string name="error_camera_preview_failed">Kameraforhåndsvisning kunne ikke starte. Prøv igjen.</string>
 
+    <string name="share_logs">Del logger</string>
+    <string name="share_logs_subject">MakeACopy diagnoselogger</string>
+    <string name="share_logs_chooser_title">Del logger via …</string>
+    <string name="share_logs_error">Kunne ikke forberede logger: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Konverter til gråtoner</string>
     <string name="convert_to_blackwhite_pdf">Konverter til svart/hvitt</string>

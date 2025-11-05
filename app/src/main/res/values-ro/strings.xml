@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Eroare la comutarea lanternei: %1$s</string>
     <string name="error_camera_preview_failed">Previzualizarea camerei nu a putut fi pornită. Încearcă din nou.</string>
 
+    <string name="share_logs">Partajează jurnalele</string>
+    <string name="share_logs_subject">Jurnale de diagnostic MakeACopy</string>
+    <string name="share_logs_chooser_title">Partajează jurnalele prin…</string>
+    <string name="share_logs_error">Nu s-au putut pregăti jurnalele: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Convertește în tonuri de gri</string>
     <string name="convert_to_blackwhite_pdf">Convertește în alb-negru</string>

@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Fel vid växling av ficklampa: %1$s</string>
     <string name="error_camera_preview_failed">Kameraförhandsvisning kunde inte startas. Försök igen.</string>
 
+    <string name="share_logs">Dela loggar</string>
+    <string name="share_logs_subject">MakeACopy diagnostikloggar</string>
+    <string name="share_logs_chooser_title">Dela loggar via…</string>
+    <string name="share_logs_error">Kunde inte förbereda loggar: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Konvertera till gråskala</string>
     <string name="convert_to_blackwhite_pdf">Konvertera till svartvitt</string>

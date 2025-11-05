@@ -53,6 +53,11 @@
     <string name="error_toggling_flashlight">Error al activar la linterna: %1$s</string>
     <string name="error_camera_preview_failed">No se pudo iniciar la vista previa de la cámara. Por favor, inténtalo de nuevo.</string>
 
+    <string name="share_logs">Compartir registros</string>
+    <string name="share_logs_subject">Registros de diagnóstico de MakeACopy</string>
+    <string name="share_logs_chooser_title">Compartir registros mediante…</string>
+    <string name="share_logs_error">No se pudieron preparar los registros: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Convertir a escala de grises</string>
     <string name="convert_to_blackwhite_pdf">Convertir a B/N</string>

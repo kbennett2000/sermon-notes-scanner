@@ -13,10 +13,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
 import android.util.Log;
 import android.view.*;
 import android.widget.TextView;
@@ -36,6 +33,7 @@ import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -47,116 +45,101 @@ import de.schliweb.makeacopy.ui.ocr.OCRViewModel;
 import de.schliweb.makeacopy.utils.UIUtils;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * CameraFragment is responsible for handling the camera functionality and user interactions
- * within the application. It includes methods for initializing the camera, managing light
- * sensor interactions, handling orientation, capturing images, and managing flashlight
- * functionality. It interacts with CameraViewModel and CropViewModel to manage state and
- * data associated with the camera and image operations.
+ * The `CameraFragment` class is responsible for managing the camera operations and associated
+ * UI interactions within a given fragment in an Android application. It includes functionality
+ * for initializing the camera, handling light sensor inputs, managing image capture, and
+ * providing a seamless user experience for scanning or capturing images.
  * <p>
- * Fields:
- * - TAG: String constant for logging purposes.
- * - CAMERA_PERMISSION_REQUEST_CODE: Integer constant for camera permission requests.
- * - LOW_LIGHT_THRESHOLD: Threshold value for detecting low light conditions.
- * - MIN_TIME_BETWEEN_PROMPTS: Minimum time interval between showing prompts.
- * - binding: Data binding object for the fragment's layout.
- * - cameraViewModel: ViewModel to manage camera-related state.
- * - imageCapture: ImageCapture instance for handling image capture operations.
- * - cameraProvider: CameraProvider for managing camera lifecycle.
- * - camera: Camera instance representing the currently active camera.
- * - isFlashlightOn: Boolean flag indicating if the flashlight is currently on.
- * - hasFlash: Boolean flag indicating if the device has a flash available.
- * - sensorManager: SensorManager instance for managing hardware sensors.
- * - lightSensor: Sensor instance representing the device's light sensor.
- * - hasLightSensor: Boolean flag indicating if the device has a light sensor.
- * - lowLightPromptShown: Boolean flag indicating if the low-light prompt has been shown.
- * - lastPromptTime: Long value representing the timestamp of the last shown prompt.
- * - isLowLightDialogVisible: Boolean flag indicating if the low-light dialog is currently visible.
- * - requestPermissionLauncher: ActivityResultLauncher for handling runtime permissions.
- * - orientationListener: Listener for handling orientation changes.
- * - reinitScheduled: Boolean flag indicating if camera reinitialization is scheduled.
- * - cropViewModel: ViewModel for managing image cropping functionality.
+ * This fragment utilizes the CameraX library along with experimental interoperability features
+ * for advanced camera controls.
  * <p>
- * Methods:
- * - onCreateView: Inflates the layout and initializes UI components for the fragment.
- * - onResume: Registers necessary lifecycle components such as the sensor listener.
- * - onPause: Unregisters lifecycle components such as the sensor listener.
- * - checkCameraPermission: Checks and requests camera permission if not already granted.
- * - getViewFinderRotation: Obtains the current rotation of the viewfinder.
- * - initializeCamera: Sets up the camera, including configuring preview and image capture use cases.
- * - handleCameraInitializationError: Handles exceptions occurring during camera initialization.
- * - captureImage: Captures an image using the camera and processes it.
- * - handleCaptureError: Handles exceptions occurring during image capture operations.
- * - displayCapturedImage: Displays the captured image using a URI.
- * - showCameraMode: Updates the UI to show camera mode.
- * - showReviewMode: Updates the UI to show image review mode.
- * - toggleFlashlight: Toggles the flashlight on or off.
- * - turnOffFlashlight: Turns off the flashlight if it is currently on.
- * - resetCamera: Resets camera components and associated states.
- * - onDestroyView: Cleans up resources when the fragment view is destroyed.
- * - initLightSensor: Initializes and checks for availability of the light sensor.
- * - showLowLightPrompt: Displays a dialog to prompt the user to turn on the flashlight in low-light conditions.
- * - onSensorChanged: Responds to changes in sensor values, such as light level changes.
- * - onAccuracyChanged: Handles changes in the accuracy of the sensors.
+ * Key Responsibilities:
+ * - Configure and bind various use cases of the camera (e.g., preview, image capture, analysis).
+ * - Handle permissions for camera access and provide appropriate error messages if permissions
+ * are not granted.
+ * - Control the camera state and flashlight based on user interaction and environmental conditions.
+ * - Provide feedback and updates to the UI to inform the user during the scanning or image capture process.
+ * - Monitor sensor data for low-light conditions and suggest enabling the flashlight when necessary.
+ * - Perform image analysis for tasks such as corner detection or scene luminance estimation.
+ * - Manage resources effectively to prevent leaks or unnecessary memory usage.
+ * <p>
+ * Usage Considerations:
+ * - This class requires the necessary camera permissions to be granted before initializing camera functionality.
+ * - It manages concurrency and thread-safety for operations such as image capture and analysis.
+ * - The UI components must be properly initialized and accessible through its `binding` property.
+ * <p>
+ * This fragment integrates various techniques such as light sensor monitoring, threading for
+ * image analysis, and real-time updates to enhance the camera user experience in dynamic
+ * application scenarios.
  */
 public class CameraFragment extends Fragment implements SensorEventListener {
-
-    // Xiaomi/Redmi torch exposure quirk mitigation
-    private boolean isXiaomiTorchQuirk = false;
-    private int previousExposureCompIndex = 0;
-    private boolean exposureCompApplied = false;
-
-    // Live corner preview (document trapezoid)
-    private ImageAnalysis imageAnalysis;
-    private java.util.concurrent.ExecutorService analysisExecutor;
-    private volatile boolean analysisEnabled = false;
-    private long lastAnalysisTs = 0L;
 
     private static final String TAG = "CameraFragment";
 
     // Light sensor constants
-    private static final float LOW_LIGHT_THRESHOLD = 10.0f; // Lux value below which light is considered low
-    private static final long MIN_TIME_BETWEEN_PROMPTS = 60000; // 1 minute
+    private static final float LOW_LIGHT_THRESHOLD = 10.0f; // lux
+    private static final long MIN_TIME_BETWEEN_PROMPTS = 60000; // ms
 
     private FragmentCameraBinding binding;
     private CameraViewModel cameraViewModel;
+    private CropViewModel cropViewModel;
 
     private ImageCapture imageCapture;
     private ProcessCameraProvider cameraProvider;
     private Camera camera;
+    private Preview preview;
+
     private boolean isFlashlightOn = false;
     private boolean hasFlash = false;
 
-    // Light sensor variables
+    // Torch-EC-Adapt: store the base EC value as long as the torch is on
+    private Integer baseEc = null;
+
+    // Live corner preview (document trapezoid)
+    private ImageAnalysis imageAnalysis;
+    private ExecutorService analysisExecutor;
+    private volatile boolean analysisEnabled = false;
+    private long lastAnalysisTs = 0L;
+    // Logging throttle for adaptive EC
+    private long lastEcLogTs = 0L;
+
+    // Light sensor
     private SensorManager sensorManager;
     private Sensor lightSensor;
     private boolean hasLightSensor = false;
     private boolean lowLightPromptShown = false;
     private long lastPromptTime = 0;
-    private boolean isLowLightDialogVisible = false; // (9) Debounce
+    private boolean isLowLightDialogVisible = false;
 
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private ActivityResultLauncher<Intent> pickImageLauncher;
 
-    // (1) Orientation listener to keep target rotation in sync
     private OrientationEventListener orientationListener;
 
-    // (5) Prevent repeated re-initialization queues
     private boolean reinitScheduled = false;
+    private boolean streamObserverAttached = false;
 
-    private CropViewModel cropViewModel;
+    // Tiered binding (runtime-based escalation instead of vendor checks)
+    private enum BindTier {PERF, COMPAT, COMPAT_LOWRES}
+
+    private BindTier lastTier = null;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         cameraViewModel = new ViewModelProvider(requireActivity()).get(CameraViewModel.class);
+        cropViewModel = new ViewModelProvider(requireActivity()).get(CropViewModel.class);
 
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
+                    Log.i(TAG, "Camera permission result: " + (isGranted ? "GRANTED" : "DENIED"));
                     if (isGranted) {
                         cameraViewModel.setCameraPermissionGranted(true);
                     } else {
@@ -212,13 +195,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                                 skipCropping = prefs.getBoolean("skip_cropping", false);
                             } catch (Throwable ignoreSp) {
                             }
-                            int dest;
-                            if (skipCropping) {
-                                dest = skipOcr ? R.id.navigation_export : R.id.navigation_ocr;
-                            } else {
-                                dest = R.id.navigation_crop;
-                            }
-                            // Reset OCR state if going directly to OCR
+                            int dest = skipCropping ? (skipOcr ? R.id.navigation_export : R.id.navigation_ocr) : R.id.navigation_crop;
                             if (skipCropping && !skipOcr) {
                                 try {
                                     OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
@@ -229,7 +206,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                             try {
                                 Navigation.findNavController(requireView()).navigate(dest);
                             } catch (IllegalArgumentException | IllegalStateException ignored) {
-                                // Fragment not in a state to navigate anymore; safe to ignore
                             }
                         }
                     }
@@ -238,8 +214,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         binding = FragmentCameraBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // Detect Xiaomi/Redmi torch exposure quirk once
-        isXiaomiTorchQuirk = isXiaomiTorchQuirkDevice();
+        // Verbose environment log to help diagnose device-specific issues
+        logEnvironment();
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.buttonContainer, (v, insets) -> {
             de.schliweb.makeacopy.utils.UIUtils.adjustMarginForSystemInsets(binding.buttonContainer, 8);
@@ -257,14 +233,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         final TextView textView = binding.textCamera;
         cameraViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
-        // Observe the image URI. Previously this triggered a confirm/review step.
-        // With the improved workflow, we navigate to Crop directly on capture/pick,
-        // so we no longer switch modes here to avoid re-navigation loops when returning.
-        cameraViewModel.getImageUri().observe(getViewLifecycleOwner(), uri -> {
-            // Intentionally left blank to avoid auto UI switches here.
-        });
-
-        // Set up scan button
+        // Scan
         binding.buttonScan.setOnClickListener(v -> {
             if (cameraViewModel != null && cameraViewModel.isCameraPermissionGranted().getValue() == Boolean.TRUE) {
                 captureImage();
@@ -286,7 +255,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             pickImageLauncher.launch(intent);
         });
 
-        // Settings/options button: open a simple dialog with only "Skip OCR"
+        // Options
         binding.buttonCameraOptions.setOnClickListener(v -> {
             getParentFragmentManager().setFragmentResultListener(CameraOptionsDialogFragment.REQUEST_KEY, getViewLifecycleOwner(), (requestKey, bundle) -> {
                 boolean skip = bundle.getBoolean(CameraOptionsDialogFragment.BUNDLE_SKIP_OCR, false);
@@ -345,7 +314,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     }, 100);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error handling retake button click: " + e.getMessage());
+                Log.e(TAG, "Error handling retake: " + e.getMessage());
                 if (isAdded()) {
                     UIUtils.showToast(requireContext(), getString(R.string.error_resetting_camera, e.getMessage()), Toast.LENGTH_SHORT);
                     v.setEnabled(true);
@@ -353,39 +322,29 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
         });
 
-        cropViewModel = new ViewModelProvider(requireActivity()).get(CropViewModel.class);
-
+        // Confirm (continue)
         binding.buttonConfirm.setOnClickListener(v -> {
-            if (isAdded() && getView() != null) {
-                cropViewModel.setImageCropped(false);
-
-                boolean skipOcr = false;
-                boolean skipCropping = false;
+            if (!isAdded()) return;
+            cropViewModel.setImageCropped(false);
+            boolean skipOcr = false;
+            boolean skipCropping = false;
+            try {
+                android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                skipOcr = prefs.getBoolean("skip_ocr", false);
+                skipCropping = prefs.getBoolean("skip_cropping", false);
+            } catch (Throwable ignoreSp) {
+            }
+            int dest = skipCropping ? (skipOcr ? R.id.navigation_export : R.id.navigation_ocr) : R.id.navigation_crop;
+            if (skipCropping && !skipOcr) {
                 try {
-                    android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                    skipOcr = prefs.getBoolean("skip_ocr", false);
-                    skipCropping = prefs.getBoolean("skip_cropping", false);
-                } catch (Throwable ignoreSp) {
+                    OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
+                    ocrVm.resetForNewImage();
+                } catch (Throwable ignore) {
                 }
-
-                int dest;
-                if (skipCropping) {
-                    dest = skipOcr ? R.id.navigation_export : R.id.navigation_ocr;
-                } else {
-                    dest = R.id.navigation_crop;
-                }
-                // Reset OCR state if going directly to OCR
-                if (skipCropping && !skipOcr) {
-                    try {
-                        OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
-                        ocrVm.resetForNewImage();
-                    } catch (Throwable ignore) {
-                    }
-                }
-                try {
-                    Navigation.findNavController(requireView()).navigate(dest);
-                } catch (IllegalArgumentException | IllegalStateException ignored) {
-                }
+            }
+            try {
+                Navigation.findNavController(requireView()).navigate(dest);
+            } catch (IllegalArgumentException | IllegalStateException ignored) {
             }
         });
 
@@ -409,7 +368,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         // Only capability detection here; registration happens in onResume (3)
         initLightSensor();
 
-        // Handle back: in review mode -> reset, sonst default
+        // Handle back: in review mode -> reset, otherwise default
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -425,59 +384,33 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         return root;
     }
 
-    // (3) Sensor-Registrierung lifecycle-freundlich
     @Override
     public void onResume() {
         super.onResume();
+        Log.i(TAG, "onResume: registering listeners (lightSensor=" + hasLightSensor + ")");
         if (hasLightSensor && sensorManager != null && lightSensor != null) {
             sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
-        if (orientationListener != null) {
-            orientationListener.enable();
-        }
+        if (orientationListener != null) orientationListener.enable();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        Log.i(TAG, "onPause: unregistering listeners");
         if (sensorManager != null) sensorManager.unregisterListener(this);
-        if (orientationListener != null) {
-            orientationListener.disable();
-        }
+        if (orientationListener != null) orientationListener.disable();
     }
 
-    /**
-     * Verifies if the application has been granted the camera permission by the user. If the
-     * permission is not yet granted, it utilizes a permission launcher to request it. If the
-     * permission is already granted, it updates the camera view model to reflect this status.
-     * <p>
-     * This method ensures that the application's camera functionality is only initialized or
-     * activated when the necessary permission is obtained.
-     * <p>
-     * Preconditions:
-     * - The fragment is added to its host activity.
-     * <p>
-     * Behavior:
-     * - If the permission is not granted:
-     * - Launches the permission request dialog using the `requestPermissionLauncher`.
-     * - If the permission is granted:
-     * - Updates the `cameraViewModel` to indicate that the camera permission is granted.
-     */
     private void checkCameraPermission() {
         if (!isAdded()) return;
-
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            if (requestPermissionLauncher != null) {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA);
-            }
+            if (requestPermissionLauncher != null) requestPermissionLauncher.launch(Manifest.permission.CAMERA);
         } else {
-            if (cameraViewModel != null) {
-                cameraViewModel.setCameraPermissionGranted(true);
-            }
+            if (cameraViewModel != null) cameraViewModel.setCameraPermissionGranted(true);
         }
     }
 
-    // (1) Orientation direkt vom PreviewView / Display beziehen
     private int getViewFinderRotation() {
         if (binding != null && binding.viewFinder.getDisplay() != null) {
             return binding.viewFinder.getDisplay().getRotation();
@@ -485,668 +418,34 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         return Surface.ROTATION_0;
     }
 
-    /**
-     * Retrieves the value of a system property identified by the given key.
-     * If the property is not found, the specified default value is returned.
-     *
-     * @param key the name of the system property to retrieve
-     * @param def the default value to return if the system property is not found
-     * @return the value of the system property, or the default value if not found
-     */
-    private static String getSystemProperty(String key, String def) {
-        try {
-            Class<?> sp = Class.forName("android.os.SystemProperties");
-            return (String) sp.getMethod("get", String.class, String.class).invoke(null, key, def);
-        } catch (Throwable t) {
-            return def;
-        }
-    }
-
-
-    private boolean isXperia1VI() {
-        String model = android.os.Build.MODEL;
-        if (model == null) return false;
-        String m = model.toUpperCase(Locale.ROOT);
-        return (m.startsWith("XQ-EC") || m.startsWith("XQ-ES"));
-    }
-
-    private static boolean isSonyModel(String... prefixes) {
-        String model = android.os.Build.MODEL;
-        if (model == null) return false;
-        String m = model.toUpperCase(Locale.ROOT).trim();
-        for (String p : prefixes) {
-            if (m.startsWith(p.toUpperCase(Locale.ROOT))) return true;
-        }
-        return false;
-    }
-
-    /**
-     * Determines if the device is manufactured by Sony or has characteristics
-     * commonly associated with Sony devices.
-     * <p>
-     * The method checks the manufacturer, brand, and model of the device for
-     * indications of Sony-like characteristics. It also examines specific system
-     * properties as a fallback for devices where these values might be customized
-     * or modified.
-     *
-     * @return true if the device is determined to be Sony-like based on the
-     * manufacturer, brand, model, or certain system properties;
-     * false otherwise or in case of any errors.
-     */
-    private static boolean isSonyLike() {
-        try {
-            String man = android.os.Build.MANUFACTURER;
-            String brand = android.os.Build.BRAND;
-            String model = android.os.Build.MODEL;
-
-            String sMan = man == null ? "" : man.toLowerCase(Locale.ROOT);
-            String sBrand = brand == null ? "" : brand.toLowerCase(Locale.ROOT);
-            String sModel = model == null ? "" : model.toLowerCase(Locale.ROOT);
-
-            // Check common system properties as a fallback (custom ROMs sometimes change MANUFACTURER)
-            String[] props = {
-                    "ro.product.manufacturer",
-                    "ro.product.vendor.manufacturer",
-                    "ro.product.system.manufacturer",
-                    "ro.product.odm.manufacturer"
-            };
-            boolean propsSaySony = false;
-            for (String k : props) {
-                String v = getSystemProperty(k, "");
-                if (v != null && v.toLowerCase(Locale.ROOT).contains("sony")) {
-                    propsSaySony = true;
-                    break;
-                }
-            }
-
-            return sMan.contains("sony") || sBrand.contains("sony")
-                    || sModel.contains("xperia") || propsSaySony;
-        } catch (Throwable t) {
-            return false;
-        }
-    }
-
-    private boolean isXperia5IV() {
-        // International variants start with XQ-CQ; Japanese carrier models: SO-54C / SOG09
-        return isSonyModel("XQ-CQ", "SO-54C", "SOG09");
-    }
-
-    // Broad Sony fallback: enforce TextureView (COMPATIBLE) on Android 15+
-    private boolean isSonyAndroid15Plus() {
-        try {
-            return android.os.Build.VERSION.SDK_INT >= 35 && isSonyLike();
-        } catch (Throwable t) {
-            return false;
-        }
-    }
-
-    private boolean shouldForceCompatiblePreview() {
-        return isPreviewBlackScreenQuirkDevice()
-                || isXperia1VI()
-                || isXperia5IV()
-                || isSonyAndroid15Plus();
-    }
-
-    private void logStartupInfo(boolean implCompatible,
-                                boolean quirkActive,
-                                boolean conservativeRes,
-                                android.util.Range<Integer> fpsRange) {
-        try {
-            String manufacturer = android.os.Build.MANUFACTURER;
-            String brand = android.os.Build.BRAND;
-            String model = android.os.Build.MODEL;
-            int sdk = android.os.Build.VERSION.SDK_INT;
-
-            String previewRes = "n/a";
-            try {
-                if (preview != null && preview.getResolutionInfo() != null) {
-                    android.util.Size s = preview.getResolutionInfo().getResolution();
-                    previewRes = s.getWidth() + "x" + s.getHeight();
-                }
-            } catch (Throwable ignored) {
-            }
-
-            String captureRes = "n/a";
-            try {
-                if (imageCapture != null && imageCapture.getResolutionInfo() != null) {
-                    android.util.Size s = imageCapture.getResolutionInfo().getResolution();
-                    captureRes = s.getWidth() + "x" + s.getHeight();
-                }
-            } catch (Throwable ignored) {
-            }
-
-            String captureMode = (imageCapture != null
-                    && imageCapture.getCaptureMode() == ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                    ? "MINIMIZE_LATENCY" : "MAXIMIZE_QUALITY";
-
-            Log.i(TAG, "=== Camera startup info ===");
-            Log.i(TAG, "Device: " + manufacturer + " / " + brand + " / " + model + " (SDK " + sdk + ")");
-            Log.i(TAG, "ImplMode: " + (implCompatible ? "COMPATIBLE" : "PERFORMANCE"));
-            Log.i(TAG, "Quirk active: " + quirkActive + ", conservativeRes: " + conservativeRes);
-            Log.i(TAG, "Preview res: " + previewRes + ", Capture res: " + captureRes);
-            Log.i(TAG, "Capture mode: " + captureMode + ", AE_TARGET_FPS_RANGE: " + fpsRange);
-            Log.i(TAG, "isXperia1VI=" + isXperia1VI() + ", isXperia5IV=" + isXperia5IV()
-                    + ", isHuaweiQuirk=" + isHuaweiQuirkDevice() + ", isHonorQuirk=" + isPreviewBlackScreenQuirkDevice());
-            Log.i(TAG, "============================");
-        } catch (Throwable t) {
-            Log.w(TAG, "logStartupInfo failed: " + t.getMessage());
-        }
-    }
-
-    /**
-     * Extracts and returns the major version number from the EMUI version string.
-     * The EMUI version string is retrieved from the system property "ro.build.version.emui".
-     * If the version string is not in a recognizable format or is unavailable, -1 is returned.
-     *
-     * @return The major version number of EMUI, or -1 if the version string is invalid or unavailable.
-     */
-    private static int getEmuiMajor() {
-        // Examples: "EmotionUI_10.1.0", "EmotionUI_11.0.0"
-        String emui = getSystemProperty("ro.build.version.emui", "");
-        if (emui == null) return -1;
-        // extract first number after underscore
-        int us = emui.indexOf('_');
-        if (us >= 0 && us + 1 < emui.length()) {
-            String rest = emui.substring(us + 1);
-            String num = rest.split("\\.")[0];
-            try {
-                return Integer.parseInt(num);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Retrieves the major version number of the EMUI system based on system property or fallback string.
-     * <p>
-     * This method first attempts to get the EMUI version from the system property "ro.build.version.emui".
-     * If it fails, it uses a fallback approach by analyzing the build's display string.
-     *
-     * @return The major version number of EMUI, or -1 if the version cannot be determined.
-     */
-    private static int getEmuiMajorLoose() {
-        // 1) Systemproperty
-        String emui = getSystemProperty("ro.build.version.emui", "");
-        if (emui != null && !emui.isEmpty()) {
-            int us = emui.indexOf('_');
-            String rest = (us >= 0 && us + 1 < emui.length()) ? emui.substring(us + 1) : emui;
-            String num = rest.split("\\.")[0];
-            try {
-                return Integer.parseInt(num);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        // 2) Fallback: Build.DISPLAY (Marketing-String)
-        try {
-            String disp = android.os.Build.DISPLAY;
-            if (disp != null) {
-                java.util.regex.Matcher m = java.util.regex.Pattern
-                        .compile("EMUI\\s*([0-9]{1,2})", java.util.regex.Pattern.CASE_INSENSITIVE)
-                        .matcher(disp);
-                if (m.find()) return Integer.parseInt(m.group(1));
-            }
-        } catch (Throwable ignored) {
-        }
-        return -1;
-    }
-
-    /**
-     * Extracts the major version number of Magic UI from system properties or build display information.
-     * The method first attempts to retrieve the version from the system property "ro.build.version.magic".
-     * If the property is found, it parses the major version from the string. If not, it falls back to
-     * parsing the version from the `Build.DISPLAY` field using a regex pattern.
-     *
-     * @return The major version number of Magic UI as an integer. Returns -1 if the version cannot be determined.
-     */
-    private static int getMagicUiMajor() {
-        String magic = getSystemProperty("ro.build.version.magic", "");
-        if (magic != null && !magic.isEmpty()) {
-            int us = magic.indexOf('_');
-            if (us >= 0 && us + 1 < magic.length()) {
-                String rest = magic.substring(us + 1);
-                String num = rest.split("\\.")[0];
-                try {
-                    return Integer.parseInt(num);
-                } catch (NumberFormatException ignored) {
-                }
-            }
-        }
-        // Fallback: try Build.DISPLAY
-        try {
-            String disp = android.os.Build.DISPLAY;
-            if (disp != null) {
-                String up = disp.toUpperCase(java.util.Locale.ROOT);
-                java.util.regex.Matcher m = java.util.regex.Pattern
-                        .compile("MAGIC\\s?UI[_\\s-]?(\\d+)").matcher(up);
-                if (m.find()) return Integer.parseInt(m.group(1));
-            }
-        } catch (Throwable ignored) {
-        }
-        return -1;
-    }
-
-
-    /**
-     * Determines if the device has a known quirk where the preview screen shows as a black screen.
-     * Specifically checks for Huawei devices running EMUI 10 and Honor devices with certain Android and Magic UI/EMUI configurations.
-     *
-     * @return true if the device is identified as having the black screen preview quirk; false otherwise.
-     */
-    private boolean isPreviewBlackScreenQuirkDevice() {
-        if (isHuaweiQuirkDevice()) return true;
-
-        String manufacturer = android.os.Build.MANUFACTURER;
-        String brand = android.os.Build.BRAND;
-        if (manufacturer == null && brand == null) return false;
-        boolean isHonorBrand = "HONOR".equalsIgnoreCase(manufacturer) || "HONOR".equalsIgnoreCase(brand);
-        if (!isHonorBrand) return false;
-
-        int sdk = android.os.Build.VERSION.SDK_INT;            // Android 10 == 29
-        int magic = getMagicUiMajor();                         // e.g., 4 for Magic UI 4.x
-        int emui = getEmuiMajor();                             // often 11 on Magic UI 4
-        boolean onAndroid10 = (sdk == 29);
-        boolean magicOrEmuiNew = (magic >= 4) || (emui >= 11);
-        return onAndroid10 && magicOrEmuiNew;
-    }
-
-    /**
-     * Determines whether the current device is a Huawei device with specific quirks.
-     * It checks if the device manufacturer is Huawei, verifies the model against known Huawei
-     * device families (P30 and P40 series), and considers the EMUI version for certain conditions.
-     *
-     * @return true if the device is a Huawei P30/P40 series device with EMUI version 10 or above,
-     * or if the EMUI version cannot be determined; false otherwise.
-     */
-    private boolean isHuaweiQuirkDevice() {
-        String manufacturer = android.os.Build.MANUFACTURER;
-        String model = android.os.Build.MODEL;
-        if (manufacturer == null || model == null) return false;
-        if (!manufacturer.equalsIgnoreCase("HUAWEI")) return false;
-
-        String m = model.toUpperCase(Locale.ROOT);
-        boolean isP30Fam = m.contains("ELE-") || m.contains("VOG-");               // P30 / P30 Pro
-        boolean isP40Fam = m.contains("ANA-") || m.contains("ELS-") || m.contains("JNY-"); // P40 / Pro / Lite
-        if (!(isP30Fam || isP40Fam)) return false;
-
-        int emui = getEmuiMajorLoose();
-        // Conservative: if we cannot determine the version (-1), prefer to fall back
-        return (emui == -1) || (emui >= 10);
-    }
-
-    // Redmi/Xiaomi torch darkening quirk detection (Android 15 / HyperOS variants too)
-    private boolean isXiaomiTorchQuirkDevice() {
-        try {
-            String manufacturer = android.os.Build.MANUFACTURER;
-            String model = android.os.Build.MODEL;
-            if (manufacturer == null && model == null) return false;
-            String man = manufacturer != null ? manufacturer.trim().toUpperCase(Locale.ROOT) : "";
-            String mod = model != null ? model.trim().toUpperCase(Locale.ROOT) : "";
-            boolean isXiaomi = man.contains("XIAOMI") || man.contains("REDMI") || man.contains("POCO");
-            boolean mentionsRedmi = mod.contains("REDMI") || mod.contains("POCO");
-            return isXiaomi || mentionsRedmi;
-        } catch (Throwable t) {
-            return false;
-        }
-    }
-
-    private void applyTorchExposureWorkaround(boolean torchOn) {
-        if (!isXiaomiTorchQuirk) return;
-        if (camera == null) return;
-        try {
-            ExposureState es = camera.getCameraInfo().getExposureState();
-            if (es == null) return;
-            android.util.Range<Integer> range = es.getExposureCompensationRange();
-            if (range == null) return;
-
-            if (torchOn) {
-                // Save current value once
-                try {
-                    previousExposureCompIndex = es.getExposureCompensationIndex();
-                } catch (Throwable ignore) {
-                    // default 0
-                }
-                int desired = 4; // +4 tends to be ~1.0-1.3 EV on many devices
-                int maxAllowed = range.getUpper() != null ? range.getUpper() : desired;
-                int minAllowed = range.getLower() != null ? range.getLower() : -desired;
-                int target = Math.max(minAllowed, Math.min(maxAllowed, desired));
-                camera.getCameraControl().setExposureCompensationIndex(target);
-                exposureCompApplied = true;
-                Log.i(TAG, "Applied Xiaomi torch exposure workaround: EC=" + target + " (range=" + range + ")");
-            } else {
-                if (exposureCompApplied) {
-                    int restore = previousExposureCompIndex;
-                    camera.getCameraControl().setExposureCompensationIndex(restore);
-                    exposureCompApplied = false;
-                    Log.i(TAG, "Restored exposure compensation index to " + restore);
-                }
-            }
-        } catch (Throwable t) {
-            Log.w(TAG, "applyTorchExposureWorkaround failed: " + t.getMessage());
-        }
-    }
-
-    private Preview preview; // make field to update rotation later
-
-    private boolean streamObserverAttached = false;
-
-    private boolean alreadyReboundCompatibleOnce = false;
-
-    private void setLiveAnalysisEnabled(boolean enabled) {
-        if (!isAdded()) {
-            analysisEnabled = enabled;
-            return;
-        }
-
-        analysisEnabled = enabled;
-
-        try {
-            android.content.SharedPreferences prefs =
-                    requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-            prefs.edit().putBoolean("analysis_enabled", enabled).apply();
-        } catch (Throwable ignore) {
-        }
-
-        if (binding != null) {
-            if (enabled && binding.viewFinder.getVisibility() == View.VISIBLE) {
-                binding.cornerOverlay.setVisibility(View.VISIBLE);
-            } else {
-                binding.cornerOverlay.setCorners(null);
-                binding.cornerOverlay.setVisibility(View.GONE);
-            }
-        }
-
-        try {
-            if (imageAnalysis != null) {
-                if (enabled) {
-                    ensureAnalysisExecutor();
-                    imageAnalysis.setAnalyzer(analysisExecutor, this::analyzeFrameForCorners);
-                } else {
-                    imageAnalysis.clearAnalyzer();
-                    if (analysisExecutor != null) {
-                        analysisExecutor.shutdownNow();
-                        analysisExecutor = null;
-                    }
-                }
-            }
-        } catch (Throwable t) {
-            Log.w(TAG, "setLiveAnalysisEnabled failed: " + t.getMessage());
-        }
-    }
-
-    /**
-     * Binds the camera use cases to the lifecycle and configures the preview and image capture
-     * settings. Includes setup for target aspect ratio, rotation and FPS range adjustments using
-     * Camera2 interop. Handles fallback to compatible preview mode if needed.
-     *
-     * @param forceCompatiblePreview Flag to force the use of compatible preview mode. If true, the
-     *                               viewfinder's implementation mode is set to compatible; otherwise,
-     *                               it is set to performance. This parameter is used during binding
-     *                               retries when initial binding fails.
-     */
-    @OptIn(markerClass = ExperimentalCamera2Interop.class)
-    private void bindUseCases(boolean forceCompatiblePreview) {
-        if (binding == null || cameraProvider == null || !isAdded()) return;
-
-        if (!forceCompatiblePreview) alreadyReboundCompatibleOnce = false;
-
-        // 1) Set ImplementationMode before SurfaceProvider
-        if (forceCompatiblePreview) {
-            binding.viewFinder.setImplementationMode(PreviewView.ImplementationMode.COMPATIBLE);
-        } else {
-            binding.viewFinder.setImplementationMode(PreviewView.ImplementationMode.PERFORMANCE);
-        }
-        binding.viewFinder.setScaleType(PreviewView.ScaleType.FIT_CENTER);
-
-        int rotation = getViewFinderRotation();
-
-        // Only run the PREVIEW conservatively; capture stays high-res
-        boolean useConservativePreview = forceCompatiblePreview
-                || isPreviewBlackScreenQuirkDevice()
-                || isXperia1VI()
-                || isXperia5IV()
-                || isSonyAndroid15Plus();
-
-        // 2) Set up the ResolutionSelector
-        androidx.camera.core.resolutionselector.ResolutionSelector.Builder rsBuilderPreview =
-                new androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
-                        .setAspectRatioStrategy(
-                                new androidx.camera.core.resolutionselector.AspectRatioStrategy(
-                                        AspectRatio.RATIO_4_3,
-                                        androidx.camera.core.resolutionselector.AspectRatioStrategy.FALLBACK_RULE_AUTO
-                                )
-                        );
-
-        androidx.camera.core.resolutionselector.ResolutionSelector.Builder rsBuilderCapture =
-                new androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
-                        .setAspectRatioStrategy(
-                                new androidx.camera.core.resolutionselector.AspectRatioStrategy(
-                                        AspectRatio.RATIO_4_3,
-                                        androidx.camera.core.resolutionselector.AspectRatioStrategy.FALLBACK_RULE_AUTO
-                                )
-                        );
-
-        // Preview in conservative mode (e.g. 1440x1080), capture prefers high-res
-        if (useConservativePreview) {
-            android.util.Size preferredPreview = new android.util.Size(1440, 1080);
-            rsBuilderPreview.setResolutionStrategy(
-                    new androidx.camera.core.resolutionselector.ResolutionStrategy(
-                            preferredPreview,
-                            androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
-                    )
-            );
-        }
-        // Prefer high-res capture (e.g. 4032x3024)
-        android.util.Size preferredHigh = new android.util.Size(4032, 3024);
-        rsBuilderCapture.setResolutionStrategy(
-                new androidx.camera.core.resolutionselector.ResolutionStrategy(
-                        preferredHigh,
-                        androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
-                )
-        );
-
-        androidx.camera.core.resolutionselector.ResolutionSelector previewSelector = rsBuilderPreview.build();
-        androidx.camera.core.resolutionselector.ResolutionSelector captureSelector = rsBuilderCapture.build();
-
-        Preview.Builder previewBuilder = new Preview.Builder()
-                .setResolutionSelector(previewSelector)
-                .setTargetRotation(rotation);
-
-        ImageCapture.Builder captureBuilder = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                .setResolutionSelector(captureSelector)
-                .setTargetRotation(rotation)
-                .setJpegQuality(98);
-
-        // 3) Camera2 interop: conservative FPS + high-quality pipelines
-        androidx.camera.camera2.interop.Camera2Interop.Extender<Preview> pExt =
-                new androidx.camera.camera2.interop.Camera2Interop.Extender<>(previewBuilder);
-        androidx.camera.camera2.interop.Camera2Interop.Extender<ImageCapture> cExt =
-                new androidx.camera.camera2.interop.Camera2Interop.Extender<>(captureBuilder);
-
-        android.util.Range<Integer> fps = new android.util.Range<>(15, 30);
-        pExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps);
-        cExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps);
-
-        pExt.setCaptureRequestOption(
-                android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE,
-                android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-        cExt.setCaptureRequestOption(
-                android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE,
-                android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-        cExt.setCaptureRequestOption(
-                android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE,
-                android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE_HIGH_QUALITY);
-        cExt.setCaptureRequestOption(
-                android.hardware.camera2.CaptureRequest.EDGE_MODE,
-                android.hardware.camera2.CaptureRequest.EDGE_MODE_HIGH_QUALITY);
-        cExt.setCaptureRequestOption(
-                android.hardware.camera2.CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
-                android.hardware.camera2.CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY);
-        cExt.setCaptureRequestOption(
-                android.hardware.camera2.CaptureRequest.SHADING_MODE,
-                android.hardware.camera2.CaptureRequest.SHADING_MODE_HIGH_QUALITY);
-
-        imageCapture = captureBuilder.build();
-        preview = previewBuilder.build();
-
-        // 4) ImageAnalysis for live document overlay
-        ImageAnalysis.Builder iaBuilder = new ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setTargetRotation(rotation);
-        imageAnalysis = iaBuilder.build();
-        // Only enable if turned on
-        if (analysisEnabled) {
-            ensureAnalysisExecutor();
-            imageAnalysis.setAnalyzer(analysisExecutor, this::analyzeFrameForCorners);
-            binding.cornerOverlay.setVisibility(View.VISIBLE);
-            binding.cornerOverlay.setCorners(null);
-        } else {
-            try {
-                imageAnalysis.clearAnalyzer();
-            } catch (Throwable ignore) {
-            }
-            binding.cornerOverlay.setCorners(null);
-            binding.cornerOverlay.setVisibility(View.GONE);
-        }
-
-        CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-
-        try {
-            cameraProvider.unbindAll();
-            camera = cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture, imageAnalysis);
-
-            final boolean implCompatible = forceCompatiblePreview;
-            final boolean quirkActive = shouldForceCompatiblePreview();
-            final boolean conservativeRes = useConservativePreview;
-            logStartupInfo(implCompatible, quirkActive, conservativeRes, fps);
-
-            // Log SurfaceRequest and then forward it to the PreviewView
-            Preview.SurfaceProvider vfProvider = binding.viewFinder.getSurfaceProvider();
-            preview.setSurfaceProvider(
-                    ContextCompat.getMainExecutor(requireContext()),
-                    request -> {
-                        android.util.Size s = request.getResolution();
-                        Log.i(TAG, "Preview SurfaceRequest resolution: " + s.getWidth() + "x" + s.getHeight());
-                        vfProvider.onSurfaceRequested(request);
-                    }
-            );
-
-            // Re-apply torch exposure workaround after (re)bind if torch is currently on
-            if (isFlashlightOn) {
-                applyTorchExposureWorkaround(true);
-            }
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "bindToLifecycle failed: " + e.getMessage(), e);
-            // Fallback: rebind once in COMPATIBLE mode
-            if (!forceCompatiblePreview) {
-                bindUseCases(true);
-                return;
-            }
-            throw e;
-        }
-
-        // 5) Orientation listener keeps preview and capture in sync
-        if (orientationListener == null) {
-            orientationListener = new OrientationEventListener(requireContext()) {
-                @Override
-                public void onOrientationChanged(int orientation) {
-                    if (!isAdded() || imageCapture == null || binding == null) return;
-                    int rot = getViewFinderRotation();
-                    try {
-                        imageCapture.setTargetRotation(rot);
-                        if (preview != null) preview.setTargetRotation(rot);
-                    } catch (Exception ignored) {
-                    }
-                }
-            };
-            orientationListener.enable();
-        }
-
-
-        // 6) Watchdog: after 3s without STREAMING → rebind in COMPATIBLE mode
-        if (!streamObserverAttached) {
-            binding.viewFinder.getPreviewStreamState()
-                    .observe(getViewLifecycleOwner(), state -> Log.d(TAG, "Preview stream state: " + state));
-            streamObserverAttached = true;
-        }
-
-        binding.viewFinder.postDelayed(() -> {
-            if (!isAdded() || binding == null) return;
-            PreviewView.StreamState st = binding.viewFinder.getPreviewStreamState().getValue();
-            boolean streaming = (st == PreviewView.StreamState.STREAMING);
-            if (!streaming) {
-                if (!alreadyReboundCompatibleOnce) {
-                    Log.w(TAG, "Preview watchdog: not STREAMING → rebinding in COMPATIBLE mode");
-                    alreadyReboundCompatibleOnce = true;
-                    bindUseCases(true);
-                } else {
-                    Log.e(TAG, "Still not STREAMING after COMPATIBLE rebind – please collect logs");
-                    UIUtils.showToast(requireContext(), R.string.error_camera_preview_failed, Toast.LENGTH_LONG);
-                }
-            }
-        }, 3000);
-    }
-
-
-    /**
-     * Initializes the camera for the fragment with proper configuration and bindings.
-     * This method ensures that necessary prerequisites (like binding and fragment attachment)
-     * are satisfied before proceeding. It retrieves an instance of the {@link ProcessCameraProvider},
-     * binds required use cases, and configures the flash functionality if available.
-     * <br>
-     * If the initialization is successful, the camera is set up and ready to scan. Otherwise,
-     * appropriate error messages or warnings are displayed to the user.
-     * <br>
-     * The behavior of this method includes:
-     * - Setting up camera use cases and verifying the availability of a flash unit.
-     * - Displaying appropriate UI updates during initialization and completion.
-     * - Handling various errors and exceptions during the camera setup process.
-     * <br>
-     * The execution relies on asynchronous callbacks provided by the {@link ListenableFuture}
-     * to properly manage the camera provider setup.
-     * <p>
-     * Preconditions:
-     * - The method checks if `binding` is null or if the fragment is not currently attached. If either condition is true, it skips the initialization process.
-     * <p>
-     * Error Handling:
-     * - If the camera provider is unavailable or null, the user is notified via a toast message and an appropriate status message is displayed in the UI.
-     * - If any unexpected errors occur during initialization, they are handled gracefully by calling the {@code handleCameraInitializationError(Exception e)} method.
-     * <p>
-     * Threading:
-     * - Uses {@link ContextCompat#getMainExecutor} for executing asynchronous callback tasks on the main thread.
-     * <p>
-     * Flashlight:
-     * - Checks for the presence of a flash unit in the camera. If available, updates the flash button visibility and its associated state.
-     */
     private void initializeCamera() {
         if (binding == null || !isAdded()) {
-            Log.d(TAG, "initializeCamera: Skipping - binding is null or fragment not attached");
+            Log.d(TAG, "initializeCamera: skip (not attached)");
             return;
         }
+        Log.i(TAG, "initializeCamera: requesting ProcessCameraProvider...");
         binding.textCamera.setText(R.string.initializing_camera);
 
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
-                ProcessCameraProvider.getInstance(requireContext());
-
-        final boolean forceCompatible = shouldForceCompatiblePreview();
-
-        cameraProviderFuture.addListener(() -> {
+        ListenableFuture<ProcessCameraProvider> fut = ProcessCameraProvider.getInstance(requireContext());
+        fut.addListener(() -> {
             try {
                 if (binding == null || !isAdded() || getView() == null) return;
-                cameraProvider = cameraProviderFuture.get();
+                cameraProvider = fut.get();
                 if (cameraProvider == null) {
                     UIUtils.showToast(requireContext(), R.string.error_camera_provider_null, Toast.LENGTH_SHORT);
                     binding.textCamera.setText(R.string.camera_ready_tap_the_button_to_scan_a_document);
+                    Log.w(TAG, "initializeCamera: cameraProvider is null");
                     return;
                 }
-                bindUseCases(forceCompatible);
+                bindWithTier(BindTier.PERF);
                 hasFlash = camera.getCameraInfo().hasFlashUnit();
                 binding.buttonFlash.setVisibility(hasFlash ? View.VISIBLE : View.GONE);
                 isFlashlightOn = false;
                 binding.buttonFlash.setImageResource(R.drawable.ic_flash_off);
                 binding.textCamera.setText(R.string.camera_ready_tap_the_button_to_scan_a_document);
+                logCameraCapabilities();
 
+                // Touch to focus
                 binding.viewFinder.setOnTouchListener((v, event) -> {
                     if (event.getAction() == MotionEvent.ACTION_UP && camera != null) {
                         MeteringPointFactory mpf = binding.viewFinder.getMeteringPointFactory();
@@ -1155,42 +454,23 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                                 pt,
                                 FocusMeteringAction.FLAG_AF | FocusMeteringAction.FLAG_AE | FocusMeteringAction.FLAG_AWB
                         ).setAutoCancelDuration(3, TimeUnit.SECONDS).build();
-
                         camera.getCameraControl().startFocusAndMetering(action);
-
-                        // Important for accessibility:
                         v.performClick();
-                        return true;   // consume only the tap
+                        return true;
                     }
-                    return false;      // do not block other gestures
+                    return false;
                 });
-
-                binding.viewFinder.setOnClickListener(v -> {
-                    // optional: centered AF/AE, identical to your pre-focus
-
-                    try {
-                        MeteringPointFactory mpf = binding.viewFinder.getMeteringPointFactory();
-                        MeteringPoint c = mpf.createPoint(binding.viewFinder.getWidth() / 2f, binding.viewFinder.getHeight() / 2f);
-                        FocusMeteringAction a = new FocusMeteringAction.Builder(c,
-                                FocusMeteringAction.FLAG_AF | FocusMeteringAction.FLAG_AE | FocusMeteringAction.FLAG_AWB)
-                                .setAutoCancelDuration(3, TimeUnit.SECONDS).build();
-                        camera.getCameraControl().startFocusAndMetering(a);
-                    } catch (Exception ignored) {
-                    }
-                });
-
-                // Forward taps on the overlay to focus too (overlay sits above PreviewView)
+                // Overlay tap → same focus
                 binding.cornerOverlay.setOnTouchListener((ov, ev) -> {
                     if (ev.getAction() == MotionEvent.ACTION_UP && camera != null) {
                         try {
                             MeteringPointFactory mpf = binding.viewFinder.getMeteringPointFactory();
-                            // Overlay shares the same bounds and FIT_CENTER as the PreviewView
                             MeteringPoint pt = mpf.createPoint(ev.getX(), ev.getY());
-                            FocusMeteringAction action = new FocusMeteringAction.Builder(
+                            FocusMeteringAction a = new FocusMeteringAction.Builder(
                                     pt,
                                     FocusMeteringAction.FLAG_AF | FocusMeteringAction.FLAG_AE | FocusMeteringAction.FLAG_AWB
                             ).setAutoCancelDuration(3, TimeUnit.SECONDS).build();
-                            camera.getCameraControl().startFocusAndMetering(action);
+                            camera.getCameraControl().startFocusAndMetering(a);
                             ov.performClick();
                             return true;
                         } catch (Throwable ignored) {
@@ -1198,28 +478,18 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     }
                     return false;
                 });
-
             } catch (Exception e) {
                 handleCameraInitializationError(e);
             }
         }, ContextCompat.getMainExecutor(requireContext()));
     }
 
-    /**
-     * Handles errors that occur during the initialization of the camera.
-     * This method provides appropriate user feedback and retries the initialization process
-     * after a short delay if conditions permit.
-     *
-     * @param e The exception that was thrown during camera initialization.
-     */
     private void handleCameraInitializationError(Exception e) {
         if (!isAdded() || binding == null) return;
-
-        Log.e(TAG, "Camera initialization error: " + e.getMessage());
+        Log.e(TAG, "Camera init error: " + e.getMessage(), e);
         UIUtils.showToast(requireContext(), getString(R.string.error_initializing_camera, e.getMessage()), Toast.LENGTH_LONG);
         binding.textCamera.setText(R.string.camera_ready_tap_the_button_to_scan_a_document);
-
-        if (!reinitScheduled) { // (5) avoid multiple queueing
+        if (!reinitScheduled) {
             reinitScheduled = true;
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 reinitScheduled = false;
@@ -1231,17 +501,192 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
     }
 
-    /**
-     * Captures an image using the camera
-     */
-    private void captureImage() {
-        if (!isAdded() || binding == null) {
-            Log.d(TAG, "captureImage: Skipping - fragment not attached or binding is null");
-            return;
+    // --------- Tiered binding without device checks ----------
+
+    @OptIn(markerClass = ExperimentalCamera2Interop.class)
+    private void bindWithTier(BindTier tier) {
+        if (binding == null || cameraProvider == null || !isAdded()) return;
+        lastTier = tier;
+
+        // ImplMode
+        binding.viewFinder.setImplementationMode(
+                tier == BindTier.PERF ? PreviewView.ImplementationMode.PERFORMANCE
+                        : PreviewView.ImplementationMode.COMPATIBLE);
+        binding.viewFinder.setScaleType(PreviewView.ScaleType.FIT_CENTER);
+
+        int rotation = getViewFinderRotation();
+        Log.i(TAG, "bindWithTier: tier=" + tier + ", rotation=" + toDegrees(rotation));
+
+        // Preview selector
+        androidx.camera.core.resolutionselector.ResolutionSelector.Builder rsPrev =
+                new androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
+                        .setAspectRatioStrategy(new androidx.camera.core.resolutionselector.AspectRatioStrategy(
+                                AspectRatio.RATIO_4_3,
+                                androidx.camera.core.resolutionselector.AspectRatioStrategy.FALLBACK_RULE_AUTO
+                        ));
+
+        if (tier == BindTier.COMPAT_LOWRES) {
+            android.util.Size preferredPreview = new android.util.Size(1280, 960);
+            rsPrev.setResolutionStrategy(
+                    new androidx.camera.core.resolutionselector.ResolutionStrategy(
+                            preferredPreview,
+                            androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
+                    )
+            );
         }
 
+        // Capture selector (prefer high resolution)
+        androidx.camera.core.resolutionselector.ResolutionSelector.Builder rsCap =
+                new androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
+                        .setAspectRatioStrategy(new androidx.camera.core.resolutionselector.AspectRatioStrategy(
+                                AspectRatio.RATIO_4_3,
+                                androidx.camera.core.resolutionselector.AspectRatioStrategy.FALLBACK_RULE_AUTO
+                        ));
+        android.util.Size preferredHigh = new android.util.Size(4032, 3024);
+        rsCap.setResolutionStrategy(
+                new androidx.camera.core.resolutionselector.ResolutionStrategy(
+                        preferredHigh,
+                        androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                )
+        );
+
+        Preview.Builder previewBuilder = new Preview.Builder()
+                .setResolutionSelector(rsPrev.build())
+                .setTargetRotation(rotation);
+
+        ImageCapture.Builder captureBuilder = new ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                .setResolutionSelector(rsCap.build())
+                .setTargetRotation(rotation)
+                .setJpegQuality(98);
+
+        // Interop: conservative FPS + high-quality pipelines
+        androidx.camera.camera2.interop.Camera2Interop.Extender<Preview> pExt =
+                new androidx.camera.camera2.interop.Camera2Interop.Extender<>(previewBuilder);
+        androidx.camera.camera2.interop.Camera2Interop.Extender<ImageCapture> cExt =
+                new androidx.camera.camera2.interop.Camera2Interop.Extender<>(captureBuilder);
+
+        android.util.Range<Integer> fps = new android.util.Range<>(15, 30);
+        pExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps);
+        cExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps);
+
+        pExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE,
+                android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+        cExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE,
+                android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+        cExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE,
+                android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE_HIGH_QUALITY);
+        cExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.EDGE_MODE,
+                android.hardware.camera2.CaptureRequest.EDGE_MODE_HIGH_QUALITY);
+        cExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
+                android.hardware.camera2.CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY);
+        cExt.setCaptureRequestOption(android.hardware.camera2.CaptureRequest.SHADING_MODE,
+                android.hardware.camera2.CaptureRequest.SHADING_MODE_HIGH_QUALITY);
+
+        imageCapture = captureBuilder.build();
+        preview = previewBuilder.build();
+
+        // Analyzer
+        setupOrUpdateImageAnalysis(rotation);
+
+        CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+
+        try {
+            cameraProvider.unbindAll();
+            camera = cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture, imageAnalysis);
+
+            // SurfaceProvider → PreviewView
+            Preview.SurfaceProvider vfProvider = binding.viewFinder.getSurfaceProvider();
+            preview.setSurfaceProvider(ContextCompat.getMainExecutor(requireContext()),
+                    request -> {
+                        android.util.Size s = request.getResolution();
+                        Log.i(TAG, "Preview SurfaceRequest: " + s.getWidth() + "x" + s.getHeight() + " tier=" + tier);
+                        vfProvider.onSurfaceRequested(request);
+                    });
+
+            // OrientationListener
+            if (orientationListener == null) {
+                orientationListener = new OrientationEventListener(requireContext()) {
+                    @Override
+                    public void onOrientationChanged(int orientation) {
+                        if (!isAdded() || imageCapture == null || binding == null) return;
+                        int rot = getViewFinderRotation();
+                        try {
+                            imageCapture.setTargetRotation(rot);
+                            if (preview != null) preview.setTargetRotation(rot);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                };
+                orientationListener.enable();
+            }
+
+            attachWatchdogs();
+
+            // Torch EC: if the torch is already on, stay in adaptive mode
+            if (isFlashlightOn) {
+                // nothing else: adaptive EC runs in the analyzer
+            }
+
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "bindToLifecycle failed: " + e.getMessage(), e);
+            escalateBindTier();
+        }
+    }
+
+    private void attachWatchdogs() {
+        // StreamState Log
+        if (!streamObserverAttached) {
+            binding.viewFinder.getPreviewStreamState()
+                    .observe(getViewLifecycleOwner(), (Observer<? super PreviewView.StreamState>) state ->
+                            Log.d(TAG, "Preview stream state: " + state + " (tier=" + lastTier + ")"));
+            streamObserverAttached = true;
+        }
+
+        // After a short delay, check if STREAMING
+        binding.viewFinder.postDelayed(() -> {
+            if (!isAdded() || binding == null) return;
+            PreviewView.StreamState st = binding.viewFinder.getPreviewStreamState().getValue();
+            if (st != PreviewView.StreamState.STREAMING) {
+                Log.w(TAG, "Watchdog: not STREAMING → escalate tier");
+                escalateBindTier();
+            }
+        }, 2500);
+
+        // CameraState errors
+        camera.getCameraInfo().getCameraState().observe(getViewLifecycleOwner(), s -> {
+            CameraState.StateError err = s.getError();
+            if (err != null) {
+                Log.w(TAG, "CameraState error: " + err.getCode());
+                if (err.getCode() == CameraState.ERROR_STREAM_CONFIG) {
+                    escalateBindTier();
+                }
+            }
+        });
+    }
+
+    private void escalateBindTier() {
+        if (cameraProvider == null) return;
+        Log.w(TAG, "Escalate tier: current=" + lastTier + ", streamState=" + (binding != null ? binding.viewFinder.getPreviewStreamState().getValue() : null));
+        if (lastTier == null || lastTier == BindTier.PERF) {
+            bindWithTier(BindTier.COMPAT);
+        } else if (lastTier == BindTier.COMPAT) {
+            bindWithTier(BindTier.COMPAT_LOWRES);
+        } else {
+            Log.e(TAG, "Still not streaming after COMPAT_LOWRES.");
+            if (isAdded()) UIUtils.showToast(requireContext(), R.string.error_camera_preview_failed, Toast.LENGTH_LONG);
+        }
+    }
+
+    // --------- Capture ---------
+
+    private void captureImage() {
+        if (!isAdded() || binding == null) {
+            Log.d(TAG, "captureImage: not attached");
+            return;
+        }
         if (imageCapture == null) {
-            Log.e(TAG, "captureImage: Camera not initialized");
+            Log.e(TAG, "captureImage: ImageCapture null");
             UIUtils.showToast(requireContext(), R.string.error_camera_not_initialized, Toast.LENGTH_SHORT);
             initializeCamera();
             return;
@@ -1257,33 +702,31 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             if (baseExt != null) {
                 // /storage/.../Android/data/<pkg>/files/Pictures/MakeACopy (also on SD if mounted)
                 outputDir = new File(baseExt, "MakeACopy");
+                Log.d(TAG, "captureImage: using external files dir: " + outputDir.getAbsolutePath());
             } else {
                 // Internal fallback: /data/data/<pkg>/files/Pictures/MakeACopy
                 File picturesInInternal = new File(requireContext().getFilesDir(), "Pictures");
                 //noinspection ResultOfMethodCallIgnored
                 picturesInInternal.mkdirs();
                 outputDir = new File(picturesInInternal, "MakeACopy");
+                Log.w(TAG, "captureImage: external files dir null, using internal: " + outputDir.getAbsolutePath());
             }
             if (!outputDir.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                outputDir.mkdirs();
+                boolean mkOk = outputDir.mkdirs();
+                Log.d(TAG, "captureImage: ensure output directory exists -> " + mkOk);
             }
 
             // Create file with timestamp
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(System.currentTimeMillis());
             File photoFile = new File(outputDir, "MakeACopy_" + timestamp + ".jpg");
+            Log.i(TAG, "captureImage: target file=" + photoFile.getAbsolutePath() + ", rotationDeg=" + toDegrees(getViewFinderRotation()));
 
             ImageCapture.OutputFileOptions outputOptions =
                     new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
-            Log.d(TAG, "Taking picture...");
-
-            // Pre-focus centered (AF/AE), then trigger capture
+            // short AF/AE pre-focus
             MeteringPointFactory mpf = binding.viewFinder.getMeteringPointFactory();
-            MeteringPoint center = mpf.createPoint(
-                    binding.viewFinder.getWidth() / 2f,
-                    binding.viewFinder.getHeight() / 2f
-            );
+            MeteringPoint center = mpf.createPoint(binding.viewFinder.getWidth() / 2f, binding.viewFinder.getHeight() / 2f);
 
             FocusMeteringAction fma = new FocusMeteringAction.Builder(
                     center,
@@ -1296,18 +739,21 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             fut.addListener(() -> {
                 try {
                     FocusMeteringResult result = fut.get(); // does not block because the listener is only invoked after completion
-                    if (result != null && result.isFocusSuccessful()) {
+                    boolean ok = result != null && result.isFocusSuccessful();
+                    Log.d(TAG, "captureImage: pre-focus result=" + ok);
+                    if (ok) {
                         binding.viewFinder.postDelayed(() -> doTakePicture(outputOptions, photoFile), 150);
                     } else {
                         doTakePicture(outputOptions, photoFile);
                     }
                 } catch (Exception e) {
+                    Log.w(TAG, "captureImage: pre-focus threw: " + e.getMessage());
                     doTakePicture(outputOptions, photoFile);
                 }
             }, ContextCompat.getMainExecutor(requireContext()));
 
         } catch (Exception e) {
-            Log.e(TAG, "Unexpected error in captureImage: " + e.getMessage(), e);
+            Log.e(TAG, "captureImage error: " + e.getMessage(), e);
             handleCaptureError(e);
         }
     }
@@ -1319,9 +765,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                        Log.d(TAG, "Image saved to: " + photoFile.getAbsolutePath() + ", size=" + photoFile.length());
-
-                        // PATCH B: FileProvider-URI robust mit Fallback
+                        Log.d(TAG, "Image saved: " + photoFile.getAbsolutePath() + ", size=" + photoFile.length());
                         Uri imageUri;
                         try {
                             imageUri = FileProvider.getUriForFile(
@@ -1330,8 +774,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                                     photoFile
                             );
                         } catch (IllegalArgumentException badRoot) {
-                            Log.w(TAG, "FileProvider root mismatch, falling back to file:// for in-app use", badRoot);
-                            imageUri = Uri.fromFile(photoFile); // Nur intern verwenden, nicht extern teilen
+                            Log.w(TAG, "FileProvider root mismatch, fallback to file://", badRoot);
+                            imageUri = Uri.fromFile(photoFile);
                         }
 
                         if (cameraViewModel != null && isAdded()) {
@@ -1346,40 +790,27 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                             cameraViewModel.setImagePath(photoFile.getAbsolutePath());
                             cameraViewModel.setImageUri(imageUri);
 
-                            // Navigate to next step: Crop or OCR depending on user preference
                             try {
-                                if (isAdded()) {
-                                    // Reset OCR state for a fresh scan before navigating further
-                                    try {
-                                        OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
-                                        ocrVm.resetForNewImage();
-                                    } catch (Throwable t) {
-                                        // best-effort reset; ignore failures
-                                    }
+                                OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
+                                ocrVm.resetForNewImage();
+                            } catch (Throwable t) {
+                            }
 
-                                    cropViewModel.setImageCropped(false);
+                            cropViewModel.setImageCropped(false);
 
-                                    boolean skipOcr = false;
-                                    boolean skipCropping = false;
-                                    try {
-                                        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                                        skipOcr = prefs.getBoolean("skip_ocr", false);
-                                        skipCropping = prefs.getBoolean("skip_cropping", false);
-                                    } catch (Throwable ignoreSp) {
-                                    }
+                            boolean skipOcr = false;
+                            boolean skipCropping = false;
+                            try {
+                                android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                                skipOcr = prefs.getBoolean("skip_ocr", false);
+                                skipCropping = prefs.getBoolean("skip_cropping", false);
+                            } catch (Throwable ignoreSp) {
+                            }
 
-                                    int dest;
-                                    if (skipCropping) {
-                                        dest = skipOcr ? R.id.navigation_export : R.id.navigation_ocr;
-                                    } else {
-                                        dest = R.id.navigation_crop;
-                                    }
-                                    try {
-                                        Navigation.findNavController(requireView()).navigate(dest);
-                                    } catch (IllegalArgumentException | IllegalStateException ignored) {
-                                    }
-                                }
-                            } catch (Throwable ignored) {
+                            int dest = skipCropping ? (skipOcr ? R.id.navigation_export : R.id.navigation_ocr) : R.id.navigation_crop;
+                            try {
+                                Navigation.findNavController(requireView()).navigate(dest);
+                            } catch (IllegalArgumentException | IllegalStateException ignored) {
                             }
                         }
                     }
@@ -1454,7 +885,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         try {
             android.content.SharedPreferences prefs =
                     requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-            analysisPref = prefs.getBoolean("analysis_enabled", false); // Default AUS
+            analysisPref = prefs.getBoolean("analysis_enabled", false); // Default OFF
         } catch (Throwable ignore) {
         }
 
@@ -1474,97 +905,39 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         lowLightPromptShown = false;
     }
 
-    /**
-     * Toggles the flashlight functionality of the camera.
-     * <p>
-     * This method checks the prerequisites such as the availability of the camera,
-     * flashlight hardware, and the fragment's attachment to the activity. If the
-     * prerequisites are satisfied, it toggles the flashlight state between on and off.
-     * The UI is then updated to reflect the flashlight state, and appropriate user feedback
-     * is displayed through toast messages.
-     * <p>
-     * Behavior:
-     * - If the camera or flashlight hardware is not available, or the fragment is not added:
-     * - Displays a toast message indicating that the flashlight is not available (if the fragment is added).
-     * - Exits without making changes.
-     * - If the prerequisites are met:
-     * - Toggles the `isFlashlightOn` state.
-     * - Updates the flashlight state using the camera's `enableTorch()` method.
-     * - Updates the flashlight button's image to represent the current state (on/off).
-     * - Displays a toast message indicating the flashlight's current state.
-     * <p>
-     * Exception Handling:
-     * - Captures any exceptions that occur during the toggling process.
-     * - Logs the error and displays a user-facing message with details of the error, if the fragment is added.
-     * <p>
-     * Preconditions:
-     * - `camera` must not be null.
-     * - The `hasFlash` property must be true.
-     * - The fragment must be added to its host activity (`isAdded()` returns true).
-     * <p>
-     * Postconditions:
-     * - The flashlight state is toggled, and the UI is updated accordingly if the prerequisites are met.
-     * - No changes are made if the prerequisites are not satisfied.
-     */
     private void toggleFlashlight() {
         if (camera == null || !hasFlash || !isAdded()) {
-            if (isAdded()) {
-                UIUtils.showToast(requireContext(), R.string.flashlight_not_available, Toast.LENGTH_SHORT);
-            }
+            if (isAdded()) UIUtils.showToast(requireContext(), R.string.flashlight_not_available, Toast.LENGTH_SHORT);
             return;
         }
-
         try {
-            isFlashlightOn = !isFlashlightOn;
+            boolean newState = !isFlashlightOn;
+            Log.i(TAG, "toggleFlashlight: " + (newState ? "ON" : "OFF") + " (was=" + isFlashlightOn + ")");
+            isFlashlightOn = newState;
             camera.getCameraControl().enableTorch(isFlashlightOn);
-            // Apply device-specific exposure workaround if needed
-            applyTorchExposureWorkaround(isFlashlightOn);
+            if (!isFlashlightOn) {
+                onTorchTurnedOffRestoreEc();
+            }
             if (binding != null && binding.buttonFlash != null) {
                 binding.buttonFlash.setImageResource(isFlashlightOn ? R.drawable.ic_flash_on : R.drawable.ic_flash_off);
                 UIUtils.showToast(requireContext(), isFlashlightOn ? R.string.flashlight_on : R.string.flashlight_off, Toast.LENGTH_SHORT);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error toggling flashlight: " + e.getMessage(), e);
-            if (isAdded()) {
+            Log.e(TAG, "toggleFlashlight error: " + e.getMessage(), e);
+            if (isAdded())
                 UIUtils.showToast(requireContext(), getString(R.string.error_toggling_flashlight, e.getMessage()), Toast.LENGTH_SHORT);
-            }
         }
     }
 
-    /**
-     * Turns off the flashlight if it is currently enabled. This method ensures that the flashlight
-     * state is updated and the corresponding UI elements are adjusted to reflect the off state.
-     * <p>
-     * Preconditions:
-     * - The `camera` object is not null.
-     * - The flashlight is currently on (`isFlashlightOn` is true).
-     * - The fragment is added to its host activity (`isAdded()` returns true).
-     * <p>
-     * Behavior:
-     * - Disables the flashlight using the `enableTorch(false)` method of the camera's control.
-     * - Updates the `isFlashlightOn` state to false.
-     * - Changes the flashlight button's icon to indicate the off state if the required UI elements are present.
-     * <p>
-     * Exception Handling:
-     * - Captures any exceptions that occur during the process of turning off the flashlight.
-     * - Logs the error with details for debugging purposes.
-     * <p>
-     * Postconditions:
-     * - The flashlight is turned off and the UI is updated accordingly if all preconditions are met.
-     * - No changes are made if the preconditions are not satisfied.
-     */
     private void turnOffFlashlight() {
         if (camera != null && isFlashlightOn && isAdded()) {
             try {
                 camera.getCameraControl().enableTorch(false);
                 isFlashlightOn = false;
-                // Restore exposure if changed
-                applyTorchExposureWorkaround(false);
-                if (binding != null) {
-                    binding.buttonFlash.setImageResource(R.drawable.ic_flash_off);
-                }
+                onTorchTurnedOffRestoreEc();
+                if (binding != null) binding.buttonFlash.setImageResource(R.drawable.ic_flash_off);
             } catch (Exception e) {
-                Log.e(TAG, "Error turning off flashlight: " + e.getMessage(), e);
+                Log.e(TAG, "turnOffFlashlight error: " + e.getMessage(), e);
             }
         }
     }
@@ -1602,9 +975,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         binding.capturedImage.setImageDrawable(null);
         if (d instanceof BitmapDrawable) {
             Bitmap bm = ((BitmapDrawable) d).getBitmap();
-            if (bm != null && !bm.isRecycled()) {
-                bm.recycle();
-            }
+            if (bm != null && !bm.isRecycled()) bm.recycle();
         }
 
         showCameraMode();
@@ -1632,10 +1003,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error resetting camera: " + e.getMessage());
-            if (isAdded()) {
+            Log.e(TAG, "resetCamera error: " + e.getMessage());
+            if (isAdded())
                 UIUtils.showToast(requireContext(), getString(R.string.error_resetting_camera, e.getMessage()), Toast.LENGTH_SHORT);
-            }
         }
     }
 
@@ -1644,13 +1014,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         super.onDestroyView();
         turnOffFlashlight();
         if (sensorManager != null && lightSensor != null) {
-            sensorManager.unregisterListener(this); // (3) defensive
+            sensorManager.unregisterListener(this);
         }
         if (cameraProvider != null) cameraProvider.unbindAll();
-        if (orientationListener != null) {
-            orientationListener.disable();
-        }
-        // Stop analysis and release executor
+        if (orientationListener != null) orientationListener.disable();
         analysisEnabled = false;
         if (imageAnalysis != null) {
             try {
@@ -1699,10 +1066,18 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             if (sensorManager != null) {
                 lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
                 hasLightSensor = (lightSensor != null);
-                Log.d(TAG, hasLightSensor ? "Light sensor available" : "Light sensor not available on this device");
+                if (hasLightSensor) {
+                    try {
+                        Log.i(TAG, "Light sensor available: name=" + lightSensor.getName() + ", vendor=" + lightSensor.getVendor() + ", maxRange=" + lightSensor.getMaximumRange());
+                    } catch (Throwable t) {
+                        Log.i(TAG, "Light sensor available");
+                    }
+                } else {
+                    Log.i(TAG, "Light sensor not available");
+                }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing light sensor: " + e.getMessage(), e);
+            Log.e(TAG, "initLightSensor error: " + e.getMessage(), e);
             hasLightSensor = false;
         }
     }
@@ -1720,11 +1095,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
      */
     private void showLowLightPrompt() {
         if (!isAdded() || binding == null || isLowLightDialogVisible) return;
-
-        long currentTime = System.currentTimeMillis();
-        if (lowLightPromptShown || (currentTime - lastPromptTime) < MIN_TIME_BETWEEN_PROMPTS) {
-            return;
-        }
+        long now = System.currentTimeMillis();
+        if (lowLightPromptShown || (now - lastPromptTime) < MIN_TIME_BETWEEN_PROMPTS) return;
 
         try {
             isLowLightDialogVisible = true;
@@ -1732,25 +1104,21 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     .setMessage(R.string.low_light_detected)
                     .setPositiveButton(R.string.flashlight_on, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            if (!isFlashlightOn && hasFlash) {
-                                toggleFlashlight();
-                            }
+                            if (!isFlashlightOn && hasFlash) toggleFlashlight();
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, (dialogInterface, id) -> dialogInterface.dismiss())
                     .create();
 
             dialog.setOnDismissListener(d -> isLowLightDialogVisible = false);
-
-            // Improve dark mode contrast for dialog buttons
-            dialog.setOnShowListener(dlg -> de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext()));
-
+            dialog.setOnShowListener(dlg ->
+                    de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext()));
             dialog.show();
 
             lowLightPromptShown = true;
-            lastPromptTime = currentTime;
+            lastPromptTime = now;
         } catch (Exception e) {
-            Log.e(TAG, "Error showing low light prompt: " + e.getMessage(), e);
+            Log.e(TAG, "showLowLightPrompt error: " + e.getMessage(), e);
             isLowLightDialogVisible = false;
         }
     }
@@ -1765,15 +1133,15 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            float lightLevel = event.values[0];
-            Log.d(TAG, "Light level: " + lightLevel + " lux");
-
-            if (lightLevel < LOW_LIGHT_THRESHOLD
+            float lux = event.values[0];
+            if (de.schliweb.makeacopy.BuildConfig.DEBUG || android.util.Log.isLoggable(TAG, android.util.Log.DEBUG)) {
+                Log.d(TAG, "Light level: " + lux + " lux");
+            }
+            if (lux < LOW_LIGHT_THRESHOLD
                     && binding != null
                     && binding.viewFinder.getVisibility() == View.VISIBLE
                     && !isFlashlightOn
                     && hasFlash) {
-
                 showLowLightPrompt();
             }
         }
@@ -1788,7 +1156,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         if (sensor.getType() == Sensor.TYPE_LIGHT) {
-            Log.d(TAG, "Light sensor accuracy changed: " + accuracy);
+            if (de.schliweb.makeacopy.BuildConfig.DEBUG || android.util.Log.isLoggable(TAG, android.util.Log.DEBUG)) {
+                Log.d(TAG, "Light sensor accuracy: " + accuracy);
+            }
         }
     }
 
@@ -1814,12 +1184,154 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
     }
 
+    // Verbose environment logging to help diagnose device-specific issues
+    private void logEnvironment() {
+        try {
+            String versionName = BuildConfig.VERSION_NAME;
+            int versionCode;
+            try {
+                versionCode = de.schliweb.makeacopy.BuildConfig.VERSION_CODE;
+            } catch (Throwable t) {
+                versionCode = -1;
+            }
+            String abis = Build.SUPPORTED_ABIS != null ? java.util.Arrays.toString(Build.SUPPORTED_ABIS) : "unknown";
+            java.util.Locale loc = java.util.Locale.getDefault();
+            boolean analysisPref = false;
+            try {
+                android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                analysisPref = prefs.getBoolean("analysis_enabled", false);
+            } catch (Throwable ignored) {
+            }
+            String secPatch = null;
+            try {
+                secPatch = android.os.Build.VERSION.SECURITY_PATCH;
+            } catch (Throwable ignored) {
+            }
+            Log.i(TAG,
+                    "Env: app=" + versionName + " (" + versionCode + ")" +
+                            ", sdk=" + Build.VERSION.SDK_INT + " (release=" + Build.VERSION.RELEASE + ", incremental=" + Build.VERSION.INCREMENTAL + ", secPatch=" + (secPatch != null ? secPatch : "-") + ")" +
+                            ", brand=" + Build.BRAND +
+                            ", manuf=" + Build.MANUFACTURER +
+                            ", model=" + Build.MODEL +
+                            ", device=" + Build.DEVICE +
+                            ", product=" + Build.PRODUCT +
+                            ", hardware=" + Build.HARDWARE +
+                            ", board=" + Build.BOARD +
+                            ", fingerprint=" + Build.FINGERPRINT +
+                            ", display=" + Build.DISPLAY +
+                            ", abis=" + abis +
+                            ", locale=" + (loc != null ? loc.toLanguageTag() : "-") +
+                            ", analysisPref=" + analysisPref);
+        } catch (Throwable t) {
+            Log.w(TAG, "logEnvironment failed: " + t.getMessage());
+        }
+    }
+
+    private void logCameraCapabilities() {
+        try {
+            if (camera == null) {
+                Log.i(TAG, "Capabilities: camera=null");
+                return;
+            }
+            boolean flash = camera.getCameraInfo().hasFlashUnit();
+            ExposureState es = camera.getCameraInfo().getExposureState();
+            String ecInfo;
+            if (es != null && es.isExposureCompensationSupported()) {
+                android.util.Range<Integer> r = es.getExposureCompensationRange();
+                float step = 0f;
+                try {
+                    step = es.getExposureCompensationStep().floatValue();
+                } catch (Throwable ignored) {
+                }
+                ecInfo = "EC supported idx=" + es.getExposureCompensationIndex() + " range=" + r + " step=" + step;
+            } else {
+                ecInfo = "EC not supported";
+            }
+            int rotDeg = toDegrees(getViewFinderRotation());
+            Log.i(TAG, "Capabilities: flash=" + flash + ", tier=" + lastTier + ", rotation=" + rotDeg + ", " + ecInfo + ", analysisEnabled=" + analysisEnabled);
+        } catch (Throwable t) {
+            Log.w(TAG, "logCameraCapabilities failed: " + t.getMessage());
+        }
+    }
+
     @androidx.annotation.VisibleForTesting
     ImageCapture getImageCaptureForTest() {
         return imageCapture;
     }
 
-    // ===== Live document trapezoid preview support =====
+    // ===== Live overlay & adaptive torch exposure =====
+
+    private void setLiveAnalysisEnabled(boolean enabled) {
+        if (!isAdded()) {
+            analysisEnabled = enabled;
+            return;
+        }
+        analysisEnabled = enabled;
+        try {
+            android.content.SharedPreferences prefs =
+                    requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+            prefs.edit().putBoolean("analysis_enabled", enabled).apply();
+        } catch (Throwable ignore) {
+        }
+
+        if (binding != null) {
+            if (enabled && binding.viewFinder.getVisibility() == View.VISIBLE) {
+                binding.cornerOverlay.setVisibility(View.VISIBLE);
+            } else {
+                binding.cornerOverlay.setCorners(null);
+                binding.cornerOverlay.setVisibility(View.GONE);
+            }
+        }
+        try {
+            if (imageAnalysis != null) {
+                if (enabled) {
+                    ensureAnalysisExecutor();
+                    imageAnalysis.setAnalyzer(analysisExecutor, this::analyzeFrameForCorners);
+                } else {
+                    imageAnalysis.clearAnalyzer();
+                    if (analysisExecutor != null) {
+                        analysisExecutor.shutdownNow();
+                        analysisExecutor = null;
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "setLiveAnalysisEnabled failed: " + t.getMessage());
+        }
+    }
+
+    private void setupOrUpdateImageAnalysis(int rotation) {
+        if (imageAnalysis == null) {
+            ImageAnalysis.Builder iaBuilder = new ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setTargetRotation(rotation);
+            imageAnalysis = iaBuilder.build();
+        } else {
+            try {
+                imageAnalysis.setTargetRotation(rotation);
+            } catch (Throwable ignored) {
+            }
+        }
+
+        if (analysisEnabled) {
+            ensureAnalysisExecutor();
+            imageAnalysis.setAnalyzer(analysisExecutor, this::analyzeFrameForCorners);
+            if (binding != null) {
+                binding.cornerOverlay.setVisibility(View.VISIBLE);
+                binding.cornerOverlay.setCorners(null);
+            }
+        } else {
+            try {
+                imageAnalysis.clearAnalyzer();
+            } catch (Throwable ignored) {
+            }
+            if (binding != null) {
+                binding.cornerOverlay.setCorners(null);
+                binding.cornerOverlay.setVisibility(View.GONE);
+            }
+        }
+    }
+
     private void ensureAnalysisExecutor() {
         if (analysisExecutor == null || analysisExecutor.isShutdown()) {
             analysisExecutor = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
@@ -1832,10 +1344,13 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private void analyzeFrameForCorners(@NonNull ImageProxy image) {
         try {
+            // 1) Adaptive torch EC based on luma, very cheap (no bitmap)
+            adaptExposureIfTorch(image);
+
             if (!analysisEnabled || binding == null || !isAdded()) return;
+
             long now = System.currentTimeMillis();
-            // Throttle to ~5 FPS
-            if (now - lastAnalysisTs < 180) return;
+            if (now - lastAnalysisTs < 180) return; // ~5–6 FPS
             lastAnalysisTs = now;
 
             // Convert to small upright bitmap (to reduce CPU)
@@ -1994,5 +1509,70 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         return out;
     }
 
+    // ===== Adaptive exposure with torch =====
 
+    private void adaptExposureIfTorch(@NonNull ImageProxy image) {
+        if (camera == null || !isFlashlightOn) return;
+        ExposureState es = camera.getCameraInfo().getExposureState();
+        if (es == null || !es.isExposureCompensationSupported()) return;
+
+        float luma = estimateSceneLuma(image); // 0..1
+        float target = 0.35f, deadband = 0.03f;
+
+        if (baseEc == null) baseEc = es.getExposureCompensationIndex();
+
+        int currentEc = es.getExposureCompensationIndex();
+        int newEc = currentEc;
+        if (luma < (target - deadband)) newEc += 1;
+        else if (luma > (target + deadband)) newEc -= 1;
+        else return;
+
+        android.util.Range<Integer> r = es.getExposureCompensationRange();
+        newEc = Math.max(r.getLower(), Math.min(r.getUpper(), newEc));
+        if (newEc != currentEc) {
+            camera.getCameraControl().setExposureCompensationIndex(newEc);
+            long now = System.currentTimeMillis();
+            if (now - lastEcLogTs > 500) { // throttle
+                lastEcLogTs = now;
+                float step = 0f;
+                try {
+                    step = es.getExposureCompensationStep().floatValue();
+                } catch (Throwable ignored) {
+                }
+                Log.d(TAG, "AdaptiveEC: luma=" + String.format(java.util.Locale.US, "%.3f", luma) +
+                        ", idx " + currentEc + " -> " + newEc +
+                        " (range=" + r + ", step=" + step + ")");
+            }
+        }
+    }
+
+    private void onTorchTurnedOffRestoreEc() {
+        if (camera == null) return;
+        ExposureState es = camera.getCameraInfo().getExposureState();
+        if (es != null && baseEc != null) {
+            camera.getCameraControl().setExposureCompensationIndex(baseEc);
+        }
+        baseEc = null;
+    }
+
+    private float estimateSceneLuma(@NonNull ImageProxy image) {
+        ImageProxy.PlaneProxy y = image.getPlanes()[0];
+        ByteBuffer buf = y.getBuffer();
+        int rowStride = y.getRowStride();
+        int pixStride = y.getPixelStride(); // usually 1
+        int w = image.getWidth(), h = image.getHeight();
+        int step = 8, count = 0;
+        long sum = 0;
+        for (int r = 0; r < h; r += step) {
+            int base = r * rowStride;
+            for (int c = 0; c < w; c += step) {
+                int idx = base + c * pixStride;
+                if (idx >= 0 && idx < buf.limit()) {
+                    sum += (buf.get(idx) & 0xFF);
+                    count++;
+                }
+            }
+        }
+        return (count == 0) ? 0f : (sum / (255f * count));
+    }
 }

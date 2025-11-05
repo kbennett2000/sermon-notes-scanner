@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">切换闪光灯出错：%1$s</string>
     <string name="error_camera_preview_failed">无法启动相机预览。请重试。</string>
 
+    <string name="share_logs">共享日志</string>
+    <string name="share_logs_subject">MakeACopy 诊断日志</string>
+    <string name="share_logs_chooser_title">通过以下方式共享日志…</string>
+    <string name="share_logs_error">无法准备日志：%1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">转为灰度</string>
     <string name="convert_to_blackwhite_pdf">转为黑白</string>

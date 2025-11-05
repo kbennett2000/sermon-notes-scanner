@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Fehler beim Umschalten der Taschenlampe: %1$s</string>
     <string name="error_camera_preview_failed">Kameravorschau konnte nicht gestartet werden. Bitte versuche es erneut.</string>
 
+    <string name="share_logs">Protokolle teilen</string>
+    <string name="share_logs_subject">MakeACopy-Diagnoseprotokolle</string>
+    <string name="share_logs_chooser_title">Protokolle teilen über …</string>
+    <string name="share_logs_error">Protokolle konnten nicht vorbereitet werden: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">In Graustufen konvertieren</string>
     <string name="convert_to_blackwhite_pdf">In S/W konvertieren</string>

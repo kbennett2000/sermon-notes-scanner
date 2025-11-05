@@ -52,6 +52,11 @@
     <string name="error_toggling_flashlight">Ошибка переключения фонарика: %1$s</string>
     <string name="error_camera_preview_failed">Не удалось запустить предпросмотр камеры. Повторите попытку.</string>
 
+    <string name="share_logs">Поделиться журналами</string>
+    <string name="share_logs_subject">Диагностические журналы MakeACopy</string>
+    <string name="share_logs_chooser_title">Поделиться журналами через…</string>
+    <string name="share_logs_error">Не удалось подготовить журналы: %1$s</string>
+
     <!-- Export options -->
     <string name="convert_to_grayscale">Преобразовать в оттенки серого</string>
     <string name="convert_to_blackwhite_pdf">Преобразовать в ч/б</string>
