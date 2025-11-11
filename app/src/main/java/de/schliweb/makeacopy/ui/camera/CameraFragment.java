@@ -614,7 +614,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         try {
             cameraProvider.unbindAll();
 
-            if (isSony) {
+            if (false && isSony) {
                 // Sony: prefer fewer outputs first to avoid stream config errors.
                 // 1) Preview only
                 camera = cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview);
