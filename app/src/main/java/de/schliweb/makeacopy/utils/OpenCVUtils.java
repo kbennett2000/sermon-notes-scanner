@@ -1279,17 +1279,32 @@ public class OpenCVUtils {
 
 
     /**
-     * Calculates the rectangularity score of a quadrilateral represented by an array of points.
-     * The score evaluates how close the angles of the quadrilateral are to 90 degrees.
+     * Calculates a rectangularity score for a quadrilateral defined by four points.
+     * <p>
+     * The score evaluates how closely the internal angles of the quadrilateral
+     * approximate right angles (90°). For each corner, the method measures the
+     * angle formed by the two adjacent edges (<code>prev–a–next</code>), not by
+     * an edge and a diagonal. A perfect rectangle yields 90° per corner and a
+     * total score of 120 (i.e., 30 points per corner). Shapes with more acute or
+     * obtuse corners receive proportionally lower scores.
+     * <p>
+     * This metric is used to assess contour quality and filter out non-rectangular
+     * candidates in document detection.
      *
-     * @param q an array of four points representing the vertices of a quadrilateral, listed in order.
-     * @return the computed rectangularity score, where a higher score indicates the quadrilateral is closer to a rectangle.
+     * @param q an array of exactly four {@link Point} objects representing the
+     *          vertices of a quadrilateral in order (either clockwise or counter-clockwise)
+     * @return a double value between 0 and 120, where higher values indicate a shape
+     * closer to a perfect rectangle
      */
     private static double rectScore(Point[] q) {
+        // Compute corner angles between the two adjacent edges at each vertex (prev–a–next),
+        // not between an edge and the diagonal. This yields 90° for perfect rectangles.
         double score = 0;
         for (int i = 0; i < 4; i++) {
-            Point a = q[i], b = q[(i + 1) % 4], c = q[(i + 2) % 4];
-            double ang = angle(b, a, c);
+            Point a = q[i];
+            Point prev = q[(i + 3) % 4];
+            Point next = q[(i + 1) % 4];
+            double ang = angle(prev, a, next);
             double dev = Math.abs(ang - 90.0);
             score += Math.max(0, 30.0 - dev); // max 30 pro Ecke → 120 gesamt
         }

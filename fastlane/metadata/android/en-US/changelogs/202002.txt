@@ -1,43 +1,15 @@
-MakeACopy 2.2.0 (Release Candidate)
+MakeACopy 2.2.0 (Release)
 
-- Camera system rebuilt for full device compatibility
-All manufacturer-specific workarounds (Sony, Huawei, Xiaomi …) were removed.
-The camera now adapts dynamically using a three-stage binding flow
-(PERFORMANCE → COMPATIBLE → COMPATIBLE_LOWRES) based on runtime feedback —
-no more hard-coded model checks.
-
-- Self-healing preview
-The camera automatically detects and recovers from black-screen states
-by re-binding itself in a safe fallback mode.
-
-- Adaptive torch exposure
-Flashlight brightness is now adjusted automatically using live luminance
-analysis instead of fixed exposure offsets. Exposure returns to normal
-once the flashlight is turned off.
-
-- Faster, lighter frame analysis
-Brightness is measured directly from the Y-plane of the camera image —
-no bitmap decoding needed — keeping the live document overlay at ~5 FPS
-with minimal CPU overhead.
-
-- Cleaner and safer codebase
-Removed legacy system-property checks and device heuristics.
-Simplified lifecycle handling and improved recovery logging.
-
-- Diagnostics & logging
-  - Added rich device context and camera capability logs at INFO so they are visible in release builds (no DEBUG needed).
-  - Light sensor availability is logged at INFO with sensor details (name/vendor/maxRange).
-  - The environment header is included when sharing logs to give support full device/app context.
-
-- Share logs
-  - New "Share logs" action in Camera options collects only this app's logs (prefers --pid), adds a compact header, and safely truncates large outputs.
-  - The button is placed below the options and visually de‑emphasized to avoid distracting from primary actions.
+- Camera rebuilt for broad device compatibility with dynamic 3‑stage binding. Most OEM workarounds removed; targeted handling remains for Sony on Android 15+.
+- Self‑healing preview to recover black screens.
+- Adaptive torch exposure based on live luminance; paused during corner preview to avoid darkening.
+- Faster frame analysis from the Y‑plane with lower CPU usage.
+- Cleaner lifecycle and improved recovery logging; key device/capability logs at INFO.
+- Share logs action collects only this app’s logs and adds a compact header.
+- Geometry fix: rectScore() angle calculation corrected for better contour ranking.
 
 Notes
 
-- Expected to resolve preview black-screens on Xperia and Huawei devices.
-- Should improve flashlight behavior and stability on Xiaomi/POCO phones.
-- Please report any regressions before final 2.2.0 release.
-- No new dangerous permissions. Log sharing goes through the standard share sheet and limits data to the app’s own process where possible.
-
-Note: This is a Release Candidate build; feedback on camera stability and preview behavior is especially welcome.
+- Fixed camera preview black screen on Sony Xperia (Android 15+) and Huawei.
+- Improved flashlight stability on Xiaomi/POCO.
+- No new dangerous permissions.

@@ -613,8 +613,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
         try {
             cameraProvider.unbindAll();
-
-            if (false && isSony) {
+            // TODO
+            if (isSony) {
                 // Sony: prefer fewer outputs first to avoid stream config errors.
                 // 1) Preview only
                 camera = cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview);
@@ -1485,8 +1485,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private void analyzeFrameForCorners(@NonNull ImageProxy image) {
         try {
-            // 1) Adaptive torch EC based on luma, very cheap (no bitmap)
-            adaptExposureIfTorch(image);
+            // Note: Do NOT adapt exposure during live corner preview.
+            // Running adaptive EC per analyzed frame caused progressive darkening when the torch is on.
+            // We keep exposure stable here to ensure a consistent preview brightness.
 
             if (!analysisEnabled || binding == null || !isAdded()) return;
 
