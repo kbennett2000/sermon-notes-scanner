@@ -217,6 +217,8 @@ A big thank you to the people who make *MakeACopy* better:
 - **teastrainer** – tested several release candidates with remarkable precision and patience,  
   helping to refine the crop and rotation workflow step by step.  
   A great example of constructive collaboration. 🙌
+- **hekele1022** – tested multiple release candidates on his Sony Xperia device, providing logs and feedback that confirmed the new camera system        works reliably without any device-specific hacks. A key contribution that helped make MakeACopy fully cross-device compatible. 📸
+- **djayko** – helped test the Sony builds with great patience on his device, confirming the stability of the new camera flow in real-world use. A    calm, steady tester spirit that every open-source project dreams of. 🙏
 
 - **Special Mention 🐴** – A 1★ review claiming *MakeACopy* installs other apps and drains the battery.  
   Technically impossible (the app only uses the `CAMERA` permission).  
