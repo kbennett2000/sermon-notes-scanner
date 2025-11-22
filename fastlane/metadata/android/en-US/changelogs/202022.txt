@@ -1,4 +1,4 @@
-MakeACopy 2.2.2 (Release Candidate)
+MakeACopy 2.2.2 (Release)
 
 This update fixes a versionCode mismatch introduced in 2.2.0/1 that prevented binary-identical reproducible builds across ABI splits and F-Droid.
 No functional changes were made to the scanning engine, camera, OCR, or UI.
