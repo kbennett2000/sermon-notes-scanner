@@ -14,8 +14,8 @@ android {
         applicationId "de.schliweb.makeacopy"
         minSdk = 29
         targetSdk = 36
-        versionCode 20201
-        versionName "2.2.1"
+        versionCode 20202
+        versionName "2.2.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -219,4 +219,11 @@ tasks.withType(JavaCompile).configureEach {
             '-Xlint:deprecation',
             '-Xlint:unchecked'
     ]
+}
+// Disable ArtProfile / baseline-prof generation for deterministic builds.
+// This only affects build artefacts (no functional change for users).
+tasks.whenTaskAdded { task ->
+    if (task.name.toLowerCase().contains("artprofile")) {
+        task.enabled = false
+    }
 }

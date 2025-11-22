@@ -127,8 +127,8 @@ public class CameraOptionsDialogFragment extends DialogFragment {
             versionName = pi.versionName;
             versionCode = pi.getLongVersionCode();
         } catch (Exception e) {
-            versionName = BuildConfig.VERSION_NAME;
-            versionCode = BuildConfig.VERSION_CODE;
+            versionName = "unknown";
+            versionCode = -1L;
         }
 
         try {
