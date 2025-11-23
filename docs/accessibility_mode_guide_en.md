@@ -21,8 +21,9 @@ Contents
 ---
 
 What does Accessibility Mode do?
-- Removes visual overlays (corner/perspective trapezoid) and replaces them with audio and haptics.
+- Focuses on audio and haptic feedback. The visual corner overlay follows the "Preview corner detection" option.
 - Speaks important states, e.g., “Camera ready”, “Low light”, “Document detected – ready to capture.”
+- Provides alignment guidance when needed, e.g., “Move left”, “Move up”, “Move closer”, “Tilt forward”.
 - Allows capturing using the hardware volume keys so you don’t have to aim for a small on‑screen button.
 - Works fully offline — no data connection, no upload.
 
@@ -32,8 +33,7 @@ Turn on Accessibility Mode
 3) Confirm with “Confirm”.
 
 From now on:
-- The visual corner overlay is hidden.
-- You will receive spoken hints and short haptic feedback instead of visual signals.
+- You will receive spoken hints and short haptic feedback. If you enable "Preview corner detection" in Options, the corner overlay is shown; otherwise it stays hidden.
 
 Operating the camera (flow)
 1) Open the camera: After initialization you’ll hear “Camera ready. Double tap Scan to capture.”
@@ -53,6 +53,21 @@ Feedback in detail
 - Low light: Instead of a pop‑up dialog, you’ll hear “Low light detected. Double tap Flash to enable.”
 - Toggle flashlight: When switching, you’ll hear “Flashlight on/off”.
 
+ Alignment guidance (examples)
+ - Movement:
+   - “Move left” / “Move right”
+   - “Move up” / “Move down”
+ - Distance:
+   - “Move closer” / “Move back”
+ - Tilt:
+   - “Tilt left” / “Tilt right”
+   - “Tilt forward” / “Tilt back”
+ - Alignment OK: “Document aligned”
+
+ Frequency notes:
+ - Announcements are intentionally calm: speech occurs only after brief stability (hysteresis) and at most about every 1–1.5 seconds (rate limit).
+ - “OK” (aligned) is typically only spoken when entering a good state or after a longer quiet period to avoid repetition.
+
 Using the volume keys to capture
 - When Accessibility Mode is active, you can capture with Volume Up or Volume Down.
 - The app suppresses the actual volume change and triggers capture instead.
@@ -65,9 +80,11 @@ Behavior in low light (flashlight)
 - Instead, you’ll hear a spoken recommendation to enable the flashlight.
 - Double tap the “Flash” button to enable/disable it. You will hear “Flashlight on” or “Flashlight off”.
 
+
 Success and error messages after capture
 - Saved successfully: “Image captured.” plus a short vibration.
 - Capture failed: “Capture failed.” — you can trigger capture again afterwards.
+
 
 Tips for good results
 - Distance: Hold the device so the document fully fits in the frame (typically 20–40 cm / 8–16 in above the page).
@@ -88,6 +105,13 @@ A: This should not happen in Accessibility Mode while the camera preview is visi
 
 Q: It’s very dark and detection doesn’t work.
 A: Turn on the flashlight. Try to illuminate the document as evenly and shadow‑free as possible.
+
+
+Q: Do I need to enable the visual “Preview corner detection” (Analysis) for Accessibility Mode to work?
+A: No. Accessibility Mode runs the required analysis internally even if the visual analysis option is turned off. The app still analyzes frames to provide audio/haptic feedback.
+
+Q: If both “Preview corner detection” (Live analysis) and Accessibility Mode are enabled, is the camera preview visible?
+A: Yes. The normal camera preview remains visible. If "Preview corner detection" is enabled, the visual corner overlay is also shown even in Accessibility Mode. Analysis runs in the background regardless, to power scoring and feedback.
 
 Q: Does Accessibility Mode work without TalkBack?
 A: Yes. Spoken output is done as a system announcement. With TalkBack, you also get the usual screen reader navigation.
