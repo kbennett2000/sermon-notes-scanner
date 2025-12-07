@@ -44,6 +44,9 @@ public interface CollectionsDao {
     @Query("SELECT * FROM collections WHERE id = :id LIMIT 1")
     CollectionEntity getById(String id);
 
+    @Query("SELECT * FROM collections WHERE name = :name LIMIT 1")
+    CollectionEntity getByName(String name);
+
     @Query("DELETE FROM collections WHERE id = :id")
     void deleteById(String id);
 

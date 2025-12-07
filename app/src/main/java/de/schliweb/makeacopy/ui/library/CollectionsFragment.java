@@ -107,64 +107,83 @@ public class CollectionsFragment extends Fragment {
 
             @Override
             public void onLongClick(@NonNull CollectionRow row) {
-                // Show actions: Rename or Delete
-                final CharSequence[] items = new CharSequence[]{getString(R.string.rename), getString(R.string.delete)};
-                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                        .setTitle(row.name)
-                        .setItems(items, (dialog, which) -> {
-                            if (which == 0) {
-                                // Rename
-                                final android.widget.EditText input = new android.widget.EditText(requireContext());
-                                input.setHint(R.string.collection_name_hint);
-                                input.setText(row.name);
-                                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                                        .setTitle(R.string.rename_collection_title)
-                                        .setView(input)
-                                        .setPositiveButton(R.string.ok, (d, w) -> {
-                                            final String name = String.valueOf(input.getText()).trim();
-                                            if (name.isEmpty()) return;
-                                            new Thread(() -> {
-                                                boolean ok;
-                                                try {
-                                                    ok = LibraryServiceLocator.getCollectionsRepository(requireContext()).renameCollection(requireContext(), row.id, name);
-                                                } catch (Throwable t) {
-                                                    ok = false;
-                                                }
-                                                final boolean finalOk = ok;
-                                                if (!isAdded()) return;
-                                                requireActivity().runOnUiThread(() -> {
-                                                    if (!finalOk) {
-                                                        UIUtils.showToast(requireContext(), R.string.error_empty_input, android.widget.Toast.LENGTH_SHORT);
-                                                    }
+                // Resolve the real default collection by ID and block actions only for that ID.
+                new Thread(() -> {
+                    boolean isDefaultById = false;
+                    try {
+                        de.schliweb.makeacopy.data.library.CollectionsRepository cr = LibraryServiceLocator.getCollectionsRepository(requireContext());
+                        de.schliweb.makeacopy.data.library.CollectionEntity def = cr.getOrCreateDefaultCompletedCollection(requireContext());
+                        isDefaultById = (def != null && def.id != null && def.id.equals(row.id));
+                    } catch (Throwable ignore) {
+                        isDefaultById = false;
+                    }
+                    final boolean block = isDefaultById;
+                    if (!isAdded()) return;
+                    requireActivity().runOnUiThread(() -> {
+                        if (block) {
+                            // Silently ignore long-press on the real default collection
+                            return;
+                        }
+                        // Show actions: Rename or Delete
+                        final CharSequence[] items = new CharSequence[]{getString(R.string.rename), getString(R.string.delete)};
+                        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                .setTitle(row.name)
+                                .setItems(items, (dialog, which) -> {
+                                    if (which == 0) {
+                                        // Rename
+                                        final android.widget.EditText input = new android.widget.EditText(requireContext());
+                                        input.setHint(R.string.collection_name_hint);
+                                        input.setText(row.name);
+                                        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                                .setTitle(R.string.rename_collection_title)
+                                                .setView(input)
+                                                .setPositiveButton(R.string.ok, (d, w) -> {
+                                                    final String name = String.valueOf(input.getText()).trim();
+                                                    if (name.isEmpty()) return;
+                                                    new Thread(() -> {
+                                                        boolean ok;
+                                                        try {
+                                                            ok = LibraryServiceLocator.getCollectionsRepository(requireContext()).renameCollection(requireContext(), row.id, name);
+                                                        } catch (Throwable t) {
+                                                            ok = false;
+                                                        }
+                                                        final boolean finalOk = ok;
+                                                        if (!isAdded()) return;
+                                                        requireActivity().runOnUiThread(() -> {
+                                                            if (!finalOk) {
+                                                                UIUtils.showToast(requireContext(), R.string.error_empty_input, android.widget.Toast.LENGTH_SHORT);
+                                                            }
+                                                            loadDataAsync();
+                                                        });
+                                                    }).start();
+                                                })
+                                                .setNegativeButton(android.R.string.cancel, null)
+                                                .show();
+                                    } else if (which == 1) {
+                                        // Delete if empty
+                                        new Thread(() -> {
+                                            boolean deleted;
+                                            try {
+                                                deleted = LibraryServiceLocator.getCollectionsRepository(requireContext()).deleteCollectionIfEmpty(requireContext(), row.id);
+                                            } catch (Throwable t) {
+                                                deleted = false;
+                                            }
+                                            final boolean finalDeleted = deleted;
+                                            if (!isAdded()) return;
+                                            requireActivity().runOnUiThread(() -> {
+                                                if (finalDeleted) {
+                                                    UIUtils.showToast(requireContext(), R.string.deleted, android.widget.Toast.LENGTH_SHORT);
                                                     loadDataAsync();
-                                                });
-                                            }).start();
-                                        })
-                                        .setNegativeButton(android.R.string.cancel, null)
-                                        .show();
-                            } else if (which == 1) {
-                                // Delete if empty
-                                new Thread(() -> {
-                                    boolean deleted;
-                                    try {
-                                        deleted = LibraryServiceLocator.getCollectionsRepository(requireContext()).deleteCollectionIfEmpty(requireContext(), row.id);
-                                    } catch (Throwable t) {
-                                        deleted = false;
+                                                } else {
+                                                    UIUtils.showToast(requireContext(), R.string.collection_not_empty, android.widget.Toast.LENGTH_SHORT);
+                                                }
+                                            });
+                                        }).start();
                                     }
-                                    final boolean finalDeleted = deleted;
-                                    if (!isAdded()) return;
-                                    requireActivity().runOnUiThread(() -> {
-                                        if (finalDeleted) {
-                                            UIUtils.showToast(requireContext(), R.string.deleted, android.widget.Toast.LENGTH_SHORT);
-                                            loadDataAsync();
-                                        } else {
-                                            UIUtils.showToast(requireContext(), R.string.collection_not_empty, android.widget.Toast.LENGTH_SHORT);
-                                        }
-                                    });
-                                }).start();
-                            }
-                        })
-                        .show();
+                                })
+                                .show();
+                    });
+                }).start();
             }
         };
 

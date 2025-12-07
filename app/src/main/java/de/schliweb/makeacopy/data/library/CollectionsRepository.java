@@ -37,4 +37,9 @@ public interface CollectionsRepository {
      * Returns all collections that contain the given scan.
      */
     List<CollectionEntity> getCollectionsForScan(Context context, String scanId);
+
+    /**
+     * Returns the default "Completed Scans" collection, creating it if necessary.
+     */
+    CollectionEntity getOrCreateDefaultCompletedCollection(Context context);
 }
