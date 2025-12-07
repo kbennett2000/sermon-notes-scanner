@@ -33,13 +33,46 @@ import java.util.UUID;
 public class DefaultCollectionsRepository implements CollectionsRepository {
     private static final String TAG = "CollectionsRepo";
 
+    private boolean isDefaultCollection(Context context, CollectionEntity e) {
+        if (e == null) return false;
+        try {
+            // Determine the real default collection (by ID) and compare IDs.
+            CollectionEntity def = getOrCreateDefaultCompletedCollection(context.getApplicationContext());
+            return def != null && def.id != null && def.id.equals(e.id);
+        } catch (Throwable ignore) {
+            return false;
+        }
+    }
+
+    private boolean isDefaultCollectionId(Context context, String collectionId) {
+        try {
+            if (collectionId == null) return false;
+            CollectionEntity def = getOrCreateDefaultCompletedCollection(context.getApplicationContext());
+            return def != null && def.id != null && def.id.equals(collectionId);
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
     @Override
     public CollectionEntity createCollection(Context context, String name) {
         try {
             AppDatabase db = AppDatabase.getInstance(context);
             CollectionsDao dao = db.collectionsDao();
+            // Normalize input
+            String trimmed = (name == null) ? null : name.trim();
+            if (trimmed == null || trimmed.isEmpty()) return null;
+            // If the requested name is the reserved default name, return the (existing or newly created)
+            // default collection instead of creating a duplicate.
+            try {
+                String defName = context.getApplicationContext().getString(de.schliweb.makeacopy.R.string.collection_completed_scans);
+                if (defName != null && defName.equalsIgnoreCase(trimmed)) {
+                    return getOrCreateDefaultCompletedCollection(context);
+                }
+            } catch (Throwable ignore) {
+            }
             int nextOrder = dao.getAll().size();
-            CollectionEntity entity = new CollectionEntity(UUID.randomUUID().toString(), name, nextOrder, System.currentTimeMillis());
+            CollectionEntity entity = new CollectionEntity(UUID.randomUUID().toString(), trimmed, nextOrder, System.currentTimeMillis());
             dao.insert(entity);
             return entity;
         } catch (Throwable t) {
@@ -78,6 +111,26 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
     public void assignScanToCollection(Context context, String scanId, String collectionId) {
         try {
             AppDatabase db = AppDatabase.getInstance(context);
+            // Guard: Default "Completed Scans" collection is ONLY for CompletedScanEntry items.
+            // If target is the default collection, verify the scan has the marker in sourceMetaJson.
+            try {
+                if (isDefaultCollectionId(context, collectionId)) {
+                    try {
+                        ScanEntity se = db.scansDao().getById(scanId);
+                        String sm = (se != null) ? se.sourceMetaJson : null;
+                        boolean isCompletedScanEntry = (sm != null && sm.contains("\"CompletedScanEntry\""));
+                        if (!isCompletedScanEntry) {
+                            android.util.Log.i(TAG, "assignScanToCollection: blocked assigning finished document to default Completed Scans collection");
+                            return; // silently ignore
+                        }
+                    } catch (Throwable ignore) {
+                        // If we cannot verify, be conservative and block assignment.
+                        android.util.Log.i(TAG, "assignScanToCollection: could not verify scan type, blocking assignment to default collection");
+                        return;
+                    }
+                }
+            } catch (Throwable ignore) {
+            }
             db.scanCollectionJoinDao().insert(new ScanCollectionCrossRef(scanId, collectionId, System.currentTimeMillis()));
         } catch (Throwable t) {
             Log.e(TAG, "assignScanToCollection failed", t);
@@ -117,6 +170,8 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
         try {
             AppDatabase db = AppDatabase.getInstance(context);
             CollectionsDao cdao = db.collectionsDao();
+            // Guard: default collection cannot be deleted at all
+            if (isDefaultCollectionId(context, collectionId)) return false;
             int count = cdao.countItems(collectionId);
             if (count > 0) return false;
             cdao.deleteById(collectionId);
@@ -147,6 +202,16 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
             CollectionsDao dao = db.collectionsDao();
             CollectionEntity e = dao.getById(collectionId);
             if (e == null) return false;
+            // Guard: default collection cannot be renamed (by ID)
+            if (isDefaultCollection(context, e)) return false;
+            // Guard: do not allow renaming another collection to the reserved default name
+            try {
+                String defName = context.getApplicationContext().getString(de.schliweb.makeacopy.R.string.collection_completed_scans);
+                if (defName != null && defName.equalsIgnoreCase(trimmed)) {
+                    return false;
+                }
+            } catch (Throwable ignore) {
+            }
             e.name = trimmed;
             dao.update(e);
             return true;
@@ -187,6 +252,38 @@ public class DefaultCollectionsRepository implements CollectionsRepository {
         } catch (Throwable t) {
             Log.e(TAG, "getCollectionsForScan failed", t);
             return java.util.Collections.emptyList();
+        }
+    }
+
+    @Override
+    public CollectionEntity getOrCreateDefaultCompletedCollection(Context context) {
+        try {
+            Context app = context.getApplicationContext();
+            AppDatabase db = AppDatabase.getInstance(app);
+            CollectionsDao dao = db.collectionsDao();
+            String name = app.getString(de.schliweb.makeacopy.R.string.collection_completed_scans);
+            CollectionEntity existing = null;
+            try {
+                existing = dao.getByName(name);
+            } catch (Throwable ignore) {
+            }
+            if (existing != null) return existing;
+            // create new
+            int nextOrder = 0;
+            try {
+                java.util.List<CollectionEntity> all = dao.getAll();
+                nextOrder = (all != null) ? all.size() : 0;
+            } catch (Throwable ignore) {
+            }
+            CollectionEntity entity = new CollectionEntity(java.util.UUID.randomUUID().toString(), name, nextOrder, System.currentTimeMillis());
+            try {
+                dao.insert(entity);
+            } catch (Throwable ignore) {
+            }
+            return entity;
+        } catch (Throwable t) {
+            android.util.Log.e(TAG, "getOrCreateDefaultCompletedCollection failed", t);
+            return null;
         }
     }
 }
