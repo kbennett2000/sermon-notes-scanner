@@ -141,6 +141,11 @@ public final class LibraryServiceLocator {
                 public java.util.List<CollectionEntity> getCollectionsForScan(Context ctx, String scanId) {
                     return java.util.Collections.emptyList();
                 }
+
+                @Override
+                public CollectionEntity getOrCreateDefaultCompletedCollection(Context ctx) {
+                    return null;
+                }
             };
         }
         if (collectionsRepository == null) {
