@@ -1845,7 +1845,19 @@ public class ExportFragment extends Fragment {
             } catch (Throwable t) {
                 cols = java.util.Collections.emptyList();
             }
-            final java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> finalCols = cols;
+            // Filter out the default "Completed Scans" collection for finished documents
+            java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> filtered = new java.util.ArrayList<>();
+            try {
+                String defName = appCtx.getString(de.schliweb.makeacopy.R.string.collection_completed_scans);
+                for (de.schliweb.makeacopy.data.library.CollectionEntity c : cols) {
+                    if (c == null) continue;
+                    if (defName != null && defName.equals(c.name)) continue; // exclude default
+                    filtered.add(c);
+                }
+            } catch (Throwable ignore) {
+                filtered = cols; // fallback: no filtering
+            }
+            final java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> finalCols = filtered;
             if (!isAdded()) return;
             requireActivity().runOnUiThread(() -> {
                 try {
