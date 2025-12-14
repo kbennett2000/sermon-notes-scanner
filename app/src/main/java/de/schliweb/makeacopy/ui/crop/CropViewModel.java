@@ -22,6 +22,8 @@ public class CropViewModel extends BaseViewModel {
     private final MutableLiveData<Integer> captureRotationDegrees = new MutableLiveData<>(0);
     // User-requested rotation after cropping (applied before OCR/export)
     private final MutableLiveData<Integer> userRotationDegrees = new MutableLiveData<>(0);
+    // OCR: best rotation (additional 0/90/180/270 tried by OCR). Relative to current user rotation.
+    private final MutableLiveData<Integer> bestOcrRotationDegrees = new MutableLiveData<>(0);
 
     public CropViewModel() {
         super("Crop Fragment");
@@ -132,6 +134,23 @@ public class CropViewModel extends BaseViewModel {
     public void setUserRotationDegrees(int deg) {
         Log.d("setUserRotationDegrees", "deg=" + deg);
         userRotationDegrees.setValue(((deg % 360) + 360) % 360);
+    }
+
+    /**
+     * Returns the best additional rotation (0/90/180/270) chosen by OCR trials.
+     * This is defined relative to the userRotationDegrees at OCR start.
+     */
+    public LiveData<Integer> getBestOcrRotationDegrees() {
+        return bestOcrRotationDegrees;
+    }
+
+    /**
+     * Sets the best additional rotation (0/90/180/270) chosen by OCR trials.
+     */
+    public void setBestOcrRotationDegrees(int deg) {
+        int v = ((deg % 360) + 360) % 360;
+        Log.d("setBestOcrRotationDegrees", "deg=" + v);
+        bestOcrRotationDegrees.setValue(v);
     }
 
     /**

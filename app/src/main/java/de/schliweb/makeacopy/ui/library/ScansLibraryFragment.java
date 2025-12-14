@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
-import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.data.library.ExistingScansIndexer;
 import de.schliweb.makeacopy.data.library.LibraryServiceLocator;
@@ -206,11 +205,17 @@ public class ScansLibraryFragment extends Fragment {
                     final int finalN = n;
                     if (!isAdded()) return;
                     requireActivity().runOnUiThread(() -> {
+                        // Build a short user message and provide both Toast and A11y announcement
+                        CharSequence msg;
                         if (finalN > 0) {
-                            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), getString(R.string.indexed_new_items, finalN), android.widget.Toast.LENGTH_SHORT);
+                            msg = getString(R.string.indexed_new_items, finalN);
+                            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), msg.toString(), android.widget.Toast.LENGTH_SHORT);
                         } else {
-                            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), R.string.nothing_new_to_index, android.widget.Toast.LENGTH_SHORT);
+                            msg = getString(R.string.nothing_new_to_index);
+                            de.schliweb.makeacopy.utils.UIUtils.showToast(requireContext(), msg.toString(), android.widget.Toast.LENGTH_SHORT);
                         }
+                        // Announce for accessibility so screen reader users receive a concise summary
+                        announceText(msg);
                         loadDataAsync();
                     });
                 }).start();
@@ -219,6 +224,17 @@ public class ScansLibraryFragment extends Fragment {
 
         // loadDataAsync() already called above depending on collection presence
         return root;
+    }
+
+    /**
+     * Announces a short message for accessibility users via the root view,
+     * centralized through A11yUtils to avoid deprecated direct calls.
+     */
+    private void announceText(@NonNull CharSequence text) {
+        View root = getView();
+        if (root == null) return;
+        root.setContentDescription(text);
+        de.schliweb.makeacopy.utils.A11yUtils.announce(root, text);
     }
 
     private void loadDataAsync() {

@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Nenhuma imagem processada. Recorte uma imagem primeiro.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Processamento de OCR concluído. Toque no botão para prosseguir para a exportação.</string>
 
+    <string name="ocr_found_rotation">Rotação detectada: %1$d°</string>
+    <string name="ocr_score">Pontuação de OCR: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Rotação detectada: %1$d° — pontuação de OCR: %2$d%%</string>
+
+    <!-- Explicação adicional adicionada no diálogo «Explicar modos de reconhecimento» -->
+    <string name="ocr_prep_modes_autorotate_note">Rotação automática do OCR: Quando ativada, o OCR também testa a página em passos de 90° (0/90/180/270) e seleciona o melhor resultado. A rotação detectada pode ser aplicada automaticamente durante a exportação se você não tiver rotacionado a página manualmente. Esta opção pode ser ativada ou desativada em «Escolher modo de reconhecimento».</string>
+
     <string name="initializing_camera">Inicializando a câmera…</string>
     <string name="resetting_camera">Reiniciando a câmera…</string>
     <string name="error_initializing_camera">Erro ao inicializar a câmera: %1$s</string>
@@ -326,6 +333,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Documento detetado — pronto para capturar.</string>
+    <string name="a11y_no_document_detected">Nenhum documento detectado.</string>
+    <string name="a11y_orientation_portrait_tip">Parece estar em modo retrato. Segurar o telefone na vertical normalmente funciona melhor para páginas altas.</string>
+    <string name="a11y_orientation_landscape_tip">Parece estar em modo paisagem. Tente segurar o telefone na horizontal para páginas largas.</string>
+    <string name="a11y_crop_summary_detected">Análise da imagem capturada: documento detectado, qualidade de aproximadamente %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Análise da imagem capturada: nenhum documento detectado.</string>
     <string name="accessibility_mode_label">Modo de acessibilidade</string>
     <string name="a11y_camera_ready">Câmara pronta. Toque duas vezes em “Digitalizar” para capturar.</string>
     <string name="a11y_low_light_toggle_flash">Pouca luz detetada. Toque duas vezes em “Flash” para ativar.</string>
@@ -338,5 +350,26 @@
     <string name="a11y_capturing_now">A capturar…</string>
     <string name="a11y_score_now">Qualidade da deteção: %1$d%%.</string>
     <string name="a11y_scan_with_score">Digitalizar. Qualidade da deteção: %1$d%%.</string>
+
+    <!-- Acessibilidade: descrição de itens da lista e anúncios -->
+    <string name="page_n_of_m">Página %1$d de %2$d</string>
+    <string name="pages_count_announcement">Páginas: %1$d</string>
+    <string name="export_started">Exportação iniciada</string>
+    <string name="page_removed">Página removida</string>
+    <string name="page_moved_to_position">Movido para a posição %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">Rotação automática de OCR (aplicar também na exportação)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Forçar mapeamento de dicas em modo paisagem (experimental)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Mostrar arquivos-fonte brutos na Biblioteca (desenvolvedor)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Não classificados</string>
+    <string name="open_unfiled">Abrir Não classificados</string>
+    <string name="a11y_unfiled_summary">Não classificados: %1$d item(ns)</string>
 
 </resources>

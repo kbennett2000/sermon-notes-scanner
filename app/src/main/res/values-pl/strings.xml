@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Nie przetworzono obrazu. Najpierw przytnij obraz.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Przetwarzanie OCR zakończone. Naciśnij przycisk, aby przejść do eksportu.</string>
 
+    <string name="ocr_found_rotation">Wykryta rotacja: %1$d°</string>
+    <string name="ocr_score">Wynik OCR: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Wykryta rotacja: %1$d° — wynik OCR: %2$d%%</string>
+
+    <!-- Dodatkowe wyjaśnienie dodane w oknie dialogowym „Wyjaśnij tryby rozpoznawania” -->
+    <string name="ocr_prep_modes_autorotate_note">Automatyczna rotacja OCR: Gdy jest włączona, OCR sprawdza stronę również w krokach co 90° (0/90/180/270) i wybiera najlepszy wynik. Wykryta rotacja może zostać automatycznie zastosowana podczas eksportu, jeśli nie obróciłeś strony ręcznie. Opcję tę można włączyć lub wyłączyć w „Wybierz tryb rozpoznawania”.</string>
+
     <string name="initializing_camera">Inicjalizacja aparatu…</string>
     <string name="resetting_camera">Resetowanie aparatu…</string>
     <string name="error_initializing_camera">Błąd inicjalizacji aparatu: %1$s</string>
@@ -325,6 +332,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Wykryto dokument — gotowe do wykonania zdjęcia.</string>
+    <string name="a11y_no_document_detected">Nie wykryto dokumentu.</string>
+    <string name="a11y_orientation_portrait_tip">Wygląda na orientację pionową. Trzymanie telefonu pionowo zazwyczaj najlepiej sprawdza się przy wysokich stronach.</string>
+    <string name="a11y_orientation_landscape_tip">Wygląda na orientację poziomą. Spróbuj trzymać telefon poziomo dla szerokich stron.</string>
+    <string name="a11y_crop_summary_detected">Analiza przechwyconego obrazu: wykryto dokument, jakość około %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Analiza przechwyconego obrazu: nie wykryto dokumentu.</string>
     <string name="accessibility_mode_label">Tryb dostępności</string>
     <string name="a11y_camera_ready">Aparat gotowy. Stuknij dwukrotnie „Skanuj”, aby wykonać zdjęcie.</string>
     <string name="a11y_low_light_toggle_flash">Wykryto słabe oświetlenie. Stuknij dwukrotnie „Lampa”, aby włączyć.</string>
@@ -337,5 +349,27 @@
     <string name="a11y_capturing_now">Trwa wykonywanie zdjęcia…</string>
     <string name="a11y_score_now">Jakość wykrycia: %1$d%%.</string>
     <string name="a11y_scan_with_score">Skanuj. Jakość wykrycia: %1$d%%.</string>
+
+    <!-- Dostępność: opis elementów listy i komunikaty -->
+    <string name="page_n_of_m">Strona %1$d z %2$d</string>
+    <string name="pages_count_announcement">Strony: %1$d</string>
+    <string name="export_started">Eksport rozpoczęty</string>
+    <string name="page_removed">Strona usunięta</string>
+    <string name="page_moved_to_position">Przeniesiono na pozycję %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">Automatyczne obracanie OCR (zastosuj także przy eksporcie)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Wymuś mapowanie podpowiedzi dla trybu poziomego (eksperymentalne)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Pokaż surowe pliki źródłowe w Bibliotece (deweloper)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Nieskategoryzowane</string>
+    <string name="open_unfiled">Otwórz Nieskategoryzowane</string>
+    <string name="a11y_unfiled_summary">Nieskategoryzowane: %1$d element(ów)</string>
+
 
 </resources>

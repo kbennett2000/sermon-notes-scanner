@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">ยังไม่มีรูปประมวลผล ครอบตัดรูปก่อน</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR เสร็จสิ้น แตะปุ่มเพื่อไปยังการส่งออก</string>
 
+    <string name="ocr_found_rotation">ตรวจพบการหมุน: %1$d°</string>
+    <string name="ocr_score">คะแนน OCR: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">ตรวจพบการหมุน: %1$d° — คะแนน OCR: %2$d%%</string>
+
+    <!-- คำอธิบายเพิ่มเติมที่แสดงในกล่องโต้ตอบ “อธิบายโหมดการรู้จำ” -->
+    <string name="ocr_prep_modes_autorotate_note">การหมุนอัตโนมัติของ OCR: เมื่อเปิดใช้งาน OCR จะทดสอบหน้าเอกสารในขั้นละ 90° (0/90/180/270) และเลือกผลลัพธ์ที่ดีที่สุด การหมุนที่ตรวจพบสามารถนำไปใช้โดยอัตโนมัติระหว่างการส่งออก หากคุณไม่ได้หมุนหน้าด้วยตนเอง คุณสามารถเปิดหรือปิดตัวเลือกนี้ได้ใน “เลือกโหมดการรู้จำ”</string>
+
     <string name="initializing_camera">กำลังเริ่มต้นกล้อง…</string>
     <string name="resetting_camera">กำลังกำหนดค่ากล้องใหม่…</string>
     <string name="error_initializing_camera">ไม่สามารถเริ่มต้นกล้อง: %1$s</string>
@@ -328,6 +335,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">ตรวจพบเอกสาร — พร้อมถ่ายภาพ</string>
+    <string name="a11y_no_document_detected">ไม่พบเอกสาร</string>
+    <string name="a11y_orientation_portrait_tip">ดูเหมือนเป็นโหมดตั้ง โทรศัพท์ในแนวตั้งมักเหมาะที่สุดสำหรับหน้ากระดาษที่มีความสูง</string>
+    <string name="a11y_orientation_landscape_tip">ดูเหมือนเป็นโหมดแนวนอน ลองถือโทรศัพท์ในแนวนอนสำหรับหน้ากระดาษที่กว้าง</string>
+    <string name="a11y_crop_summary_detected">การวิเคราะห์ภาพที่บันทึก: พบเอกสาร คุณภาพประมาณ %1$d%%</string>
+    <string name="a11y_crop_summary_no_doc">การวิเคราะห์ภาพที่บันทึก: ไม่พบเอกสาร</string>
     <string name="accessibility_mode_label">โหมดการเข้าถึง</string>
     <string name="a11y_camera_ready">กล้องพร้อมแล้ว แตะสองครั้งที่ “สแกน” เพื่อถ่ายภาพ</string>
     <string name="a11y_low_light_toggle_flash">ตรวจพบแสงน้อย แตะสองครั้งที่ “แฟลช” เพื่อเปิดใช้งาน</string>
@@ -340,5 +352,26 @@
     <string name="a11y_capturing_now">กำลังถ่ายภาพ…</string>
     <string name="a11y_score_now">คุณภาพการตรวจจับ: %1$d%%</string>
     <string name="a11y_scan_with_score">สแกน คุณภาพการตรวจจับ: %1$d%%</string>
+
+    <!-- การช่วยการเข้าถึง: คำอธิบายรายการและการประกาศ -->
+    <string name="page_n_of_m">หน้า %1$d จาก %2$d</string>
+    <string name="pages_count_announcement">จำนวนหน้า: %1$d</string>
+    <string name="export_started">เริ่มการส่งออกแล้ว</string>
+    <string name="page_removed">ลบหน้าแล้ว</string>
+    <string name="page_moved_to_position">ย้ายไปยังตำแหน่ง %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">หมุน OCR อัตโนมัติ (ใช้กับการส่งออกด้วย)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">บังคับการจับคู่คำแนะนำสำหรับโหมดแนวนอน (ทดลอง)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">แสดงไฟล์ต้นฉบับดิบในไลบรารี (นักพัฒนา)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">ยังไม่จัดหมวดหมู่</string>
+    <string name="open_unfiled">เปิดรายการที่ยังไม่จัดหมวดหมู่</string>
+    <string name="a11y_unfiled_summary">ยังไม่จัดหมวดหมู่: %1$d รายการ</string>
 
 </resources>

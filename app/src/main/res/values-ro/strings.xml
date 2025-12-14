@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Nicio imagine procesată. Decupează o imagine mai întâi.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Procesarea OCR este completă. Atinge butonul pentru a continua la export.</string>
 
+    <string name="ocr_found_rotation">Rotație detectată: %1$d°</string>
+    <string name="ocr_score">Scor OCR: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Rotație detectată: %1$d° — scor OCR: %2$d%%</string>
+
+    <!-- Explicație suplimentară adăugată în dialogul „Explică modurile de recunoaștere” -->
+    <string name="ocr_prep_modes_autorotate_note">Rotire automată OCR: Când este activată, OCR încearcă pagina și în pași de 90° (0/90/180/270) și alege cel mai bun rezultat. Rotația detectată poate fi aplicată automat la export dacă nu ai rotit manual pagina. Această opțiune poate fi activată sau dezactivată în „Alege modul de recunoaștere”.</string>
+
     <string name="initializing_camera">Inițializare cameră…</string>
     <string name="resetting_camera">Resetare cameră…</string>
     <string name="error_initializing_camera">Eroare la inițializarea camerei: %1$s</string>
@@ -327,6 +334,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document detectat — gata pentru captură.</string>
+    <string name="a11y_no_document_detected">Nu a fost detectat niciun document.</string>
+    <string name="a11y_orientation_portrait_tip">Pare a fi modul portret. Ținerea telefonului în poziție verticală este de obicei cea mai potrivită pentru paginile înalte.</string>
+    <string name="a11y_orientation_landscape_tip">Pare a fi modul peisaj. Încercați să țineți telefonul în poziție orizontală pentru paginile late.</string>
+    <string name="a11y_crop_summary_detected">Analiza imaginii capturate: document detectat, calitate aproximativ %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Analiza imaginii capturate: nu a fost detectat niciun document.</string>
     <string name="accessibility_mode_label">Mod de accesibilitate</string>
     <string name="a11y_camera_ready">Camera este gata. Atingeți de două ori „Scanare” pentru a captura.</string>
     <string name="a11y_low_light_toggle_flash">Luminozitate scăzută detectată. Atingeți de două ori „Bliț” pentru a activa.</string>
@@ -339,5 +351,27 @@
     <string name="a11y_capturing_now">Se capturează…</string>
     <string name="a11y_score_now">Calitatea detecției: %1$d%%.</string>
     <string name="a11y_scan_with_score">Scanați. Calitatea detecției: %1$d%%.</string>
+
+    <!-- Accesibilitate: descrierea elementelor din listă și anunțuri -->
+    <string name="page_n_of_m">Pagina %1$d din %2$d</string>
+    <string name="pages_count_announcement">Pagini: %1$d</string>
+    <string name="export_started">Export pornit</string>
+    <string name="page_removed">Pagina eliminată</string>
+    <string name="page_moved_to_position">Mutat la poziția %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">Rotire automată OCR (aplică și la export)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Forțează maparea indicațiilor pentru mod peisaj (experimental)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Afișează fișierele sursă brute în Bibliotecă (developer)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Neclasificat</string>
+    <string name="open_unfiled">Deschide Neclasificat</string>
+    <string name="a11y_unfiled_summary">Neclasificat: %1$d element(e)</string>
+
 
 </resources>

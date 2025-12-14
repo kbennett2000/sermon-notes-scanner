@@ -133,14 +133,17 @@ public final class BitmapUtils {
     public static Bitmap loadPreviewBitmapForCompletedScan(CompletedScan scan, int reqW, int reqH) {
         if (scan == null) return null;
         Bitmap bmp = scan.inMemoryBitmap();
+        boolean fromDisk = false;
         try {
             if (bmp == null) {
                 String path = scan.filePath();
                 if (path != null) {
                     bmp = ImageDecodeUtils.decodeSampled(path, Math.max(1, reqW), Math.max(1, reqH));
+                    if (bmp != null) fromDisk = true;
                 }
                 if (bmp == null && scan.thumbPath() != null) {
                     bmp = ImageDecodeUtils.decodeSampled(scan.thumbPath(), Math.max(1, reqW), Math.max(1, reqH));
+                    if (bmp != null) fromDisk = true;
                 }
             }
             if (bmp != null) {
@@ -149,6 +152,19 @@ public final class BitmapUtils {
                     deg = scan.rotationDeg();
                 } catch (Throwable ignore) {
                 }
+                String mode = null;
+                try {
+                    mode = scan.orientationMode();
+                } catch (Throwable ignore) {
+                }
+                boolean shouldRotate;
+                try {
+                    shouldRotate = de.schliweb.makeacopy.utils.RotationPolicy
+                            .shouldRotateForThumbnail(fromDisk, mode, deg);
+                } catch (Throwable ignore) {
+                    shouldRotate = false;
+                }
+                if (!shouldRotate) return bmp;
                 bmp = BitmapUtils.maybeRotate(bmp, deg);
             }
         } catch (Throwable ignore) {

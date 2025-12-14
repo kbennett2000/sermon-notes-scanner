@@ -57,6 +57,7 @@ public class ScansAdapter extends RecyclerView.Adapter<ScansAdapter.VH> {
     public interface OnItemClickListener {
         void onItemClick(@NonNull ScanEntity item);
     }
+
     public interface OnItemLongClickListener {
         void onItemLongClick(@NonNull ScanEntity item);
     }
@@ -122,7 +123,8 @@ public class ScansAdapter extends RecyclerView.Adapter<ScansAdapter.VH> {
             if (Boolean.TRUE.equals(unread)) {
                 try {
                     de.schliweb.makeacopy.utils.UIUtils.showToast(v.getContext(), R.string.missing_file, android.widget.Toast.LENGTH_SHORT);
-                } catch (Throwable ignore) {}
+                } catch (Throwable ignore) {
+                }
             }
             listener.onItemClick(e);
         });
@@ -187,7 +189,10 @@ public class ScansAdapter extends RecyclerView.Adapter<ScansAdapter.VH> {
                             String sub = base;
                             if (!readable) {
                                 sub = sub + " • " + h.itemView.getContext().getString(R.string.missing_file);
-                                try { h.thumb.setAlpha(0.7f); } catch (Throwable ignore) {}
+                                try {
+                                    h.thumb.setAlpha(0.7f);
+                                } catch (Throwable ignore) {
+                                }
                             }
                             h.subtitle.setText(sub);
                             if (h.membership != null) {
@@ -261,14 +266,9 @@ public class ScansAdapter extends RecyclerView.Adapter<ScansAdapter.VH> {
     }
 
     private static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
+        // Use centralized EXIF-neutral decoder for baked disk files
         try {
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, options);
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-            options.inJustDecodeBounds = false;
-            options.inPreferredConfig = Bitmap.Config.RGB_565;
-            return BitmapFactory.decodeFile(path, options);
+            return de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeSampled(path, reqWidth, reqHeight);
         } catch (Throwable t) {
             return null;
         }

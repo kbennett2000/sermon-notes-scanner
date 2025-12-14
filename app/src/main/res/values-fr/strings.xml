@@ -42,6 +42,13 @@
     <string name="no_image_processed_crop_an_image_first">Aucune image traitée. Recadrez d’abord une image.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Traitement OCR terminé. Touchez le bouton pour passer à l’exportation.</string>
 
+    <string name="ocr_found_rotation">Rotation détectée : %1$d°</string>
+    <string name="ocr_score">Score OCR : %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Rotation détectée : %1$d° — score OCR : %2$d%%</string>
+
+    <!-- Explication supplémentaire ajoutée dans la boîte de dialogue « Expliquer les modes de reconnaissance » -->
+    <string name="ocr_prep_modes_autorotate_note">Rotation automatique OCR : Lorsqu’elle est activée, l’OCR teste également la page par pas de 90° (0/90/180/270) et sélectionne le meilleur résultat. La rotation détectée peut être appliquée automatiquement lors de l’export si vous n’avez pas effectué de rotation manuelle. Cette option peut être activée ou désactivée dans « Choisir le mode de reconnaissance ».</string>
+
     <string name="initializing_camera">Initialisation de la caméra…</string>
     <string name="resetting_camera">Réinitialisation de la caméra…</string>
     <string name="error_initializing_camera">Erreur lors de l’initialisation de la caméra : %1$s</string>
@@ -94,7 +101,7 @@
     <string name="clear_all_pages">Tout effacer</string>
     <string name="remove_this_page">Supprimer cette page</string>
     <string name="multipage_not_implemented">Exportation multi-page non encore implémentée</string>
-    
+
     <!-- Reorder A11y controls -->
     <string name="move_page_left">Déplacer la page vers la gauche</string>
     <string name="move_page_right">Déplacer la page vers la droite</string>
@@ -324,6 +331,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document détecté — prêt à capturer.</string>
+    <string name="a11y_no_document_detected">Aucun document détecté.</string>
+    <string name="a11y_orientation_portrait_tip">Cela ressemble à un format portrait. Tenir le téléphone en mode portrait convient généralement mieux aux pages hautes.</string>
+    <string name="a11y_orientation_landscape_tip">Cela ressemble à un format paysage. Essayez de tenir le téléphone en mode paysage pour les pages larges.</string>
+    <string name="a11y_crop_summary_detected">Analyse de l’image capturée : document détecté, qualité d’environ %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Analyse de l’image capturée : aucun document détecté.</string>
     <string name="accessibility_mode_label">Mode accessibilité</string>
     <string name="a11y_camera_ready">Caméra prête. Double-tapez sur Scanner pour capturer.</string>
     <string name="a11y_low_light_toggle_flash">Faible luminosité détectée. Double-tapez sur Flash pour activer.</string>
@@ -337,5 +349,25 @@
     <string name="a11y_score_now">Qualité de détection : %1$d%%.</string>
     <string name="a11y_scan_with_score">Scanner. Qualité de détection : %1$d%%.</string>
 
+    <!-- Accessibilité : description des éléments de liste et annonces -->
+    <string name="page_n_of_m">Page %1$d sur %2$d</string>
+    <string name="pages_count_announcement">Pages : %1$d</string>
+    <string name="export_started">Export démarré</string>
+    <string name="page_removed">Page supprimée</string>
+    <string name="page_moved_to_position">Déplacé à la position %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">Rotation automatique OCR (appliquer aussi à l’export)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Forcer l’attribution des indications en mode paysage (expérimental)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Afficher les fichiers sources bruts dans la Bibliothèque (développeur)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Non classé</string>
+    <string name="open_unfiled">Ouvrir Non classé</string>
+    <string name="a11y_unfiled_summary">Non classé : %1$d élément(s)</string>
 
 </resources>

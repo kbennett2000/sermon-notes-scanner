@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Изображение не обработано. Сначала обрежьте изображение.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR завершён. Нажмите кнопку, чтобы перейти к экспорту.</string>
 
+    <string name="ocr_found_rotation">Обнаружен поворот: %1$d°</string>
+    <string name="ocr_score">Оценка OCR: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Обнаружен поворот: %1$d° — оценка OCR: %2$d%%</string>
+
+    <!-- Дополнительное объяснение, добавленное в диалог «Пояснение режимов распознавания» -->
+    <string name="ocr_prep_modes_autorotate_note">Автоматический поворот OCR: При включении OCR также проверяет страницу с шагом 90° (0/90/180/270) и выбирает лучший результат. Обнаруженный поворот может быть автоматически применён при экспорте, если вы не поворачивали страницу вручную. Этот параметр можно включить или выключить в разделе «Выбрать режим распознавания».</string>
+
     <string name="initializing_camera">Инициализация камеры…</string>
     <string name="resetting_camera">Сброс камеры…</string>
     <string name="error_initializing_camera">Ошибка инициализации камеры: %1$s</string>
@@ -326,6 +333,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Документ обнаружен — готов к съёмке.</string>
+    <string name="a11y_no_document_detected">Документ не обнаружен.</string>
+    <string name="a11y_orientation_portrait_tip">Похоже на портретную ориентацию. Держать телефон вертикально обычно лучше всего подходит для высоких страниц.</string>
+    <string name="a11y_orientation_landscape_tip">Похоже на альбомную ориентацию. Попробуйте держать телефон горизонтально для широких страниц.</string>
+    <string name="a11y_crop_summary_detected">Анализ полученного изображения: документ обнаружен, качество примерно %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Анализ полученного изображения: документ не обнаружен.</string>
     <string name="accessibility_mode_label">Режим доступности</string>
     <string name="a11y_camera_ready">Камера готова. Дважды нажмите «Сканировать», чтобы сделать снимок.</string>
     <string name="a11y_low_light_toggle_flash">Обнаружено мало света. Дважды нажмите «Вспышка», чтобы включить.</string>
@@ -338,5 +350,27 @@
     <string name="a11y_capturing_now">Идёт съёмка…</string>
     <string name="a11y_score_now">Качество распознавания: %1$d%%.</string>
     <string name="a11y_scan_with_score">Сканировать. Качество распознавания: %1$d%%.</string>
+
+    <!-- Доступность: описание элементов списка и объявления -->
+    <string name="page_n_of_m">Страница %1$d из %2$d</string>
+    <string name="pages_count_announcement">Страниц: %1$d</string>
+    <string name="export_started">Экспорт начат</string>
+    <string name="page_removed">Страница удалена</string>
+    <string name="page_moved_to_position">Перемещено на позицию %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">Автоматическое поворот OCR (также применять при экспорте)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Принудительное сопоставление подсказок для альбомного режима (экспериментально)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Показать исходные необработанные файлы в Библиотеке (для разработчиков)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Без категории</string>
+    <string name="open_unfiled">Открыть «Без категории»</string>
+    <string name="a11y_unfiled_summary">Без категории: %1$d элемент(ов)</string>
+
 
 </resources>

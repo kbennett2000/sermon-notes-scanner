@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Kein Bild verarbeitet. Schneide zuerst ein Bild zu.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR-Verarbeitung abgeschlossen. Tippe auf die Schaltfläche, um mit dem Export fortzufahren.</string>
 
+    <string name="ocr_found_rotation">Gefundene Rotation: %1$d°</string>
+    <string name="ocr_score">OCR-Score: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Gefundene Rotation: %1$d° — OCR-Score: %2$d%%</string>
+
+    <!-- Zusätzliche Erklärung im Dialog „Erkennungsmodi erklären“ -->
+    <string name="ocr_prep_modes_autorotate_note">OCR-Auto-Rotation: Wenn aktiviert, prüft die OCR die Seite zusätzlich in 90°-Schritten (0/90/180/270) und wählt das beste Ergebnis aus. Die gefundene Rotation kann beim Export automatisch angewendet werden, sofern Sie die Seite nicht manuell gedreht haben. Diese Option kann unter „Erkennungsmodus auswählen“ umgeschaltet werden.</string>
+
     <string name="initializing_camera">Kamera wird initialisiert…</string>
     <string name="resetting_camera">Kamera wird zurückgesetzt…</string>
     <string name="error_initializing_camera">Fehler bei der Initialisierung der Kamera: %1$s</string>
@@ -325,6 +332,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument erkannt – bereit zum Aufnehmen.</string>
+    <string name="a11y_no_document_detected">Kein Dokument erkannt.</string>
+    <string name="a11y_orientation_portrait_tip">Das sieht nach Hochformat aus. Das Halten des Telefons im Hochformat passt normalerweise am besten für hohe Seiten.</string>
+    <string name="a11y_orientation_landscape_tip">Das sieht nach Querformat aus. Versuche, das Telefon im Querformat zu halten – das eignet sich besser für breite Seiten.</string>
+    <string name="a11y_crop_summary_detected">Analyse des aufgenommenen Bildes: Dokument erkannt, Qualität etwa %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Analyse des aufgenommenen Bildes: Kein Dokument erkannt.</string>
     <string name="accessibility_mode_label">Barrierefreiheitsmodus</string>
     <string name="a11y_camera_ready">Kamera bereit. Doppeltippen auf „Scannen“ zum Aufnehmen.</string>
     <string name="a11y_low_light_toggle_flash">Wenig Licht erkannt. Doppeltippen auf „Blitz“ zum Aktivieren.</string>
@@ -338,4 +350,26 @@
     <string name="a11y_score_now">Erkennungsqualität: %1$d%%.</string>
     <string name="a11y_scan_with_score">Scannen. Erkennungsqualität: %1$d%%.</string>
 
+    <!-- Barrierefreiheit: Beschreibung von Listenelementen und Ansagen -->
+    <string name="page_n_of_m">Seite %1$d von %2$d</string>
+    <string name="pages_count_announcement">Seiten: %1$d</string>
+    <string name="export_started">Export gestartet</string>
+    <string name="page_removed">Seite entfernt</string>
+    <string name="page_moved_to_position">Verschoben an Position %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">OCR-Auto-Drehung (auch beim Export anwenden)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Hinweiszuordnung für Querformat erzwingen (experimentell)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Rohquellen in der Bibliothek anzeigen (Entwickler)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Unsortiert</string>
+    <string name="open_unfiled">Unsortiertes öffnen</string>
+    <string name="a11y_unfiled_summary">Unsortiert: %1$d Element(e)</string>
+
+    <!-- Reorder A11y controls (defined above) -->
 </resources>

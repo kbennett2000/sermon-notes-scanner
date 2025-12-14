@@ -141,7 +141,9 @@ public final class RegistryCleaner {
                                 s.createdAt(),
                                 s.widthPx(),
                                 s.heightPx(),
-                                s.inMemoryBitmap()
+                                s.inMemoryBitmap(),
+                                s.schemaVersion(),
+                                s.orientationMode()
                         );
                         try {
                             reg.remove(s.id());

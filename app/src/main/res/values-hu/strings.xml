@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Nincs feldolgozott kép. Először vágjon ki egy képet.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Az OCR feldolgozás befejeződött. Nyomja meg a gombot az exportáláshoz.</string>
 
+    <string name="ocr_found_rotation">Talált elforgatás: %1$d°</string>
+    <string name="ocr_score">OCR-pontszám: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Talált elforgatás: %1$d° — OCR-pontszám: %2$d%%</string>
+
+    <!-- További magyarázat a „Felismerési módok magyarázata” párbeszédablakban -->
+    <string name="ocr_prep_modes_autorotate_note">OCR automatikus elforgatás: Ha engedélyezve van, az OCR a lapot 90°-os lépésekben is kipróbálja (0/90/180/270), és a legjobb eredményt választja ki. A talált elforgatás exportáláskor automatikusan alkalmazható, ha nem forgattad el manuálisan az oldalt. Ez a beállítás a „Felismerési mód kiválasztása” menüpontban kapcsolható.</string>
+
     <string name="initializing_camera">Kamera inicializálása…</string>
     <string name="resetting_camera">Kamera visszaállítása…</string>
     <string name="error_initializing_camera">Hiba a kamera inicializálásakor: %1$s</string>
@@ -326,6 +333,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokumentum érzékelve — készen áll a rögzítésre.</string>
+    <string name="a11y_no_document_detected">Nem észlelhető dokumentum.</string>
+    <string name="a11y_orientation_portrait_tip">Ez portré tájolásúnak tűnik. A telefon álló helyzetben tartása általában a magas oldalakhoz a legjobb.</string>
+    <string name="a11y_orientation_landscape_tip">Ez fekvő tájolásúnak tűnik. Próbáld meg a telefont fekvő helyzetben tartani a széles oldalakhoz.</string>
+    <string name="a11y_crop_summary_detected">A rögzített kép elemzése: dokumentum észlelve, a minőség körülbelül %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">A rögzített kép elemzése: nem észlelhető dokumentum.</string>
     <string name="accessibility_mode_label">Kisegítő mód</string>
     <string name="a11y_camera_ready">A kamera kész. A rögzítéshez koppintson duplán a Szkennelésre.</string>
     <string name="a11y_low_light_toggle_flash">Gyenge fény észlelve. A bekapcsoláshoz koppintson duplán a Vaku gombra.</string>
@@ -339,5 +351,25 @@
     <string name="a11y_score_now">Érzékelési minőség: %1$d%%.</string>
     <string name="a11y_scan_with_score">Szkennelés. Érzékelési minőség: %1$d%%.</string>
 
+    <!-- Akadálymentesítés: listaelem leírása és értesítések -->
+    <string name="page_n_of_m">%1$d. oldal / %2$d</string>
+    <string name="pages_count_announcement">Oldalak száma: %1$d</string>
+    <string name="export_started">Export elindítva</string>
+    <string name="page_removed">Oldal eltávolítva</string>
+    <string name="page_moved_to_position">%1$d. pozícióra áthelyezve</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">OCR automatikus elforgatás (exportáláskor is alkalmazza)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Fekvő tájolású súgótérkép kényszerítése (kísérleti)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Nyers forrásfájlok megjelenítése a Könyvtárban (fejlesztő)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Rendezetlen</string>
+    <string name="open_unfiled">Rendezetlen megnyitása</string>
+    <string name="a11y_unfiled_summary">Rendezetlen: %1$d elem</string>
 
 </resources>

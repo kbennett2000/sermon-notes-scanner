@@ -53,7 +53,9 @@ public class CompletedScansRegistryTest {
                 createdAt,
                 100,
                 200,
-                null
+                null,
+                1,
+                "baked"
         );
     }
 
@@ -115,7 +117,9 @@ public class CompletedScansRegistryTest {
                 now,
                 100,
                 200,
-                null
+                null,
+                1,
+                "baked"
         );
         CompletedScan withNullFmt = new CompletedScan(
                 id2,
@@ -127,7 +131,9 @@ public class CompletedScansRegistryTest {
                 now + 1,
                 100,
                 200,
-                null
+                null,
+                1,
+                "baked"
         );
 
         registry.insert(withHocr);

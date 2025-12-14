@@ -564,14 +564,9 @@ public class ScanDetailsFragment extends Fragment {
     }
 
     private static android.graphics.Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
+        // Use centralized EXIF-neutral decoder for baked disk files
         try {
-            final android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            android.graphics.BitmapFactory.decodeFile(path, options);
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-            options.inJustDecodeBounds = false;
-            options.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
-            return android.graphics.BitmapFactory.decodeFile(path, options);
+            return de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeSampled(path, Math.max(1, reqWidth), Math.max(1, reqHeight));
         } catch (Throwable t) {
             return null;
         }

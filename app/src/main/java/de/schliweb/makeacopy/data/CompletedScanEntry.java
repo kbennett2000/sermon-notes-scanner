@@ -20,6 +20,10 @@ public class CompletedScanEntry {
     public long createdAt;
     public int widthPx;
     public int heightPx;
+    // New fields for rotation unification
+    public int schemaVersion; // defaults to 1 for legacy
+    @Nullable
+    public String orientationMode; // "baked" | "metadata"; defaults to "baked"
 
     public CompletedScanEntry() {
     }
@@ -32,7 +36,9 @@ public class CompletedScanEntry {
                               @Nullable String thumbPath,
                               long createdAt,
                               int widthPx,
-                              int heightPx) {
+                              int heightPx,
+                              int schemaVersion,
+                              @Nullable String orientationMode) {
         this.id = id;
         this.filePath = filePath;
         this.rotationDeg = rotationDeg;
@@ -42,5 +48,7 @@ public class CompletedScanEntry {
         this.createdAt = createdAt;
         this.widthPx = widthPx;
         this.heightPx = heightPx;
+        this.schemaVersion = (schemaVersion <= 0) ? 1 : schemaVersion;
+        this.orientationMode = (orientationMode == null || orientationMode.isEmpty()) ? "baked" : orientationMode;
     }
 }

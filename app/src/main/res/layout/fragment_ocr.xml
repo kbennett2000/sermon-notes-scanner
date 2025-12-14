@@ -129,7 +129,10 @@
                 android:contentDescription="@string/btn_options"
                 android:src="@drawable/ic_build"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/btn_options"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <ImageButton
                 android:id="@+id/button_ocr_review"
@@ -140,7 +143,10 @@
                 android:contentDescription="@string/btn_review"
                 android:src="@drawable/ic_edit"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/btn_review"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
     </LinearLayout>
 
     <!-- Bottom button bar (mirror CropFragment positioning) -->
@@ -166,6 +172,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="12dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/back"
                 android:maxLines="1"
@@ -180,6 +188,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/next"
                 android:maxLines="1"

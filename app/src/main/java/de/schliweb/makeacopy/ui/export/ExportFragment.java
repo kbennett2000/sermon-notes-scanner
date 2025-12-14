@@ -13,6 +13,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,6 +34,9 @@ import java.io.File;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * ExportFragment is a UI component that extends Fragment and facilitates exporting
@@ -66,6 +70,8 @@ import java.util.*;
  * - getOcrWordsFromState: Retrieves a list of recognized OCR words from the application state.
  */
 public class ExportFragment extends Fragment {
+    // Track last pages count to avoid repetitive announcements
+    private int lastPagesCount = -1;
     // When Include OCR Text is selected, delay the library assignment snackbar
     // until the TXT file has been successfully saved.
     private boolean deferAssignUntilTxt = false;
@@ -120,13 +126,11 @@ public class ExportFragment extends Fragment {
      */
     private void renderPreview(Bitmap source) {
         if (binding == null || source == null) return;
-        Bitmap out = de.schliweb.makeacopy.utils.BitmapUtils.processForPreview(source, requireContext());
-        try {
-            binding.documentPreview.setImageBitmap(out);
-            binding.documentPreview.setVisibility(View.VISIBLE);
-        } catch (Throwable ignore) {
-            // keep previous state on UI errors
-        }
+        Context ctx = getContext();
+        if (ctx == null) return;
+        Bitmap out = de.schliweb.makeacopy.utils.BitmapUtils.processForPreview(source, ctx);
+        binding.documentPreview.setImageBitmap(out);
+        binding.documentPreview.setVisibility(View.VISIBLE);
     }
 
     private void renderPreviewFromCurrent() {
@@ -199,16 +203,16 @@ public class ExportFragment extends Fragment {
         cameraViewModel = new ViewModelProvider(requireActivity()).get(CameraViewModel.class);
 
         // Ensure we have a bitmap if arriving here directly (skipping Crop/OCR)
-        try {
-            if (cropViewModel.getImageBitmap().getValue() == null) {
+        if (cropViewModel.getImageBitmap().getValue() == null) {
+            Context ctxInit = getContext();
+            if (ctxInit != null) {
                 String path = cameraViewModel.getImagePath() != null ? cameraViewModel.getImagePath().getValue() : null;
                 Uri u = cameraViewModel.getImageUri() != null ? cameraViewModel.getImageUri().getValue() : null;
-                Bitmap bmp = de.schliweb.makeacopy.utils.ImageLoader.decode(requireContext(), path, u);
+                Bitmap bmp = de.schliweb.makeacopy.utils.ImageLoader.decode(ctxInit, path, u);
                 if (bmp != null) {
                     cropViewModel.setImageBitmap(bmp);
                 }
             }
-        } catch (Throwable ignore) {
         }
 
         // Multipage session setup (v1 increment) - use Activity scope so it survives navigation
@@ -217,6 +221,11 @@ public class ExportFragment extends Fragment {
             @Override
             public void onRemoveClicked(int position) {
                 exportSessionViewModel.removeAt(position);
+                // A11y: announce removal
+                View v = getView();
+                if (isAdded() && v != null) {
+                    de.schliweb.makeacopy.utils.A11yUtils.announce(v, getString(R.string.page_removed));
+                }
             }
 
             @Override
@@ -238,6 +247,11 @@ public class ExportFragment extends Fragment {
             @Override
             public void onReorder(int fromPosition, int toPosition) {
                 exportSessionViewModel.move(fromPosition, toPosition);
+                // A11y: announce new position (1-based)
+                View rootV = getView();
+                if (isAdded() && rootV != null) {
+                    de.schliweb.makeacopy.utils.A11yUtils.announce(rootV, getString(R.string.page_moved_to_position, toPosition + 1));
+                }
             }
 
             @Override
@@ -306,6 +320,15 @@ public class ExportFragment extends Fragment {
                     }
                 }
             }
+            // Accessibility: Announce updated page count when it changes
+            if (isAdded() && n != lastPagesCount) {
+                lastPagesCount = n;
+                View rootView = getView();
+                if (rootView != null) {
+                    String msg = getString(R.string.pages_count_announcement, n);
+                    de.schliweb.makeacopy.utils.A11yUtils.announce(rootView, msg);
+                }
+            }
             // Do not toggle Include OCR checkbox visibility here; it remains hidden and controlled by the dialog.
         });
         // Initialize or update pages based on current state and pending add-page flag
@@ -318,11 +341,8 @@ public class ExportFragment extends Fragment {
             // First time opening Export in this session: seed with current cropped bitmap if available
             if (initBmp != null) {
                 int userDeg = 0;
-                try {
-                    Integer v = cropViewModel.getUserRotationDegrees().getValue();
-                    if (v != null) userDeg = ((v % 360) + 360) % 360;
-                } catch (Throwable ignore) {
-                }
+                Integer vDeg = cropViewModel.getUserRotationDegrees().getValue();
+                if (vDeg != null) userDeg = ((vDeg % 360) + 360) % 360;
                 de.schliweb.makeacopy.ui.export.session.CompletedScan initial = new de.schliweb.makeacopy.ui.export.session.CompletedScan(
                         java.util.UUID.randomUUID().toString(),
                         null,
@@ -333,22 +353,20 @@ public class ExportFragment extends Fragment {
                         System.currentTimeMillis(),
                         initBmp.getWidth(),
                         initBmp.getHeight(),
-                        initBmp
+                        initBmp,
+                        1,
+                        "metadata"
                 );
                 // Align the session id used by Review autosave to this export session id
-                if (de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled()) {
-                    try {
-                        de.schliweb.makeacopy.utils.SessionIds.setCurrentScanId(requireContext().getApplicationContext(), initial.id());
-                    } catch (Throwable ignore) {
+                if (de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled() && isAdded()) {
+                    Context c = getContext();
+                    if (c != null) {
+                        de.schliweb.makeacopy.utils.SessionIds.setCurrentScanId(c.getApplicationContext(), initial.id());
                     }
                 }
                 exportSessionViewModel.setInitial(initial);
                 // Persist initial page so it appears in the registry as well
-                try {
-                    persistCompletedScanAsync(initial);
-                } catch (Throwable t) {
-                    Log.w(TAG, "Failed to persist initial scan to registry", t);
-                }
+                persistCompletedScanAsync(initial);
             } else {
                 exportSessionViewModel.setInitial(null);
             }
@@ -365,11 +383,8 @@ public class ExportFragment extends Fragment {
                 }
                 if (!alreadyPresent) {
                     int userDeg = 0;
-                    try {
-                        Integer v = cropViewModel.getUserRotationDegrees().getValue();
-                        if (v != null) userDeg = ((v % 360) + 360) % 360;
-                    } catch (Throwable ignore) {
-                    }
+                    Integer v2 = cropViewModel.getUserRotationDegrees().getValue();
+                    if (v2 != null) userDeg = ((v2 % 360) + 360) % 360;
                     de.schliweb.makeacopy.ui.export.session.CompletedScan added = new de.schliweb.makeacopy.ui.export.session.CompletedScan(
                             java.util.UUID.randomUUID().toString(),
                             null,
@@ -380,22 +395,20 @@ public class ExportFragment extends Fragment {
                             System.currentTimeMillis(),
                             initBmp.getWidth(),
                             initBmp.getHeight(),
-                            initBmp
+                            initBmp,
+                            1,
+                            "metadata"
                     );
                     // Keep SessionIds aligned to the last added page (so Review autosave per-page stays consistent)
-                    if (de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled()) {
-                        try {
-                            de.schliweb.makeacopy.utils.SessionIds.setCurrentScanId(requireContext().getApplicationContext(), added.id());
-                        } catch (Throwable ignore) {
+                    if (de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled() && isAdded()) {
+                        Context c2 = getContext();
+                        if (c2 != null) {
+                            de.schliweb.makeacopy.utils.SessionIds.setCurrentScanId(c2.getApplicationContext(), added.id());
                         }
                     }
                     exportSessionViewModel.add(added);
                     // Persist this newly added page into the CompletedScans registry (Insert-Hook)
-                    try {
-                        persistCompletedScanAsync(added);
-                    } catch (Throwable t) {
-                        Log.w(TAG, "Failed to persist completed scan to registry", t);
-                    }
+                    persistCompletedScanAsync(added);
                 }
             }
             // Clear the flag regardless to prevent re-adding on future opens
@@ -403,19 +416,18 @@ public class ExportFragment extends Fragment {
         }
         binding.buttonAddPage.setOnClickListener(v -> {
             // Directly open the Completed Scans picker (no dialog)
-            try {
-                ArrayList<String> already = new ArrayList<>();
-                List<de.schliweb.makeacopy.ui.export.session.CompletedScan> cur = exportSessionViewModel.getPages().getValue();
-                if (cur != null) {
-                    for (de.schliweb.makeacopy.ui.export.session.CompletedScan s : cur) {
-                        if (s != null && s.id() != null) already.add(s.id());
-                    }
+            ArrayList<String> already = new ArrayList<>();
+            List<de.schliweb.makeacopy.ui.export.session.CompletedScan> cur = exportSessionViewModel.getPages().getValue();
+            if (cur != null) {
+                for (de.schliweb.makeacopy.ui.export.session.CompletedScan s : cur) {
+                    if (s != null && s.id() != null) already.add(s.id());
                 }
-                Bundle args = new Bundle();
-                args.putStringArrayList(de.schliweb.makeacopy.ui.export.picker.CompletedScansPickerFragment.ARG_ALREADY_SELECTED_IDS, already);
+            }
+            Bundle args = new Bundle();
+            args.putStringArrayList(de.schliweb.makeacopy.ui.export.picker.CompletedScansPickerFragment.ARG_ALREADY_SELECTED_IDS, already);
+            try {
                 Navigation.findNavController(requireView()).navigate(R.id.navigation_completed_scans_picker, args);
-            } catch (Throwable t) {
-                // ignore
+            } catch (IllegalArgumentException | IllegalStateException ignored) {
             }
         });
         binding.buttonClearPages.setOnClickListener(v -> {
@@ -428,7 +440,7 @@ public class ExportFragment extends Fragment {
                         de.schliweb.makeacopy.ui.export.session.CompletedScan one = null;
                         if (bmp != null) {
                             one = new de.schliweb.makeacopy.ui.export.session.CompletedScan(
-                                    UUID.randomUUID().toString(), null, 0, null, null, null, System.currentTimeMillis(), bmp.getWidth(), bmp.getHeight(), bmp);
+                                    UUID.randomUUID().toString(), null, 0, null, null, null, System.currentTimeMillis(), bmp.getWidth(), bmp.getHeight(), bmp, 1, "metadata");
                         }
                         exportSessionViewModel.setInitial(one);
                     })
@@ -440,8 +452,8 @@ public class ExportFragment extends Fragment {
         binding.buttonLibraryActions.setOnClickListener(v -> {
             try {
                 Navigation.findNavController(requireView()).navigate(R.id.navigation_scans_library);
-            } catch (Throwable t) {
-                Log.w(TAG, "Navigation to library failed", t);
+            } catch (IllegalArgumentException | IllegalStateException ex) {
+                Log.w(TAG, "Navigation to library failed", ex);
             }
         });
 
@@ -496,30 +508,28 @@ public class ExportFragment extends Fragment {
                 de.schliweb.makeacopy.ui.export.picker.CompletedScansPickerFragment.RESULT_KEY,
                 getViewLifecycleOwner(),
                 (requestKey, bundle) -> {
-                    try {
-                        java.util.ArrayList<String> ids = bundle.getStringArrayList(
-                                de.schliweb.makeacopy.ui.export.picker.CompletedScansPickerFragment.RESULT_IDS);
-                        if (ids == null || ids.isEmpty()) return;
-                        // Resolve from registry
-                        java.util.List<de.schliweb.makeacopy.ui.export.session.CompletedScan> all =
-                                de.schliweb.makeacopy.data.CompletedScansRegistry.get(requireContext()).listAllOrderedByDateDesc();
-                        java.util.Map<String, de.schliweb.makeacopy.ui.export.session.CompletedScan> byId = new java.util.HashMap<>();
-                        for (de.schliweb.makeacopy.ui.export.session.CompletedScan s : all) {
-                            if (s != null && s.id() != null) byId.put(s.id(), s);
-                        }
-                        java.util.ArrayList<de.schliweb.makeacopy.ui.export.session.CompletedScan> picked = new java.util.ArrayList<>();
-                        for (String id : ids) {
-                            de.schliweb.makeacopy.ui.export.session.CompletedScan s = byId.get(id);
-                            if (s != null) picked.add(s);
-                        }
-                        if (!picked.isEmpty()) {
-                            // Sort by creation timestamp ascending to maintain chronological order when adding multiple pages
-                            picked.sort(java.util.Comparator.comparingLong(de.schliweb.makeacopy.ui.export.session.CompletedScan::createdAt));
-                            exportSessionViewModel.addAll(picked);
-                            UIUtils.showToast(requireContext(), getString(R.string.added_pages_from_registry, picked.size()), Toast.LENGTH_SHORT);
-                        }
-                    } catch (Throwable t) {
-                        Log.w(TAG, "Failed to handle picker result", t);
+                    java.util.ArrayList<String> ids = bundle.getStringArrayList(
+                            de.schliweb.makeacopy.ui.export.picker.CompletedScansPickerFragment.RESULT_IDS);
+                    if (ids == null || ids.isEmpty()) return;
+                    Context ctx2 = getContext();
+                    if (ctx2 == null) return;
+                    // Resolve from registry
+                    java.util.List<de.schliweb.makeacopy.ui.export.session.CompletedScan> all =
+                            de.schliweb.makeacopy.data.CompletedScansRegistry.get(ctx2).listAllOrderedByDateDesc();
+                    java.util.Map<String, de.schliweb.makeacopy.ui.export.session.CompletedScan> byId = new java.util.HashMap<>();
+                    for (de.schliweb.makeacopy.ui.export.session.CompletedScan s : all) {
+                        if (s != null && s.id() != null) byId.put(s.id(), s);
+                    }
+                    java.util.ArrayList<de.schliweb.makeacopy.ui.export.session.CompletedScan> picked = new java.util.ArrayList<>();
+                    for (String id : ids) {
+                        de.schliweb.makeacopy.ui.export.session.CompletedScan s = byId.get(id);
+                        if (s != null) picked.add(s);
+                    }
+                    if (!picked.isEmpty()) {
+                        // Sort by creation timestamp ascending to maintain chronological order when adding multiple pages
+                        picked.sort(java.util.Comparator.comparingLong(de.schliweb.makeacopy.ui.export.session.CompletedScan::createdAt));
+                        exportSessionViewModel.addAll(picked);
+                        UIUtils.showToast(requireContext(), getString(R.string.added_pages_from_registry, picked.size()), Toast.LENGTH_SHORT);
                     }
                 }
         );
@@ -545,11 +555,8 @@ public class ExportFragment extends Fragment {
                                 cropViewModel.setOriginalImageBitmap(null);
                                 cropViewModel.setImageLoaded(false);
                                 // Also clear pending add flag to avoid unintended re-adding on next open
-                                try {
-                                    android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                                    prefs.edit().putBoolean("pending_add_page", false).apply();
-                                } catch (Throwable ignore) {
-                                }
+                                android.content.SharedPreferences prefs2 = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                                prefs2.edit().putBoolean("pending_add_page", false).apply();
                                 NavOptions navOptions = new NavOptions.Builder().setPopUpTo(R.id.navigation_camera, true).build();
                                 Navigation.findNavController(requireView()).navigate(R.id.navigation_camera, null, navOptions);
                             })
@@ -557,12 +564,9 @@ public class ExportFragment extends Fragment {
                                 dialogInterface.dismiss(); // stay on Export
                             })
                             .create();
-                    dialog.setOnShowListener(dlg -> {
-                        try {
-                            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext());
-                        } catch (Throwable ignore) {
-                        }
-                    });
+                    dialog.setOnShowListener(dlg ->
+                            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext())
+                    );
                     dialog.show();
                     return;
                 }
@@ -624,10 +628,10 @@ public class ExportFragment extends Fragment {
             ExportOptionsDialogFragment.show(getParentFragmentManager());
         });
         binding.buttonAddScan.setOnClickListener(v -> {
-            try {
-                android.content.SharedPreferences p2 = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
+            Context ctx3 = getContext();
+            if (ctx3 != null) {
+                android.content.SharedPreferences p2 = ctx3.getSharedPreferences("export_options", Context.MODE_PRIVATE);
                 p2.edit().putBoolean("pending_add_page", true).apply();
-            } catch (Throwable ignore) {
             }
             cameraViewModel.setImageUri(null);
             cropViewModel.setImageCropped(false);
@@ -688,24 +692,18 @@ public class ExportFragment extends Fragment {
             // In most cases, the crop result already includes this rotation; applying it again is a no-op for 0°
             // and corrects cases where the rotation wasn't baked into the cropped bitmap on some devices/flows.
             Bitmap bmp = maybeBitmap;
-            try {
-                int userDeg = 0;
-                try {
-                    Integer v = cropViewModel.getUserRotationDegrees().getValue();
-                    if (v != null) userDeg = v;
-                } catch (Throwable ignore) {
-                }
-                userDeg = ((userDeg % 360) + 360) % 360;
-                if (userDeg != 0) {
-                    Log.d(TAG, "[EXPORT_LOG] checkDocumentReady: applying user rotation=" + userDeg + "° to cropped bitmap before preview");
-                    android.graphics.Matrix m = new android.graphics.Matrix();
-                    m.postRotate(userDeg);
-                    Bitmap rotated = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
-                    if (rotated != null) bmp = rotated;
-                } else {
-                    Log.d(TAG, "[EXPORT_LOG] checkDocumentReady: user rotation is 0°, using cropped bitmap as-is");
-                }
-            } catch (Throwable ignore) {
+            int userDeg = 0;
+            Integer v = cropViewModel.getUserRotationDegrees().getValue();
+            if (v != null) userDeg = v;
+            userDeg = ((userDeg % 360) + 360) % 360;
+            if (userDeg != 0) {
+                Log.d(TAG, "[EXPORT_LOG] checkDocumentReady: applying user rotation=" + userDeg + "° to cropped bitmap before preview");
+                android.graphics.Matrix m = new android.graphics.Matrix();
+                m.postRotate(userDeg);
+                Bitmap rotated = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
+                if (rotated != null) bmp = rotated;
+            } else {
+                Log.d(TAG, "[EXPORT_LOG] checkDocumentReady: user rotation is 0°, using cropped bitmap as-is");
             }
             exportViewModel.setDocumentBitmap(bmp);
             exportViewModel.setDocumentReady(true);
@@ -768,32 +766,28 @@ public class ExportFragment extends Fragment {
         List<RecognizedWord> wordsTmp;
         if (de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled()) {
             wordsTmp = null;
-            try {
-                // Try to find a scan id to resolve autosave path
-                String candidateId = null;
-                List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pgs =
-                        exportSessionViewModel != null ? exportSessionViewModel.getPages().getValue() : null;
-                if (pgs != null && !pgs.isEmpty() && pgs.get(0) != null) {
-                    candidateId = pgs.get(0).id();
+            // Try to find a scan id to resolve autosave path
+            String candidateId = null;
+            List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pgs =
+                    exportSessionViewModel != null ? exportSessionViewModel.getPages().getValue() : null;
+            if (pgs != null && !pgs.isEmpty() && pgs.get(0) != null) {
+                candidateId = pgs.get(0).id();
+            }
+            Context ctxForIds = getContext();
+            if ((candidateId == null || candidateId.trim().isEmpty()) && ctxForIds != null) {
+                // Fall back to session id used by Review autosave
+                candidateId = de.schliweb.makeacopy.utils.SessionIds.getOrCreateCurrentScanId(ctxForIds.getApplicationContext());
+            }
+            if (candidateId != null && !candidateId.trim().isEmpty() && ctxForIds != null) {
+                File dir = new File(ctxForIds.getFilesDir(), "scans/" + candidateId);
+                File ocrFile = new File(dir, "page.ocr.json");
+                List<RecognizedWord> fromJson = de.schliweb.makeacopy.utils.OcrJsonWords.parseFile(ocrFile);
+                if (fromJson != null && !fromJson.isEmpty()) {
+                    wordsTmp = fromJson;
                 }
-                if (candidateId == null || candidateId.trim().isEmpty()) {
-                    // Fall back to session id used by Review autosave
-                    candidateId = de.schliweb.makeacopy.utils.SessionIds.getOrCreateCurrentScanId(requireContext().getApplicationContext());
-                }
-                if (candidateId != null && !candidateId.trim().isEmpty()) {
-                    File dir = new File(requireContext().getFilesDir(), "scans/" + candidateId);
-                    File ocrFile = new File(dir, "page.ocr.json");
-                    List<RecognizedWord> fromJson = de.schliweb.makeacopy.utils.OcrJsonWords.parseFile(ocrFile);
-                    if (fromJson != null && !fromJson.isEmpty()) {
-                        wordsTmp = fromJson;
-                    }
-                }
-                if (wordsTmp == null) {
-                    // fallback: current in-memory OCR words
-                    wordsTmp = getOcrWordsFromState();
-                }
-            } catch (Throwable ignore) {
-                // On any error, fall back to in-memory words
+            }
+            if (wordsTmp == null) {
+                // fallback: current in-memory OCR words
                 wordsTmp = getOcrWordsFromState();
             }
         } else {
@@ -811,63 +805,70 @@ public class ExportFragment extends Fragment {
         lastExportedDocumentUri = null;
         lastExportedPdfName = null;
         exportViewModel.setExporting(true);
+        // A11y: announce export start (guarded)
+        if (isAdded()) {
+            View rv = getView();
+            if (rv != null) {
+                de.schliweb.makeacopy.utils.A11yUtils.announce(rv, getString(R.string.export_started));
+            }
+        }
 
         new Thread(() -> {
             try {
                 // Determine PDF quality preset from SharedPreferences (set by dialog)
                 de.schliweb.makeacopy.utils.PdfQualityPreset preset;
                 boolean convertBwEffectiveLocal = false;
-                try {
-                    android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                    String presetSaved = p.getString("pdf_preset", null);
-                    String bwModeSaved = p.getString("pdf_bw_mode", null);
-                    convertBwEffectiveLocal = (("ROBUST".equalsIgnoreCase(bwModeSaved) || "CLASSIC".equalsIgnoreCase(bwModeSaved)));
-                    List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pgs =
-                            exportSessionViewModel != null ? exportSessionViewModel.getPages().getValue() : null;
-                    int pageCount = (pgs == null) ? 0 : pgs.size();
-                    de.schliweb.makeacopy.utils.PdfQualityPreset def =
-                            (pageCount > 1) ? de.schliweb.makeacopy.utils.PdfQualityPreset.STANDARD
-                                    : de.schliweb.makeacopy.utils.PdfQualityPreset.HIGH;
-                    preset = de.schliweb.makeacopy.utils.PdfQualityPreset.fromName(presetSaved, def);
-                } catch (Throwable t) {
-                    preset = de.schliweb.makeacopy.utils.PdfQualityPreset.STANDARD;
+                Context prefsCtx = getContext();
+                String presetSaved = null;
+                String bwModeSaved = null;
+                if (prefsCtx != null) {
+                    android.content.SharedPreferences p = prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                    presetSaved = p.getString("pdf_preset", null);
+                    bwModeSaved = p.getString("pdf_bw_mode", null);
                 }
+                convertBwEffectiveLocal = ("ROBUST".equalsIgnoreCase(bwModeSaved) || "CLASSIC".equalsIgnoreCase(bwModeSaved));
+                List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pgsForPreset =
+                        exportSessionViewModel != null ? exportSessionViewModel.getPages().getValue() : null;
+                int pageCount = (pgsForPreset == null) ? 0 : pgsForPreset.size();
+                de.schliweb.makeacopy.utils.PdfQualityPreset def =
+                        (pageCount > 1) ? de.schliweb.makeacopy.utils.PdfQualityPreset.STANDARD
+                                : de.schliweb.makeacopy.utils.PdfQualityPreset.HIGH;
+                preset = de.schliweb.makeacopy.utils.PdfQualityPreset.fromName(presetSaved, def);
                 // Determine exclusivity from pdf_bw_mode: GRAYSCALE vs BW
                 boolean convertGrayEffectiveLocal = preset.forceGrayscale || convertToGrayscale;
-                try {
-                    android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                    String pdfModeSel = p.getString("pdf_bw_mode", null);
-                    if ("GRAYSCALE".equalsIgnoreCase(pdfModeSel)) {
-                        convertGrayEffectiveLocal = true;
-                        convertBwEffectiveLocal = false;
-                    } else if ("CLASSIC".equalsIgnoreCase(pdfModeSel) || "ROBUST".equalsIgnoreCase(pdfModeSel)) {
-                        convertGrayEffectiveLocal = false;
-                        convertBwEffectiveLocal = true;
-                    } else if ("OCR_ROBUST".equalsIgnoreCase(pdfModeSel)) {
-                        // OCR robust preprocessing is grayscale-like but handled in PdfCreator via BwMode
-                        convertGrayEffectiveLocal = false;
-                        convertBwEffectiveLocal = false;
-                    }
-                } catch (Throwable ignore) {
+                String pdfModeSel = null;
+                if (prefsCtx != null) {
+                    android.content.SharedPreferences p = prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                    pdfModeSel = p.getString("pdf_bw_mode", null);
+                }
+                if ("GRAYSCALE".equalsIgnoreCase(pdfModeSel)) {
+                    convertGrayEffectiveLocal = true;
+                    convertBwEffectiveLocal = false;
+                } else if ("CLASSIC".equalsIgnoreCase(pdfModeSel) || "ROBUST".equalsIgnoreCase(pdfModeSel)) {
+                    convertGrayEffectiveLocal = false;
+                    convertBwEffectiveLocal = true;
+                } else if ("OCR_ROBUST".equalsIgnoreCase(pdfModeSel)) {
+                    // OCR robust preprocessing is grayscale-like but handled in PdfCreator via BwMode
+                    convertGrayEffectiveLocal = false;
+                    convertBwEffectiveLocal = false;
                 }
                 final boolean convertBwEffective = convertBwEffectiveLocal;
                 final int jpegQuality = preset.jpegQuality;
                 final boolean convertGrayEffective = convertGrayEffectiveLocal;
                 // Determine PDF BW mode (ROBUST/CLASSIC) if BW is enabled
                 de.schliweb.makeacopy.utils.PdfCreator.BwMode tmpBwMode;
-                try {
-                    android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                    String bw = p.getString("pdf_bw_mode", null);
-                    if ("CLASSIC".equalsIgnoreCase(bw))
-                        tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.CLASSIC;
-                    else if ("ROBUST".equalsIgnoreCase(bw))
-                        tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.ROBUST;
-                    else if ("OCR_ROBUST".equalsIgnoreCase(bw))
-                        tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.OCR_ROBUST;
-                    else tmpBwMode = null;
-                } catch (Throwable ignore) {
-                    tmpBwMode = null;
+                String bw = null;
+                if (prefsCtx != null) {
+                    android.content.SharedPreferences p = prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                    bw = p.getString("pdf_bw_mode", null);
                 }
+                if ("CLASSIC".equalsIgnoreCase(bw))
+                    tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.CLASSIC;
+                else if ("ROBUST".equalsIgnoreCase(bw))
+                    tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.ROBUST;
+                else if ("OCR_ROBUST".equalsIgnoreCase(bw))
+                    tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.OCR_ROBUST;
+                else tmpBwMode = null;
                 final de.schliweb.makeacopy.utils.PdfCreator.BwMode bwMode = tmpBwMode;
 
                 Uri exportUri;
@@ -890,12 +891,10 @@ public class ExportFragment extends Fragment {
                         if (pageBmp == null) {
                             String p = s.filePath();
                             if (p != null) {
-                                try {
-                                    pageBmp = android.graphics.BitmapFactory.decodeFile(p);
-                                    loadedFromFile = (pageBmp != null);
-                                    if (loadedFromFile) toRecycle.add(pageBmp);
-                                } catch (Throwable ignore) {
-                                }
+                                // Decode full-res without implicit EXIF rotation; baked files are visually upright
+                                pageBmp = de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeFull(p);
+                                loadedFromFile = (pageBmp != null);
+                                if (loadedFromFile) toRecycle.add(pageBmp);
                             }
                         }
                         if (pageBmp == null) {
@@ -903,28 +902,24 @@ public class ExportFragment extends Fragment {
                             perPage.add(null);
                             continue;
                         }
-                        int deg = 0;
-                        try {
-                            deg = s.rotationDeg();
-                        } catch (Throwable ignore) {
-                        }
-                        if (deg % 360 != 0) {
-                            try {
-                                android.graphics.Matrix m = new android.graphics.Matrix();
-                                m.postRotate(deg);
-                                Bitmap rotated = android.graphics.Bitmap.createBitmap(pageBmp, 0, 0, pageBmp.getWidth(), pageBmp.getHeight(), m, true);
-                                if (rotated != pageBmp) {
-                                    if (loadedFromFile) {
-                                        try {
-                                            pageBmp.recycle();
-                                        } catch (Throwable ignore) {
-                                        }
-                                        toRecycle.remove(pageBmp);
+                        int deg = s.rotationDeg();
+                        String mode = s.orientationMode();
+                        boolean shouldRotate = de.schliweb.makeacopy.utils.RotationPolicy
+                                .shouldRotateForExport(loadedFromFile, mode, deg);
+                        if (shouldRotate) {
+                            android.graphics.Matrix m = new android.graphics.Matrix();
+                            m.postRotate(((deg % 360) + 360) % 360);
+                            Bitmap rotated = android.graphics.Bitmap.createBitmap(pageBmp, 0, 0, pageBmp.getWidth(), pageBmp.getHeight(), m, true);
+                            if (rotated != pageBmp) {
+                                if (loadedFromFile) {
+                                    if (pageBmp != null && !pageBmp.isRecycled()) {
+                                        pageBmp.recycle();
                                     }
-                                    pageBmp = rotated;
-                                    toRecycle.add(pageBmp);
+                                    toRecycle.remove(pageBmp);
                                 }
-                            } catch (Throwable t) { /* keep original */ }
+                                pageBmp = rotated;
+                                toRecycle.add(pageBmp);
+                            }
                         }
                         bitmaps.add(pageBmp);
 
@@ -932,30 +927,18 @@ public class ExportFragment extends Fragment {
                         // otherwise or if not found, use registry words_json; finally fall back to in-memory words for current page.
                         List<RecognizedWord> pageWords = null;
                         if (de.schliweb.makeacopy.utils.FeatureFlags.isOcrReviewEnabled()) {
-                            try {
-                                // 1) Try our editable OCR JSON sidecar under filesDir/scans/<id>/page.ocr.json
-                                if (s.id() != null) {
-                                    File dir = new File(requireContext().getFilesDir(), "scans/" + s.id());
+                            // 1) Try our editable OCR JSON sidecar under filesDir/scans/<id)/page.ocr.json
+                            if (s.id() != null) {
+                                Context c = getContext();
+                                if (c != null) {
+                                    File dir = new File(c.getFilesDir(), "scans/" + s.id());
                                     File ocrFile = new File(dir, "page.ocr.json");
                                     List<RecognizedWord> fromJson = de.schliweb.makeacopy.utils.OcrJsonWords.parseFile(ocrFile);
                                     if (fromJson != null && !fromJson.isEmpty()) pageWords = fromJson;
                                 }
-                                // 2) If not found, try registry-backed words_json
-                                if (pageWords == null) {
-                                    String fmt = s.ocrFormat();
-                                    String path = s.ocrTextPath();
-                                    if ("words_json".equalsIgnoreCase(fmt) && path != null) {
-                                        File f = new File(path);
-                                        if (f.exists() && f.isFile()) {
-                                            pageWords = de.schliweb.makeacopy.utils.WordsJson.parseFile(f);
-                                            if (pageWords != null && pageWords.isEmpty()) pageWords = null;
-                                        }
-                                    }
-                                }
-                            } catch (Throwable ignore) {
                             }
-                        } else {
-                            try {
+                            // 2) If not found, try registry-backed words_json
+                            if (pageWords == null) {
                                 String fmt = s.ocrFormat();
                                 String path = s.ocrTextPath();
                                 if ("words_json".equalsIgnoreCase(fmt) && path != null) {
@@ -965,7 +948,16 @@ public class ExportFragment extends Fragment {
                                         if (pageWords != null && pageWords.isEmpty()) pageWords = null;
                                     }
                                 }
-                            } catch (Throwable ignore) {
+                            }
+                        } else {
+                            String fmt = s.ocrFormat();
+                            String path = s.ocrTextPath();
+                            if ("words_json".equalsIgnoreCase(fmt) && path != null) {
+                                File f = new File(path);
+                                if (f.exists() && f.isFile()) {
+                                    pageWords = de.schliweb.makeacopy.utils.WordsJson.parseFile(f);
+                                    if (pageWords != null && pageWords.isEmpty()) pageWords = null;
+                                }
                             }
                         }
                         if (pageWords == null && s.inMemoryBitmap() == current && recognizedWords != null && !recognizedWords.isEmpty()) {
@@ -993,20 +985,14 @@ public class ExportFragment extends Fragment {
                             bwMode
                     );
                     // Recycle any temporary bitmaps we created (those not part of the session's in-memory references)
-                    try {
-                        final HashSet<Bitmap> sessionBitmaps = new HashSet<>();
-                        for (de.schliweb.makeacopy.ui.export.session.CompletedScan s2 : pages) {
-                            if (s2 != null && s2.inMemoryBitmap() != null) sessionBitmaps.add(s2.inMemoryBitmap());
+                    final HashSet<Bitmap> sessionBitmaps = new HashSet<>();
+                    for (de.schliweb.makeacopy.ui.export.session.CompletedScan s2 : pages) {
+                        if (s2 != null && s2.inMemoryBitmap() != null) sessionBitmaps.add(s2.inMemoryBitmap());
+                    }
+                    for (Bitmap b : bitmaps) {
+                        if (b != null && !sessionBitmaps.contains(b) && !b.isRecycled()) {
+                            b.recycle();
                         }
-                        for (Bitmap b : bitmaps) {
-                            if (b != null && !sessionBitmaps.contains(b)) {
-                                try {
-                                    b.recycle();
-                                } catch (Throwable ignore) {
-                                }
-                            }
-                        }
-                    } catch (Throwable ignore) {
                     }
 
                 } else {
@@ -1038,13 +1024,14 @@ public class ExportFragment extends Fragment {
                         if (!FeatureFlags.isScanLibraryEnable()) {
                             String msg = getString(isMulti ? R.string.document_multipage_exported : R.string.document_exported, lastExportedPdfName);
                             UIUtils.showToast(appContext, msg, Toast.LENGTH_LONG);
+                            View rv = getView();
+                            if (isAdded() && rv != null) {
+                                de.schliweb.makeacopy.utils.A11yUtils.announce(rv, msg);
+                            }
                         }
                         // Begin: index exported PDF into scan library (feature-guarded via service locator)
-                        try {
-                            int pageCount = isMulti ? ((pages == null) ? 0 : pages.size()) : 1;
-                            indexScanLibraryAsync(displayName, pageCount, finalUri);
-                        } catch (Throwable ignore) {
-                        }
+                        int pageCountForIndex = isMulti ? ((pages == null) ? 0 : pages.size()) : 1;
+                        indexScanLibraryAsync(displayName, pageCountForIndex, finalUri);
                         // End: index
                         if (includeOcr) {
                             // Defer showing the assignment snackbar until TXT has been saved
@@ -1057,7 +1044,12 @@ public class ExportFragment extends Fragment {
                         lastExportedDocumentUri = null;
                         exportViewModel.setTxtExportUri(null);
                         setShareButtonsEnabled(false);
-                        UIUtils.showToast(appContext, getString(R.string.failed_to_export_document), Toast.LENGTH_SHORT);
+                        String fail = getString(R.string.failed_to_export_document);
+                        UIUtils.showToast(appContext, fail, Toast.LENGTH_SHORT);
+                        View rv = getView();
+                        if (isAdded() && rv != null) {
+                            de.schliweb.makeacopy.utils.A11yUtils.announce(rv, fail);
+                        }
                     }
                 });
             } catch (Exception e) {
@@ -1066,7 +1058,12 @@ public class ExportFragment extends Fragment {
                     lastExportedDocumentUri = null;
                     exportViewModel.setTxtExportUri(null);
                     setShareButtonsEnabled(false);
-                    UIUtils.showToast(appContext, getString(R.string.error_during_export_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
+                    String err = getString(R.string.error_during_export_with_reason, e.getMessage());
+                    UIUtils.showToast(appContext, err, Toast.LENGTH_SHORT);
+                    View rv = getView();
+                    if (isAdded() && rv != null) {
+                        de.schliweb.makeacopy.utils.A11yUtils.announce(rv, err);
+                    }
                 });
             } finally {
                 postToUiSafe(() -> {
@@ -1094,12 +1091,8 @@ public class ExportFragment extends Fragment {
 
     // Centralized default base-name derivation used for PDF/JPEG/ZIP/TXT
     private String buildDefaultBaseName() {
-        try {
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-            return "DOC_" + timeStamp;
-        } catch (Throwable ignore) {
-            return "DOC_" + System.currentTimeMillis();
-        }
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        return "DOC_" + timeStamp;
     }
 
     // Strip a single trailing extension (case-insensitive), e.g. file.pdf -> file; file.name.zip -> file.name
@@ -1120,7 +1113,7 @@ public class ExportFragment extends Fragment {
                     uri,
                     android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION | android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             );
-        } catch (Throwable ignore) {
+        } catch (SecurityException | IllegalArgumentException ignore) {
             // Some providers don't support persisting or the Uri is already persisted; ignore errors
         }
     }
@@ -1194,8 +1187,8 @@ public class ExportFragment extends Fragment {
             if (!OpenCVUtils.isInitialized()) {
                 OpenCVUtils.init(appContext);
             }
-        } catch (Throwable t) {
-            Log.w(TAG, "performJpegExport: OpenCV init failed or not available", t);
+        } catch (Exception e) {
+            Log.w(TAG, "performJpegExport: OpenCV init failed or not available", e);
         }
 
         // Reset any previously generated TXT URI to avoid sharing stale OCR text
@@ -1205,6 +1198,13 @@ public class ExportFragment extends Fragment {
         lastExportedDocumentUri = null;
         lastExportedPdfName = null;
         exportViewModel.setExporting(true);
+        // A11y: announce export start (JPEG)
+        if (isAdded()) {
+            View rv = getView();
+            if (rv != null) {
+                de.schliweb.makeacopy.utils.A11yUtils.announce(rv, getString(R.string.export_started));
+            }
+        }
         new Thread(() -> {
             try {
                 JpegExportOptions options = new JpegExportOptions(); // defaults (quality=85, no resize)
@@ -1265,11 +1265,12 @@ public class ExportFragment extends Fragment {
     private void performJpegZipExport() {
         // Determine mode from SharedPreferences (set by dialog)
         Context context = requireContext();
+        android.content.SharedPreferences prefs = context.getSharedPreferences("export_options", Context.MODE_PRIVATE);
+        String saved = prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name());
         JpegExportOptions.Mode mode;
         try {
-            android.content.SharedPreferences prefs = context.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-            mode = JpegExportOptions.Mode.valueOf(prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name()));
-        } catch (Exception e) {
+            mode = JpegExportOptions.Mode.valueOf(saved);
+        } catch (IllegalArgumentException ex) {
             mode = JpegExportOptions.Mode.AUTO;
         }
 
@@ -1285,6 +1286,13 @@ public class ExportFragment extends Fragment {
         }
         final Context appContext = requireContext().getApplicationContext();
         exportViewModel.setExporting(true);
+        // A11y: announce export start (ZIP)
+        if (isAdded()) {
+            View rv = getView();
+            if (rv != null) {
+                de.schliweb.makeacopy.utils.A11yUtils.announce(rv, getString(R.string.export_started));
+            }
+        }
         exportViewModel.setTxtExportUri(null);
         // Disable Share at the start of export; it will be re-enabled only on success
         setShareButtonsEnabled(false);
@@ -1304,7 +1312,8 @@ public class ExportFragment extends Fragment {
                 // Ensure OpenCV is initialized
                 try {
                     if (!OpenCVUtils.isInitialized()) OpenCVUtils.init(appContext);
-                } catch (Throwable ignored) {
+                } catch (Exception e) {
+                    Log.w(TAG, "performJpegZipExport: OpenCV init failed or not available", e);
                 }
 
                 JpegExportOptions options = new JpegExportOptions();
@@ -1321,12 +1330,16 @@ public class ExportFragment extends Fragment {
                     java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry(name);
                     zos.putNextEntry(entry);
                     Bitmap pageBmp = s.inMemoryBitmap();
+                    boolean loadedFromFile = false;
                     if (pageBmp == null) {
                         String p = s.filePath();
                         if (p != null) {
                             try {
-                                pageBmp = android.graphics.BitmapFactory.decodeFile(p);
-                            } catch (Throwable ignore) {
+                                // Decode full-res without implicit EXIF rotation; baked files are visually upright
+                                pageBmp = de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeFull(p);
+                                loadedFromFile = (pageBmp != null);
+                            } catch (Exception e) {
+                                Log.w(TAG, "ZIP export: decodeFull failed for " + p, e);
                             }
                         }
                     }
@@ -1336,30 +1349,26 @@ public class ExportFragment extends Fragment {
                         idx++;
                         continue;
                     }
-                    int deg = 0;
-                    try {
-                        deg = s.rotationDeg();
-                    } catch (Throwable ignore) {
-                    }
-                    if (deg % 360 != 0) {
+                    int deg = s.rotationDeg();
+                    String orientationMode = s.orientationMode();
+                    boolean shouldRotate = de.schliweb.makeacopy.utils.RotationPolicy
+                            .shouldRotateForExport(loadedFromFile, orientationMode, deg);
+                    if (shouldRotate) {
                         try {
                             android.graphics.Matrix m = new android.graphics.Matrix();
-                            m.postRotate(deg);
+                            m.postRotate(((deg % 360) + 360) % 360);
                             Bitmap rotated = android.graphics.Bitmap.createBitmap(pageBmp, 0, 0, pageBmp.getWidth(), pageBmp.getHeight(), m, true);
                             if (rotated != pageBmp) pageBmp = rotated;
-                        } catch (Throwable t) {
-                            // keep original pageBmp
+                        } catch (Exception e) {
+                            Log.w(TAG, "ZIP export: rotation failed, keeping original", e);
                         }
                     }
                     boolean ok = JpegExporter.exportToStream(appContext, pageBmp, options, zos);
                     zos.closeEntry();
                     if (!ok) throw new RuntimeException("Failed to encode " + name);
                     // Recycle if this bitmap was not the session's in-memory reference
-                    if (s.inMemoryBitmap() != pageBmp) {
-                        try {
-                            pageBmp.recycle();
-                        } catch (Throwable ignore) {
-                        }
+                    if (s.inMemoryBitmap() != pageBmp && pageBmp != null && !pageBmp.isRecycled()) {
+                        pageBmp.recycle();
                     }
                     // Update progress after each page
                     final int done = idx;
@@ -1437,12 +1446,8 @@ public class ExportFragment extends Fragment {
         if (pdfName == null) {
             pdfName = buildDefaultBaseName();
         } else {
-            try {
-                // Strip one extension (handles .pdf, .jpg, .jpeg, .zip, etc.)
-                pdfName = stripOneExtension(pdfName);
-            } catch (Throwable t) {
-                pdfName = buildDefaultBaseName();
-            }
+            // Strip one extension (handles .pdf, .jpg, .jpeg, .zip, etc.)
+            pdfName = stripOneExtension(pdfName);
         }
         String txtFileName = pdfName + ".txt";
         createTxtDocumentLauncher.launch(txtFileName);
@@ -1489,31 +1494,34 @@ public class ExportFragment extends Fragment {
         for (int i = 0; i < pages.size(); i++) {
             de.schliweb.makeacopy.ui.export.session.CompletedScan s = pages.get(i);
             String pageText = null;
-            try {
-                String p = (s != null) ? s.ocrTextPath() : null;
-                String fmt = (s != null) ? s.ocrFormat() : null;
-                boolean isPlain = (fmt == null) || "plain".equalsIgnoreCase(fmt);
-                if (p != null && isPlain) {
+            String p = (s != null) ? s.ocrTextPath() : null;
+            String fmt = (s != null) ? s.ocrFormat() : null;
+            boolean isPlain = (fmt == null) || "plain".equalsIgnoreCase(fmt);
+            if (p != null) {
+                if (isPlain) {
                     java.io.File f = new java.io.File(p);
                     if (f.exists() && f.isFile()) {
-                        pageText = readAllUtf8(f);
+                        try {
+                            pageText = readAllUtf8(f);
+                        } catch (java.io.IOException e) {
+                            Log.w(TAG, "Failed reading plain OCR text for page: " + p, e);
+                        }
                     }
-                } else if (p != null && !isPlain) {
+                } else {
                     // Fallback: if not plain, try sibling text.txt next to words_json/hocr/alto
-                    try {
-                        java.io.File f = new java.io.File(p);
-                        java.io.File dir = f.getParentFile();
-                        if (dir != null) {
-                            java.io.File txtFile = new java.io.File(dir, "text.txt");
-                            if (txtFile.exists() && txtFile.isFile()) {
+                    java.io.File f = new java.io.File(p);
+                    java.io.File dir = f.getParentFile();
+                    if (dir != null) {
+                        java.io.File txtFile = new java.io.File(dir, "text.txt");
+                        if (txtFile.exists() && txtFile.isFile()) {
+                            try {
                                 pageText = readAllUtf8(txtFile);
+                            } catch (java.io.IOException e) {
+                                Log.w(TAG, "Failed reading fallback text.txt for page: " + txtFile.getAbsolutePath(), e);
                             }
                         }
-                    } catch (Throwable ignore) {
                     }
                 }
-            } catch (Throwable t) {
-                // ignore per-page read errors; fallback below
             }
             if ((pageText == null || pageText.isEmpty()) && s != null && s.inMemoryBitmap() != null && curPreview == s.inMemoryBitmap()) {
                 // Fallback: if this page is the currently previewed one, use in-memory OCR text
@@ -1532,29 +1540,26 @@ public class ExportFragment extends Fragment {
     }
 
     private void writeTxtToUri(Uri txtUri, String content) {
-        try {
-            OutputStream os = requireContext().getContentResolver().openOutputStream(txtUri);
-            if (os != null) {
-                os.write((content != null ? content : "").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                os.close();
-                exportViewModel.setTxtExportUri(txtUri);
-                if (!FeatureFlags.isScanLibraryEnable()) {
-                    UIUtils.showToast(requireContext(), getString(R.string.ocr_text_exported_as_txt), Toast.LENGTH_SHORT);
-                }
-                // If assignment snackbar was deferred until TXT save, show it now
-                if (deferAssignUntilTxt) {
-                    try {
-                        maybeShowAssignSnackbar();
-                    } catch (Throwable ignore) {
-                    } finally {
-                        deferAssignUntilTxt = false;
-                    }
-                }
-            } else {
+        try (OutputStream os = requireContext().getContentResolver().openOutputStream(txtUri)) {
+            if (os == null) {
                 Log.e(TAG, "exportOcrTextToTxt: Failed to open output stream for TXT file");
+                return;
             }
-        } catch (Exception e) {
-            Log.e(TAG, "exportOcrTextToTxt: Error exporting OCR text to TXT file", e);
+            byte[] bytes = (content != null ? content : "").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            os.write(bytes);
+            exportViewModel.setTxtExportUri(txtUri);
+            if (!FeatureFlags.isScanLibraryEnable()) {
+                UIUtils.showToast(requireContext(), getString(R.string.ocr_text_exported_as_txt), Toast.LENGTH_SHORT);
+            }
+            if (deferAssignUntilTxt) {
+                maybeShowAssignSnackbar();
+                deferAssignUntilTxt = false;
+            }
+        } catch (java.io.FileNotFoundException | SecurityException e) {
+            Log.e(TAG, "exportOcrTextToTxt: Permission or file error during TXT export", e);
+            UIUtils.showToast(requireContext(), getString(R.string.error_exporting_ocr_text_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
+        } catch (java.io.IOException e) {
+            Log.e(TAG, "exportOcrTextToTxt: I/O error during TXT export", e);
             UIUtils.showToast(requireContext(), getString(R.string.error_exporting_ocr_text_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
         }
     }
@@ -1566,12 +1571,8 @@ public class ExportFragment extends Fragment {
         final android.graphics.Bitmap bmp = s.inMemoryBitmap();
         final String id = s.id();
         // Respect user preference: Skip OCR (export only)
-        boolean skipOcrPref = false;
-        try {
-            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
-            skipOcrPref = prefs.getBoolean("skip_ocr", false);
-        } catch (Throwable ignore) {
-        }
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
+        boolean skipOcrPref = prefs.getBoolean("skip_ocr", false);
         // Capture current in-memory OCR text/words at call time unless Skip OCR is enabled
         final String ocrTextAtCall = skipOcrPref ? null : getOcrTextFromState();
         final java.util.List<de.schliweb.makeacopy.utils.RecognizedWord> ocrWordsAtCall = skipOcrPref ? null : getOcrWordsFromState();
@@ -1600,15 +1601,17 @@ public class ExportFragment extends Fragment {
                                     it.createdAt(),
                                     it.widthPx(),
                                     it.heightPx(),
-                                    it.inMemoryBitmap()
+                                    it.inMemoryBitmap(),
+                                    persisted.schemaVersion(),
+                                    persisted.orientationMode()
                             );
                             exportSessionViewModel.updateAt(i, updated);
                             break;
                         }
                     }
                 });
-            } catch (Throwable t) {
-                Log.w(TAG, "Persist scan failed", t);
+            } catch (Exception e) {
+                Log.w(TAG, "Persist scan failed", e);
             }
         }).start();
     }
@@ -1640,12 +1643,8 @@ public class ExportFragment extends Fragment {
         if (s == null) return;
         // Enqueue background OCR job for this page id. UI will be updated when the job broadcasts completion.
         UIUtils.showToast(requireContext(), getString(R.string.ocr_processing_started), Toast.LENGTH_SHORT);
-        String lang = null;
-        try {
-            de.schliweb.makeacopy.ui.ocr.OCRViewModel.OcrUiState st = ocrViewModel.getState().getValue();
-            lang = (st != null && st.language() != null) ? st.language() : null;
-        } catch (Throwable ignore) {
-        }
+        de.schliweb.makeacopy.ui.ocr.OCRViewModel.OcrUiState st = ocrViewModel.getState().getValue();
+        String lang = (st != null && st.language() != null) ? st.language() : null;
         // If user hasn't visited the OCR screen, fall back to a sensible system-based default
         if (lang == null || lang.trim().isEmpty()) {
             lang = de.schliweb.makeacopy.utils.OCRUtils.resolveEffectiveLanguage(lang);
@@ -1660,10 +1659,7 @@ public class ExportFragment extends Fragment {
      */
     private void setShareButtonsEnabled(boolean enabled) {
         if (binding != null) {
-            try {
-                if (binding.buttonShareSmall != null) binding.buttonShareSmall.setEnabled(enabled);
-            } catch (Throwable ignore) {
-            }
+            if (binding.buttonShareSmall != null) binding.buttonShareSmall.setEnabled(enabled);
         }
     }
 
@@ -1701,8 +1697,14 @@ public class ExportFragment extends Fragment {
             String fileName = FileUtils.getDisplayNameFromUri(requireContext(), lastExportedDocumentUri);
             Uri txtUri = exportViewModel.getTxtExportUri().getValue();
             de.schliweb.makeacopy.utils.ShareIntentHelper.shareDocument(this, lastExportedDocumentUri, txtUri, fileName);
-        } catch (Exception e) {
-            Log.e(TAG, "Error sharing document", e);
+        } catch (android.content.ActivityNotFoundException e) {
+            Log.w(TAG, "No activity found to handle share intent", e);
+            UIUtils.showToast(requireContext(), getString(R.string.error_sharing_document_with_reason, getString(R.string.no_app_found_to_open_file)), Toast.LENGTH_SHORT);
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException during share", e);
+            UIUtils.showToast(requireContext(), getString(R.string.error_sharing_document_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            Log.e(TAG, "Share failed due to illegal state/arg", e);
             UIUtils.showToast(requireContext(), getString(R.string.error_sharing_document_with_reason, e.getMessage()), Toast.LENGTH_SHORT);
         }
     }
@@ -1735,8 +1737,8 @@ public class ExportFragment extends Fragment {
             if (success) {
                 try {
                     de.schliweb.makeacopy.utils.SessionOcrUpdater.applyOcrResultToSession(requireContext(), exportSessionViewModel, id);
-                } catch (Throwable t) {
-                    Log.w(TAG, "Failed to update session after OCR job", t);
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to update session after OCR job", e);
                 }
             } else {
                 UIUtils.showToast(requireContext(), getString(R.string.ocr_processing_failed), Toast.LENGTH_SHORT);
@@ -1747,33 +1749,29 @@ public class ExportFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        try {
-            if (!ocrReceiverRegistered) {
-                android.content.Context app = requireContext().getApplicationContext();
-                android.content.IntentFilter filter = new android.content.IntentFilter(de.schliweb.makeacopy.jobs.OcrBackgroundJobs.ACTION_OCR_UPDATED);
-                int flags = androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED;
-                try {
-                    androidx.core.content.ContextCompat.registerReceiver(app, ocrUpdateReceiver, filter, flags);
-                    ocrReceiverRegistered = true;
-                } catch (Throwable ignore) {
-                }
+        if (!ocrReceiverRegistered) {
+            android.content.Context app = requireContext().getApplicationContext();
+            android.content.IntentFilter filter = new android.content.IntentFilter(de.schliweb.makeacopy.jobs.OcrBackgroundJobs.ACTION_OCR_UPDATED);
+            int flags = androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED;
+            try {
+                androidx.core.content.ContextCompat.registerReceiver(app, ocrUpdateReceiver, filter, flags);
+                ocrReceiverRegistered = true;
+            } catch (IllegalArgumentException | SecurityException e) {
+                Log.w(TAG, "Failed to register OCR update receiver", e);
             }
-        } catch (Throwable ignore) {
         }
     }
 
     @Override
     public void onStop() {
-        try {
-            if (ocrReceiverRegistered) {
-                android.content.Context app = requireContext().getApplicationContext();
-                try {
-                    app.unregisterReceiver(ocrUpdateReceiver);
-                } catch (Throwable ignore) {
-                }
-                ocrReceiverRegistered = false;
+        if (ocrReceiverRegistered) {
+            android.content.Context app = requireContext().getApplicationContext();
+            try {
+                app.unregisterReceiver(ocrUpdateReceiver);
+            } catch (IllegalArgumentException | SecurityException e) {
+                Log.w(TAG, "Failed to unregister OCR update receiver", e);
             }
-        } catch (Throwable ignore) {
+            ocrReceiverRegistered = false;
         }
         super.onStop();
     }
@@ -1817,21 +1815,18 @@ public class ExportFragment extends Fragment {
     // Minimal background indexer hook; guarded by service locator's feature flag
     // Flag-gated: offer assignment to a collection via snackbar
     private void maybeShowAssignSnackbar() {
-        try {
-            if (!FeatureFlags.isScanLibraryEnable()) return;
-            if (binding == null) return;
-            View anchor = binding.exportOptionsGroup;
-            com.google.android.material.snackbar.Snackbar
-                    .make(anchor, getString(R.string.scan_saved), com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
-                    .setAction(getString(R.string.action_add_to_collection), v -> {
-                        String id = lastIndexedScanIdForAssign;
-                        if (id != null) {
-                            openCollectionPickerForScan(id);
-                        }
-                    })
-                    .show();
-        } catch (Throwable ignore) {
-        }
+        if (!FeatureFlags.isScanLibraryEnable()) return;
+        if (binding == null) return;
+        View anchor = binding.exportOptionsGroup;
+        com.google.android.material.snackbar.Snackbar
+                .make(anchor, getString(R.string.scan_saved), com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.action_add_to_collection), v -> {
+                    String id = lastIndexedScanIdForAssign;
+                    if (id != null) {
+                        openCollectionPickerForScan(id);
+                    }
+                })
+                .show();
     }
 
     private void openCollectionPickerForScan(@NonNull String scanId) {
@@ -1842,91 +1837,81 @@ public class ExportFragment extends Fragment {
                 cols = de.schliweb.makeacopy.data.library.LibraryServiceLocator
                         .getCollectionsRepository(appCtx)
                         .getAllCollections(appCtx);
-            } catch (Throwable t) {
+            } catch (Exception e) {
+                Log.w(TAG, "openCollectionPickerForScan: failed to load collections", e);
                 cols = java.util.Collections.emptyList();
             }
             // Filter out the default "Completed Scans" collection for finished documents
             java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> filtered = new java.util.ArrayList<>();
-            try {
-                String defName = appCtx.getString(de.schliweb.makeacopy.R.string.collection_completed_scans);
-                for (de.schliweb.makeacopy.data.library.CollectionEntity c : cols) {
-                    if (c == null) continue;
-                    if (defName != null && defName.equals(c.name)) continue; // exclude default
-                    filtered.add(c);
-                }
-            } catch (Throwable ignore) {
-                filtered = cols; // fallback: no filtering
+            String defName = appCtx.getString(de.schliweb.makeacopy.R.string.collection_completed_scans);
+            for (de.schliweb.makeacopy.data.library.CollectionEntity c : cols) {
+                if (c == null) continue;
+                if (defName != null && defName.equals(c.name)) continue; // exclude default
+                filtered.add(c);
             }
             final java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> finalCols = filtered;
             if (!isAdded()) return;
             requireActivity().runOnUiThread(() -> {
-                try {
-                    int n = (finalCols == null) ? 0 : finalCols.size();
-                    CharSequence[] names = new CharSequence[n + 1];
-                    for (int i = 0; i < n; i++) {
-                        names[i] = finalCols.get(i).name;
-                    }
-                    names[n] = getString(R.string.create_new_collection);
-
-                    final androidx.appcompat.app.AlertDialog pickerDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                            .setTitle(getString(R.string.place_in_collection_title))
-                            .setItems(names, (dialog, which) -> {
-                                if (which == n) {
-                                    // Create new collection flow
-                                    final android.widget.EditText input = new android.widget.EditText(requireContext());
-                                    input.setHint(R.string.collection_name_hint);
-                                    final androidx.appcompat.app.AlertDialog createDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                                            .setTitle(R.string.new_collection_title)
-                                            .setView(input)
-                                            .setPositiveButton(R.string.create, (d, w) -> {
-                                                final String name = String.valueOf(input.getText()).trim();
-                                                if (name.isEmpty()) return;
-                                                new Thread(() -> {
-                                                    try {
-                                                        de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
-                                                        de.schliweb.makeacopy.data.library.CollectionEntity ce = repo.createCollection(appCtx, name);
-                                                        if (ce != null) {
-                                                            repo.assignScanToCollection(appCtx, scanId, ce.id);
-                                                            if (isAdded())
-                                                                requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, name), Toast.LENGTH_SHORT));
-                                                        }
-                                                    } catch (Throwable ignore) {
-                                                    }
-                                                }).start();
-                                            })
-                                            .setNegativeButton(android.R.string.cancel, null)
-                                            .create();
-                                    createDialog.setOnShowListener(d -> {
-                                        try {
-                                            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(createDialog, requireContext());
-                                        } catch (Throwable ignore) {
-                                        }
-                                    });
-                                    createDialog.show();
-                                } else if (which >= 0 && which < n) {
-                                    final de.schliweb.makeacopy.data.library.CollectionEntity sel = finalCols.get(which);
-                                    new Thread(() -> {
-                                        try {
-                                            de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
-                                            repo.assignScanToCollection(appCtx, scanId, sel.id);
-                                            if (isAdded())
-                                                requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, sel.name), Toast.LENGTH_SHORT));
-                                        } catch (Throwable ignore) {
-                                        }
-                                    }).start();
-                                }
-                            })
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .create();
-                    pickerDialog.setOnShowListener(d -> {
-                        try {
-                            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(pickerDialog, requireContext());
-                        } catch (Throwable ignore) {
-                        }
-                    });
-                    pickerDialog.show();
-                } catch (Throwable ignore) {
+                int n = (finalCols == null) ? 0 : finalCols.size();
+                CharSequence[] names = new CharSequence[n + 1];
+                for (int i = 0; i < n; i++) {
+                    names[i] = finalCols.get(i).name;
                 }
+                names[n] = getString(R.string.create_new_collection);
+
+                final androidx.appcompat.app.AlertDialog pickerDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle(getString(R.string.place_in_collection_title))
+                        .setItems(names, (dialog, which) -> {
+                            if (which == n) {
+                                // Create new collection flow
+                                final android.widget.EditText input = new android.widget.EditText(requireContext());
+                                input.setHint(R.string.collection_name_hint);
+                                final androidx.appcompat.app.AlertDialog createDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                        .setTitle(R.string.new_collection_title)
+                                        .setView(input)
+                                        .setPositiveButton(R.string.create, (d, w) -> {
+                                            final String name = String.valueOf(input.getText()).trim();
+                                            if (name.isEmpty()) return;
+                                            new Thread(() -> {
+                                                try {
+                                                    de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
+                                                    de.schliweb.makeacopy.data.library.CollectionEntity ce = repo.createCollection(appCtx, name);
+                                                    if (ce != null) {
+                                                        repo.assignScanToCollection(appCtx, scanId, ce.id);
+                                                        if (isAdded())
+                                                            requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, name), Toast.LENGTH_SHORT));
+                                                    }
+                                                } catch (Exception e) {
+                                                    Log.w(TAG, "Failed creating/assigning new collection", e);
+                                                }
+                                            }).start();
+                                        })
+                                        .setNegativeButton(android.R.string.cancel, null)
+                                        .create();
+                                createDialog.setOnShowListener(d ->
+                                        de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(createDialog, requireContext())
+                                );
+                                createDialog.show();
+                            } else if (which >= 0 && which < n) {
+                                final de.schliweb.makeacopy.data.library.CollectionEntity sel = finalCols.get(which);
+                                new Thread(() -> {
+                                    try {
+                                        de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
+                                        repo.assignScanToCollection(appCtx, scanId, sel.id);
+                                        if (isAdded())
+                                            requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, sel.name), Toast.LENGTH_SHORT));
+                                    } catch (Exception e) {
+                                        Log.w(TAG, "Failed assigning scan to collection", e);
+                                    }
+                                }).start();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .create();
+                pickerDialog.setOnShowListener(d ->
+                        de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(pickerDialog, requireContext())
+                );
+                pickerDialog.show();
             });
         }).start();
     }
@@ -1943,96 +1928,66 @@ public class ExportFragment extends Fragment {
         final String exportJson = (exportUri != null) ? ("[\"" + exportUri + "\"]") : null;
         new Thread(() -> {
             try {
-                // Best-effort cover generation for image exports
+                // Best-effort cover generation for image/PDF exports
                 String coverPath = null;
                 if (exportUri != null) {
+                    android.content.ContentResolver cr = ctx.getContentResolver();
+                    String mime = null;
                     try {
-                        android.content.ContentResolver cr = ctx.getContentResolver();
-                        String mime = null;
-                        try {
-                            mime = cr.getType(exportUri);
-                        } catch (Throwable ignore) {
+                        mime = cr.getType(exportUri);
+                    } catch (SecurityException se) {
+                        Log.w(TAG, "indexScanLibraryAsync: cannot query MIME type", se);
+                    }
+                    boolean isImage = mime != null && mime.startsWith("image/");
+                    boolean isPdf = mime != null && ("application/pdf".equalsIgnoreCase(mime) || mime.toLowerCase(java.util.Locale.ROOT).contains("pdf"));
+                    if (!isImage && !isPdf) {
+                        String u = exportUri.toString();
+                        String lower = (u != null) ? u.toLowerCase(java.util.Locale.ROOT) : null;
+                        if (lower != null) {
+                            isImage = lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp");
+                            if (!isImage) isPdf = lower.endsWith(".pdf");
                         }
-                        boolean isImage = mime != null && mime.startsWith("image/");
-                        boolean isPdf = mime != null && ("application/pdf".equalsIgnoreCase(mime) || mime.toLowerCase(java.util.Locale.ROOT).contains("pdf"));
-                        if (!isImage && !isPdf) {
-                            String u = exportUri.toString();
-                            String lower = (u != null) ? u.toLowerCase(java.util.Locale.ROOT) : null;
-                            if (lower != null) {
-                                isImage = lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp");
-                                if (!isImage) {
-                                    isPdf = lower.endsWith(".pdf");
-                                }
-                            }
-                        }
-                        if (isImage) {
-                            try (java.io.InputStream is = cr.openInputStream(exportUri)) {
-                                if (is != null) {
-                                    android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
-                                    opts.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
-                                    // Sample down aggressively to around 224px on the long side
-                                    opts.inJustDecodeBounds = true;
-                                    android.graphics.BitmapFactory.decodeStream(is, null, opts);
-                                }
-                            } catch (Throwable ignore) {
-                            }
-                            // Re-open stream to actually decode with sample size
-                            try (java.io.InputStream is2 = cr.openInputStream(exportUri)) {
-                                if (is2 != null) {
-                                    // Compute sample size roughly targeting 224px
-                                    android.graphics.BitmapFactory.Options bounds = new android.graphics.BitmapFactory.Options();
-                                    bounds.inJustDecodeBounds = true;
+                    }
+                    if (isImage) {
+                        try (java.io.InputStream is = cr.openInputStream(exportUri)) {
+                            if (is != null) {
+                                android.graphics.BitmapFactory.Options dec = new android.graphics.BitmapFactory.Options();
+                                dec.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
+                                dec.inSampleSize = 2; // simple downscale
+                                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(is, null, dec);
+                                if (bmp != null) {
                                     try {
-                                        android.graphics.BitmapFactory.decodeStream(is2, null, bounds);
-                                    } catch (Throwable ignore) {
+                                        java.io.File dir = new java.io.File(ctx.getFilesDir(), "scans_covers");
+                                        //noinspection ResultOfMethodCallIgnored
+                                        dir.mkdirs();
+                                        java.io.File out = new java.io.File(dir, generatedId + ".jpg");
+                                        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(out)) {
+                                            bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 82, fos);
+                                            fos.flush();
+                                            coverPath = out.getAbsolutePath();
+                                        }
+                                    } catch (java.io.IOException ioe) {
+                                        Log.w(TAG, "indexScanLibraryAsync: failed saving image cover", ioe);
+                                    } finally {
+                                        try { bmp.recycle(); } catch (Exception ignored) {}
                                     }
                                 }
-                            } catch (Throwable ignore) {
                             }
-                            // Open again with computed sample
-                            try (java.io.InputStream is3 = cr.openInputStream(exportUri)) {
-                                if (is3 != null) {
-                                    // We don't know actual bounds here reliably because streams can't be rewound easily across decode passes on all providers.
-                                    // Use a safe fixed inSampleSize for typical exports.
-                                    android.graphics.BitmapFactory.Options dec = new android.graphics.BitmapFactory.Options();
-                                    dec.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
-                                    dec.inSampleSize = 2; // downscale
-                                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(is3, null, dec);
-                                    if (bmp != null) {
-                                        try {
-                                            java.io.File dir = new java.io.File(ctx.getFilesDir(), "scans_covers");
-                                            //noinspection ResultOfMethodCallIgnored
-                                            dir.mkdirs();
-                                            java.io.File out = new java.io.File(dir, generatedId + ".jpg");
-                                            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(out)) {
-                                                bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 82, fos);
-                                                fos.flush();
-                                                coverPath = out.getAbsolutePath();
-                                            }
-                                        } catch (Throwable ignore) {
-                                        }
-                                        try {
-                                            bmp.recycle();
-                                        } catch (Throwable ignore) {
-                                        }
-                                    }
-                                }
-                            } catch (Throwable ignore) {
-                            }
-                        } else if (isPdf) {
-                            android.os.ParcelFileDescriptor pfd = null;
-                            android.graphics.pdf.PdfRenderer renderer = null;
-                            try {
-                                pfd = cr.openFileDescriptor(exportUri, "r");
-                                if (pfd != null) {
-                                    renderer = new android.graphics.pdf.PdfRenderer(pfd);
+                        } catch (java.io.FileNotFoundException e) {
+                            Log.w(TAG, "indexScanLibraryAsync: image cover source not found", e);
+                        } catch (SecurityException | java.io.IOException e) {
+                            Log.w(TAG, "indexScanLibraryAsync: image cover io/security error", e);
+                        }
+                    } else if (isPdf) {
+                        try (android.os.ParcelFileDescriptor pfd = ctx.getContentResolver().openFileDescriptor(exportUri, "r")) {
+                            if (pfd != null) {
+                                try (android.graphics.pdf.PdfRenderer renderer = new android.graphics.pdf.PdfRenderer(pfd)) {
                                     if (renderer.getPageCount() > 0) {
                                         android.graphics.pdf.PdfRenderer.Page page = renderer.openPage(0);
                                         try {
-                                            // Target a small width while keeping aspect ratio
                                             int pageW = page.getWidth();
                                             int pageH = page.getHeight();
-                                            int targetW = 320; // px
+                                            int targetW = 320;
                                             int targetH = (pageW > 0) ? Math.max(1, (int) (targetW * (pageH / (float) pageW))) : 320;
                                             android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(targetW, targetH, android.graphics.Bitmap.Config.ARGB_8888);
                                             android.graphics.Canvas canvas = new android.graphics.Canvas(bmp);
@@ -2042,7 +1997,6 @@ public class ExportFragment extends Fragment {
                                             float scaleY = targetH / (float) pageH;
                                             m.setScale(scaleX, scaleY);
                                             page.render(bmp, null, m, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                                            // Save as JPEG
                                             java.io.File dir = new java.io.File(ctx.getFilesDir(), "scans_covers");
                                             //noinspection ResultOfMethodCallIgnored
                                             dir.mkdirs();
@@ -2051,39 +2005,28 @@ public class ExportFragment extends Fragment {
                                                 bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 82, fos);
                                                 fos.flush();
                                                 coverPath = out.getAbsolutePath();
-                                            } catch (Throwable ignore) {
-                                            }
-                                            try {
-                                                bmp.recycle();
-                                            } catch (Throwable ignore) {
+                                            } catch (java.io.IOException ioe) {
+                                                Log.w(TAG, "indexScanLibraryAsync: failed saving pdf cover", ioe);
+                                            } finally {
+                                                try { bmp.recycle(); } catch (Exception ignored) {}
                                             }
                                         } finally {
-                                            try {
-                                                page.close();
-                                            } catch (Throwable ignore) {
-                                            }
+                                            try { page.close(); } catch (Exception ignored) {}
                                         }
                                     }
                                 }
-                            } catch (Throwable ignore) {
-                            } finally {
-                                try {
-                                    if (renderer != null) renderer.close();
-                                } catch (Throwable ignore) {
-                                }
-                                try {
-                                    if (pfd != null) pfd.close();
-                                } catch (Throwable ignore) {
-                                }
                             }
+                        } catch (java.io.FileNotFoundException e) {
+                            Log.w(TAG, "indexScanLibraryAsync: pdf not found for cover", e);
+                        } catch (SecurityException | java.io.IOException e) {
+                            Log.w(TAG, "indexScanLibraryAsync: pdf cover io/security error", e);
                         }
-                    } catch (Throwable ignore) {
                     }
                 }
                 ScanIndexMeta meta = new ScanIndexMeta(generatedId, titleFinal, System.currentTimeMillis(), pages, coverPath, exportJson, null);
                 LibraryServiceLocator.getScansRepository(ctx).indexExportedScan(ctx, meta);
-            } catch (Throwable t) {
-                Log.d(TAG, "indexScanLibraryAsync: suppressed", t);
+            } catch (Exception e) {
+                Log.d(TAG, "indexScanLibraryAsync: suppressed", e);
             }
         }).start();
     }

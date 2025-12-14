@@ -71,8 +71,22 @@ public final class OcrBackgroundJobs {
                 }
                 if (s == null) throw new RuntimeException("Entry not found in registry: " + pageId);
                 Bitmap bmp = null;
-                if (s.filePath() != null) bmp = BitmapFactory.decodeFile(s.filePath());
-                if (bmp == null && s.thumbPath() != null) bmp = BitmapFactory.decodeFile(s.thumbPath());
+                if (s.filePath() != null) bmp = de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeFull(s.filePath());
+                if (bmp == null && s.thumbPath() != null)
+                    bmp = de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeFull(s.thumbPath());
+                // For rare legacy metadata entries: apply rotation before OCR so text is upright
+                try {
+                    String mode = s.orientationMode();
+                    int deg = s.rotationDeg();
+                    boolean isMetadata = mode != null && "metadata".equalsIgnoreCase(mode);
+                    if (bmp != null && isMetadata && ((deg % 360) != 0)) {
+                        android.graphics.Matrix m = new android.graphics.Matrix();
+                        m.postRotate(((deg % 360) + 360) % 360);
+                        Bitmap rotated = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
+                        if (rotated != null) bmp = rotated;
+                    }
+                } catch (Throwable ignore) {
+                }
                 if (bmp == null) throw new RuntimeException("No bitmap available for OCR");
 
                 OCRHelper helper = new OCRHelper(app);
@@ -110,7 +124,8 @@ public final class OcrBackgroundJobs {
                 // Update registry to prefer words_json
                 CompletedScan updated = new CompletedScan(
                         s.id(), s.filePath(), s.rotationDeg(), wordsFile.getAbsolutePath(), "words_json",
-                        s.thumbPath(), s.createdAt(), s.widthPx(), s.heightPx(), s.inMemoryBitmap());
+                        s.thumbPath(), s.createdAt(), s.widthPx(), s.heightPx(), s.inMemoryBitmap(),
+                        s.schemaVersion(), s.orientationMode());
                 try {
                     reg.remove(s.id());
                 } catch (Throwable ignore) {

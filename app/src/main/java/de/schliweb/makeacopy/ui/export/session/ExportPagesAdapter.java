@@ -1,7 +1,6 @@
 package de.schliweb.makeacopy.ui.export.session;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +9,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schliweb.makeacopy.R;
 
@@ -27,78 +28,6 @@ import java.util.*;
 public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.PageVH> {
     // Simple in-memory LRU cache for small thumbnails
     private static final LruCache<String, Bitmap> THUMB_CACHE = new LruCache<>(32);
-
-    private static Bitmap decodeSampled(String path, int reqW, int reqH) {
-        try {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, opts);
-            int inSampleSize = 1;
-            int halfH = opts.outHeight / 2;
-            int halfW = opts.outWidth / 2;
-            while ((halfH / inSampleSize) >= reqH && (halfW / inSampleSize) >= reqW) {
-                inSampleSize *= 2;
-            }
-            BitmapFactory.Options real = new BitmapFactory.Options();
-            real.inSampleSize = Math.max(1, inSampleSize);
-            real.inPreferredConfig = Bitmap.Config.RGB_565;
-            return BitmapFactory.decodeFile(path, real);
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
-    private static Bitmap ThumbCache_get(String key) {
-        return key == null ? null : THUMB_CACHE.get(key);
-    }
-
-    private static void ThumbCache_put(String key, Bitmap bmp) {
-        if (key != null && bmp != null) THUMB_CACHE.put(key, bmp);
-    }
-
-    /**
-     * Defines callback methods for handling user interactions and actions
-     * within a RecyclerView adapter.
-     * <p>
-     * This interface is intended to be implemented by components that need
-     * to handle specific events such as item removal, item clicks, and
-     * reordering operations in a list of items.
-     */
-    public interface Callbacks {
-        /**
-         * Handles the event when the remove button is clicked for a specific item in the list.
-         * Typically used to remove the item at the given position from the data set or perform
-         * associated actions.
-         *
-         * @param position The position of the item in the list that was clicked.
-         */
-        void onRemoveClicked(int position);
-
-        /**
-         * Handles the event when a page in the list is clicked.
-         * Typically used to select the page at the given position.
-         *
-         * @param position The position of the clicked page in the list.
-         */
-        void onPageClicked(int position);
-
-        /**
-         * Handles the reordering of items in a list, typically in response to user actions such as drag-and-drop operations.
-         * This method is intended to update the logical order of the items and perform any related processing as necessary.
-         *
-         * @param fromPosition The initial position of the item before reordering.
-         * @param toPosition   The new position of the item after reordering.
-         */
-        void onReorder(int fromPosition, int toPosition);
-
-        /**
-         * Requests running OCR for a specific page (inline OCR action).
-         *
-         * @param position Index of the page in the adapter.
-         */
-        void onOcrRequested(int position);
-    }
-
     /**
      * A list that holds instances of {@link CompletedScan}, representing completed scans available
      * for processing, exporting, or display in the UI.
@@ -135,6 +64,23 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
     public ExportPagesAdapter(Callbacks callbacks) {
         this.callbacks = callbacks;
         setHasStableIds(false);
+    }
+
+    private static Bitmap decodeSampled(String path, int reqW, int reqH) {
+        // Use centralized EXIF-neutral decoder for baked disk files
+        try {
+            return de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeSampled(path, Math.max(1, reqW), Math.max(1, reqH));
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static Bitmap ThumbCache_get(String key) {
+        return key == null ? null : THUMB_CACHE.get(key);
+    }
+
+    private static void ThumbCache_put(String key, Bitmap bmp) {
+        if (key != null && bmp != null) THUMB_CACHE.put(key, bmp);
     }
 
     /**
@@ -211,7 +157,7 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
         h.title.setText(title);
 
         // Thumbnail strategy: prefer in-memory bitmap; else decode sampled from thumbPath or filePath.
-        // Apply rotationDeg consistently (like the large preview) and key cache by path+rotation.
+        // Apply rotationDeg for in-memory; for disk sources only when orientationMode=="metadata".
         int deg = 0;
         try {
             deg = s.rotationDeg();
@@ -233,7 +179,7 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
             h.thumb.setImageBitmap(bmp);
         } else {
             String basePath = (s.thumbPath() != null) ? s.thumbPath() : s.filePath();
-            String cacheKey = basePath; // Decoded thumbnails are already oriented on disk; do not include rotation in key
+            String cacheKey = basePath; // keep simple key; we rotate only for rare metadata entries inline
             Bitmap cached = ThumbCache_get(cacheKey);
             if (cached != null) {
                 h.thumb.setImageBitmap(cached);
@@ -244,9 +190,25 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
                     // decode sampled to roughly view size
                     Bitmap decoded = decodeSampled(path, 96, 128);
                     if (decoded != null) {
-                        // Do not rotate decoded bitmaps; CompletedScans are already stored with correct orientation
-                        ThumbCache_put(cacheKey, decoded);
-                        h.thumb.setImageBitmap(decoded);
+                        // Decide rotation via centralized policy to avoid drift
+                        boolean rotate = false;
+                        try {
+                            rotate = de.schliweb.makeacopy.utils.RotationPolicy
+                                    .shouldRotateForThumbnail(true, s.orientationMode(), deg);
+                        } catch (Throwable ignore) {
+                        }
+                        Bitmap out = decoded;
+                        if (rotate) {
+                            try {
+                                android.graphics.Matrix m = new android.graphics.Matrix();
+                                m.postRotate(((deg % 360) + 360) % 360);
+                                Bitmap rotated = android.graphics.Bitmap.createBitmap(decoded, 0, 0, decoded.getWidth(), decoded.getHeight(), m, true);
+                                if (rotated != null) out = rotated;
+                            } catch (Throwable ignore) {
+                            }
+                        }
+                        ThumbCache_put(cacheKey, out);
+                        h.thumb.setImageBitmap(out);
                     }
                 }
             }
@@ -289,6 +251,80 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
         };
         h.itemView.setOnClickListener(select);
         h.thumb.setOnClickListener(select);
+
+        // Accessibility: item description like "Page X of Y"
+        try {
+            android.content.Context ctx = h.itemView.getContext();
+            int total = getItemCount();
+            String cd = ctx.getString(de.schliweb.makeacopy.R.string.page_n_of_m, position + 1, total);
+            h.itemView.setContentDescription(cd);
+        } catch (Throwable ignore) {
+        }
+
+        // Accessibility: expose contextual custom actions for Delete / Move left / Move right
+        try {
+            final int pos = position;
+            ViewCompat.setAccessibilityDelegate(h.itemView, new androidx.core.view.AccessibilityDelegateCompat() {
+                @Override
+                public void onInitializeAccessibilityNodeInfo(@NonNull View host, @NonNull AccessibilityNodeInfoCompat info) {
+                    super.onInitializeAccessibilityNodeInfo(host, info);
+                    android.content.Context ctx = host.getContext();
+                    // Always allow Delete
+                    CharSequence deleteLabel = ctx.getString(de.schliweb.makeacopy.R.string.remove_this_page);
+                    AccessibilityNodeInfoCompat.AccessibilityActionCompat deleteAction =
+                            new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                                    de.schliweb.makeacopy.R.id.a11y_action_delete_page,
+                                    deleteLabel);
+                    info.addAction(deleteAction);
+
+                    // Move left if not first
+                    if (pos > 0) {
+                        CharSequence leftLabel = ctx.getString(de.schliweb.makeacopy.R.string.move_page_left);
+                        AccessibilityNodeInfoCompat.AccessibilityActionCompat moveLeft =
+                                new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                                        de.schliweb.makeacopy.R.id.a11y_action_move_left,
+                                        leftLabel);
+                        info.addAction(moveLeft);
+                    }
+                    // Move right if not last
+                    if (pos < getItemCount() - 1) {
+                        CharSequence rightLabel = ctx.getString(de.schliweb.makeacopy.R.string.move_page_right);
+                        AccessibilityNodeInfoCompat.AccessibilityActionCompat moveRight =
+                                new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                                        de.schliweb.makeacopy.R.id.a11y_action_move_right,
+                                        rightLabel);
+                        info.addAction(moveRight);
+                    }
+                }
+
+                @Override
+                public boolean performAccessibilityAction(@NonNull View host, int action, android.os.Bundle args) {
+                    if (callbacks != null) {
+                        int adapterPos = h.getBindingAdapterPosition();
+                        if (adapterPos == RecyclerView.NO_POSITION)
+                            return super.performAccessibilityAction(host, action, args);
+                        if (action == de.schliweb.makeacopy.R.id.a11y_action_delete_page) {
+                            callbacks.onRemoveClicked(adapterPos);
+                            return true;
+                        } else if (action == de.schliweb.makeacopy.R.id.a11y_action_move_left) {
+                            if (adapterPos > 0) {
+                                boolean moved = onItemMove(adapterPos, adapterPos - 1);
+                                if (moved && callbacks != null) callbacks.onReorder(adapterPos, adapterPos - 1);
+                                return moved;
+                            }
+                        } else if (action == de.schliweb.makeacopy.R.id.a11y_action_move_right) {
+                            if (adapterPos < getItemCount() - 1) {
+                                boolean moved = onItemMove(adapterPos, adapterPos + 1);
+                                if (moved && callbacks != null) callbacks.onReorder(adapterPos, adapterPos + 1);
+                                return moved;
+                            }
+                        }
+                    }
+                    return super.performAccessibilityAction(host, action, args);
+                }
+            });
+        } catch (Throwable ignore) {
+        }
     }
 
     /**
@@ -299,6 +335,49 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
     @Override
     public int getItemCount() {
         return items.size();
+    }
+
+    /**
+     * Defines callback methods for handling user interactions and actions
+     * within a RecyclerView adapter.
+     * <p>
+     * This interface is intended to be implemented by components that need
+     * to handle specific events such as item removal, item clicks, and
+     * reordering operations in a list of items.
+     */
+    public interface Callbacks {
+        /**
+         * Handles the event when the remove button is clicked for a specific item in the list.
+         * Typically used to remove the item at the given position from the data set or perform
+         * associated actions.
+         *
+         * @param position The position of the item in the list that was clicked.
+         */
+        void onRemoveClicked(int position);
+
+        /**
+         * Handles the event when a page in the list is clicked.
+         * Typically used to select the page at the given position.
+         *
+         * @param position The position of the clicked page in the list.
+         */
+        void onPageClicked(int position);
+
+        /**
+         * Handles the reordering of items in a list, typically in response to user actions such as drag-and-drop operations.
+         * This method is intended to update the logical order of the items and perform any related processing as necessary.
+         *
+         * @param fromPosition The initial position of the item before reordering.
+         * @param toPosition   The new position of the item after reordering.
+         */
+        void onReorder(int fromPosition, int toPosition);
+
+        /**
+         * Requests running OCR for a specific page (inline OCR action).
+         *
+         * @param position Index of the page in the adapter.
+         */
+        void onOcrRequested(int position);
     }
 
     /**

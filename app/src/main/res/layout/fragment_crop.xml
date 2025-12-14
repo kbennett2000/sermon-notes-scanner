@@ -48,6 +48,19 @@
             app:layout_constraintEnd_toEndOf="@id/image_to_crop"
             android:visibility="visible"/>
 
+    <!-- Dev-Overlay: zeigt modelRect/Metriken, wenn FEATURE_FRAMING_LOGGING aktiv ist -->
+    <de.schliweb.makeacopy.ui.camera.CameraCornersOverlay
+            android:id="@+id/crop_dev_overlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/image_to_crop"
+            app:layout_constraintBottom_toBottomOf="@id/image_to_crop"
+            app:layout_constraintStart_toStartOf="@id/image_to_crop"
+            app:layout_constraintEnd_toEndOf="@id/image_to_crop"/>
+
     <!-- Cropped Image (nur nach Zuschnitt sichtbar, identische Constraints!) -->
     <ImageView
             android:id="@+id/cropped_image"
@@ -86,6 +99,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="12dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/back"
                 android:maxLines="1"
@@ -100,6 +115,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/btn_crop"
                 android:maxLines="1"
@@ -128,11 +145,12 @@
                 android:id="@+id/button_rotate_left"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="@android:color/transparent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/rotate_left_cd"
                 android:padding="8dp"
                 android:src="@drawable/ic_rotate_left"
-                app:tint="?attr/colorControlNormal"/>
+                app:tint="?attr/colorControlNormal"
+                app:tooltipText="@string/rotate_left_cd"/>
 
         <Space
                 android:layout_width="12dp"
@@ -142,10 +160,11 @@
                 android:id="@+id/button_rotate_right"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="@android:color/transparent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/rotate_right_cd"
                 android:padding="8dp"
                 android:src="@drawable/ic_rotate_right"
-                app:tint="?attr/colorControlNormal"/>
+                app:tint="?attr/colorControlNormal"
+                app:tooltipText="@string/rotate_right_cd"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

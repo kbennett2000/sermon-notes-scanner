@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Geen afbeelding verwerkt. Snijd eerst een afbeelding bij.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR voltooid. Tik op de knop om door te gaan naar exporteren.</string>
 
+    <string name="ocr_found_rotation">Gevonden rotatie: %1$d°</string>
+    <string name="ocr_score">OCR-score: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Gevonden rotatie: %1$d° — OCR-score: %2$d%%</string>
+
+    <!-- Extra uitleg toegevoegd in het dialoogvenster ‘Herkenningsmodi uitleggen’ -->
+    <string name="ocr_prep_modes_autorotate_note">OCR automatische rotatie: Wanneer ingeschakeld, probeert OCR de pagina ook in stappen van 90° (0/90/180/270) en kiest het beste resultaat. De gevonden rotatie kan tijdens het exporteren automatisch worden toegepast als je de pagina niet handmatig hebt geroteerd. Deze optie kan worden in- of uitgeschakeld in ‘Kies herkenningsmodus’.</string>
+
     <string name="initializing_camera">Camera initialiseren…</string>
     <string name="resetting_camera">Camera resetten…</string>
     <string name="error_initializing_camera">Fout bij initialiseren camera: %1$s</string>
@@ -324,6 +331,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document gedetecteerd — klaar om vast te leggen.</string>
+    <string name="a11y_no_document_detected">Geen document gedetecteerd.</string>
+    <string name="a11y_orientation_portrait_tip">Dit lijkt portretstand. Het vasthouden van de telefoon in portretmodus werkt meestal het beste voor hoge pagina’s.</string>
+    <string name="a11y_orientation_landscape_tip">Dit lijkt liggend. Probeer de telefoon in liggende stand te houden voor brede pagina’s.</string>
+    <string name="a11y_crop_summary_detected">Analyse van de vastgelegde afbeelding: document gedetecteerd, kwaliteit ongeveer %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Analyse van de vastgelegde afbeelding: geen document gedetecteerd.</string>
     <string name="accessibility_mode_label">Toegankelijkheidsmodus</string>
     <string name="a11y_camera_ready">Camera klaar. Dubbel tik op Scannen om vast te leggen.</string>
     <string name="a11y_low_light_toggle_flash">Weinig licht gedetecteerd. Dubbel tik op Flits om in te schakelen.</string>
@@ -336,5 +348,25 @@
     <string name="a11y_capturing_now">Bezig met vastleggen…</string>
     <string name="a11y_score_now">Detectiekwaliteit: %1$d%%.</string>
     <string name="a11y_scan_with_score">Scannen. Detectiekwaliteit: %1$d%%.</string>
+
+    <!-- Toegankelijkheid: beschrijving van lijstitems en aankondigingen -->
+    <string name="page_n_of_m">Pagina %1$d van %2$d</string>
+    <string name="pages_count_announcement">Pagina’s: %1$d</string>
+    <string name="export_started">Export gestart</string>
+    <string name="page_removed">Pagina verwijderd</string>
+    <string name="page_moved_to_position">Verplaatst naar positie %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">OCR automatisch roteren (ook toepassen bij exporteren)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Forceer toewijzing van hints voor liggend formaat (experimenteel)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Ruwe bronbestanden in de Bibliotheek tonen (ontwikkelaar)</string>
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Niet ingedeeld</string>
+    <string name="open_unfiled">Open Niet ingedeeld</string>
+    <string name="a11y_unfiled_summary">Niet ingedeeld: %1$d item(s)</string>
 
 </resources>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application>
-    </application>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Allow tests to run on emulators without strict camera hardware requirement -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 </manifest>

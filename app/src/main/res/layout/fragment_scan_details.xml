@@ -89,7 +89,10 @@
             android:contentDescription="@string/back"
             android:src="@android:drawable/ic_media_previous"
             app:tint="?attr/colorControlNormal"
-            android:background="@android:color/transparent"/>
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:tooltipText="@string/back"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView
             android:id="@+id/textPageIndicator"
@@ -106,7 +109,10 @@
             android:contentDescription="@string/next"
             android:src="@android:drawable/ic_media_next"
             app:tint="?attr/colorControlNormal"
-            android:background="@android:color/transparent"/>
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:tooltipText="@string/next"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
     </LinearLayout>
 
     <!-- Actions row with icons above the bottom button container -->
@@ -198,6 +204,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="12dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/back"
                 android:maxLines="1"
@@ -208,6 +216,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/action_add_to_collection"
                 android:maxLines="1"

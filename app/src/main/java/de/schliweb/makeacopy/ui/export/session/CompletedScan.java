@@ -29,10 +29,18 @@ import androidx.annotation.Nullable;
  * @param thumbPath      not used in v1 increment
  * @param inMemoryBitmap Convenience: keep a reference to the in-memory bitmap for v1 (UI thumbnails)
  */
-public record CompletedScan(String id, @Nullable String filePath, int rotationDeg, @Nullable String ocrTextPath,
+public record CompletedScan(String id,
+                            @Nullable String filePath,
+                            int rotationDeg,
+                            @Nullable String ocrTextPath,
                             @Nullable String ocrFormat,
-                            @Nullable String thumbPath, long createdAt, int widthPx, int heightPx,
-                            @Nullable Bitmap inMemoryBitmap) {
+                            @Nullable String thumbPath,
+                            long createdAt,
+                            int widthPx,
+                            int heightPx,
+                            @Nullable Bitmap inMemoryBitmap,
+                            int schemaVersion,
+                            @Nullable String orientationMode) {
     /**
      * Constructs a CompletedScan object representing a completed scan, encapsulating various metadata
      * and associated information about the scan.
@@ -49,5 +57,12 @@ public record CompletedScan(String id, @Nullable String filePath, int rotationDe
      * @param inMemoryBitmap An optional in-memory bitmap representation of the scanned document, typically used for UI thumbnails. May be null if not available.
      */
     public CompletedScan {
+        // Normalize defaults for backward compatibility when callers pass 0/ null
+        if (orientationMode == null || orientationMode.isEmpty()) {
+            orientationMode = "baked"; // safe default for legacy entries
+        }
+        if (schemaVersion <= 0) {
+            schemaVersion = 1; // legacy entries
+        }
     }
 }

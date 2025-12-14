@@ -150,6 +150,9 @@ public final class CompletedScansRegistry {
      * @return a {@link CompletedScan} object representing the runtime representation of the completed scan
      */
     private CompletedScan toRuntime(CompletedScanEntry e) {
+        // Default legacy entries to schemaVersion=1 and orientationMode="baked"
+        int sv = (e.schemaVersion <= 0) ? 1 : e.schemaVersion;
+        String mode = (e.orientationMode == null || e.orientationMode.isEmpty()) ? "baked" : e.orientationMode;
         return new CompletedScan(
                 e.id,
                 e.filePath,
@@ -160,7 +163,9 @@ public final class CompletedScansRegistry {
                 e.createdAt,
                 e.widthPx,
                 e.heightPx,
-                null // no in-memory bitmap from persistence
+                null, // no in-memory bitmap from persistence
+                sv,
+                mode
         );
     }
 
@@ -175,7 +180,7 @@ public final class CompletedScansRegistry {
     private CompletedScanEntry fromRuntime(CompletedScan s) {
         return new CompletedScanEntry(
                 s.id(), s.filePath(), s.rotationDeg(), s.ocrTextPath(), s.ocrFormat(), s.thumbPath(),
-                s.createdAt(), s.widthPx(), s.heightPx()
+                s.createdAt(), s.widthPx(), s.heightPx(), s.schemaVersion(), s.orientationMode()
         );
     }
 

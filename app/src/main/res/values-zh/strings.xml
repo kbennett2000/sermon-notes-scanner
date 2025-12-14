@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">尚未处理图像。请先裁剪图像。</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR 处理完成。点按按钮进入导出。</string>
 
+    <string name="ocr_found_rotation">检测到旋转：%1$d°</string>
+    <string name="ocr_score">OCR 评分：%1$d%%</string>
+    <string name="ocr_found_rotation_with_score">检测到旋转：%1$d° — OCR 评分：%2$d%%</string>
+
+    <!-- 在“解释识别模式”对话框中附加的额外说明 -->
+    <string name="ocr_prep_modes_autorotate_note">OCR 自动旋转：启用后，OCR 会以 90° 步进（0/90/180/270）尝试页面，并选择最佳结果。如果你没有手动旋转页面，检测到的旋转角度可在导出时自动应用。你可以在“选择识别模式”中开启或关闭此选项。</string>
+
     <string name="initializing_camera">正在初始化相机…</string>
     <string name="resetting_camera">正在重置相机…</string>
     <string name="error_initializing_camera">初始化相机出错：%1$s</string>
@@ -327,6 +334,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">检测到文档 — 准备拍摄。</string>
+    <string name="a11y_no_document_detected">未检测到文档。</string>
+    <string name="a11y_orientation_portrait_tip">看起来是竖屏。对较高的页面而言，竖着握持手机通常效果最好。</string>
+    <string name="a11y_orientation_landscape_tip">看起来是横屏。对于较宽的页面，试试横着握持手机。</string>
+    <string name="a11y_crop_summary_detected">已捕获图像分析：检测到文档，质量约为 %1$d%%。</string>
+    <string name="a11y_crop_summary_no_doc">已捕获图像分析：未检测到文档。</string>
     <string name="accessibility_mode_label">无障碍模式</string>
     <string name="a11y_camera_ready">相机已就绪。双击“扫描”即可拍摄。</string>
     <string name="a11y_low_light_toggle_flash">检测到光线不足。双击“闪光灯”以开启。</string>
@@ -339,5 +351,27 @@
     <string name="a11y_capturing_now">正在拍摄…</string>
     <string name="a11y_score_now">检测质量：%1$d%%。</string>
     <string name="a11y_scan_with_score">扫描。检测质量：%1$d%%。</string>
+
+    <!-- 无障碍：列表项描述与提示 -->
+    <string name="page_n_of_m">第 %1$d 页，共 %2$d 页</string>
+    <string name="pages_count_announcement">页数：%1$d</string>
+    <string name="export_started">导出已开始</string>
+    <string name="page_removed">页面已移除</string>
+    <string name="page_moved_to_position">已移动到位置 %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">OCR 自动旋转（导出时也应用）</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">强制横向提示映射（实验性）</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">在资料库中显示原始源文件（开发者）</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">未分类</string>
+    <string name="open_unfiled">打开未分类</string>
+    <string name="a11y_unfiled_summary">未分类：%1$d 项</string>
+
 
 </resources>

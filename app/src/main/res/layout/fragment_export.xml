@@ -17,6 +17,8 @@
             android:text="@string/document_ready_for_export"
             android:textAlignment="center"
             android:textSize="20sp"
+            android:accessibilityHeading="true"
+            android:accessibilityLiveRegion="polite"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -85,7 +87,10 @@
                 android:contentDescription="@string/btn_options"
                 android:src="@drawable/ic_build"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/btn_options"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <ImageButton
                 android:id="@+id/button_add_page"
@@ -96,7 +101,10 @@
                 android:contentDescription="@string/add_another_page"
                 android:src="@drawable/ic_add"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/add_another_page"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <!-- Library actions icon placed to the left of the trash icon -->
         <ImageButton
@@ -108,7 +116,10 @@
                 android:contentDescription="@string/library_actions"
                 android:src="@drawable/ic_library"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/library_actions"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <ImageButton
                 android:id="@+id/button_clear_pages"
@@ -119,7 +130,10 @@
                 android:contentDescription="@string/clear_all_pages"
                 android:src="@drawable/ic_delete"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/clear_all_pages"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <!-- Share icon identical behavior to Share button -->
         <ImageButton
@@ -132,7 +146,10 @@
                 android:src="@drawable/ic_share"
                 app:tint="?attr/colorControlNormal"
                 android:enabled="false"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/btn_share"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
     </LinearLayout>
 
     <!-- Optionen & Button -->
@@ -167,6 +184,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:background="@drawable/rounded_bg_light"
                     android:text="@string/btn_new"
                     android:maxLines="1"
@@ -184,6 +203,8 @@
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:background="@drawable/rounded_bg_light"
                     android:text="@string/add_another_page"
                     android:maxLines="1"
@@ -201,6 +222,8 @@
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
                     android:background="@drawable/rounded_bg_light"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:text="@string/btn_save"
                     android:enabled="false"
                     android:maxLines="1"

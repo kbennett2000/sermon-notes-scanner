@@ -57,13 +57,8 @@ public final class ScanPersister {
             //noinspection ResultOfMethodCallIgnored
             dir.mkdirs();
         }
-        File page = new File(dir, "page.jpg");
-        try (FileOutputStream fos = new FileOutputStream(page)) {
-            bmp.compress(Bitmap.CompressFormat.JPEG, 90, fos);
-            fos.flush();
-        }
-        // Create thumbnail with rotation applied
-        Bitmap sourceForThumb = bmp;
+        // Bake rotation before writing page and thumb
+        Bitmap baked = bmp;
         try {
             int deg = 0;
             try {
@@ -75,9 +70,16 @@ public final class ScanPersister {
                 Matrix m = new Matrix();
                 m.postRotate(deg);
                 Bitmap rotated = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
-                if (rotated != null) sourceForThumb = rotated;
+                if (rotated != null) baked = rotated;
             }
-        } catch (Throwable ignore) { /* fall back to original */ }
+        } catch (Throwable ignore) { /* keep original */ }
+        File page = new File(dir, "page.jpg");
+        try (FileOutputStream fos = new FileOutputStream(page)) {
+            baked.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            fos.flush();
+        }
+        // Create thumbnail from baked image (no additional rotation)
+        Bitmap sourceForThumb = baked;
         int w = sourceForThumb.getWidth();
         int h = sourceForThumb.getHeight();
         int longEdge = Math.max(w, h);
@@ -92,9 +94,15 @@ public final class ScanPersister {
             tfos.flush();
         } catch (Throwable ignore) {
         }
-        if (sourceForThumb != bmp) {
+        if (sourceForThumb != bmp && sourceForThumb != null && sourceForThumb != baked) {
             try {
                 sourceForThumb.recycle();
+            } catch (Throwable ignore) {
+            }
+        }
+        if (baked != bmp) {
+            try {
+                baked.recycle();
             } catch (Throwable ignore) {
             }
         }
@@ -128,14 +136,16 @@ public final class ScanPersister {
         CompletedScan persisted = new CompletedScan(
                 id,
                 page.getAbsolutePath(),
-                inMemory.rotationDeg(),
+                0, // rotation normalized after baking
                 ocrPath,
                 ocrFormat,
                 thumbFile.getAbsolutePath(),
                 inMemory.createdAt(),
                 inMemory.widthPx(),
                 inMemory.heightPx(),
-                null
+                null,
+                2,
+                "baked"
         );
         try {
             CompletedScansRegistry reg = CompletedScansRegistry.get(appContext);

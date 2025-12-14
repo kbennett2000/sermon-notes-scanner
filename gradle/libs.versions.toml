@@ -1,9 +1,12 @@
 [versions]
-agp = "8.11.2"
+
+agp = "8.12.0"
 hamcrest = "3.0"
 junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
+# AndroidX Test ext:junit version (aligned with AndroidX Test 1.5.x line)
+junitVersion = "1.1.5"
+# Espresso core version (use direct version to avoid repository issues)
+espressoCore = "3.5.1"
 appcompat = "1.7.1"
 material = "1.13.0"
 constraintlayout = "2.2.1"
@@ -12,20 +15,25 @@ lifecycleViewmodelKtx = "2.10.0"
 navigationFragment = "2.9.6"
 navigationUi = "2.9.6"
 # Added for MakeACopy
-camerax = "1.5.1"
+camerax = "1.5.2"
 roomRuntime = "2.8.4"
 tesseract = "4.9.0"
 lombok = "1.18.42"
 pdfbox = "2.0.27.0"
-activity = "1.12.0"
-exifinterface = "1.4.1"
+activity = "1.12.1"
+exifinterface = "1.4.2"
 gson="2.13.2"
-# Android test libs
-androidxTestRules = "1.7.0"
+# Android test libs (aligned set)
+androidxTestRules = "1.5.0"
+androidxTestCore = "1.5.0"
+androidxTestRunner = "1.5.2"
 fragmentTesting = "1.8.9"
 awaitility = "4.3.0"
 
+accessibilityTestFramework = "4.1.1"
+
 [libraries]
+accessibility-test-framework = { module = "com.google.android.apps.common.testing.accessibility.framework:accessibility-test-framework", version.ref = "accessibilityTestFramework" }
 hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -62,6 +70,8 @@ exifinterface = { group = "androidx.exifinterface", name = "exifinterface", vers
 
 # Android test libraries
 test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
 fragment-testing = { group = "androidx.fragment", name = "fragment-testing", version.ref = "fragmentTesting" }
 awaitility = { group = "org.awaitility", name = "awaitility", version.ref = "awaitility" }
 

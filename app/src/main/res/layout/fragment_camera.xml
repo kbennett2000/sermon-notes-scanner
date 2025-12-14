@@ -18,6 +18,8 @@
             android:text="@string/camera_ready_tap_the_button_to_scan_a_document"
             android:textAlignment="center"
             android:textSize="20sp"
+            android:accessibilityHeading="true"
+            android:accessibilityLiveRegion="polite"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -39,6 +41,9 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="16dp"
+            android:focusable="false"
+            android:clickable="false"
+            android:importantForAccessibility="no"
             app:layout_constraintTop_toBottomOf="@id/text_camera"
             app:layout_constraintBottom_toTopOf="@id/camera_actions_row"
             app:layout_constraintStart_toStartOf="parent"
@@ -94,7 +99,10 @@
                 android:contentDescription="@string/btn_options"
                 android:src="@drawable/ic_build"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/btn_options"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <!-- Library entry icon (feature-flagged) -->
         <ImageButton
@@ -107,7 +115,10 @@
                 android:src="@drawable/ic_library"
                 android:visibility="gone"
                 app:tint="?attr/colorControlNormal"
-                android:background="@android:color/transparent"/>
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:tooltipText="@string/open_collections"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
     </LinearLayout>
 
     <!-- Scan buttons -->
@@ -143,6 +154,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/btn_pick_image"
                 android:contentDescription="@string/pick_image_cd"
@@ -163,6 +176,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/btn_scan"
                 android:maxLines="1"
@@ -197,6 +212,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="12dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/back"
                 android:maxLines="1"
@@ -211,6 +228,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:background="@drawable/rounded_bg_light"
                 android:text="@string/next"
                 android:maxLines="1"

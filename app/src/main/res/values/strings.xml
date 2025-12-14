@@ -41,6 +41,12 @@
     <string name="processing_image">Processing image...</string>
     <string name="no_image_processed_crop_an_image_first">No image processed. Crop an image first.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR processing complete. Tap the button to proceed to export.</string>
+    <string name="ocr_found_rotation">Found rotation: %1$d°</string>
+    <string name="ocr_score">OCR score: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Found rotation: %1$d° — OCR score: %2$d%%</string>
+    
+    <!-- Extra explanation appended in “Explain recognition modes” dialog -->
+    <string name="ocr_prep_modes_autorotate_note">OCR Auto‑Rotate: When enabled, OCR also tries the page at 90° steps (0/90/180/270) and picks the best result. The found rotation can be applied automatically during export if you didn’t rotate manually. You can toggle this in “Choose recognition mode”.</string>
 
     <string name="initializing_camera">Initializing camera…</string>
     <string name="resetting_camera">Resetting camera…</string>
@@ -324,6 +330,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document detected – ready to capture.</string>
+    <string name="a11y_no_document_detected">No document detected.</string>
+    <string name="a11y_orientation_portrait_tip">This looks like portrait. Holding the phone in portrait usually fits best for tall pages.</string>
+    <string name="a11y_orientation_landscape_tip">This looks like landscape. Try holding the phone in landscape for wide pages.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected, quality about %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Captured image analysis: no document detected.</string>
     <string name="accessibility_mode_label">Accessibility Mode</string>
     <string name="a11y_camera_ready">Camera ready. Double tap Scan to capture.</string>
     <string name="a11y_low_light_toggle_flash">Low light detected. Double tap Flash to enable.</string>
@@ -336,5 +347,23 @@
     <string name="a11y_capturing_now">Capturing…</string>
     <string name="a11y_score_now">Detection quality: %1$d%%.</string>
     <string name="a11y_scan_with_score">Scan. Detection quality: %1$d%%.</string>
-
+    
+    <!-- Accessibility: Recycler item description and announcements -->
+    <string name="page_n_of_m">Page %1$d of %2$d</string>
+    <string name="pages_count_announcement">Pages: %1$d</string>
+    <string name="export_started">Export started</string>
+    <string name="page_removed">Page removed</string>
+    <string name="page_moved_to_position">Moved to position %1$d</string>
+    <!-- RecyclerView custom accessibility actions (defined once above in Reorder A11y controls) -->
+    
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">OCR auto-rotate (also apply to export)</string>
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Force landscape hint mapping (experimental)</string>
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Show raw source files in Library (developer)</string>
+    <!-- Library / Collections (developer strings kept non-translatable for now) -->
+    <string name="unfiled_collection_title">Unfiled</string>
+    <string name="open_unfiled">Open Unfiled</string>
+    <string name="a11y_unfiled_summary">Unfiled: %1$d item(s)</string>
 </resources>

@@ -11,6 +11,8 @@
 
     <!-- Camera permission for document scanning -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Haptics for subtle accessibility feedback (no runtime prompt required) -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <uses-feature
             android:name="android.hardware.camera"

@@ -42,4 +42,19 @@ public final class ImageDecodeUtils {
             return null;
         }
     }
+
+    /**
+     * Decodes an image from file at original resolution without applying EXIF-based rotation.
+     * Intended for baked files where visual orientation on disk is already upright.
+     * Returns null on failure.
+     */
+    public static Bitmap decodeFull(String path) {
+        try {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            // Keep defaults; do not apply any extra transformations
+            return BitmapFactory.decodeFile(path, opts);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
 }

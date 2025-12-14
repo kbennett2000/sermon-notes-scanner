@@ -69,6 +69,8 @@ public class OCRFragment extends Fragment {
     // SAF launcher for manual traineddata import
     private ActivityResultLauncher<Intent> openTraineddataLauncher;
 
+    public static final String BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT = "ocr_auto_rotate_apply_export";
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ocrViewModel = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
@@ -594,21 +596,56 @@ public class OCRFragment extends Fragment {
     }
 
     private void showOcrPrepModeDialog() {
-        final CharSequence[] modes = new CharSequence[]{
-                getString(R.string.ocr_mode_original),
-                getString(R.string.ocr_mode_quick),
-                getString(R.string.ocr_mode_robust)
-        };
-        final int[] sel = {Math.max(0, Math.min(2, getSelectedOcrMode()))};
+        android.view.LayoutInflater inflater = android.view.LayoutInflater.from(requireContext());
+        android.view.View view = inflater.inflate(R.layout.dialog_ocr_prep_mode, null);
+
+        android.widget.RadioGroup rg = view.findViewById(R.id.rg_ocr_modes);
+        android.widget.RadioButton rbOriginal = view.findViewById(R.id.rbtn_mode_original);
+        android.widget.RadioButton rbQuick = view.findViewById(R.id.rbtn_mode_quick);
+        android.widget.RadioButton rbRobust = view.findViewById(R.id.rbtn_mode_robust);
+        android.widget.CheckBox cbOcrAuto = view.findViewById(R.id.checkbox_ocr_auto_rotate_apply_export_dialog);
+
+        int mode = Math.max(0, Math.min(2, getSelectedOcrMode()));
+        if (mode == 0) rbOriginal.setChecked(true);
+        else if (mode == 1) rbQuick.setChecked(true);
+        else rbRobust.setChecked(true);
+
+        boolean ocrAutoRotateApply = false;
+        try {
+            android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
+            ocrAutoRotateApply = p.getBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, false);
+        } catch (Throwable ignore) {}
+        cbOcrAuto.setChecked(ocrAutoRotateApply);
+
         AlertDialog dlg = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.ocr_choose_prep_mode_title)
-                .setSingleChoiceItems(modes, sel[0], (d, which) -> sel[0] = which)
+                .setView(view)
+                .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, (d, w) -> {
-                    setSelectedOcrMode(sel[0]);
-                    UIUtils.showToast(requireContext(), getString(R.string.ocr_prep_mode_set, modes[sel[0]]), Toast.LENGTH_SHORT);
+                    int selectedMode = 1; // default Quick
+                    int checkedId = rg.getCheckedRadioButtonId();
+                    if (checkedId == R.id.rbtn_mode_original) selectedMode = 0;
+                    else if (checkedId == R.id.rbtn_mode_quick) selectedMode = 1;
+                    else if (checkedId == R.id.rbtn_mode_robust) selectedMode = 2;
+
+                    setSelectedOcrMode(selectedMode);
+                    try {
+                        android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
+                        p.edit().putBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, cbOcrAuto.isChecked()).apply();
+                    } catch (Throwable ignore) { }
+
+                    CharSequence[] modes = new CharSequence[]{
+                            getString(R.string.ocr_mode_original),
+                            getString(R.string.ocr_mode_quick),
+                            getString(R.string.ocr_mode_robust)
+                    };
+                    // Show toast including selected mode AND current status of OCR Auto-Rotate option
+                    String modeMsg = getString(R.string.ocr_prep_mode_set, modes[selectedMode]);
+                    String autoLabel = getString(R.string.opt_ocr_auto_rotate_apply_export);
+                    String autoState = cbOcrAuto.isChecked() ? "[ON]" : "[OFF]";
+                    UIUtils.showToast(requireContext(), modeMsg + " — " + autoLabel + ": " + autoState, Toast.LENGTH_SHORT);
                     prepareReprocessAfterModelChange();
                 })
-                .setNegativeButton(R.string.cancel, null)
                 .create();
         dlg.setOnShowListener(d -> DialogUtils.improveAlertDialogButtonContrastForNight(dlg, requireContext()));
         dlg.show();
@@ -702,9 +739,20 @@ public class OCRFragment extends Fragment {
                     } else if (which == 3) {
                         showOcrPrepModeDialog();
                     } else if (which == 4) {
+                        // Build message that also explains the OCR Auto‑Rotate option
+                        String explain = getString(R.string.ocr_prep_modes_message);
+                        String autoNote;
+                        try {
+                            autoNote = getString(R.string.ocr_prep_modes_autorotate_note);
+                        } catch (Throwable ignore) {
+                            autoNote = null;
+                        }
+                        if (autoNote != null && !autoNote.isEmpty()) {
+                            explain = explain + "\n\n" + autoNote;
+                        }
                         AlertDialog info = new AlertDialog.Builder(requireContext())
                                 .setTitle(R.string.ocr_prep_modes_title)
-                                .setMessage(R.string.ocr_prep_modes_message)
+                                .setMessage(explain)
                                 .setPositiveButton(R.string.ok, null)
                                 .create();
                         info.setOnShowListener(d2 -> DialogUtils.improveAlertDialogButtonContrastForNight(info, requireContext()));
@@ -867,10 +915,15 @@ public class OCRFragment extends Fragment {
                     } catch (Throwable ignore) {
                     }
 
-                    // Try OCR for rotations 0, 90, 180, 270 and keep best result
-                    // TODO
-                    int[] extraRots = new int[]{0, 90, 180, 270};
-                    // int[] extraRots = new int[]{0};
+                    // Try OCR rotations only when Auto‑Rotate is enabled. Otherwise, use current orientation only.
+                    boolean allowOcrAutoRotate = false;
+                    try {
+                        android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
+                        allowOcrAutoRotate = p.getBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, false);
+                    } catch (Throwable ignore) { }
+
+                    // When disabled, restrict to a single attempt at the current orientation (extra=0)
+                    int[] extraRots = allowOcrAutoRotate ? new int[]{0, 90, 180, 270} : new int[]{0};
                     OCRHelper.OcrResultWords bestResult = null;
                     OCRViewModel.OcrTransform bestTx = null;
                     int bestRot = 0;
@@ -963,7 +1016,18 @@ public class OCRFragment extends Fragment {
 
                     // Push transform of best attempt to VM on UI thread
                     OCRViewModel.OcrTransform finalTx = bestTx;
-                    runOnUiThreadSafe(() -> ocrViewModel.setTransform(finalTx));
+                    final int bestRotFinal = bestRot;
+                    final boolean finalAllowOcrAutoRotate = allowOcrAutoRotate;
+                    runOnUiThreadSafe(() -> {
+                        ocrViewModel.setTransform(finalTx);
+                        try {
+                            // Store best OCR rotation (relative extra rotation) for optional export alignment
+                            if (cropViewModel != null) {
+                                // Only persist the computed rotation if the feature is enabled; otherwise reset to 0
+                                cropViewModel.setBestOcrRotationDegrees(finalAllowOcrAutoRotate ? bestRotFinal : 0);
+                            }
+                        } catch (Throwable ignore) {}
+                    });
 
                     long durMs = (System.nanoTime() - t0) / 1_000_000L;
                     String finalText = (bestResult.text == null || bestResult.text.trim().isEmpty())
@@ -979,6 +1043,39 @@ public class OCRFragment extends Fragment {
                     runOnUiThreadSafe(() -> {
                         ocrViewModel.setWords(words);
                         ocrViewModel.finishSuccess(finalText, words, durMs, meanConfFinal, finalTx);
+                        // If Auto‑Rotate is enabled, show the found rotation to the user
+                        try {
+                            android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
+                            boolean apply = p.getBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, false);
+                            int score = (meanConfFinal != null ? meanConfFinal : -1);
+                            // When enabled, also apply the detected rotation to the current scan for export,
+                            // respecting the unified rotation model (apply in-memory; persist will bake).
+                            if (apply) {
+                                try {
+                                    // Add bestRotFinal to the current user rotation in CropViewModel
+                                    if (cropViewModel != null) {
+                                        Integer cur = null;
+                                        try { cur = cropViewModel.getUserRotationDegrees().getValue(); } catch (Throwable ignore) {}
+                                        int curDeg = (cur == null) ? 0 : cur.intValue();
+                                        int newDeg = ((curDeg + bestRotFinal) % 360 + 360) % 360;
+                                        try { cropViewModel.setUserRotationDegrees(newDeg); } catch (Throwable ignore) {}
+                                        // We have applied the OCR suggestion; clear the helper to avoid re-applying later.
+                                        try { cropViewModel.setBestOcrRotationDegrees(0); } catch (Throwable ignore) {}
+                                    }
+                                } catch (Throwable ignore) { }
+                            }
+                            if (apply) {
+                                // If we know the score, show rotation + score combined; otherwise, show rotation only.
+                                if (score >= 0) {
+                                    UIUtils.showToast(requireContext(), getString(R.string.ocr_found_rotation_with_score, bestRotFinal, score), Toast.LENGTH_SHORT);
+                                } else {
+                                    UIUtils.showToast(requireContext(), getString(R.string.ocr_found_rotation, bestRotFinal), Toast.LENGTH_SHORT);
+                                }
+                            } else if (score >= 0) {
+                                // Auto‑Rotate not applied, but still useful to show the OCR score.
+                                UIUtils.showToast(requireContext(), getString(R.string.ocr_score, score), Toast.LENGTH_SHORT);
+                            }
+                        } catch (Throwable ignore) { }
                     });
 
                 } catch (Throwable e) {

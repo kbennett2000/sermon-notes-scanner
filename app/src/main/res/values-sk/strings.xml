@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Žiadny obrázok nebol spracovaný. Najprv orežte obrázok.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">Spracovanie OCR dokončené. Klepnite na tlačidlo pre pokračovanie na export.</string>
 
+    <string name="ocr_found_rotation">Nájdená rotácia: %1$d°</string>
+    <string name="ocr_score">Skóre OCR: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Nájdená rotácia: %1$d° — skóre OCR: %2$d%%</string>
+
+    <!-- Dodatočné vysvetlenie pridané v dialógu „Vysvetliť režimy rozpoznávania“ -->
+    <string name="ocr_prep_modes_autorotate_note">OCR automatická rotácia: Keď je povolená, OCR skúša stránku aj v krokoch po 90° (0/90/180/270) a vyberá najlepší výsledok. Nájdená rotácia môže byť automaticky použitá pri exporte, ak ste stránku neotočili manuálne. Túto možnosť môžete zapnúť alebo vypnúť v „Vybrať režim rozpoznávania“.</string>
+
     <string name="initializing_camera">Inicializuje sa fotoaparát…</string>
     <string name="resetting_camera">Resetuje sa fotoaparát…</string>
     <string name="error_initializing_camera">Chyba pri inicializácii fotoaparátu: %1$s</string>
@@ -326,6 +333,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument zistený — pripravený na zachytenie.</string>
+    <string name="a11y_no_document_detected">Nebol zistený žiadny dokument.</string>
+    <string name="a11y_orientation_portrait_tip">Vyzerá to na portrét. Držanie telefónu na výšku zvyčajne najlepšie vyhovuje vysokým stránkam.</string>
+    <string name="a11y_orientation_landscape_tip">Vyzerá to na krajinu. Skúste držať telefón na šírku pre široké stránky.</string>
+    <string name="a11y_crop_summary_detected">Analýza zachyteného obrázka: dokument zistený, kvalita približne %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Analýza zachyteného obrázka: nebol zistený žiadny dokument.</string>
     <string name="accessibility_mode_label">Režim prístupnosti</string>
     <string name="a11y_camera_ready">Fotoaparát pripravený. Dvojitým ťuknutím na „Skenovať“ zachytíte.</string>
     <string name="a11y_low_light_toggle_flash">Zistené slabé osvetlenie. Dvojitým ťuknutím na „Blesk“ ho zapnete.</string>
@@ -338,5 +350,27 @@
     <string name="a11y_capturing_now">Prebieha zachytávanie…</string>
     <string name="a11y_score_now">Kvalita detekcie: %1$d%%.</string>
     <string name="a11y_scan_with_score">Skenovať. Kvalita detekcie: %1$d%%.</string>
+
+    <!-- Prístupnosť: popis položiek zoznamu a oznámenia -->
+    <string name="page_n_of_m">Strana %1$d z %2$d</string>
+    <string name="pages_count_announcement">Počet strán: %1$d</string>
+    <string name="export_started">Export spustený</string>
+    <string name="page_removed">Strana odstránená</string>
+    <string name="page_moved_to_position">Presunuté na pozíciu %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">Automatické otočenie OCR (použiť aj pri exporte)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Vynútiť mapovanie pokynov pre režim na šírku (experimentálne)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Zobraziť nespracované zdrojové súbory v Knižnici (vývojár)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Nezaradené</string>
+    <string name="open_unfiled">Otvoriť Nezaradené</string>
+    <string name="a11y_unfiled_summary">Nezaradené: %1$d položiek</string>
+
 
 </resources>

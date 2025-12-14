@@ -80,7 +80,10 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/deselect_all"
             app:tint="?android:textColorPrimary"
-            android:src="@drawable/ic_deselect_all_24" />
+            android:src="@drawable/ic_deselect_all_24"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:tooltipText="@string/deselect_all" />
 
         <ImageButton
             android:id="@+id/button_select_all"
@@ -90,7 +93,10 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/select_all"
             app:tint="?android:textColorPrimary"
-            android:src="@drawable/ic_select_all_24" />
+            android:src="@drawable/ic_select_all_24"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:tooltipText="@string/select_all" />
 
     </LinearLayout>
 
@@ -116,6 +122,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="12dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:background="@drawable/rounded_bg_light"
             android:text="@string/back"/>
 
@@ -125,6 +133,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="12dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:background="@drawable/rounded_bg_light"
             android:text="@string/delete"
             android:enabled="false"/>
@@ -134,6 +144,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:background="@drawable/rounded_bg_light"
             android:text="@string/done"
             android:enabled="false"/>

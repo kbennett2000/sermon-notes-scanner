@@ -14,9 +14,10 @@ android {
         applicationId "de.schliweb.makeacopy"
         minSdk = 29
         targetSdk = 36
-        versionCode 20300
-        versionName "2.3.0"
+        versionCode 20301
+        versionName "2.3.1"
 
+        // Use default AndroidX test runner
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Add a note about OpenCV being built from source
@@ -24,7 +25,7 @@ android {
         // Feature flags
         buildConfigField "boolean", "FEATURE_SCAN_LIBRARY", "true"
         buildConfigField "boolean", "FEATURE_REVIEW_OCR", "false"
-        buildConfigField "boolean", "FEATURE_FRAMING_LOGGING", "true"
+        buildConfigField "boolean", "FEATURE_FRAMING_LOGGING", "false"
         buildConfigField "boolean", "FEATURE_A11Y_GUIDANCE", "true"
     }
 
@@ -152,26 +153,41 @@ dependencies {
     annotationProcessor libs.room.compiler
 
     testImplementation libs.junit
+    // AndroidX Test stack (aligned)
+    androidTestImplementation libs.espresso.core
+
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.runner)
+
     androidTestImplementation(libs.ext.junit) {
         exclude group: 'org.hamcrest', module: 'hamcrest-core'
         exclude group: 'org.hamcrest', module: 'hamcrest-library'
     }
-    androidTestImplementation(libs.espresso.core) {
-        exclude group: 'org.hamcrest', module: 'hamcrest-core'
-        exclude group: 'org.hamcrest', module: 'hamcrest-library'
-    }
+    // Keep excludes on other deps to avoid legacy Hamcrest
     androidTestImplementation(libs.test.rules) {
         exclude group: 'org.hamcrest', module: 'hamcrest-core'
         exclude group: 'org.hamcrest', module: 'hamcrest-library'
     }
     // fragment-testing must be in the target (debug) APK to provide EmptyFragmentActivity
-    debugImplementation(libs.fragment.testing)
+    debugImplementation(libs.fragment.testing) {
+        exclude group: 'org.hamcrest', module: 'hamcrest-core'
+        exclude group: 'org.hamcrest', module: 'hamcrest-library'
+    }
     // Align Hamcrest to a single modern version to avoid duplicate classes
     androidTestImplementation libs.hamcrest
     androidTestImplementation libs.awaitility
+    // Espresso Accessibility Test Framework for automated accessibility checks
+    androidTestImplementation (libs.accessibility.test.framework) {
+        exclude group: 'org.hamcrest', module: 'hamcrest-core'
+        exclude group: 'org.hamcrest', module: 'hamcrest-library'
+    }
 }
-
-
+// Guardrail for androidTest classpath: enforce modern Hamcrest and exclude legacy variants
+configurations.matching { it.name.toLowerCase().contains('androidtest') }.all { cfg ->
+    cfg.resolutionStrategy.force 'org.hamcrest:hamcrest:3.0'
+    cfg.exclude group: 'org.hamcrest', module: 'hamcrest-core'
+    cfg.exclude group: 'org.hamcrest', module: 'hamcrest-library'
+}
 
 tasks.register("copyNotices", Sync) {
     from("$rootDir/NOTICE", "$rootDir/LICENSE")

@@ -1,6 +1,7 @@
 package de.schliweb.makeacopy.ui.crop;
 
 import android.graphics.Bitmap;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import androidx.navigation.Navigation;
 import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.databinding.FragmentCropBinding;
 import de.schliweb.makeacopy.ui.camera.CameraViewModel;
+import de.schliweb.makeacopy.utils.FeatureFlags;
 import de.schliweb.makeacopy.utils.OpenCVUtils;
 
 /**
@@ -25,7 +27,7 @@ import de.schliweb.makeacopy.utils.OpenCVUtils;
  */
 public class CropFragment extends Fragment {
     private static final String TAG = "CropFragment";
-
+    private static final long CROP_A11Y_COOLDOWN_MS = 10000L;
     private FragmentCropBinding binding;
     private CropViewModel cropViewModel;
     private CameraViewModel cameraViewModel;
@@ -34,6 +36,9 @@ public class CropFragment extends Fragment {
     // Guard: when we update the VM bitmap due to a user rotation, skip handling the immediate
     // imageBitmap observer callback to avoid re-triggering edge detection in the overlay.
     private boolean skipNextBitmapObserver = false;
+    // A11y: one-shot post-capture announcement
+    private boolean cropA11yAnnounced = false;
+    private long cropA11yLastAnnounceTs = 0L;
 
     /**
      * Inflates the layout for this fragment and initializes all necessary components including
@@ -121,6 +126,23 @@ public class CropFragment extends Fragment {
                     binding.getRoot().post(this::updateTrapezoidHintInset);
                     // With a new bitmap, recompute and wire the magnifier mapping
                     tryUpdateMagnifierMapping();
+
+                    // Post-capture: announce detection summary once in Accessibility Mode
+                    maybeAnnounceCropDetectionOnce(safe);
+
+                    // Dev-Overlay: zeige modelRect im Crop-Screen, wenn Logging-Flag aktiv
+                    if (FeatureFlags.isFramingLoggingEnabled()) {
+                        binding.cropDevOverlay.setVisibility(View.VISIBLE);
+                        // Nach Layout-Pass mappen, falls Größen noch 0 sind
+                        binding.cropDevOverlay.post(() -> updateDevOverlayForBitmap(safe));
+                    } else {
+                        try {
+                            binding.cropDevOverlay.setModelRect(null);
+                            binding.cropDevOverlay.setDebugText(null);
+                            binding.cropDevOverlay.setVisibility(View.GONE);
+                        } catch (Throwable ignore) {
+                        }
+                    }
                 }
             }
         });
@@ -164,6 +186,12 @@ public class CropFragment extends Fragment {
             skipNextBitmapObserver = true;
             cropViewModel.setImageBitmap(safe);
             tryUpdateMagnifierMapping();
+
+            // Dev-Overlay im Crop: nach Rotation neu mappen, wenn Flag aktiv
+            if (de.schliweb.makeacopy.utils.FeatureFlags.isFramingLoggingEnabled()) {
+                final Bitmap safeFinal = safe;
+                binding.cropDevOverlay.post(() -> updateDevOverlayForBitmap(safeFinal));
+            }
         });
 
         cameraViewModel.getImageUri().observe(getViewLifecycleOwner(), uri -> {
@@ -185,6 +213,62 @@ public class CropFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private boolean isAccessibilityModeEnabled() {
+        try {
+            android.content.Context ctx = requireContext();
+            android.content.SharedPreferences prefs = ctx.getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
+            return prefs.getBoolean(de.schliweb.makeacopy.ui.camera.CameraOptionsDialogFragment.BUNDLE_ACCESSIBILITY_MODE, false);
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    private void maybeAnnounceCropDetectionOnce(@NonNull Bitmap bmp) {
+        if (!isAccessibilityModeEnabled()) return;
+        long now = System.currentTimeMillis();
+        if (cropA11yAnnounced && (now - cropA11yLastAnnounceTs) < CROP_A11Y_COOLDOWN_MS) return;
+        cropA11yAnnounced = true;
+        cropA11yLastAnnounceTs = now;
+        new Thread(() -> {
+            try {
+                // Ensure OpenCV is ready
+                de.schliweb.makeacopy.utils.OpenCVUtils.init(requireContext().getApplicationContext());
+            } catch (Throwable ignore) {
+            }
+            de.schliweb.makeacopy.utils.OpenCVUtils.DetectionResult det = null;
+            try {
+                det = de.schliweb.makeacopy.utils.OpenCVUtils.detectDocumentCornersResult(requireContext(), bmp);
+            } catch (Throwable ignore) {
+            }
+            boolean hasValid = (det != null && det.corners() != null && det.corners().length == 4);
+
+            // Use the same score as in the CameraFragment for A11y outputs
+            double scoreForA11y = 0.0;
+            try {
+                scoreForA11y = (det != null) ? det.score() : 0.0; // 0..1
+            } catch (Throwable ignore) {
+            }
+            final int percent = Math.max(0, Math.min(100, (int) Math.round(scoreForA11y * 100.0)));
+            if (!isAdded() || binding == null) return;
+            requireActivity().runOnUiThread(() -> {
+                if (binding == null) return;
+                if (hasValid) {
+                    announceText(getString(R.string.a11y_crop_summary_detected, percent));
+                } else {
+                    // Be polite: only a short non-intrusive note
+                    announceText(getString(R.string.a11y_crop_summary_no_doc));
+                }
+            });
+        }, "CropA11yAnnounce").start();
+    }
+
+    private void announceText(@NonNull CharSequence text) {
+        if (binding == null) return;
+        View root = binding.getRoot();
+        root.setContentDescription(text);
+        de.schliweb.makeacopy.utils.A11yUtils.announce(root, text);
     }
 
     private void tryUpdateMagnifierMapping() {
@@ -439,7 +523,50 @@ public class CropFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        try {
+            if (binding != null && binding.cropDevOverlay != null) {
+                binding.cropDevOverlay.setModelRect(null);
+                binding.cropDevOverlay.setDebugText(null);
+            }
+        } catch (Throwable ignore) {
+        }
         super.onDestroyView();
         binding = null;
+    }
+
+    // --- Dev overlay (framing logging) in the CropFragment ---
+    private void updateDevOverlayForBitmap(@androidx.annotation.NonNull Bitmap bmp) {
+        if (binding == null) return;
+        if (!de.schliweb.makeacopy.utils.FeatureFlags.isFramingLoggingEnabled()) return;
+        try {
+            RectF fb = OpenCVUtils.getFallbackRectF(bmp.getWidth(), bmp.getHeight());
+            RectF vr = mapBitmapToOverlayRect(fb, bmp.getWidth(), bmp.getHeight());
+            if (vr != null) {
+                binding.cropDevOverlay.setModelRect(vr);
+                // In the crop screen, marking the model frame is sufficient
+                binding.cropDevOverlay.setDebugText(null);
+            }
+        } catch (Throwable ignore) {
+        }
+    }
+
+    private RectF mapBitmapToOverlayRect(RectF src, int bmpW, int bmpH) {
+        if (binding == null || src == null) return null;
+        int vw = binding.cropDevOverlay.getWidth();
+        int vh = binding.cropDevOverlay.getHeight();
+        if (vw <= 0 || vh <= 0 || bmpW <= 0 || bmpH <= 0) return null;
+        float sx = vw / (float) bmpW;
+        float sy = vh / (float) bmpH;
+        float scale = Math.min(sx, sy);
+        float contentW = bmpW * scale;
+        float contentH = bmpH * scale;
+        float offX = (vw - contentW) * 0.5f;
+        float offY = (vh - contentH) * 0.5f;
+        return new RectF(
+                offX + src.left * scale,
+                offY + src.top * scale,
+                offX + src.right * scale,
+                offY + src.bottom * scale
+        );
     }
 }

@@ -16,12 +16,17 @@ public class CameraCornersOverlay extends View {
     private final Paint linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint shadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint modelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path path = new Path();
 
     @Nullable
     private PointF[] corners; // 4 points in view coords
     @Nullable
     private Double score; // optional: live detection score (0..1)
+    @Nullable
+    private RectF modelRect; // optional: model rect in view coords
+    @Nullable
+    private CharSequence debugText; // optional: metrics text
 
     public CameraCornersOverlay(Context context) {
         super(context);
@@ -62,6 +67,11 @@ public class CameraCornersOverlay extends View {
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(dp(14));
         textPaint.setShadowLayer(dp(2), dp(1), dp(1), Color.BLACK);
+
+        modelPaint.setStyle(Paint.Style.STROKE);
+        modelPaint.setStrokeWidth(dp(2));
+        modelPaint.setColor(Color.argb(220, 0, 200, 255)); // cyan-ish for model rect
+        modelPaint.setPathEffect(new DashPathEffect(new float[]{dp(6), dp(6)}, 0));
     }
 
     /**
@@ -111,6 +121,28 @@ public class CameraCornersOverlay extends View {
     }
 
     /**
+     * Sets the optional model rectangle to visualize the stable reference framing
+     * area (aka modelRect). Pass null to hide it.
+     */
+    public void setModelRect(@Nullable RectF rect) {
+        if (rect == null) {
+            this.modelRect = null;
+        } else {
+            // keep a copy to avoid external mutation
+            this.modelRect = new RectF(rect);
+        }
+        invalidate();
+    }
+
+    /**
+     * Sets optional debug metrics text to be shown in the overlay. Pass null to hide it.
+     */
+    public void setDebugText(@Nullable CharSequence text) {
+        this.debugText = text;
+        invalidate();
+    }
+
+    /**
      * Draws the overlay by rendering a polygon based on the provided corner points and
      * using the configured paint for styling. If the corner points are not set, the
      * method exits without performing any drawing.
@@ -130,6 +162,11 @@ public class CameraCornersOverlay extends View {
             canvas.drawPath(path, linePaint);
         }
 
+        // Draw modelRect if provided (as dashed cyan rectangle)
+        if (modelRect != null && !modelRect.isEmpty()) {
+            canvas.drawRect(modelRect, modelPaint);
+        }
+
         // Draw score in the top-left corner if available
         if (score != null) {
             float pad = dp(8);
@@ -143,6 +180,16 @@ public class CameraCornersOverlay extends View {
             // Show as percentage for better intuition
             txt = p + "%";
             canvas.drawText(txt, pad, pad + textPaint.getTextSize(), textPaint);
+        }
+
+        // Draw debug metrics text if available (below score)
+        if (debugText != null && debugText.length() > 0) {
+            float pad = dp(8);
+            float y = pad + textPaint.getTextSize() * 2f; // one line below score
+            for (String line : debugText.toString().split("\n")) {
+                canvas.drawText(line, pad, y, textPaint);
+                y += textPaint.getTextSize() * 1.2f;
+            }
         }
     }
 

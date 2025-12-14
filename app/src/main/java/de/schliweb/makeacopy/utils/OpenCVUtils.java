@@ -2247,4 +2247,103 @@ public class OpenCVUtils {
             mask.release();
         }
     }
+
+    // --- Lightweight text orientation estimation (preview-time) ---
+
+    /**
+     * Result of {@link #estimateTextOrientation(Bitmap)}.
+     * bucket is 0 or 90 (degrees), representing a coarse orientation class.
+     * confidence in [0..1], where higher means a clearer separation.
+     */
+    @Getter
+    public static class OrientationEstimate {
+        /**
+         * 0 or 90
+         */
+        private final int bucketDeg;
+        /**
+         * 0..1
+         */
+        private final double confidence;
+
+        public OrientationEstimate(int bucketDeg, double confidence) {
+            this.bucketDeg = (bucketDeg == 90) ? 90 : 0;
+            this.confidence = Math.max(0.0, Math.min(1.0, confidence));
+        }
+    }
+
+    /**
+     * Estimate whether text runs mostly horizontally (0° bucket) or vertically (90° bucket).
+     * Heuristic: Compare summed absolute Scharr/Sobel gradient magnitudes in X vs. Y.
+     * Horizontal text lines produce stronger horizontal edge responses → |Gy| > |Gx|.
+     *
+     * @param uprightSmall an upright bitmap (already rotated by CameraX rotationDegrees), ideally <= 720 px long side
+     * @return OrientationEstimate with bucket 0 or 90 and a confidence 0..1
+     */
+    public static OrientationEstimate estimateTextOrientation(Bitmap uprightSmall) {
+        try {
+            if (uprightSmall == null || uprightSmall.getWidth() < 8 || uprightSmall.getHeight() < 8) {
+                return new OrientationEstimate(0, 0.0);
+            }
+            // Convert to grayscale Mat
+            Mat rgba = new Mat();
+            Utils.bitmapToMat(uprightSmall, rgba);
+            Mat gray = new Mat();
+            Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
+            rgba.release();
+
+            // Downscale to speed up and reduce noise
+            int maxSide = 512;
+            int w = gray.cols(), h = gray.rows();
+            int longSide = Math.max(w, h);
+            if (longSide > maxSide) {
+                double scale = (double) maxSide / longSide;
+                Imgproc.resize(gray, gray, new Size(Math.max(1, (int) Math.round(w * scale)), Math.max(1, (int) Math.round(h * scale))), 0, 0, Imgproc.INTER_AREA);
+            }
+
+            // Light denoise and normalization
+            Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
+
+            // Use Scharr if available, fallback to Sobel
+            Mat gx = new Mat();
+            Mat gy = new Mat();
+            try {
+                Imgproc.Scharr(gray, gx, CvType.CV_16S, 1, 0);
+                Imgproc.Scharr(gray, gy, CvType.CV_16S, 0, 1);
+            } catch (Throwable t) {
+                Imgproc.Sobel(gray, gx, CvType.CV_16S, 1, 0, 3);
+                Imgproc.Sobel(gray, gy, CvType.CV_16S, 0, 1, 3);
+            }
+            Mat agx = new Mat();
+            Mat agy = new Mat();
+            Core.convertScaleAbs(gx, agx);
+            Core.convertScaleAbs(gy, agy);
+            gx.release();
+            gy.release();
+
+            Scalar sumX = Core.sumElems(agx);
+            Scalar sumY = Core.sumElems(agy);
+            double sx = sumX.val[0];
+            double sy = sumY.val[0];
+            agx.release();
+            agy.release();
+            gray.release();
+
+            double total = sx + sy;
+            if (total <= 1e-3) {
+                // Blank or too uniform
+                return new OrientationEstimate(0, 0.0);
+            }
+
+            // If vertical gradient energy (Gy) dominates, we assume horizontal lines → 0° bucket
+            int bucket = (sy >= sx) ? 0 : 90;
+            double diff = Math.abs(sy - sx);
+            double conf = Math.min(1.0, Math.max(0.0, diff / (total + 1e-6)));
+            // Slightly compress confidence to be conservative
+            conf = Math.max(0.0, Math.min(1.0, conf * 0.9));
+            return new OrientationEstimate(bucket, conf);
+        } catch (Throwable t) {
+            return new OrientationEstimate(0, 0.0);
+        }
+    }
 }

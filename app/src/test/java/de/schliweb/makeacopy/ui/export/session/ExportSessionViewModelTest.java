@@ -46,7 +46,9 @@ public class ExportSessionViewModelTest {
                 System.currentTimeMillis(),
                 0,
                 0,
-                null
+                null,
+                1,
+                "baked"
         );
     }
 
@@ -169,7 +171,9 @@ public class ExportSessionViewModelTest {
         CompletedScan a2 = new CompletedScan(
                 "id-X", null, 0, null, null, null,
                 System.currentTimeMillis(), 0, 0,
-                null
+                null,
+                1,
+                "baked"
         );
         vm.setInitial(a1);
         vm.add(a2);
@@ -199,7 +203,9 @@ public class ExportSessionViewModelTest {
         CompletedScan dupA = new CompletedScan(
                 "id-A", null, 0, null, null, null,
                 System.currentTimeMillis(), 0, 0,
-                null
+                null,
+                1,
+                "baked"
         );
         vm.setInitial(a);
         vm.addAll(Arrays.asList(b, dupA));

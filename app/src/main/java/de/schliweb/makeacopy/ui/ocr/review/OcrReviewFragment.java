@@ -139,21 +139,9 @@ public class OcrReviewFragment extends Fragment {
                 return;
             }
 
-            // Decode bounds first
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(src.getAbsolutePath(), opts);
-            int w = opts.outWidth;
-            int h = opts.outHeight;
-            if (w <= 0 || h <= 0) return;
+            // Use centralized EXIF-neutral sampled decode for baked disk files
             int maxDim = 512; // cap long edge
-            int sample = 1;
-            int longEdge = Math.max(w, h);
-            while (longEdge / (sample * 2) > maxDim) sample *= 2;
-            BitmapFactory.Options opts2 = new BitmapFactory.Options();
-            opts2.inSampleSize = Math.max(1, sample);
-            opts2.inPreferredConfig = Bitmap.Config.RGB_565; // lighter
-            Bitmap bmp = BitmapFactory.decodeFile(src.getAbsolutePath(), opts2);
+            Bitmap bmp = de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeSampled(src.getAbsolutePath(), maxDim, maxDim);
             if (bmp == null) return;
 
             // Swap and recycle previous

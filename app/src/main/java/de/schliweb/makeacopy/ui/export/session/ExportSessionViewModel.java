@@ -43,7 +43,7 @@ public class ExportSessionViewModel extends ViewModel {
     public void setInitial(CompletedScan scan) {
         List<CompletedScan> cur = new ArrayList<>();
         if (scan != null) cur.add(scan);
-        pages.postValue(cur);
+        pages.setValue(cur);
     }
 
     /**
@@ -59,7 +59,7 @@ public class ExportSessionViewModel extends ViewModel {
         for (CompletedScan s : scans) {
             if (!contains(cur, s.id())) cur.add(s);
         }
-        pages.postValue(cur);
+        pages.setValue(cur);
     }
 
     /**
@@ -74,7 +74,7 @@ public class ExportSessionViewModel extends ViewModel {
         List<CompletedScan> cur = new ArrayList<>(safe());
         if (!contains(cur, scan.id())) {
             cur.add(scan);
-            pages.postValue(cur);
+            pages.setValue(cur);
         }
     }
 
@@ -90,7 +90,7 @@ public class ExportSessionViewModel extends ViewModel {
         List<CompletedScan> cur = new ArrayList<>(safe());
         if (index >= 0 && index < cur.size()) {
             cur.remove(index);
-            pages.postValue(cur);
+            pages.setValue(cur);
         }
     }
 
@@ -111,7 +111,7 @@ public class ExportSessionViewModel extends ViewModel {
         if (from == to) return;
         CompletedScan s = cur.remove(from);
         cur.add(to, s);
-        pages.postValue(cur);
+        pages.setValue(cur);
     }
 
     /**
@@ -123,7 +123,7 @@ public class ExportSessionViewModel extends ViewModel {
         List<CompletedScan> cur = new ArrayList<>(safe());
         if (index >= 0 && index < cur.size()) {
             cur.set(index, scan);
-            pages.postValue(cur);
+            pages.setValue(cur);
         }
     }
 

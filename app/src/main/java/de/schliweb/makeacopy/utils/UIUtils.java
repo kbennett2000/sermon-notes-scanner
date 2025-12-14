@@ -1,6 +1,10 @@
 package de.schliweb.makeacopy.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -89,15 +93,17 @@ public class UIUtils {
     }
 
     /**
-     * Displays a toast message using the provided message and duration.
-     * It ensures the application context is used to avoid memory leaks
-     * or context-related issues. If the context or message is null, the method does nothing.
+     * Displays a toast message using the provided string and duration. If Accessibility Mode
+     * is enabled, the message is announced via the device's screen reader instead of
+     * showing a toast. Ensures the use of application context to prevent memory leaks or
+     * context-related issues. If the context or message is null, the method does nothing.
      *
      * @param context  The context from which the toast is triggered. If null, no action is taken.
-     * @param message  The message to display in the toast. If null, no action is taken.
+     * @param message  The string message to display in the toast. If null, no action is taken.
      * @param duration The duration for which the toast should be displayed.
      *                 Should be either Toast.LENGTH_SHORT or Toast.LENGTH_LONG.
      */
+    @SuppressWarnings("deprecation")
     public static void showToast(Context context, String message, int duration) {
         if (context == null || message == null) {
             return;
@@ -105,16 +111,44 @@ public class UIUtils {
 
         // Always use the application context to prevent memory leaks and context-related issues
         Context appContext = context.getApplicationContext();
+
+        // If Accessibility Mode is enabled, announce via screen reader instead of showing a toast
+        try {
+            SharedPreferences prefs = appContext.getSharedPreferences("export_options", Context.MODE_PRIVATE);
+            boolean a11yMode = prefs.getBoolean(
+                    de.schliweb.makeacopy.ui.camera.CameraOptionsDialogFragment.BUNDLE_ACCESSIBILITY_MODE,
+                    false
+            );
+            Log.d(TAG, "Accessibility Mode: " + a11yMode);
+            if (a11yMode) {
+                AccessibilityManager am = (AccessibilityManager) appContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+                if (am != null && am.isEnabled()) {
+                    AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_ANNOUNCEMENT);
+                    event.setPackageName(appContext.getPackageName());
+                    event.setClassName(UIUtils.class.getName());
+                    event.getText().add(message);
+                    am.sendAccessibilityEvent(event);
+                    Log.d(TAG, "Accessibility announcement made: " + message);
+                    return; // Do not show a Toast when A11y announcement is made
+                }
+            }
+        } catch (Throwable ignore) {
+            Log.e(TAG, "Error checking accessibility mode", ignore);
+            // Best-effort: fall back to Toast below
+        }
+
         Toast.makeText(appContext, message, duration).show();
     }
 
     /**
-     * Displays a toast message using the string resource ID and duration provided.
-     * Ensures that the application context is used to avoid memory leaks or
-     * context-related issues. If the context is null, the method does nothing.
+     * Displays a toast message using a string resource ID and a specified duration. The method resolves the
+     * resource string and displays it as a toast. The application context is used internally to ensure
+     * memory safety and avoid context-related issues. If the context is null or the resource ID cannot be resolved,
+     * the method does nothing.
      *
      * @param context  The context from which the toast is triggered. If null, no action is taken.
-     * @param resId    The resource ID of the string to display in the toast.
+     * @param resId    The resource ID of the string to display in the toast. If the resource ID cannot
+     *                 be resolved, no action is taken.
      * @param duration The duration for which the toast should be displayed.
      *                 Should be either Toast.LENGTH_SHORT or Toast.LENGTH_LONG.
      */
@@ -125,6 +159,16 @@ public class UIUtils {
 
         // Always use the application context to prevent memory leaks and context-related issues
         Context appContext = context.getApplicationContext();
-        Toast.makeText(appContext, resId, duration).show();
+
+        // Resolve string now to funnel through the same accessibility path
+        String msg;
+        try {
+            msg = appContext.getString(resId);
+        } catch (Throwable t) {
+            msg = null;
+        }
+        if (msg != null) {
+            showToast(appContext, msg, duration);
+        }
     }
 }

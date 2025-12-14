@@ -60,7 +60,9 @@ public final class SessionOcrUpdater {
                             it.createdAt(),
                             it.widthPx(),
                             it.heightPx(),
-                            it.inMemoryBitmap()
+                            it.inMemoryBitmap(),
+                            persisted.schemaVersion(),
+                            persisted.orientationMode()
                     );
                     sessionVM.updateAt(i, updated);
                     break;

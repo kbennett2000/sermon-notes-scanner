@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.ui.export.session.CompletedScan;
+import de.schliweb.makeacopy.utils.BitmapUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -115,7 +116,25 @@ class CompletedScansPickerAdapter extends RecyclerView.Adapter<CompletedScansPic
             h.title.setText(date);
             // Efficient thumb loading with sampling and background decode
             String path = hasThumb ? s.thumbPath() : s.filePath();
-            loadThumbnailAsync(h.thumb, path, dpToPx(h.itemView.getResources(), 56));
+            int deg = 0;
+            try {
+                deg = s.rotationDeg();
+            } catch (Throwable ignore) {
+            }
+            String mode = null;
+            try {
+                mode = s.orientationMode();
+            } catch (Throwable ignore) {
+            }
+            boolean rotate;
+            try {
+                rotate = de.schliweb.makeacopy.utils.RotationPolicy
+                        .shouldRotateForThumbnail(true, mode, deg);
+            } catch (Throwable ignore) {
+                rotate = false;
+            }
+            int effDeg = rotate ? ((deg % 360) + 360) % 360 : 0;
+            loadThumbnailAsync(h.thumb, path, dpToPx(h.itemView.getResources(), 56), effDeg);
         }
 
         boolean disabled = callbacks.isDisabled(s.id()) || missing;
@@ -152,13 +171,17 @@ class CompletedScansPickerAdapter extends RecyclerView.Adapter<CompletedScansPic
     }
 
     // ===== Image loading helpers =====
-    private static void loadThumbnailAsync(@NonNull ImageView target, @NonNull String path, int targetPx) {
+    private static void loadThumbnailAsync(@NonNull ImageView target, @NonNull String path, int targetPx, int rotationDeg) {
         target.setImageResource(R.drawable.ic_image);
         target.setTag(path);
         EXEC.execute(() -> {
             Bitmap bmp = null;
             try {
                 bmp = decodeSampled(path, targetPx, targetPx);
+                // Apply rotation if requested (only for metadata entries)
+                if (bmp != null && ((rotationDeg % 360) != 0)) {
+                    bmp = BitmapUtils.maybeRotate(bmp, rotationDeg);
+                }
             } catch (Throwable ignore) {
             }
             final Bitmap result = bmp;
@@ -179,17 +202,12 @@ class CompletedScansPickerAdapter extends RecyclerView.Adapter<CompletedScansPic
     }
 
     private static Bitmap decodeSampled(String path, int reqW, int reqH) {
-        // First decode with inJustDecodeBounds=true to check dimensions
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(path, opts);
-        // Calculate inSampleSize
-        opts.inSampleSize = calculateInSampleSize(opts, reqW, reqH);
-        // Decode bitmap with inSampleSize set
-        BitmapFactory.Options opts2 = new BitmapFactory.Options();
-        opts2.inSampleSize = opts.inSampleSize;
-        opts2.inPreferredConfig = Bitmap.Config.RGB_565; // lighter
-        return BitmapFactory.decodeFile(path, opts2);
+        // Centralized EXIF-neutral decode for baked disk files
+        try {
+            return de.schliweb.makeacopy.utils.ImageDecodeUtils.decodeSampled(path, Math.max(1, reqW), Math.max(1, reqH));
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

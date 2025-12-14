@@ -95,4 +95,47 @@ public class AccessibilityGuidanceControllerTest {
         Assert.assertEquals(3, sp.spoken.size());
         Assert.assertEquals(GuidanceHint.MOVE_BACK, sp.spoken.get(2));
     }
+
+    @Test
+    public void testOscillationPreventsSpeakDueToHysteresis() {
+        AccessibilityGuidanceController ctrl = new AccessibilityGuidanceController(1000, 2, 6000);
+        CapturingSpeaker sp = new CapturingSpeaker();
+        long t = 3000L;
+
+        // Alternate hints so stableCount never reaches the threshold
+        for (int i = 0; i < 10; i++) {
+            GuidanceHint h = (i % 2 == 0) ? GuidanceHint.MOVE_LEFT : GuidanceHint.MOVE_RIGHT;
+            ctrl.onResult(makeResult(h), t += 150, sp);
+        }
+
+        // Expect no speaks because we never had 2 consecutive identical hints
+        Assert.assertTrue(sp.spoken.isEmpty());
+    }
+
+    @Test
+    public void testStateChangeRequiresRateLimitEvenWhenStable() {
+        long rate = 1200L;
+        AccessibilityGuidanceController ctrl = new AccessibilityGuidanceController(rate, 2, 6000);
+        CapturingSpeaker sp = new CapturingSpeaker();
+        long t = 5000L;
+
+        // First stable emission: MOVE_LEFT
+        ctrl.onResult(makeResult(GuidanceHint.MOVE_LEFT), t += 50, sp);
+        ctrl.onResult(makeResult(GuidanceHint.MOVE_LEFT), t += 50, sp);
+        Assert.assertEquals(1, sp.spoken.size());
+        Assert.assertEquals(GuidanceHint.MOVE_LEFT, sp.spoken.get(0));
+
+        // Attempt to switch to MOVE_RIGHT with enough stable frames,
+        // but still within rate limit => must not speak yet
+        ctrl.onResult(makeResult(GuidanceHint.MOVE_RIGHT), t += 50, sp);
+        ctrl.onResult(makeResult(GuidanceHint.MOVE_RIGHT), t += 50, sp);
+        Assert.assertEquals(1, sp.spoken.size());
+
+        // After rate limit elapsed, provide stable frames again => should speak
+        t += rate;
+        ctrl.onResult(makeResult(GuidanceHint.MOVE_RIGHT), t += 50, sp);
+        ctrl.onResult(makeResult(GuidanceHint.MOVE_RIGHT), t += 50, sp);
+        Assert.assertEquals(2, sp.spoken.size());
+        Assert.assertEquals(GuidanceHint.MOVE_RIGHT, sp.spoken.get(1));
+    }
 }

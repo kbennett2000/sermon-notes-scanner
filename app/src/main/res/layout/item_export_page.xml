@@ -35,13 +35,17 @@
 
         <ImageButton
             android:id="@+id/button_remove"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="top|end"
-            android:background="@android:color/transparent"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/remove_this_page"
             android:src="@drawable/ic_close"
-            app:tint="?attr/colorControlNormal" />
+            app:tint="?attr/colorControlNormal"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:padding="8dp"
+            app:tooltipText="@string/remove_this_page" />
     </FrameLayout>
 
     <TextView

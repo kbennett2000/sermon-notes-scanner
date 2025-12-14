@@ -41,6 +41,13 @@
     <string name="no_image_processed_crop_an_image_first">Intet billede behandlet. Beskær et billede først.</string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR-behandling fuldført. Tryk på knappen for at fortsætte til eksport.</string>
 
+    <string name="ocr_found_rotation">Fundet rotation: %1$d°</string>
+    <string name="ocr_score">OCR-score: %1$d%%</string>
+    <string name="ocr_found_rotation_with_score">Fundet rotation: %1$d° — OCR-score: %2$d%%</string>
+
+    <!-- Ekstra forklaring tilføjet i dialogen “Forklar genkendelsestilstande” -->
+    <string name="ocr_prep_modes_autorotate_note">OCR automatisk rotation: Når den er aktiveret, prøver OCR også siden i 90°-trin (0/90/180/270) og vælger det bedste resultat. Den fundne rotation kan automatisk anvendes under eksport, hvis du ikke har roteret manuelt. Dette kan slås til/fra i “Vælg genkendelsestilstand”.</string>
+
     <string name="initializing_camera">Initialiserer kamera…</string>
     <string name="resetting_camera">Nulstiller kamera…</string>
     <string name="error_initializing_camera">Fejl under initialisering af kamera: %1$s</string>
@@ -325,6 +332,11 @@
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument registreret – klar til optagelse.</string>
+    <string name="a11y_no_document_detected">Intet dokument registreret.</string>
+    <string name="a11y_orientation_portrait_tip">Det ligner portræt. At holde telefonen lodret passer normalt bedst til høje sider.</string>
+    <string name="a11y_orientation_landscape_tip">Det ligner landskab. Prøv at holde telefonen vandret til brede sider.</string>
+    <string name="a11y_crop_summary_detected">Analyse af det optagede billede: dokument registreret, kvalitet cirka %1$d%%.</string>
+    <string name="a11y_crop_summary_no_doc">Analyse af det optagede billede: intet dokument registreret.</string>
     <string name="accessibility_mode_label">Tilgængelighedstilstand</string>
     <string name="a11y_camera_ready">Kamera klar. Dobbelttryk på Scan for at optage.</string>
     <string name="a11y_low_light_toggle_flash">Lavt lys. Dobbelttryk på Flash for at aktivere.</string>
@@ -338,5 +350,25 @@
     <string name="a11y_score_now">Registreringskvalitet: %1$d%%.</string>
     <string name="a11y_scan_with_score">Scan. Registreringskvalitet: %1$d%%.</string>
 
+    <!-- Tilgængelighed: beskrivelse af listeelement og meddelelser -->
+    <string name="page_n_of_m">Side %1$d af %2$d</string>
+    <string name="pages_count_announcement">Antal sider: %1$d</string>
+    <string name="export_started">Eksport startet</string>
+    <string name="page_removed">Side fjernet</string>
+    <string name="page_moved_to_position">Flyttet til position %1$d</string>
+
+    <!-- Options: OCR auto-rotate toggle -->
+    <string name="opt_ocr_auto_rotate_apply_export">OCR auto-rotation (anvend også ved eksport)</string>
+
+    <!-- Options: Experimental directional mapping fallback -->
+    <string name="opt_force_direction_mapping">Tving landskabs-tilordning af hints (eksperimentelt)</string>
+
+    <!-- Developer / Debug options -->
+    <string name="opt_show_raw_source_files">Vis rå kildefiler i biblioteket (udvikler)</string>
+
+    <!-- Library / Collections -->
+    <string name="unfiled_collection_title">Ikke sorteret</string>
+    <string name="open_unfiled">Åbn ikke-sorteret</string>
+    <string name="a11y_unfiled_summary">Ikke sorteret: %1$d element(er)</string>
 
 </resources>
