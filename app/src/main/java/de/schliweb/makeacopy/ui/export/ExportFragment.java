@@ -13,7 +13,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,9 +33,6 @@ import java.io.File;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * ExportFragment is a UI component that extends Fragment and facilitates exporting
@@ -70,36 +66,72 @@ import org.json.JSONObject;
  * - getOcrWordsFromState: Retrieves a list of recognized OCR words from the application state.
  */
 public class ExportFragment extends Fragment {
+    private static final String TAG = "ExportFragment";
+    // Main thread handler for safe UI updates
+    private final android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     // Track last pages count to avoid repetitive announcements
     private int lastPagesCount = -1;
     // When Include OCR Text is selected, delay the library assignment snackbar
     // until the TXT file has been successfully saved.
     private boolean deferAssignUntilTxt = false;
-    private static final String TAG = "ExportFragment";
-
     private FragmentExportBinding binding;
     private ExportViewModel exportViewModel;
     private CropViewModel cropViewModel;
     private OCRViewModel ocrViewModel;
     private CameraViewModel cameraViewModel;
-
     // Multipage session (v1 increment)
     private de.schliweb.makeacopy.ui.export.session.ExportSessionViewModel exportSessionViewModel;
+    /**
+     * A BroadcastReceiver to handle updates from OCR processing jobs. This receiver listens for broadcasts
+     * containing information about the OCR processing status and updates the session data accordingly.
+     * <p>
+     * The receiver performs the following tasks:
+     * - Extracts the associated page ID and success status from the received Intent.
+     * - If the processing was successful, updates the session data using the OCR result.
+     * - If the processing failed, displays a user notification indicating the failure.
+     * <p>
+     * It expects the following extras in the received Intent:
+     * - {@link de.schliweb.makeacopy.jobs.OcrBackgroundJobs#EXTRA_PAGE_ID}: A String representing the ID
+     * of the page that was processed. This is used to associate the OCR result with the correct session.
+     * - {@link de.schliweb.makeacopy.jobs.OcrBackgroundJobs#EXTRA_SUCCESS}: A boolean indicating whether
+     * the OCR processing was successful.
+     * <p>
+     * In case of any exceptions during the session update, a warning message is logged.
+     */
+    private final android.content.BroadcastReceiver ocrUpdateReceiver = new android.content.BroadcastReceiver() {
+        @Override
+        public void onReceive(android.content.Context context, android.content.Intent intent) {
+            if (intent == null) return;
+            String id = intent.getStringExtra(de.schliweb.makeacopy.jobs.OcrBackgroundJobs.EXTRA_PAGE_ID);
+            boolean success = intent.getBooleanExtra(de.schliweb.makeacopy.jobs.OcrBackgroundJobs.EXTRA_SUCCESS, false);
+            if (id == null) return;
+            if (success) {
+                try {
+                    de.schliweb.makeacopy.utils.SessionOcrUpdater.applyOcrResultToSession(requireContext(), exportSessionViewModel, id);
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to update session after OCR job", e);
+                }
+            } else {
+                UIUtils.showToast(requireContext(), getString(R.string.ocr_processing_failed), Toast.LENGTH_SHORT);
+            }
+        }
+    };
     private de.schliweb.makeacopy.ui.export.session.ExportPagesAdapter pagesAdapter;
-
     private ActivityResultLauncher<String> createDocumentLauncher;
     private ActivityResultLauncher<String> createTxtDocumentLauncher;
     private ActivityResultLauncher<String> createJpegDocumentLauncher;
     private ActivityResultLauncher<String> createZipDocumentLauncher;
-
     // URI of the last exported document for sharing
     private Uri lastExportedDocumentUri;
     private String lastExportedPdfName;
     // Library assignment helper: remember last indexed scan id (only when feature flag is on)
     private String lastIndexedScanIdForAssign;
+    private boolean ocrReceiverRegistered = false;
 
-    // Main thread handler for safe UI updates
-    private final android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private static String readAllUtf8(java.io.File file) throws java.io.IOException {
+        byte[] buf = java.nio.file.Files.readAllBytes(file.toPath());
+        return new String(buf, java.nio.charset.StandardCharsets.UTF_8);
+    }
 
     /**
      * Posts a runnable to the main thread only if the Fragment is still added and the view binding exists.
@@ -1021,14 +1053,14 @@ public class ExportFragment extends Fragment {
                         String displayName = FileUtils.getDisplayNameFromUri(requireContext(), lastExportedDocumentUri);
                         lastExportedPdfName = displayName;
                         setShareButtonsEnabled(true);
-                        if (!FeatureFlags.isScanLibraryEnable()) {
-                            String msg = getString(isMulti ? R.string.document_multipage_exported : R.string.document_exported, lastExportedPdfName);
-                            UIUtils.showToast(appContext, msg, Toast.LENGTH_LONG);
-                            View rv = getView();
-                            if (isAdded() && rv != null) {
-                                de.schliweb.makeacopy.utils.A11yUtils.announce(rv, msg);
-                            }
+
+                        String msg = getString(isMulti ? R.string.document_multipage_exported : R.string.document_exported, lastExportedPdfName);
+                        UIUtils.showToast(appContext, msg, Toast.LENGTH_LONG);
+                        View rv = getView();
+                        if (isAdded() && rv != null) {
+                            de.schliweb.makeacopy.utils.A11yUtils.announce(rv, msg);
                         }
+
                         // Begin: index exported PDF into scan library (feature-guarded via service locator)
                         int pageCountForIndex = isMulti ? ((pages == null) ? 0 : pages.size()) : 1;
                         indexScanLibraryAsync(displayName, pageCountForIndex, finalUri);
@@ -1037,8 +1069,6 @@ public class ExportFragment extends Fragment {
                             // Defer showing the assignment snackbar until TXT has been saved
                             deferAssignUntilTxt = true;
                             launchTxtFileCreation();
-                        } else {
-                            maybeShowAssignSnackbar();
                         }
                     } else {
                         lastExportedDocumentUri = null;
@@ -1222,9 +1252,8 @@ public class ExportFragment extends Fragment {
                         String displayName = FileUtils.getDisplayNameFromUri(requireContext(), lastExportedDocumentUri);
                         lastExportedPdfName = displayName;
                         setShareButtonsEnabled(true);
-                        if (!FeatureFlags.isScanLibraryEnable()) {
-                            UIUtils.showToast(appContext, getString(R.string.image_exported, displayName), Toast.LENGTH_LONG);
-                        }
+                        UIUtils.showToast(appContext, getString(R.string.image_exported, displayName), Toast.LENGTH_LONG);
+
 
                         // Begin: index exported scan in background (feature-guarded via service locator)
                         indexScanLibraryAsync(displayName, 1, exportUriFinal);
@@ -1233,8 +1262,6 @@ public class ExportFragment extends Fragment {
                             // Defer showing the assignment snackbar until TXT has been saved
                             deferAssignUntilTxt = true;
                             launchTxtFileCreation();
-                        } else {
-                            maybeShowAssignSnackbar();
                         }
                     } else {
                         lastExportedDocumentUri = null;
@@ -1387,9 +1414,8 @@ public class ExportFragment extends Fragment {
                         String displayName = FileUtils.getDisplayNameFromUri(requireContext(), exportUri);
                         lastExportedPdfName = displayName;
                         setShareButtonsEnabled(true);
-                        if (!FeatureFlags.isScanLibraryEnable()) {
-                            UIUtils.showToast(appContext, getString(R.string.zip_exported, displayName), Toast.LENGTH_LONG);
-                        }
+                        UIUtils.showToast(appContext, getString(R.string.zip_exported, displayName), Toast.LENGTH_LONG);
+
                         // Begin: index exported multi-page scan in background (feature-guarded via service locator)
                         indexScanLibraryAsync(displayName, totalPages, exportUri);
                         // End: index
@@ -1397,8 +1423,6 @@ public class ExportFragment extends Fragment {
                             // Defer showing the assignment snackbar until TXT has been saved
                             deferAssignUntilTxt = true;
                             launchTxtFileCreation();
-                        } else {
-                            maybeShowAssignSnackbar();
                         }
                     } else {
                         lastExportedDocumentUri = null;
@@ -1534,11 +1558,6 @@ public class ExportFragment extends Fragment {
         writeTxtToUri(txtUri, sb.toString());
     }
 
-    private static String readAllUtf8(java.io.File file) throws java.io.IOException {
-        byte[] buf = java.nio.file.Files.readAllBytes(file.toPath());
-        return new String(buf, java.nio.charset.StandardCharsets.UTF_8);
-    }
-
     private void writeTxtToUri(Uri txtUri, String content) {
         try (OutputStream os = requireContext().getContentResolver().openOutputStream(txtUri)) {
             if (os == null) {
@@ -1548,11 +1567,9 @@ public class ExportFragment extends Fragment {
             byte[] bytes = (content != null ? content : "").getBytes(java.nio.charset.StandardCharsets.UTF_8);
             os.write(bytes);
             exportViewModel.setTxtExportUri(txtUri);
-            if (!FeatureFlags.isScanLibraryEnable()) {
-                UIUtils.showToast(requireContext(), getString(R.string.ocr_text_exported_as_txt), Toast.LENGTH_SHORT);
-            }
+            UIUtils.showToast(requireContext(), getString(R.string.ocr_text_exported_as_txt), Toast.LENGTH_SHORT);
+
             if (deferAssignUntilTxt) {
-                maybeShowAssignSnackbar();
                 deferAssignUntilTxt = false;
             }
         } catch (java.io.FileNotFoundException | SecurityException e) {
@@ -1709,43 +1726,6 @@ public class ExportFragment extends Fragment {
         }
     }
 
-    private boolean ocrReceiverRegistered = false;
-    /**
-     * A BroadcastReceiver to handle updates from OCR processing jobs. This receiver listens for broadcasts
-     * containing information about the OCR processing status and updates the session data accordingly.
-     * <p>
-     * The receiver performs the following tasks:
-     * - Extracts the associated page ID and success status from the received Intent.
-     * - If the processing was successful, updates the session data using the OCR result.
-     * - If the processing failed, displays a user notification indicating the failure.
-     * <p>
-     * It expects the following extras in the received Intent:
-     * - {@link de.schliweb.makeacopy.jobs.OcrBackgroundJobs#EXTRA_PAGE_ID}: A String representing the ID
-     * of the page that was processed. This is used to associate the OCR result with the correct session.
-     * - {@link de.schliweb.makeacopy.jobs.OcrBackgroundJobs#EXTRA_SUCCESS}: A boolean indicating whether
-     * the OCR processing was successful.
-     * <p>
-     * In case of any exceptions during the session update, a warning message is logged.
-     */
-    private final android.content.BroadcastReceiver ocrUpdateReceiver = new android.content.BroadcastReceiver() {
-        @Override
-        public void onReceive(android.content.Context context, android.content.Intent intent) {
-            if (intent == null) return;
-            String id = intent.getStringExtra(de.schliweb.makeacopy.jobs.OcrBackgroundJobs.EXTRA_PAGE_ID);
-            boolean success = intent.getBooleanExtra(de.schliweb.makeacopy.jobs.OcrBackgroundJobs.EXTRA_SUCCESS, false);
-            if (id == null) return;
-            if (success) {
-                try {
-                    de.schliweb.makeacopy.utils.SessionOcrUpdater.applyOcrResultToSession(requireContext(), exportSessionViewModel, id);
-                } catch (Exception e) {
-                    Log.w(TAG, "Failed to update session after OCR job", e);
-                }
-            } else {
-                UIUtils.showToast(requireContext(), getString(R.string.ocr_processing_failed), Toast.LENGTH_SHORT);
-            }
-        }
-    };
-
     @Override
     public void onStart() {
         super.onStart();
@@ -1812,110 +1792,6 @@ public class ExportFragment extends Fragment {
         return (s != null) ? s.words() : null;
     }
 
-    // Minimal background indexer hook; guarded by service locator's feature flag
-    // Flag-gated: offer assignment to a collection via snackbar
-    private void maybeShowAssignSnackbar() {
-        if (!FeatureFlags.isScanLibraryEnable()) return;
-        if (binding == null) return;
-        View anchor = binding.exportOptionsGroup;
-        com.google.android.material.snackbar.Snackbar
-                .make(anchor, getString(R.string.scan_saved), com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
-                .setAction(getString(R.string.action_add_to_collection), v -> {
-                    String id = lastIndexedScanIdForAssign;
-                    if (id != null) {
-                        openCollectionPickerForScan(id);
-                    }
-                })
-                .show();
-    }
-
-    private void openCollectionPickerForScan(@NonNull String scanId) {
-        final android.content.Context appCtx = requireContext().getApplicationContext();
-        new Thread(() -> {
-            java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> cols;
-            try {
-                cols = de.schliweb.makeacopy.data.library.LibraryServiceLocator
-                        .getCollectionsRepository(appCtx)
-                        .getAllCollections(appCtx);
-            } catch (Exception e) {
-                Log.w(TAG, "openCollectionPickerForScan: failed to load collections", e);
-                cols = java.util.Collections.emptyList();
-            }
-            // Filter out the default "Completed Scans" collection for finished documents
-            java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> filtered = new java.util.ArrayList<>();
-            String defName = appCtx.getString(de.schliweb.makeacopy.R.string.collection_completed_scans);
-            for (de.schliweb.makeacopy.data.library.CollectionEntity c : cols) {
-                if (c == null) continue;
-                if (defName != null && defName.equals(c.name)) continue; // exclude default
-                filtered.add(c);
-            }
-            final java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> finalCols = filtered;
-            if (!isAdded()) return;
-            requireActivity().runOnUiThread(() -> {
-                int n = (finalCols == null) ? 0 : finalCols.size();
-                CharSequence[] names = new CharSequence[n + 1];
-                for (int i = 0; i < n; i++) {
-                    names[i] = finalCols.get(i).name;
-                }
-                names[n] = getString(R.string.create_new_collection);
-
-                final androidx.appcompat.app.AlertDialog pickerDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                        .setTitle(getString(R.string.place_in_collection_title))
-                        .setItems(names, (dialog, which) -> {
-                            if (which == n) {
-                                // Create new collection flow
-                                final android.widget.EditText input = new android.widget.EditText(requireContext());
-                                input.setHint(R.string.collection_name_hint);
-                                final androidx.appcompat.app.AlertDialog createDialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                                        .setTitle(R.string.new_collection_title)
-                                        .setView(input)
-                                        .setPositiveButton(R.string.create, (d, w) -> {
-                                            final String name = String.valueOf(input.getText()).trim();
-                                            if (name.isEmpty()) return;
-                                            new Thread(() -> {
-                                                try {
-                                                    de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
-                                                    de.schliweb.makeacopy.data.library.CollectionEntity ce = repo.createCollection(appCtx, name);
-                                                    if (ce != null) {
-                                                        repo.assignScanToCollection(appCtx, scanId, ce.id);
-                                                        if (isAdded())
-                                                            requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, name), Toast.LENGTH_SHORT));
-                                                    }
-                                                } catch (Exception e) {
-                                                    Log.w(TAG, "Failed creating/assigning new collection", e);
-                                                }
-                                            }).start();
-                                        })
-                                        .setNegativeButton(android.R.string.cancel, null)
-                                        .create();
-                                createDialog.setOnShowListener(d ->
-                                        de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(createDialog, requireContext())
-                                );
-                                createDialog.show();
-                            } else if (which >= 0 && which < n) {
-                                final de.schliweb.makeacopy.data.library.CollectionEntity sel = finalCols.get(which);
-                                new Thread(() -> {
-                                    try {
-                                        de.schliweb.makeacopy.data.library.CollectionsRepository repo = de.schliweb.makeacopy.data.library.LibraryServiceLocator.getCollectionsRepository(appCtx);
-                                        repo.assignScanToCollection(appCtx, scanId, sel.id);
-                                        if (isAdded())
-                                            requireActivity().runOnUiThread(() -> UIUtils.showToast(requireContext(), getString(R.string.scan_added_to_collection, sel.name), Toast.LENGTH_SHORT));
-                                    } catch (Exception e) {
-                                        Log.w(TAG, "Failed assigning scan to collection", e);
-                                    }
-                                }).start();
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .create();
-                pickerDialog.setOnShowListener(d ->
-                        de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(pickerDialog, requireContext())
-                );
-                pickerDialog.show();
-            });
-        }).start();
-    }
-
     private void indexScanLibraryAsync(String title, int pageCount, Uri exportUri) {
         if (title == null) title = buildDefaultBaseName();
         final String titleFinal = title;
@@ -1969,7 +1845,10 @@ public class ExportFragment extends Fragment {
                                     } catch (java.io.IOException ioe) {
                                         Log.w(TAG, "indexScanLibraryAsync: failed saving image cover", ioe);
                                     } finally {
-                                        try { bmp.recycle(); } catch (Exception ignored) {}
+                                        try {
+                                            bmp.recycle();
+                                        } catch (Exception ignored) {
+                                        }
                                     }
                                 }
                             }
@@ -2008,10 +1887,16 @@ public class ExportFragment extends Fragment {
                                             } catch (java.io.IOException ioe) {
                                                 Log.w(TAG, "indexScanLibraryAsync: failed saving pdf cover", ioe);
                                             } finally {
-                                                try { bmp.recycle(); } catch (Exception ignored) {}
+                                                try {
+                                                    bmp.recycle();
+                                                } catch (Exception ignored) {
+                                                }
                                             }
                                         } finally {
-                                            try { page.close(); } catch (Exception ignored) {}
+                                            try {
+                                                page.close();
+                                            } catch (Exception ignored) {
+                                            }
                                         }
                                     }
                                 }

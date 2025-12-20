@@ -242,7 +242,6 @@ public class ScansLibraryFragment extends Fragment {
         final android.content.Context appCtx = requireContext().getApplicationContext();
         new Thread(() -> {
             List<ScanEntity> data;
-            boolean showIndexBtnComputed = false;
             try {
                 if (collectionIdArg == null) {
                     data = LibraryServiceLocator.getScansRepository(appCtx).getAllScans(appCtx);
@@ -260,16 +259,8 @@ public class ScansLibraryFragment extends Fragment {
                         }
                         data = filtered;
                     }
-                    // On home (no collection), the index button should NOT be shown.
                 } else {
                     data = LibraryServiceLocator.getScansRepository(appCtx).getScansForCollection(appCtx, collectionIdArg);
-                    // Only show the index button when viewing the default "Completed Scans" collection
-                    try {
-                        de.schliweb.makeacopy.data.library.CollectionsRepository cr = LibraryServiceLocator.getCollectionsRepository(appCtx);
-                        de.schliweb.makeacopy.data.library.CollectionEntity def = cr.getOrCreateDefaultCompletedCollection(appCtx);
-                        showIndexBtnComputed = (def != null && def.id != null && def.id.equals(collectionIdArg));
-                    } catch (Throwable ignore) {
-                    }
                 }
             } catch (Throwable t) {
                 data = java.util.Collections.emptyList();
@@ -294,7 +285,7 @@ public class ScansLibraryFragment extends Fragment {
                 }
             } catch (Throwable ignore) {
             }
-            final boolean finalShowIndexBtn = (de.schliweb.makeacopy.utils.FeatureFlags.isScanLibraryEnable() && showIndexBtnComputed);
+            final boolean finalShowIndexBtn = (de.schliweb.makeacopy.utils.FeatureFlags.isScanLibraryEnable());
             if (!isAdded()) return;
             requireActivity().runOnUiThread(() -> {
                 adapter.setMemberships(memberships);
