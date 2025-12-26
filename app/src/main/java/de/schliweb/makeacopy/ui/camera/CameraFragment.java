@@ -617,7 +617,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 .setTargetRotation(rotation);
 
         ImageCapture.Builder captureBuilder = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY) // weniger invasive Pipeline
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY) // beste Qualität für OCR
                 .setResolutionSelector(rsCap.build())
                 .setTargetRotation(rotation)
                 .setJpegQuality(98);
@@ -1571,8 +1571,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     try {
                         de.schliweb.makeacopy.utils.OpenCVUtils.OrientationEstimate est =
                                 de.schliweb.makeacopy.utils.OpenCVUtils.estimateTextOrientation(bmp);
-                        orientBucketLocal = (est.getBucketDeg() == 90) ? 90 : 0;
-                        orientConfLocal = est.getConfidence();
+                        orientBucketLocal = (est.bucketDeg() == 90) ? 90 : 0;
+                        orientConfLocal = est.confidence();
                     } catch (Exception e) {
                         Log.d(TAG, "estimateTextOrientation failed", e);
                     }

@@ -47,5 +47,20 @@ includes third-party components under their respective licenses as noted below.
       to Reserved Font Names. When bundled, the OFL notice is included at
       third_party_licenses/OFL.txt.
 
+7) Noto Naskh Arabic (fonts; NotoNaskhArabic-Regular.ttf)
+    - Project: https://github.com/notofonts/arabic
+    - License: SIL Open Font License 1.1
+    - Notes: Used for Arabic and Persian (Farsi) script rendering in PDF text
+      layers. Distributed under the OFL without modification. The OFL notice
+      is included at third_party_licenses/OFL.txt.
+
+8) FrequencyWords (OCR dictionaries)
+    - Project: https://github.com/hermitdave/FrequencyWords
+    - License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+    - Notes: Word frequency dictionaries derived from Wikipedia are used for OCR
+      post-processing to improve text recognition accuracy. Dictionaries for 21
+      languages are included. The license notice is included at
+      app/src/main/assets/dictionaries/LICENSE.txt.
+
 For full license texts, see the corresponding upstream repositories and their
 LICENSE files. The Apache License 2.0 for this project is provided in LICENSE.

@@ -25,16 +25,69 @@ public class OCRHelper {
     private static final String DEFAULT_LANGUAGE = "eng";
     private static final String TRAINEDDATA_EXT = ".traineddata";
     private static final String DEFAULT_DPI = "300";
-
+    private static final String BEST_MODEL_DPI = "400";
+    /**
+     * A regular expression pattern used to match and extract specific HTML span elements
+     * related to OCR results. These span elements represent words extracted by OCR engines
+     * such as Tesseract and are associated with word-level metadata like bounding box
+     * coordinates and recognition confidence.
+     * <p>
+     * The pattern matches `<span>` elements with the following characteristics:
+     * - A class attribute that contains `ocrx_word` or `ocr_word`.
+     * - A title attribute that includes bounding box (`bbox`) information and confidence
+     * (`x_wconf`) values.
+     * <p>
+     * Capturing groups are used to extract:
+     * 1. Metadata information from the title attribute (e.g., bounding box data).
+     * 2. The text content enclosed within the span element.
+     * <p>
+     * This pattern is case-insensitive and supports matching across multiple lines.
+     */
+    private static final Pattern SPAN_PATTERN = Pattern.compile(
+            "<span[^>]*class=[\"'][^\"']*ocrx?_word[^\"']*[\"'][^>]*title=[\"']([^\"']+)[\"'][^>]*>(.*?)</span>",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    /**
+     * A regular expression pattern used to match bounding box data in text. This pattern
+     * identifies strings in the format "bbox x1 y1 x2 y2", where `x1`, `y1`, `x2`, and `y2`
+     * are integers representing the coordinates of a bounding box.
+     * <p>
+     * The pattern is case-insensitive and designed to capture four integer groups
+     * corresponding to the bounding box's corners.
+     */
+    private static final Pattern BBOX_PATTERN = Pattern.compile(
+            "bbox\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)",
+            Pattern.CASE_INSENSITIVE);
+    /**
+     * A precompiled {@link Pattern} used to match and extract confidence (x_wconf) values
+     * from text, typically in the context of processing OCR-related data or structured
+     * output formats such as HOCR.
+     * <p>
+     * The pattern is constructed with the following properties:
+     * - It matches strings containing "x_wconf" followed by one or more digits.
+     * - The matching is case insensitive due to the use of {@link Pattern#CASE_INSENSITIVE}.
+     * <p>
+     * Capturing groups:
+     * - Captures the numeric component immediately following "x_wconf".
+     * <p>
+     * This pattern is likely used to parse and extract confidence levels associated with
+     * OCR-recognized words or regions.
+     */
+    private static final Pattern XWCONF_PATTERN = Pattern.compile(
+            "x_wconf\\s+(\\d+)",
+            Pattern.CASE_INSENSITIVE);
     private final Context context;
     private final String dataPath;
     private TessBaseAPI tessBaseAPI;
-    private String language;
+    private String language = DEFAULT_LANGUAGE;
     private boolean isInitialized = false;
     // Use a fixed Page Segmentation Mode by default to stabilize OCR results
     private int pageSegMode = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
     // Option to reinitialize Tesseract engine per OCR run to avoid internal state carry-over
     private boolean reinitPerRun = true;
+    // Flag to indicate if Best model optimizations should be applied
+    private boolean useBestModelSettings = false;
+
+    private String dpi = DEFAULT_DPI;
 
     /**
      * Constructs an instance of the OCRHelper class.
@@ -45,7 +98,6 @@ public class OCRHelper {
      */
     public OCRHelper(Context context) {
         this.context = context.getApplicationContext();
-        this.language = DEFAULT_LANGUAGE;
         // Use no-backup directory to align with OcrModelManager imports
         this.dataPath = ContextCompat.getNoBackupFilesDir(this.context).getAbsolutePath();
     }
@@ -61,7 +113,30 @@ public class OCRHelper {
         return new File(ContextCompat.getNoBackupFilesDir(context), TESSDATA_DIR);
     }
 
-    /* ==================== Init / Shutdown ==================== */
+    /**
+     * Cleans an HTML text string by removing HTML tags, resolving basic HTML entities,
+     * trimming whitespace, and normalizing multiple consecutive spaces into a single space.
+     *
+     * @param html the HTML text string to be cleaned; can be null
+     * @return the cleaned plain text string; returns an empty string if the input is null
+     */
+    private static String cleanHtmlText(String html) {
+        if (html == null) return "";
+        // Tags entfernen
+        String t = html.replaceAll("<[^>]+>", "");
+        // Grundlegende Entities auflösen
+        t = t.replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'");
+        // trim & normalisieren
+        t = t.trim();
+        // Mehrfach-Leerzeichen → eins
+        t = t.replaceAll("\\s{2,}", " ");
+        return t;
+    }
 
     /**
      * Initializes the Tesseract OCR engine for the specified language and prepares it for processing.
@@ -75,14 +150,60 @@ public class OCRHelper {
         try {
             ensureLanguageDataPresent(language);
             tessBaseAPI = new TessBaseAPI();
-            boolean ok = tessBaseAPI.init(dataPath, language);
+            int oem = useBestModelSettings ? TessBaseAPI.OEM_LSTM_ONLY : TessBaseAPI.OEM_DEFAULT;
+            boolean ok = tessBaseAPI.init(dataPath, language, oem);
             if (!ok) {
                 Log.e(TAG, "Tesseract initialization failed");
                 return false;
             }
-            applyDefaultsForLanguage(language);
+            tessBaseAPI.setPageSegMode(pageSegMode);
             isInitialized = true;
-            Log.i(TAG, "Tesseract initialized: lang=" + language + ", psm=" + pageSegMode + ", dpi=" + DEFAULT_DPI);
+            // Select DPI based on model type - Best models benefit from higher DPI
+            setVariable("user_defined_dpi", dpi);
+            // Disable automatic inversion detection (can cause issues with clean documents)
+            setVariable("tessedit_do_invert", "0");
+            // More aggressive noise reduction during text ordering
+            setVariable("textord_heavy_nr", "1");
+            // Allow more children per outline for complex glyphs (improves detail recognition)
+            setVariable("edges_max_children_per_outline", "40");
+            // Reduce minimum line size to detect smaller text lines
+            setVariable("textord_min_linesize", "2.5");
+            // Verbesserte Wortsegmentierung
+            setVariable("textord_force_make_prop_words", "1");
+            // Bessere Erkennung von Sonderzeichen
+            setVariable("tessedit_char_blacklist", "");
+            // Verbesserte Baseline-Erkennung für schiefe Texte
+            setVariable("textord_straight_baselines", "1");
+            // Verbesserte Zeichensegmentierung
+            setVariable("segment_penalty_dict_nonword", "0.5");
+            setVariable("segment_penalty_garbage", "1.5");
+            // Bessere Erkennung von Ligaturen und Sonderzeichen
+            setVariable("tessedit_enable_dict_correction", "1");
+            // Verbesserte Zeilenerkennung
+            setVariable("textord_tabfind_vertical_text", "0"); // Für westliche Sprachen
+            setVariable("textord_tabfind_force_vertical_text", "0");
+            // Bessere Worttrennung
+            setVariable("tessedit_word_for_word", "0");
+            setVariable("tessedit_enable_bigram_correction", "1");
+
+            // --- Best model specific optimizations ---
+            if (useBestModelSettings) {
+                // Lower penalties for Best models - they have better language models
+                setVariable("language_model_penalty_non_dict_word", "0.05");
+                setVariable("language_model_penalty_non_freq_dict_word", "0.05");
+                // Enable more thorough character segmentation for Best models
+                setVariable("chop_enable", "1");
+                // Increase certainty threshold for better accuracy
+                setVariable("classify_min_certainty", "-2.5");
+            } else {
+                // Fast model defaults
+                // Reduce penalty for non-dictionary words (improves recognition of names, abbreviations)
+                setVariable("language_model_penalty_non_dict_word", "0.1");
+                // Reduce penalty for non-frequent dictionary words
+                setVariable("language_model_penalty_non_freq_dict_word", "0.1");
+            }
+            applyDefaultsForLanguage(language);
+            Log.i(TAG, "Tesseract initialized: lang=" + language + ", psm=" + pageSegMode + ", dpi=" + dpi);
             return true;
         } catch (Exception e) {
             Log.e(TAG, "Error initializing Tesseract", e);
@@ -117,10 +238,32 @@ public class OCRHelper {
         return isInitialized;
     }
 
-    /* ==================== Language / Data ==================== */
-
     public int getPageSegMode() {
         return pageSegMode;
+    }
+
+    /**
+     * Sets the page segmentation mode for the Tesseract OCR engine.
+     * The page segmentation mode determines how Tesseract interprets the structure of the input image,
+     * such as whether the input is a single block of text, a single word, or a single character.
+     * This setting can influence the accuracy and performance of OCR processing.
+     *
+     * @param mode The page segmentation mode to be set. Valid values are defined by the Tesseract API
+     *             and include modes such as single block of text, single word, single character, etc.
+     *             Refer to the Tesseract documentation for details on available modes.
+     */
+    public void setPageSegMode(int mode) {
+        this.pageSegMode = mode;
+        if (!isInitialized) {
+            Log.w(TAG, "setPageSegMode: Engine not initialized yet; will apply on init. psm=" + mode);
+            return;
+        }
+        try {
+            tessBaseAPI.setPageSegMode(mode);
+        } catch (Throwable t) {
+            Log.e(TAG, "Failed to set PSM on engine", t);
+        }
+        Log.i(TAG, "setPageSegMode: applied psm=" + mode);
     }
 
     /**
@@ -130,6 +273,34 @@ public class OCRHelper {
     public void setReinitPerRun(boolean enable) {
         this.reinitPerRun = enable;
         Log.i(TAG, "setReinitPerRun: " + enable);
+    }
+
+    /**
+     * Enables/disables Best model optimizations.
+     * When enabled, the following optimizations are applied:
+     * - Higher DPI (400 instead of 300) for better detail recognition
+     * - Disabled character whitelist to allow full character set recognition
+     * - LSTM-only OCR engine mode for better accuracy with Best models
+     * - Adjusted language model penalties for improved recognition
+     * <p>
+     * Best models are larger and slower but can provide better accuracy
+     * on high-quality scans. For camera photos, Fast models may perform equally well.
+     *
+     * @param enable true to enable Best model optimizations, false for Fast model defaults
+     */
+    public void setUseBestModelSettings(boolean enable) {
+        this.useBestModelSettings = enable;
+        Log.i(TAG, "setUseBestModelSettings: " + enable);
+        this.dpi = enable ? BEST_MODEL_DPI : DEFAULT_DPI;
+    }
+
+    /**
+     * Returns whether Best model optimizations are enabled.
+     *
+     * @return true if Best model settings are active
+     */
+    public boolean isUsingBestModelSettings() {
+        return useBestModelSettings;
     }
 
     /**
@@ -152,16 +323,10 @@ public class OCRHelper {
         ensureLanguageDataPresent(language);
 
         if (isInitialized) {
-            tessBaseAPI.recycle();
-            tessBaseAPI = new TessBaseAPI();
-            boolean ok = tessBaseAPI.init(dataPath, language);
-            if (!ok) {
-                isInitialized = false;
-                Log.e(TAG, "Failed to reinit Tesseract with language: " + language);
-                return;
-            }
-            applyDefaultsForLanguage(language);
+            shutdown();
+            initTesseract();
         }
+        applyDefaultsForLanguage(language);
     }
 
     /**
@@ -176,33 +341,55 @@ public class OCRHelper {
      */
     public void applyDefaultsForLanguage(String langSpec) {
         if (!isInitialized) return;
-        boolean isCjkOrThai = false;
-        try {
-            String ls = (langSpec == null) ? "" : langSpec.toLowerCase();
-            isCjkOrThai = ls.contains("chi_") || ls.contains("tha");
-        } catch (Throwable ignore) {
+
+        String ls = (langSpec == null) ? "" : langSpec.toLowerCase();
+        boolean isCjkOrThai = ls.contains("chi_") || ls.contains("tha");
+        boolean isRtlArabic = ls.contains("ara") || ls.contains("fas");
+
+        // For Chinese, Thai, Arabic, and Persian, prefer AUTO segmentation; otherwise keep configured PSM
+        int psm = (isCjkOrThai || isRtlArabic) ? com.googlecode.tesseract.android.TessBaseAPI.PageSegMode.PSM_AUTO : pageSegMode;
+        this.pageSegMode = psm;  // Keep instance variable in sync for getPageSegMode()
+        tessBaseAPI.setPageSegMode(psm);
+
+        // In CJK and Thai, interword spaces are not meaningful; let Tesseract decide spacing
+        setVariable("preserve_interword_spaces", isCjkOrThai ? "0" : "1");
+
+        // Für Sprachen mit vielen Akzenten (FR, ES, PT)
+        if (ls.contains("fra") || ls.contains("spa") || ls.contains("por")) {
+            setVariable("tessedit_enable_dict_correction", "1");
+            setVariable("language_model_penalty_punc", "0.1");
         }
-        try {
-            // For Chinese and Thai, prefer AUTO segmentation; otherwise keep configured PSM
-            int psm = isCjkOrThai ? com.googlecode.tesseract.android.TessBaseAPI.PageSegMode.PSM_AUTO : pageSegMode;
-            tessBaseAPI.setPageSegMode(psm);
-        } catch (Throwable ignored) {
+
+        // Für Deutsch (Komposita)
+        if (ls.contains("deu")) {
+            setVariable("language_model_penalty_non_dict_word", "0.08");
+            setVariable("segment_penalty_dict_case_ok", "0.5");
         }
-        try {
-            tessBaseAPI.setVariable("user_defined_dpi", DEFAULT_DPI);
-        } catch (Throwable ignored) {
+
+        // Für Kyrillisch (RU)
+        if (ls.contains("rus")) {
+            setVariable("tessedit_enable_dict_correction", "1");
         }
-        try {
-            // In CJK and Thai, interword spaces are not meaningful; let Tesseract decide spacing
-            tessBaseAPI.setVariable("preserve_interword_spaces", isCjkOrThai ? "0" : "1");
-        } catch (Throwable ignored) {
-        }
-        try {
+
+        // Whitelist handling: Best models work better without whitelist restrictions
+        // RTL scripts (Arabic/Persian) should never use Latin whitelist
+        if (useBestModelSettings || isRtlArabic) {
+            // Clear whitelist for Best models and RTL scripts to allow full character recognition
+            setWhitelist("");
+            if (isRtlArabic) {
+                Log.i(TAG, "RTL script (ara/fas): whitelist disabled for Arabic script recognition");
+            } else {
+                Log.i(TAG, "Best model: whitelist disabled for full character recognition");
+            }
+        } else if (!isCjkOrThai) {
             // Do NOT enforce Latin whitelist for Chinese/Thai; otherwise compose whitelist from spec
-            if (!isCjkOrThai) setWhitelist(OCRWhitelist.getWhitelistForLangSpec(langSpec));
-        } catch (Throwable ignored) {
+            setWhitelist(OCRWhitelist.getWhitelistForLangSpec(langSpec));
         }
-        Log.i(TAG, "applyDefaultsForLanguage: langSpec=" + langSpec + (isCjkOrThai ? " (CJK/TH)" : "") + ", psm=" + (isCjkOrThai ? "AUTO" : String.valueOf(pageSegMode)) + ", dpi=" + DEFAULT_DPI);
+
+        String scriptInfo = isCjkOrThai ? " (CJK/TH)" : (isRtlArabic ? " (RTL)" : "");
+        Log.i(TAG, "applyDefaultsForLanguage: langSpec=" + langSpec + scriptInfo +
+                ", psm=" + ((isCjkOrThai || isRtlArabic) ? "AUTO" : String.valueOf(pageSegMode)) +
+                ", dpi=" + dpi + ", bestModel=" + useBestModelSettings);
     }
 
     /**
@@ -315,46 +502,7 @@ public class OCRHelper {
         return f.exists() && f.length() > 0;
     }
 
-    /* ==================== OCR-Options ==================== */
-
-    /**
-     * Sets the page segmentation mode for the Tesseract OCR engine.
-     * The page segmentation mode determines how Tesseract interprets the structure of the input image,
-     * such as whether the input is a single block of text, a single word, or a single character.
-     * This setting can influence the accuracy and performance of OCR processing.
-     *
-     * @param mode The page segmentation mode to be set. Valid values are defined by the Tesseract API
-     *             and include modes such as single block of text, single word, single character, etc.
-     *             Refer to the Tesseract documentation for details on available modes.
-     */
-    public void setPageSegMode(int mode) {
-        this.pageSegMode = mode;
-        if (!isInitialized) {
-            Log.w(TAG, "setPageSegMode: Engine not initialized yet; will apply on init. psm=" + mode);
-            return;
-        }
-        try {
-            tessBaseAPI.setPageSegMode(mode);
-        } catch (Throwable t) {
-            Log.e(TAG, "Failed to set PSM on engine", t);
-        }
-        Log.i(TAG, "setPageSegMode: applied psm=" + mode);
-    }
-
-    /**
-     * Sets a configuration variable for the Tesseract OCR engine.
-     * This method allows dynamically updating the behavior of the Tesseract engine
-     * by setting specific variables to the provided values. The method returns false
-     * if the Tesseract engine is not initialized.
-     *
-     * @param var   The name of the variable to be set. This corresponds to a
-     *              configuration parameter recognized by the Tesseract engine.
-     * @param value The value to assign to the configuration variable. This value
-     *              modifies the behavior of the specified variable in the OCR engine.
-     * @return true if the variable is successfully set; false if the Tesseract engine
-     * is not initialized or the variable could not be set.
-     */
-    public boolean setVariable(String var, String value) {
+    private boolean setVariable(String var, String value) {
         if (!isInitialized) {
             Log.e(TAG, "Tesseract not initialized");
             return false;
@@ -362,54 +510,8 @@ public class OCRHelper {
         return tessBaseAPI.setVariable(var, value);
     }
 
-    /**
-     * Sets a whitelist of characters to be recognized by the OCR engine.
-     * This method specifies a string of allowed characters that the OCR engine
-     * should consider during text recognition, which can improve accuracy by
-     * limiting the character set.
-     *
-     * @param chars The string containing characters to whitelist for recognition.
-     *              Only these characters will be considered valid during OCR processing.
-     * @return true if the whitelist is successfully set; false if the OCR engine
-     * is not initialized or the whitelist could not be applied.
-     */
-    public boolean setWhitelist(String chars) {
+    private boolean setWhitelist(String chars) {
         return setVariable("tessedit_char_whitelist", chars);
-    }
-
-    /* ==================== OCR – Results ==================== */
-
-    /**
-     * Represents the result of an OCR (Optical Character Recognition) process.
-     * This class encapsulates the extracted text along with the mean confidence
-     * score of the OCR engine.
-     */
-    public static class OcrResult {
-        public final String text;
-        public final Integer meanConfidence;
-
-        public OcrResult(String text, Integer meanConfidence) {
-            this.text = text != null ? text : "";
-            this.meanConfidence = meanConfidence;
-        }
-    }
-
-    /**
-     * Represents the result of an OCR (Optical Character Recognition) process with detailed
-     * recognition information at the word level. This class extends {@code OcrResult} by
-     * including a list of recognized words, each with additional details.
-     * <p>
-     * The {@code words} property contains a collection of {@code RecognizedWord} objects,
-     * allowing for more granular inspection of the OCR output, such as bounding boxes,
-     * confidence scores, and text content for each recognized word.
-     */
-    public static class OcrResultWords extends OcrResult {
-        public final List<RecognizedWord> words;
-
-        public OcrResultWords(String text, Integer meanConfidence, List<RecognizedWord> words) {
-            super(text, meanConfidence);
-            this.words = (words != null) ? words : new ArrayList<>();
-        }
     }
 
     /**
@@ -423,7 +525,7 @@ public class OCRHelper {
      * and a list of recognized words with their respective details. If OCR fails or Tesseract
      * is not initialized, the result will contain empty text and default values.
      */
-    public OcrResultWords runOcrWithWords(Bitmap bitmap) {
+    private OcrResultWords runOcrWithWords(Bitmap bitmap) {
         if (bitmap == null) {
             Log.e(TAG, "runOcrWithWords: bitmap is null");
             return new OcrResultWords("", null, new ArrayList<>());
@@ -465,59 +567,38 @@ public class OCRHelper {
         }
     }
 
-    /* ==================== HOCR-Parsing ==================== */
+    public OcrResultWords runOcrWithRetry(Bitmap bitmap) {
+        logAllVariables();
+        OcrResultWords result = runOcrWithWords(bitmap);
 
-    /**
-     * A regular expression pattern used to match and extract specific HTML span elements
-     * related to OCR results. These span elements represent words extracted by OCR engines
-     * such as Tesseract and are associated with word-level metadata like bounding box
-     * coordinates and recognition confidence.
-     * <p>
-     * The pattern matches `<span>` elements with the following characteristics:
-     * - A class attribute that contains `ocrx_word` or `ocr_word`.
-     * - A title attribute that includes bounding box (`bbox`) information and confidence
-     * (`x_wconf`) values.
-     * <p>
-     * Capturing groups are used to extract:
-     * 1. Metadata information from the title attribute (e.g., bounding box data).
-     * 2. The text content enclosed within the span element.
-     * <p>
-     * This pattern is case-insensitive and supports matching across multiple lines.
-     */
-    private static final Pattern SPAN_PATTERN = Pattern.compile(
-            "<span[^>]*class=[\"'][^\"']*ocrx?_word[^\"']*[\"'][^>]*title=[\"']([^\"']+)[\"'][^>]*>(.*?)</span>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        // Bei niedriger Konfidenz mit anderen Einstellungen wiederholen
+        if (result.meanConfidence != null && result.meanConfidence < 50) {
+            Log.i(TAG, "Low confidence (" + result.meanConfidence + "), retrying with PSM_AUTO");
+            int originalPsm = pageSegMode;
+            setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
 
-    /**
-     * A regular expression pattern used to match bounding box data in text. This pattern
-     * identifies strings in the format "bbox x1 y1 x2 y2", where `x1`, `y1`, `x2`, and `y2`
-     * are integers representing the coordinates of a bounding box.
-     * <p>
-     * The pattern is case-insensitive and designed to capture four integer groups
-     * corresponding to the bounding box's corners.
-     */
-    private static final Pattern BBOX_PATTERN = Pattern.compile(
-            "bbox\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)",
-            Pattern.CASE_INSENSITIVE);
+            OcrResultWords retryResult = runOcrWithWords(bitmap);
+            setPageSegMode(originalPsm);
 
-    /**
-     * A precompiled {@link Pattern} used to match and extract confidence (x_wconf) values
-     * from text, typically in the context of processing OCR-related data or structured
-     * output formats such as HOCR.
-     * <p>
-     * The pattern is constructed with the following properties:
-     * - It matches strings containing "x_wconf" followed by one or more digits.
-     * - The matching is case insensitive due to the use of {@link Pattern#CASE_INSENSITIVE}.
-     * <p>
-     * Capturing groups:
-     * - Captures the numeric component immediately following "x_wconf".
-     * <p>
-     * This pattern is likely used to parse and extract confidence levels associated with
-     * OCR-recognized words or regions.
-     */
-    private static final Pattern XWCONF_PATTERN = Pattern.compile(
-            "x_wconf\\s+(\\d+)",
-            Pattern.CASE_INSENSITIVE);
+            if (retryResult.meanConfidence != null &&
+                    retryResult.meanConfidence > result.meanConfidence + 10) {
+                return retryResult;
+            }
+        }
+        return result;
+    }
+
+    public void logAllVariables() {
+        if (!isInitialized) return;
+        String[] vars = {
+                "user_defined_dpi", "tessedit_do_invert", "textord_heavy_nr",
+                "language_model_penalty_non_dict_word", "tessedit_char_whitelist"
+        };
+        for (String var : vars) {
+            String val = tessBaseAPI.getVariable(var);
+            Log.d(TAG, "Tesseract var: " + var + " = " + val);
+        }
+    }
 
     /**
      * Parses the given hOCR (HTML for OCR) content to extract recognized words along
@@ -573,33 +654,6 @@ public class OCRHelper {
     }
 
     /**
-     * Cleans an HTML text string by removing HTML tags, resolving basic HTML entities,
-     * trimming whitespace, and normalizing multiple consecutive spaces into a single space.
-     *
-     * @param html the HTML text string to be cleaned; can be null
-     * @return the cleaned plain text string; returns an empty string if the input is null
-     */
-    private static String cleanHtmlText(String html) {
-        if (html == null) return "";
-        // Tags entfernen
-        String t = html.replaceAll("<[^>]+>", "");
-        // Grundlegende Entities auflösen
-        t = t.replace("&nbsp;", " ")
-                .replace("&amp;", "&")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&quot;", "\"")
-                .replace("&apos;", "'");
-        // trim & normalisieren
-        t = t.trim();
-        // Mehrfach-Leerzeichen → eins
-        t = t.replaceAll("\\s{2,}", " ");
-        return t;
-    }
-
-    /* ==================== Metriken ==================== */
-
-    /**
      * Retrieves the mean confidence value of the OCR engine if it has been successfully initialized.
      * The mean confidence represents the average confidence level of the recognized text.
      * If the OCR engine is not initialized or an error occurs during retrieval, this method returns null.
@@ -613,6 +667,39 @@ public class OCRHelper {
             return tessBaseAPI.meanConfidence(); // in tess-two oft so benannt
         } catch (Throwable t) {
             return null;
+        }
+    }
+
+    /**
+     * Represents the result of an OCR (Optical Character Recognition) process.
+     * This class encapsulates the extracted text along with the mean confidence
+     * score of the OCR engine.
+     */
+    public static class OcrResult {
+        public final String text;
+        public final Integer meanConfidence;
+
+        public OcrResult(String text, Integer meanConfidence) {
+            this.text = text != null ? text : "";
+            this.meanConfidence = meanConfidence;
+        }
+    }
+    
+    /**
+     * Represents the result of an OCR (Optical Character Recognition) process with detailed
+     * recognition information at the word level. This class extends {@code OcrResult} by
+     * including a list of recognized words, each with additional details.
+     * <p>
+     * The {@code words} property contains a collection of {@code RecognizedWord} objects,
+     * allowing for more granular inspection of the OCR output, such as bounding boxes,
+     * confidence scores, and text content for each recognized word.
+     */
+    public static class OcrResultWords extends OcrResult {
+        public final List<RecognizedWord> words;
+
+        public OcrResultWords(String text, Integer meanConfidence, List<RecognizedWord> words) {
+            super(text, meanConfidence);
+            this.words = (words != null) ? words : new ArrayList<>();
         }
     }
 }

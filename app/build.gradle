@@ -14,8 +14,8 @@ android {
         applicationId "de.schliweb.makeacopy"
         minSdk = 29
         targetSdk = 36
-        versionCode 20301
-        versionName "2.3.1"
+        versionCode 20400
+        versionName "2.4.0"
 
         // Use default AndroidX test runner
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -103,6 +103,12 @@ android {
         buildConfig = true
     }
 
+    // Exclude test assets from APK packaging
+    // test_jpegs are copied to instrumented_test_data before instrumented tests and deleted after (see tasks below)
+    aaptOptions {
+        ignoreAssetsPattern "test_pdfs:test_jpegs"
+    }
+
     sourceSets {
         main {
             assets.srcDirs = [
@@ -110,6 +116,12 @@ android {
                     layout.buildDirectory.dir("generated/assets/licenses").get().asFile
             ]
             jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+        // Add test assets only for debug builds (instrumented tests)
+        debug {
+            assets.srcDirs += [
+                    layout.buildDirectory.dir("generated/assets/test_assets").get().asFile
+            ]
         }
     }
 }
@@ -198,12 +210,49 @@ tasks.named("preBuild").configure {
     dependsOn("copyNotices")
 }
 
-androidComponents {
-    onVariants(selector().withBuildType("release")) { variant ->
-        // Exclude test PDFs from release APK/AAB packaging
-        variant.packaging.resources.excludes.add("assets/test_pdfs/**")
-    }
+// Copy Best model from langpack-latin-best to generated assets directory for instrumented tests
+tasks.register("copyBestModelsForTest", Copy) {
+    description = "Copies the Best Tesseract models from langpack-latin-best for OCR comparison tests"
+    from("$rootDir/langpack-latin-best/src/main/assets/tessdata")
+    into(layout.buildDirectory.dir("generated/assets/test_assets/tessdata_best"))
+}
 
+// Copy test_jpegs to generated assets directory for instrumented tests
+// (test_jpegs is excluded from APK via aaptOptions, so we copy to a generated location with different name)
+tasks.register("copyTestJpegsForTest", Copy) {
+    description = "Copies test JPEGs for instrumented tests"
+    from("$projectDir/src/main/assets/test_jpegs")
+    into(layout.buildDirectory.dir("generated/assets/test_assets/instrumented_test_data"))
+}
+
+// Copy test_pfds to generated assets directory for instrumented tests
+// (test_pdfs is excluded from APK via aaptOptions, so we copy to a generated location with different name)
+tasks.register("copyTestPdfsForTest", Copy) {
+    description = "Copies test PDFs for instrumented tests"
+    from("$projectDir/src/main/assets/test_pdfs")
+    into(layout.buildDirectory.dir("generated/assets/test_assets/instrumented_test_data"))
+}
+
+// Delete test_jpegs and bestmodels from generated assets after instrumented tests
+tasks.register("deleteTestAssetsAfterTest", Delete) {
+    description = "Deletes test assets from generated assets after tests"
+    delete(layout.buildDirectory.dir("generated/assets/test_assets"))
+}
+
+// Wire copy tasks to run before connected Android tests and delete tasks to run after
+// Also ensure mergeDebugAssets depends on copy tasks to avoid implicit dependency errors
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith("connectedDebugAndroidTest") || task.name.startsWith("connectedAndroidTest")) {
+        task.dependsOn("copyBestModelsForTest", "copyTestJpegsForTest", "copyTestPdfsForTest")
+        task.finalizedBy("deleteTestAssetsAfterTest")
+    }
+    // Declare explicit dependency: mergeDebugAssets must run after copy tasks
+    if (task.name == "mergeDebugAssets") {
+        task.dependsOn("copyBestModelsForTest", "copyTestJpegsForTest", "copyTestPdfsForTest")
+    }
+}
+
+androidComponents {
     // Assign per-ABI versionCode: baseVersionCode * 10 + abiCode
     onVariants(selector().all()) { variant ->
         def baseCode = (project.android.defaultConfig.versionCode ?: 1)

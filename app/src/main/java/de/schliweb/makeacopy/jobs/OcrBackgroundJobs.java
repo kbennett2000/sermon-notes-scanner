@@ -100,7 +100,7 @@ public final class OcrBackgroundJobs {
                 } catch (Throwable ignore) {
                 }
                 if (!helper.initTesseract()) throw new RuntimeException("Tesseract init failed");
-                OCRHelper.OcrResultWords res = helper.runOcrWithWords(bmp);
+                OCRHelper.OcrResultWords res = helper.runOcrWithRetry(bmp);
                 String text = (res != null && res.text != null) ? res.text : "";
 
                 File dir = new File(app.getFilesDir(), "scans/" + s.id());

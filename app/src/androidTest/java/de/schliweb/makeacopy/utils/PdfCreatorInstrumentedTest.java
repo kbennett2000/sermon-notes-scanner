@@ -77,7 +77,7 @@ public class PdfCreatorInstrumentedTest {
      */
     @Test
     public void test_All_TestPdfs_Produce_Searchable_TextLayer() throws Exception {
-        String base = "test_pdfs/";
+        String base = "instrumented_test_data/";
         String[] testFiles = {
                 "simple_line.pdf",
                 "vertical_scan.pdf",

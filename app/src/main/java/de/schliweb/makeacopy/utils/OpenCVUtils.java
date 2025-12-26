@@ -3,16 +3,13 @@ package de.schliweb.makeacopy.utils;
 import ai.onnxruntime.*;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.RectF;
-import android.graphics.Paint;
+import android.graphics.*;
 import android.os.Build;
 import android.util.Log;
 import lombok.Getter;
 import org.opencv.android.Utils;
 import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
@@ -582,6 +579,135 @@ public class OpenCVUtils {
         } finally {
             inv.release();
             if (k3 != null) k3.release();
+        }
+
+        // Additional pass: remove very small connected components (likely noise, not text)
+        removeSmallComponents(bw, /*minArea*/ 15);
+    }
+
+    /**
+     * Removes connected components smaller than the specified minimum area.
+     * This helps eliminate small noise artifacts that are too small to be valid characters.
+     *
+     * @param bw      Input binary image of type Mat (CV_8UC1), with pixel values of 0 or 255.
+     *                Text should be black (0) on white (255) background.
+     * @param minArea Minimum area in pixels for a component to be kept.
+     */
+    private static void removeSmallComponents(Mat bw /* CV_8UC1, 0/255 */, int minArea) {
+        if (bw == null || bw.empty() || minArea <= 0) return;
+
+        Mat inv = new Mat();
+        Mat labels = new Mat();
+        Mat stats = new Mat();
+        Mat centroids = new Mat();
+
+        try {
+            // Invert so text becomes white (foreground) for connectedComponents
+            Core.bitwise_not(bw, inv);
+
+            int numLabels = Imgproc.connectedComponentsWithStats(inv, labels, stats, centroids, 8, CvType.CV_32S);
+
+            // Label 0 is background, start from 1
+            for (int label = 1; label < numLabels; label++) {
+                int area = (int) stats.get(label, Imgproc.CC_STAT_AREA)[0];
+                if (area < minArea) {
+                    // Remove this component by setting its pixels to background (0 in inv, 255 in bw)
+                    int left = (int) stats.get(label, Imgproc.CC_STAT_LEFT)[0];
+                    int top = (int) stats.get(label, Imgproc.CC_STAT_TOP)[0];
+                    int width = (int) stats.get(label, Imgproc.CC_STAT_WIDTH)[0];
+                    int height = (int) stats.get(label, Imgproc.CC_STAT_HEIGHT)[0];
+
+                    // Clear pixels belonging to this label in the bounding box
+                    for (int y = top; y < top + height && y < bw.rows(); y++) {
+                        for (int x = left; x < left + width && x < bw.cols(); x++) {
+                            int[] labelVal = new int[1];
+                            labels.get(y, x, labelVal);
+                            if (labelVal[0] == label) {
+                                bw.put(y, x, 255); // Set to white (background)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ignore) {
+            // If connectedComponents fails, skip this optimization
+        } finally {
+            inv.release();
+            labels.release();
+            stats.release();
+            centroids.release();
+        }
+    }
+
+    /**
+     * Clears noise and small artifacts touching the image borders.
+     * This helps remove scanning artifacts, edge noise, and partial characters
+     * that often appear at document edges and cause OCR errors.
+     *
+     * @param bw Input binary image of type Mat (CV_8UC1), with pixel values of 0 or 255.
+     *           It will be modified in-place to clear border-touching components.
+     */
+    private static void clearBorderNoise(Mat bw /* CV_8UC1, 0/255 */) {
+        if (bw == null || bw.empty()) return;
+
+        int w = bw.cols();
+        int h = bw.rows();
+
+        // Define border margin (percentage of image size)
+        int marginX = Math.max(8, (int) (w * 0.015)); // 1.5% of width, min 8px
+        int marginY = Math.max(8, (int) (h * 0.015)); // 1.5% of height, min 8px
+
+        // Use submat and setTo for efficient border clearing
+        try {
+            // Clear top border region
+            if (marginY > 0 && marginY < h) {
+                Mat top = bw.submat(0, marginY, 0, w);
+                top.setTo(new Scalar(255));
+            }
+
+            // Clear bottom border region
+            if (marginY > 0 && h - marginY > 0) {
+                Mat bottom = bw.submat(h - marginY, h, 0, w);
+                bottom.setTo(new Scalar(255));
+            }
+
+            // Clear left border region
+            if (marginX > 0 && marginX < w) {
+                Mat left = bw.submat(0, h, 0, marginX);
+                left.setTo(new Scalar(255));
+            }
+
+            // Clear right border region
+            if (marginX > 0 && w - marginX > 0) {
+                Mat right = bw.submat(0, h, w - marginX, w);
+                right.setTo(new Scalar(255));
+            }
+        } catch (Throwable ignore) {
+            // Fallback: pixel-by-pixel clearing if submat fails
+            for (int y = 0; y < marginY && y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    bw.put(y, x, 255);
+                }
+            }
+            for (int y = h - marginY; y < h; y++) {
+                if (y >= 0) {
+                    for (int x = 0; x < w; x++) {
+                        bw.put(y, x, 255);
+                    }
+                }
+            }
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < marginX && x < w; x++) {
+                    bw.put(y, x, 255);
+                }
+            }
+            for (int y = 0; y < h; y++) {
+                for (int x = w - marginX; x < w; x++) {
+                    if (x >= 0) {
+                        bw.put(y, x, 255);
+                    }
+                }
+            }
         }
     }
 
@@ -1686,6 +1812,19 @@ public class OpenCVUtils {
             Utils.bitmapToMat(src, rgba);
             Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
 
+            // 1b) Inversion detection: if image is predominantly dark (inverted/negative),
+            //     flip it so text becomes dark-on-light (required for OCR)
+            try {
+                double medianVal = Core.mean(gray).val[0];
+                if (medianVal < 128) {
+                    // Image is inverted (white text on black background) - invert it
+                    Core.bitwise_not(gray, gray);
+                    Log.d(TAG, "prepareForOCR: detected inverted image (mean=" + medianVal + "), auto-inverting");
+                }
+            } catch (Throwable ignore) {
+                // If median calculation fails, continue without inversion
+            }
+
             // 2) Low-light handling (reuse existing utility)
             if (isLowLight(gray)) {
                 Mat tmp = rgba.clone();
@@ -1795,6 +1934,36 @@ public class OpenCVUtils {
                         } catch (Throwable ignore) {
                         }
                     }
+                    // Candidate F: Wolf binarization (better for uneven illumination, device only)
+                    if (!isSafeMode()) {
+                        int wolfWin = Math.max(31, ((Math.min(work.width(), work.height()) / 24) | 1));
+                        if (wolfWin % 2 == 0) wolfWin++;
+                        double[] wolfKs = new double[]{0.25, 0.35, 0.45};
+                        for (double kv : wolfKs) {
+                            try {
+                                Mat m = new Mat();
+                                wolfThreshold(work, m, wolfWin, kv);
+                                candidates.add(m);
+                                candNames.add("Wolf w=" + wolfWin + " k=" + kv);
+                            } catch (Throwable ignore) {
+                            }
+                        }
+                    }
+                    // Candidate G: NICK binarization (better for low contrast, device only)
+                    if (!isSafeMode()) {
+                        int nickWin = Math.max(31, ((Math.min(work.width(), work.height()) / 24) | 1));
+                        if (nickWin % 2 == 0) nickWin++;
+                        double[] nickKs = new double[]{-0.10, -0.14, -0.20};
+                        for (double kv : nickKs) {
+                            try {
+                                Mat m = new Mat();
+                                nickThreshold(work, m, nickWin, kv);
+                                candidates.add(m);
+                                candNames.add("NICK w=" + nickWin + " k=" + kv);
+                            } catch (Throwable ignore) {
+                            }
+                        }
+                    }
                     // Pick best by lowest score
                     double bestScore = Double.POSITIVE_INFINITY;
                     int bestIdx = -1;
@@ -1844,20 +2013,17 @@ public class OpenCVUtils {
                 } catch (Throwable ignore) {
                 }
 
-                // 5f) Smart scaling near target glyph size (~22 px median height)
+                // 5f) Super-resolution scaling for small text (~24-32 px target glyph height)
+                // Uses Lanczos interpolation + adaptive sharpening for best OCR quality
                 try {
-                    int targetGlyphPx = 24;
-                    int medH = estimateMedianComponentHeight(bw);
-                    if (medH > 0 && medH < targetGlyphPx) {
-                        double scale = Math.min(2.2, Math.max(1.0, targetGlyphPx / (double) medH));
-                        if (scale > 1.05) {
-                            Mat tmp = new Mat();
-                            Imgproc.resize(bw, tmp, new Size(0, 0), scale, scale, Imgproc.INTER_CUBIC);
-                            tmp.copyTo(bw);
-                            tmp.release();
+                    int targetGlyphPx = 28; // slightly higher target for better recognition
+                    boolean scaled = superResolutionUpscale(bw, targetGlyphPx, /*maxScale*/ 2.5);
+                    if (!scaled) {
+                        // Fallback: ensure minimum resolution if glyph estimation failed
+                        int medH = estimateMedianComponentHeight(bw);
+                        if (medH <= 0) {
+                            ensureMinTextScaleLanczos(bw, /*minLongSide*/ 1900, /*scaleMax*/ 2.2);
                         }
-                    } else if (medH <= 0) {
-                        ensureMinTextScale(bw, /*minLongSide*/ 1900, /*scaleMax*/ 2.2);
                     }
                 } catch (Throwable ignore) {
                 }
@@ -1926,6 +2092,36 @@ public class OpenCVUtils {
     }
 
     /**
+     * Ensures sufficient resolution for OCR using Lanczos interpolation with sharpening.
+     * Higher quality than ensureMinTextScale for text upscaling.
+     *
+     * @param singleChannel the single-channel matrix (CV_8U) to upscale
+     * @param minLongSide   minimum length for the longer side
+     * @param scaleMax      maximum allowed scale factor
+     */
+    private static void ensureMinTextScaleLanczos(Mat singleChannel /* CV_8U */, int minLongSide, double scaleMax) {
+        int w = singleChannel.cols(), h = singleChannel.rows();
+        int longSide = Math.max(w, h);
+        if (longSide >= minLongSide) return;
+
+        double scale = Math.min(scaleMax, (double) minLongSide / longSide);
+        int nw = Math.max(1, (int) Math.round(w * scale));
+        int nh = Math.max(1, (int) Math.round(h * scale));
+
+        Mat tmp = new Mat();
+        // Use INTER_LANCZOS4 for highest quality text upscaling
+        Imgproc.resize(singleChannel, tmp, new Size(nw, nh), 0, 0, Imgproc.INTER_LANCZOS4);
+
+        // Apply sharpening to enhance text edges
+        try {
+            sharpenForOCR(tmp);
+        } catch (Throwable ignore) { /* sharpening is optional */ }
+
+        tmp.copyTo(singleChannel);
+        tmp.release();
+    }
+
+    /**
      * Prepares the given bitmap for OCR processing quickly and robustly using OpenCV.
      * The method applies a series of image preprocessing steps such as grayscale conversion,
      * light enhancement, noise reduction, binarization, and rescaling to ensure the image
@@ -1967,6 +2163,9 @@ public class OpenCVUtils {
             // 5) Remove small disturbances
             despeckleFast(bw);
 
+            // 5b) Clear border noise to remove edge artifacts that cause OCR errors
+            clearBorderNoise(bw);
+
             // 6) Light upscaling if too small (max. ~1.6x)
             upscaleIfNeeded(bw, /*minLongSidePx*/ 1400, /*maxScale*/ 1.6);
 
@@ -1994,6 +2193,7 @@ public class OpenCVUtils {
      * Upscales the given single-channel matrix if its longer side is smaller than the specified minimum length.
      * The scaling factor is determined based on the provided maximum scale and the ratio between the desired
      * minimum long side and the current long side.
+     * Uses Lanczos interpolation for highest quality upscaling, followed by optional sharpening.
      *
      * @param singleChannel the single-channel matrix (CV_8U) that may be upscaled
      * @param minLongSide   the minimum length for the longer side of the matrix
@@ -2009,9 +2209,108 @@ public class OpenCVUtils {
         int nh = Math.max(1, (int) Math.round(h * scale));
 
         Mat tmp = new Mat();
-        Imgproc.resize(singleChannel, tmp, new Size(nw, nh), 0, 0, Imgproc.INTER_CUBIC);
+        // Use INTER_LANCZOS4 for highest quality upscaling (better than INTER_CUBIC for text)
+        Imgproc.resize(singleChannel, tmp, new Size(nw, nh), 0, 0, Imgproc.INTER_LANCZOS4);
+
+        // Apply mild sharpening to enhance text edges after upscaling
+        try {
+            sharpenForOCR(tmp);
+        } catch (Throwable ignore) { /* sharpening is optional */ }
+
         tmp.copyTo(singleChannel);
         tmp.release();
+    }
+
+    /**
+     * Super-resolution upscaling optimized for small text in OCR.
+     * Uses Lanczos interpolation with adaptive sharpening based on estimated glyph size.
+     * This method is more aggressive than upscaleIfNeeded and targets a specific glyph height.
+     *
+     * @param singleChannel     the single-channel matrix (CV_8U) to upscale
+     * @param targetGlyphHeight the target median glyph height in pixels (typically 24-32 for OCR)
+     * @param maxScale          maximum allowed scale factor to prevent memory issues
+     * @return true if upscaling was applied, false otherwise
+     */
+    private static boolean superResolutionUpscale(Mat singleChannel /*CV_8U*/, int targetGlyphHeight, double maxScale) {
+        int medH = estimateMedianComponentHeight(singleChannel);
+        if (medH <= 0 || medH >= targetGlyphHeight) return false;
+
+        double scale = Math.min(maxScale, (double) targetGlyphHeight / medH);
+        if (scale <= 1.05) return false;
+
+        int w = singleChannel.cols(), h = singleChannel.rows();
+        int nw = Math.max(1, (int) Math.round(w * scale));
+        int nh = Math.max(1, (int) Math.round(h * scale));
+
+        Mat tmp = new Mat();
+        try {
+            // Use INTER_LANCZOS4 for highest quality upscaling
+            Imgproc.resize(singleChannel, tmp, new Size(nw, nh), 0, 0, Imgproc.INTER_LANCZOS4);
+
+            // Apply adaptive sharpening - stronger for larger scale factors
+            double sharpenStrength = Math.min(1.5, 0.5 + (scale - 1.0) * 0.5);
+            sharpenForOCRAdaptive(tmp, sharpenStrength);
+
+            tmp.copyTo(singleChannel);
+            return true;
+        } catch (Throwable t) {
+            Log.w(TAG, "superResolutionUpscale failed", t);
+            return false;
+        } finally {
+            tmp.release();
+        }
+    }
+
+    /**
+     * Applies mild unsharp masking to enhance text edges for OCR.
+     * Uses a small Gaussian blur and subtracts it from the original to sharpen.
+     *
+     * @param gray single-channel CV_8U image to sharpen in-place
+     */
+    private static void sharpenForOCR(Mat gray) {
+        sharpenForOCRAdaptive(gray, 1.0);
+    }
+
+    /**
+     * Applies adaptive unsharp masking with configurable strength.
+     * Formula: sharpened = original + strength * (original - blurred)
+     *
+     * @param gray     single-channel CV_8U image to sharpen in-place
+     * @param strength sharpening strength (0.5 = mild, 1.0 = normal, 1.5 = strong)
+     */
+    private static void sharpenForOCRAdaptive(Mat gray, double strength) {
+        if (strength <= 0) return;
+
+        Mat blurred = new Mat();
+        Mat sharpened = new Mat();
+        try {
+            // Small kernel for fine detail preservation
+            Imgproc.GaussianBlur(gray, blurred, new Size(3, 3), 0);
+
+            // Convert to float for precise arithmetic
+            Mat grayF = new Mat();
+            Mat blurredF = new Mat();
+            gray.convertTo(grayF, CvType.CV_32F);
+            blurred.convertTo(blurredF, CvType.CV_32F);
+
+            // sharpened = original + strength * (original - blurred)
+            Mat diff = new Mat();
+            Core.subtract(grayF, blurredF, diff);
+            Core.multiply(diff, new Scalar(strength), diff);
+            Core.add(grayF, diff, sharpened);
+
+            // Clamp to valid range and convert back
+            Core.min(sharpened, new Scalar(255), sharpened);
+            Core.max(sharpened, new Scalar(0), sharpened);
+            sharpened.convertTo(gray, CvType.CV_8U);
+
+            diff.release();
+            grayF.release();
+            blurredF.release();
+        } finally {
+            blurred.release();
+            sharpened.release();
+        }
     }
 
 
@@ -2248,29 +2547,159 @@ public class OpenCVUtils {
         }
     }
 
+    /**
+     * Wolf local adaptive thresholding.
+     * Similar to Sauvola but uses the global maximum standard deviation as R,
+     * making it more robust for images with uneven illumination.
+     * Formula: T(x,y) = mean * (1 + k * ((stddev / R) - 1)) where R = max(stddev) globally
+     *
+     * @param src8u grayscale CV_8U
+     * @param dst   output binary CV_8U (0/255)
+     * @param win   odd window size for local statistics
+     * @param k     typically in [0.2, 0.5]
+     */
+    private static void wolfThreshold(Mat src8u, Mat dst, int win, double k) {
+        if (win % 2 == 0) win++;
+        int btype = CvType.CV_32F;
+        Mat f = new Mat();
+        Mat mean = new Mat();
+        Mat sq = new Mat();
+        Mat meanSq = new Mat();
+        Mat var = new Mat();
+        Mat stddev = new Mat();
+        Mat thresh = new Mat();
+        Mat mask = new Mat();
+        try {
+            src8u.convertTo(f, btype);
+            Imgproc.boxFilter(f, mean, btype, new Size(win, win));
+            Core.multiply(f, f, sq);
+            Imgproc.boxFilter(sq, meanSq, btype, new Size(win, win));
+            // var = E[x^2] - (E[x])^2
+            Core.multiply(mean, mean, var);
+            Core.subtract(meanSq, var, var);
+            Core.max(var, new Scalar(0.0), var);
+            Core.sqrt(var, stddev);
+
+            // Wolf's key difference: R = max(stddev) globally instead of fixed constant
+            Core.MinMaxLocResult mmr = Core.minMaxLoc(stddev);
+            double R = Math.max(1.0, mmr.maxVal); // avoid division by zero
+
+            // Also compute global minimum pixel value for Wolf's full formula
+            Core.MinMaxLocResult mmrSrc = Core.minMaxLoc(f);
+            double minVal = mmrSrc.minVal;
+
+            // Wolf formula: T = (1 - k) * mean + k * minVal + k * (stddev / R) * (mean - minVal)
+            // Simplified variant closer to Sauvola: T = mean * (1 + k * ((stddev / R) - 1))
+            Mat stdDivR = new Mat();
+            Core.divide(stddev, new Scalar(R), stdDivR);
+            Mat tmp = new Mat();
+            Core.subtract(stdDivR, new Scalar(1.0), tmp);
+            Core.multiply(tmp, new Scalar(k), tmp);
+            Core.add(tmp, new Scalar(1.0), tmp);
+            Core.multiply(mean, tmp, thresh);
+
+            // compare f > thresh -> 255 else 0
+            Core.compare(f, thresh, mask, Core.CMP_GT);
+            dst.create(src8u.size(), CvType.CV_8U);
+            dst.setTo(new Scalar(0));
+            dst.setTo(new Scalar(255), mask);
+
+            stdDivR.release();
+            tmp.release();
+        } finally {
+            f.release();
+            mean.release();
+            sq.release();
+            meanSq.release();
+            var.release();
+            stddev.release();
+            thresh.release();
+            mask.release();
+        }
+    }
+
+    /**
+     * NICK (Niblack Improved Contrast K-factor) local adaptive thresholding.
+     * An improved version of Niblack that handles low contrast regions better.
+     * Formula: T(x,y) = mean + k * sqrt(stddev^2 + mean^2)
+     * This avoids the issue of Niblack producing noise in uniform regions.
+     *
+     * @param src8u grayscale CV_8U
+     * @param dst   output binary CV_8U (0/255)
+     * @param win   odd window size for local statistics
+     * @param k     typically in [-0.2, -0.1] (negative values for dark text on light background)
+     */
+    private static void nickThreshold(Mat src8u, Mat dst, int win, double k) {
+        if (win % 2 == 0) win++;
+        int btype = CvType.CV_32F;
+        Mat f = new Mat();
+        Mat mean = new Mat();
+        Mat sq = new Mat();
+        Mat meanSq = new Mat();
+        Mat var = new Mat();
+        Mat thresh = new Mat();
+        Mat mask = new Mat();
+        try {
+            src8u.convertTo(f, btype);
+            Imgproc.boxFilter(f, mean, btype, new Size(win, win));
+            Core.multiply(f, f, sq);
+            Imgproc.boxFilter(sq, meanSq, btype, new Size(win, win));
+            // var = E[x^2] - (E[x])^2
+            Core.multiply(mean, mean, var);
+            Core.subtract(meanSq, var, var);
+            Core.max(var, new Scalar(0.0), var);
+
+            // NICK formula: T = mean + k * sqrt(var + mean^2)
+            // This is equivalent to: T = mean + k * sqrt(stddev^2 + mean^2)
+            Mat meanSquared = new Mat();
+            Core.multiply(mean, mean, meanSquared);
+            Mat sumVarMeanSq = new Mat();
+            Core.add(var, meanSquared, sumVarMeanSq);
+            Mat sqrtTerm = new Mat();
+            Core.sqrt(sumVarMeanSq, sqrtTerm);
+
+            // thresh = mean + k * sqrtTerm
+            Mat kTimesRoot = new Mat();
+            Core.multiply(sqrtTerm, new Scalar(k), kTimesRoot);
+            Core.add(mean, kTimesRoot, thresh);
+
+            // compare f > thresh -> 255 else 0
+            Core.compare(f, thresh, mask, Core.CMP_GT);
+            dst.create(src8u.size(), CvType.CV_8U);
+            dst.setTo(new Scalar(0));
+            dst.setTo(new Scalar(255), mask);
+
+            meanSquared.release();
+            sumVarMeanSq.release();
+            sqrtTerm.release();
+            kTimesRoot.release();
+        } finally {
+            f.release();
+            mean.release();
+            sq.release();
+            meanSq.release();
+            var.release();
+            thresh.release();
+            mask.release();
+        }
+    }
+
     // --- Lightweight text orientation estimation (preview-time) ---
 
     /**
      * Result of {@link #estimateTextOrientation(Bitmap)}.
      * bucket is 0 or 90 (degrees), representing a coarse orientation class.
      * confidence in [0..1], where higher means a clearer separation.
+     *
+     * @param bucketDeg  0 or 90
+     * @param confidence 0..1
      */
-    @Getter
-    public static class OrientationEstimate {
-        /**
-         * 0 or 90
-         */
-        private final int bucketDeg;
-        /**
-         * 0..1
-         */
-        private final double confidence;
-
-        public OrientationEstimate(int bucketDeg, double confidence) {
-            this.bucketDeg = (bucketDeg == 90) ? 90 : 0;
-            this.confidence = Math.max(0.0, Math.min(1.0, confidence));
+        public record OrientationEstimate(int bucketDeg, double confidence) {
+            public OrientationEstimate(int bucketDeg, double confidence) {
+                this.bucketDeg = (bucketDeg == 90) ? 90 : 0;
+                this.confidence = Math.max(0.0, Math.min(1.0, confidence));
+            }
         }
-    }
 
     /**
      * Estimate whether text runs mostly horizontally (0° bucket) or vertically (90° bucket).

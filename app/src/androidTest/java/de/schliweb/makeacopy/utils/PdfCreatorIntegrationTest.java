@@ -130,4 +130,87 @@ public class PdfCreatorIntegrationTest {
 
         }
     }
+
+    /**
+     * Tests that words on the same visual line but with slightly varying Y positions
+     * are correctly ordered in the PDF text layer.
+     * <p>
+     * This test reproduces the issue where text selection in PDFs was shuffled because
+     * words with small Y-coordinate differences were incorrectly grouped into different
+     * "lines" during PDF creation.
+     * <p>
+     * The test creates words that simulate a typical OCR result where words on the same
+     * line may have slight vertical variations (e.g., due to font baseline differences,
+     * subscripts, or OCR inaccuracies).
+     *
+     * @throws Exception if any operation encounters an issue.
+     */
+    @Test
+    public void testTextLayerWithVaryingYPositionsOnSameLine() throws Exception {
+        // Dummy Bitmap
+        Bitmap bmp = Bitmap.createBitmap(1200, 800, Bitmap.Config.ARGB_8888);
+        bmp.eraseColor(Color.WHITE);
+
+        // Simulate words on the same visual line with slight Y variations
+        // Word heights are ~40px, but Y positions vary by up to 15px
+        List<RecognizedWord> words = new ArrayList<>();
+
+        // First line: "In a bid to diversify"
+        // Words have slight Y variations (within typical line height tolerance)
+        words.add(new RecognizedWord("In", new RectF(50, 100, 80, 140), 95f));
+        words.add(new RecognizedWord("a", new RectF(90, 105, 110, 145), 95f));      // +5px Y offset
+        words.add(new RecognizedWord("bid", new RectF(120, 98, 170, 138), 95f));    // -2px Y offset
+        words.add(new RecognizedWord("to", new RectF(180, 103, 210, 143), 95f));    // +3px Y offset
+        words.add(new RecognizedWord("diversify", new RectF(220, 100, 320, 140), 95f));
+
+        // Second line: "its economy away"
+        // Clearly on a different line (Y ~200)
+        words.add(new RecognizedWord("its", new RectF(50, 200, 90, 240), 95f));
+        words.add(new RecognizedWord("economy", new RectF(100, 205, 200, 245), 95f));  // +5px Y offset
+        words.add(new RecognizedWord("away", new RectF(210, 198, 280, 238), 95f));     // -2px Y offset
+
+        // Output file
+        File outFile = new File(context.getCacheDir(), "ocr_varying_y_test.pdf");
+        if (outFile.exists()) outFile.delete();
+
+        // Create PDF
+        PdfCreator.createSearchablePdf(
+                context,
+                bmp,
+                words,
+                android.net.Uri.fromFile(outFile),
+                80,
+                true
+        );
+
+        assertTrue("PDF not created", outFile.exists());
+
+        // Extract text with PDFBox
+        try (FileInputStream fis = new FileInputStream(outFile);
+             PDDocument doc = PDDocument.load(fis)) {
+
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(doc).trim();
+
+            System.out.println("[DEBUG_LOG] Extracted text: >>>" + text + "<<<");
+
+            // Normalize whitespace for comparison
+            String norm = text.replaceAll("[\\s\\u00A0]+", " ").trim();
+            System.out.println("[DEBUG_LOG] Normalized text: >>>" + norm + "<<<");
+
+            // Verify first line words appear in correct order
+            assertTrue("First line should contain 'In a bid to diversify' in order",
+                    norm.contains("In a bid to diversify"));
+
+            // Verify second line words appear in correct order
+            assertTrue("Second line should contain 'its economy away' in order",
+                    norm.contains("its economy away"));
+
+            // Verify the lines appear in correct order (first line before second line)
+            int firstLinePos = norm.indexOf("In a bid");
+            int secondLinePos = norm.indexOf("its economy");
+            assertTrue("First line should appear before second line",
+                    firstLinePos < secondLinePos);
+        }
+    }
 }

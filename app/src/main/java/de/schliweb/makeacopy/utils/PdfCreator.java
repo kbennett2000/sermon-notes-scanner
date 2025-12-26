@@ -34,8 +34,6 @@ import java.util.List;
  * creation of both single-page and multi-page searchable PDFs.
  */
 public class PdfCreator {
-    public enum BwMode {ROBUST, CLASSIC, OCR_ROBUST}
-
     private static final String TAG = "PdfCreator";
     // Text sizing (relative to OCR box height in image space)
     private static final float TEXT_SIZE_RATIO = 0.70f;
@@ -249,7 +247,6 @@ public class PdfCreator {
         return fonts;
     }
 
-
     /**
      * Copies a file from the assets directory to the cache directory. If the file already exists
      * in the cache directory and has a non-zero length, it is returned as-is. Otherwise, the file
@@ -363,8 +360,6 @@ public class PdfCreator {
     private static void addTextLayerImageSpace(PDPageContentStream cs, List<RecognizedWord> words, List<PDFont> fonts, int imageWidth, int imageHeight) throws Exception {
         if (words == null || words.isEmpty()) return;
 
-        final float EPS_Y = 6f;
-
         // --- 1) Clean and validate ---
         List<RecognizedWord> clean = new ArrayList<>(words.size());
         for (RecognizedWord w : words) {
@@ -403,59 +398,86 @@ public class PdfCreator {
         }
         if (clean.isEmpty()) return;
 
+        // Compute dynamic tolerance based on median word height.
+        // Words within this Y-distance are considered on the same line.
+        final float lineToleranceY = Math.max(6f, medianHeight(clean));
+
         // Stable tie-breaker: original index
         java.util.IdentityHashMap<RecognizedWord, Integer> idx = new java.util.IdentityHashMap<>();
         for (int i = 0; i < clean.size(); i++) idx.put(clean.get(i), i);
 
-        // Precompute sort keys (bucket + coordinates)
-        class Key {
-            final RecognizedWord w;
-            final int bucket;
-            final float left;
-            final float top;
-
-            Key(RecognizedWord w) {
-                this.w = w;
-                RectF r = w.getBoundingBox();
-                float yCenter = (r.top + r.bottom) * 0.5f;
-                // Bucket = line (top→bottom), robust against ±EPS_Y
-                this.bucket = (int) Math.floor(yCenter / EPS_Y);
-                this.left = r.left;
-                this.top = r.top;
-            }
-        }
-        List<Key> keys = new ArrayList<>(clean.size());
-        for (RecognizedWord w : clean) keys.add(new Key(w));
-
-        // --- 2) Total order: bucket → left → top → originalIndex ---
-        keys.sort((ka, kb) -> {
-            int c = Integer.compare(ka.bucket, kb.bucket);
+        // --- 2) Sort words by Y-center first, then by X (left-to-right) ---
+        // This ensures we process words top-to-bottom, left-to-right
+        clean.sort((a, b) -> {
+            float yCenterA = (a.getBoundingBox().top + a.getBoundingBox().bottom) * 0.5f;
+            float yCenterB = (b.getBoundingBox().top + b.getBoundingBox().bottom) * 0.5f;
+            int c = Float.compare(yCenterA, yCenterB);
             if (c != 0) return c;
-            c = Float.compare(ka.left, kb.left);
+            c = Float.compare(a.getBoundingBox().left, b.getBoundingBox().left);
             if (c != 0) return c;
-            c = Float.compare(ka.top, kb.top);
-            if (c != 0) return c;
-            return Integer.compare(idx.get(ka.w), idx.get(kb.w));
+            return Integer.compare(idx.get(a), idx.get(b));
         });
 
-        // --- 3) Cluster into lines – same bucket logic! ---
+        // --- 3) Cluster into lines using proximity-based grouping ---
+        // Words are on the same line if their Y-centers are within lineToleranceY
+        // of the line's reference Y (first word's Y-center in that line)
         List<List<RecognizedWord>> lines = new ArrayList<>();
-        int currentBucket = Integer.MIN_VALUE;
-        for (Key k : keys) {
-            if (k.bucket != currentBucket) {
-                lines.add(new ArrayList<>());
-                currentBucket = k.bucket;
+        for (RecognizedWord w : clean) {
+            float yCenter = (w.getBoundingBox().top + w.getBoundingBox().bottom) * 0.5f;
+
+            // Try to find an existing line where this word fits
+            boolean added = false;
+            for (List<RecognizedWord> line : lines) {
+                if (line.isEmpty()) continue;
+                // Use the average Y-center of the line for comparison
+                float lineYSum = 0f;
+                for (RecognizedWord lw : line) {
+                    lineYSum += (lw.getBoundingBox().top + lw.getBoundingBox().bottom) * 0.5f;
+                }
+                float lineYAvg = lineYSum / line.size();
+
+                if (Math.abs(yCenter - lineYAvg) <= lineToleranceY) {
+                    line.add(w);
+                    added = true;
+                    break;
+                }
             }
-            lines.get(lines.size() - 1).add(k.w);
+
+            if (!added) {
+                // Start a new line
+                List<RecognizedWord> newLine = new ArrayList<>();
+                newLine.add(w);
+                lines.add(newLine);
+            }
         }
 
-        // --- 4) Render: line L→R; invisible/selectable ---
+        // Sort lines by their average Y position (top to bottom)
+        lines.sort((lineA, lineB) -> {
+            float avgYA = 0f, avgYB = 0f;
+            for (RecognizedWord w : lineA) avgYA += (w.getBoundingBox().top + w.getBoundingBox().bottom) * 0.5f;
+            for (RecognizedWord w : lineB) avgYB += (w.getBoundingBox().top + w.getBoundingBox().bottom) * 0.5f;
+            avgYA /= lineA.size();
+            avgYB /= lineB.size();
+            return Float.compare(avgYA, avgYB);
+        });
+
+        // --- 4) Render: line L→R or R→L (for RTL scripts); invisible/selectable ---
         for (List<RecognizedWord> line : lines) {
             if (line.isEmpty()) continue;
 
-            // within the line: left→right, then top→bottom (stable)
+            // Detect if this line is predominantly RTL (Arabic/Persian/Hebrew)
+            boolean isRtl = isRtlLine(line);
+
+            // within the line: left→right for LTR, right→left for RTL
             line.sort((a, b) -> {
-                int c = Float.compare(a.getBoundingBox().left, b.getBoundingBox().left);
+                int c;
+                if (isRtl) {
+                    // RTL: sort right→left (descending X)
+                    c = Float.compare(b.getBoundingBox().left, a.getBoundingBox().left);
+                } else {
+                    // LTR: sort left→right (ascending X)
+                    c = Float.compare(a.getBoundingBox().left, b.getBoundingBox().left);
+                }
                 if (c != 0) return c;
                 c = Float.compare(a.getBoundingBox().top, b.getBoundingBox().top);
                 if (c != 0) return c;
@@ -596,7 +618,6 @@ public class PdfCreator {
         return viaCvGray; // may be null → caller will handle
     }
 
-
     /**
      * Calculates the pixel dimensions of an A4 paper size at a given DPI (dots per inch).
      *
@@ -649,6 +670,51 @@ public class PdfCreator {
      */
     private static float clamp(float v, float min, float max) {
         return Math.max(min, Math.min(max, v));
+    }
+
+    /**
+     * Determines if a line of recognized words is predominantly RTL (Right-to-Left) script.
+     * This is used for BiDi sorting in PDF text layers to ensure correct reading order
+     * for Arabic, Persian, Hebrew, and other RTL scripts.
+     *
+     * @param line The list of recognized words in the line.
+     * @return true if the line contains predominantly RTL characters, false otherwise.
+     */
+    private static boolean isRtlLine(List<RecognizedWord> line) {
+        if (line == null || line.isEmpty()) return false;
+
+        int rtlCount = 0;
+        int ltrCount = 0;
+
+        for (RecognizedWord w : line) {
+            String text = w.getText();
+            if (text == null) continue;
+
+            for (int i = 0; i < text.length(); ) {
+                int cp = text.codePointAt(i);
+                byte directionality = Character.getDirectionality(cp);
+
+                // RTL scripts: Arabic, Hebrew, etc.
+                if (directionality == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
+                        directionality == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC ||
+                        directionality == Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING ||
+                        directionality == Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE) {
+                    rtlCount++;
+                }
+                // LTR scripts: Latin, etc.
+                else if (directionality == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
+                        directionality == Character.DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING ||
+                        directionality == Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE) {
+                    ltrCount++;
+                }
+                // Neutral characters (numbers, punctuation) are ignored
+
+                i += Character.charCount(cp);
+            }
+        }
+
+        // Line is RTL if it has more RTL characters than LTR characters
+        return rtlCount > ltrCount;
     }
 
     /**
@@ -840,6 +906,8 @@ public class PdfCreator {
             return null;
         }
     }
+
+    public enum BwMode {ROBUST, CLASSIC, OCR_ROBUST}
 
     /**
      * An interface for listening to progress updates during a multi-step process,

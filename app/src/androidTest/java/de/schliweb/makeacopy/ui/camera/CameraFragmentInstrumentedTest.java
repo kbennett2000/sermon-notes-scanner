@@ -47,8 +47,8 @@ public class CameraFragmentInstrumentedTest {
 
         ImageCapture ic = ref.get();
         assertNotNull("ImageCapture should be initialized", ic);
-        assertEquals("Capture mode must be MINIMIZE_LATENCY",
-                ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY,
+        assertEquals("Capture mode must be MAXIMIZE_QUALITY",
+                ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY,
                 ic.getCaptureMode());
     }
 }

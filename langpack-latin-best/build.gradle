@@ -52,11 +52,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    aaptOptions { noCompress 'traineddata' }
 
     buildFeatures {
         buildConfig = false
         viewBinding = false
+    }
+    androidResources {
+        noCompress 'traineddata'
     }
 }
 

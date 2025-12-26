@@ -482,6 +482,12 @@ public class OCRFragment extends Fragment {
             case "tha":
                 two = "th";
                 break;
+            case "fas":
+                two = "fa";
+                break;
+            case "ara":
+                two = "ar";
+                break;
             case "chi_sim":
                 return appendVariantLabel("Chinese (Simplified)", code);
             case "chi_tra":
@@ -515,6 +521,19 @@ public class OCRFragment extends Fragment {
      * treat it as Best; otherwise Fast.
      */
     private String determineModelVariant(String code) {
+        return isUsingBestModel(code) ? "Best" : "Fast";
+    }
+
+    /**
+     * Check whether the given language code uses a Best model (imported larger model)
+     * rather than the built-in Fast asset.
+     * Heuristic: if a file exists in no_backup/tessdata whose size is larger than the asset's size (or asset absent),
+     * treat it as Best; otherwise Fast.
+     *
+     * @param code The language code (e.g., "eng", "deu")
+     * @return true if Best model is detected, false for Fast model
+     */
+    private boolean isUsingBestModel(String code) {
         try {
             java.io.File dir = de.schliweb.makeacopy.utils.OCRHelper.getTessdataDir(requireContext());
             java.io.File local = new java.io.File(dir, code + ".traineddata");
@@ -543,11 +562,11 @@ public class OCRFragment extends Fragment {
 
             // Decide Best vs Fast with small margin to avoid equality due to copy
             if (localSize > 0 && (assetSize < 0 || localSize > assetSize + 1024)) {
-                return "Best";
+                return true;
             }
         } catch (Throwable ignoreAll) {
         }
-        return "Fast";
+        return false;
     }
 
     /**
@@ -614,7 +633,8 @@ public class OCRFragment extends Fragment {
         try {
             android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
             ocrAutoRotateApply = p.getBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, false);
-        } catch (Throwable ignore) {}
+        } catch (Throwable ignore) {
+        }
         cbOcrAuto.setChecked(ocrAutoRotateApply);
 
         AlertDialog dlg = new AlertDialog.Builder(requireContext())
@@ -632,7 +652,8 @@ public class OCRFragment extends Fragment {
                     try {
                         android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
                         p.edit().putBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, cbOcrAuto.isChecked()).apply();
-                    } catch (Throwable ignore) { }
+                    } catch (Throwable ignore) {
+                    }
 
                     CharSequence[] modes = new CharSequence[]{
                             getString(R.string.ocr_mode_original),
@@ -892,6 +913,15 @@ public class OCRFragment extends Fragment {
                         Log.e(TAG, LP + "Failed to set language " + lang, t);
                     }
 
+                    // Detect if Best model is used and configure OCRHelper accordingly BEFORE init
+                    try {
+                        boolean useBest = isUsingBestModel(lang);
+                        localHelper.setUseBestModelSettings(useBest);
+                        Log.d(TAG, LP + "Best model settings enabled=" + useBest + " for lang=" + lang);
+                    } catch (Throwable t) {
+                        Log.w(TAG, LP + "Failed to detect/set Best model settings", t);
+                    }
+
                     long tInit0 = System.nanoTime();
                     boolean initOk = false;
                     try {
@@ -920,7 +950,8 @@ public class OCRFragment extends Fragment {
                     try {
                         android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
                         allowOcrAutoRotate = p.getBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, false);
-                    } catch (Throwable ignore) { }
+                    } catch (Throwable ignore) {
+                    }
 
                     // When disabled, restrict to a single attempt at the current orientation (extra=0)
                     int[] extraRots = allowOcrAutoRotate ? new int[]{0, 90, 180, 270} : new int[]{0};
@@ -964,7 +995,7 @@ public class OCRFragment extends Fragment {
                         Log.d(TAG, LP + "Transform: src=" + tx.srcW() + "x" + tx.srcH() + ", dst=" + tx.dstW() + "x" + tx.dstH() + ", sx=" + tx.scaleX() + ", sy=" + tx.scaleY());
 
                         // Run OCR
-                        OCRHelper.OcrResultWords r = localHelper.runOcrWithWords(inputForOcr);
+                        OCRHelper.OcrResultWords r = localHelper.runOcrWithRetry(inputForOcr);
 
                         if (ocrCancelled.get()) {
                             Log.w(TAG, LP + "Cancelled after OCR run (extraRot=" + extra + ")");
@@ -1026,14 +1057,33 @@ public class OCRFragment extends Fragment {
                                 // Only persist the computed rotation if the feature is enabled; otherwise reset to 0
                                 cropViewModel.setBestOcrRotationDegrees(finalAllowOcrAutoRotate ? bestRotFinal : 0);
                             }
-                        } catch (Throwable ignore) {}
+                        } catch (Throwable ignore) {
+                        }
                     });
 
                     long durMs = (System.nanoTime() - t0) / 1_000_000L;
-                    String finalText = (bestResult.text == null || bestResult.text.trim().isEmpty())
+                    String ocrText = (bestResult.text == null || bestResult.text.trim().isEmpty())
                             ? getString(R.string.ocr_results_will_appear_here)
                             : bestResult.text;
-                    List<RecognizedWord> words = (bestResult.words != null) ? bestResult.words : new ArrayList<>();
+                    List<RecognizedWord> ocrWords = (bestResult.words != null) ? bestResult.words : new ArrayList<>();
+
+                    // Apply post-processing to correct common OCR errors (including dictionary-based correction)
+                    try {
+                        ocrWords = OCRPostProcessor.processWithDictionary(ocrWords, lang, requireContext());
+                        // Also correct the full text
+                        if (ocrText != null && !ocrText.equals(getString(R.string.ocr_results_will_appear_here))) {
+                            ocrText = OCRPostProcessor.processTextWithDictionary(ocrText, lang, requireContext());
+                        }
+                        // Log quality statistics
+                        OCRPostProcessor.OcrQualityStats stats = OCRPostProcessor.analyzeQuality(ocrWords);
+                        Log.d(TAG, LP + "OCR Quality: " + stats);
+                    } catch (Throwable t) {
+                        Log.w(TAG, LP + "Post-processing failed", t);
+                    }
+
+                    // Create final variables for lambda
+                    final String finalText = ocrText;
+                    final List<RecognizedWord> words = ocrWords;
 
                     int appliedExtraRot = bestRot; // for logging only
                     Integer bestMeanConf = bestResult.meanConfidence;
@@ -1055,14 +1105,24 @@ public class OCRFragment extends Fragment {
                                     // Add bestRotFinal to the current user rotation in CropViewModel
                                     if (cropViewModel != null) {
                                         Integer cur = null;
-                                        try { cur = cropViewModel.getUserRotationDegrees().getValue(); } catch (Throwable ignore) {}
+                                        try {
+                                            cur = cropViewModel.getUserRotationDegrees().getValue();
+                                        } catch (Throwable ignore) {
+                                        }
                                         int curDeg = (cur == null) ? 0 : cur.intValue();
                                         int newDeg = ((curDeg + bestRotFinal) % 360 + 360) % 360;
-                                        try { cropViewModel.setUserRotationDegrees(newDeg); } catch (Throwable ignore) {}
+                                        try {
+                                            cropViewModel.setUserRotationDegrees(newDeg);
+                                        } catch (Throwable ignore) {
+                                        }
                                         // We have applied the OCR suggestion; clear the helper to avoid re-applying later.
-                                        try { cropViewModel.setBestOcrRotationDegrees(0); } catch (Throwable ignore) {}
+                                        try {
+                                            cropViewModel.setBestOcrRotationDegrees(0);
+                                        } catch (Throwable ignore) {
+                                        }
                                     }
-                                } catch (Throwable ignore) { }
+                                } catch (Throwable ignore) {
+                                }
                             }
                             if (apply) {
                                 // If we know the score, show rotation + score combined; otherwise, show rotation only.
@@ -1075,7 +1135,8 @@ public class OCRFragment extends Fragment {
                                 // Auto‑Rotate not applied, but still useful to show the OCR score.
                                 UIUtils.showToast(requireContext(), getString(R.string.ocr_score, score), Toast.LENGTH_SHORT);
                             }
-                        } catch (Throwable ignore) { }
+                        } catch (Throwable ignore) {
+                        }
                     });
 
                 } catch (Throwable e) {

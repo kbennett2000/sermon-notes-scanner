@@ -63,10 +63,12 @@ MakeACopy supports OCR via Tesseract. You can choose the OCR language during the
 Supported out of the box:
 - English (eng), German (deu), French (fra), Italian (ita), Spanish (spa), Portuguese (por), Dutch (nld), Polish (pol), Czech (ces), Slovak (slk), Hungarian (hun), Romanian (ron), Danish (dan), Norwegian (nor), Swedish (swe), Russian (rus), Thai (tha)
 - Chinese (Simplified) — chi_sim, Chinese (Traditional) — chi_tra
+- Arabic (ara), Persian/Farsi (fas)
 
 Notes:
 - All OCR runs fully offline on-device.
 - For Chinese, MakeACopy includes appropriate CJK fonts for better PDF text embedding.
+- For Arabic and Persian, MakeACopy includes the Noto Naskh Arabic font for proper RTL (right-to-left) text rendering in PDF exports.
 
 ## Screenshots
 
@@ -150,6 +152,19 @@ MakeACopy follows the Single-Activity + Multi-Fragment pattern with MVVM archite
 | OCR | tess-two (Tesseract JNI) | Apache 2.0 |
 | PDF | Android PdfDocument, pdfbox-android | Apache 2.0 |
 | UI | Material Components | Apache 2.0 |
+| OCR Dictionaries | [FrequencyWords](https://github.com/hermitdave/FrequencyWords) | CC BY-SA 4.0 |
+
+### OCR Dictionaries
+
+MakeACopy uses word frequency dictionaries for OCR post-processing to improve text recognition accuracy.
+
+**Source:** [FrequencyWords by Hermit Dave](https://github.com/hermitdave/FrequencyWords)  
+**License:** [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)  
+**Data Origin:** Wikipedia word frequency lists
+
+The dictionaries are used to validate and correct OCR results by checking recognized words against known word lists. This helps reduce common OCR errors while maintaining fully offline operation.
+
+Included dictionaries cover 21 languages: Arabic (ara), Czech (ces), Danish (dan), German (deu), English (eng), Persian (fas), French (fra), Hungarian (hun), Italian (ita), Dutch (nld), Norwegian (nor), Polish (pol), Portuguese (por), Romanian (ron), Russian (rus), Slovak (slk), Spanish (spa), Swedish (swe), Thai (tha), Chinese Simplified (chi_sim), and Chinese Traditional (chi_tra).
 
 ## Submodules
 

@@ -9,8 +9,8 @@ package de.schliweb.makeacopy.utils;
  */
 public class OCRWhitelist {
 
-    // German
-    public static final String DE = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyzäöüß0123456789.,:;-?!()[]/\"' ";
+    // German (includes common symbols: %, €, §, +, =, <, >, &, @, #, *, _, |, \, {, }, ~)
+    public static final String DE = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyzäöüß0123456789.,:;-?!()[]/\"' %€§+=<>&@#*_|\\{}~";
 
     // English
     public static final String EN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,:;-?!()[]/\"' ";
