@@ -8,6 +8,13 @@ MakeACopy treats privacy and offline operation as technical design decisions, no
 The app works fully offline, is open source, and avoids tracking or cloud services because this results in a simpler, more robust, and more auditable system.
 Users are encouraged to evaluate MakeACopy based on its concrete features and implementation rather than on positioning or narratives.
 
+### App Size Note
+
+To ensure fully offline operation, MakeACopy bundles OCR language models, fonts, and image processing components locally.
+This significantly increases the app size, but avoids any cloud dependencies or on-demand downloads.
+
+**100 MB are not a sign of excess, but of consistency.**
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/de.schliweb.makeacopy/)
