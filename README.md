@@ -41,6 +41,7 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
 - **Perspective Correction**: Adjust and crop documents with manual or automatic perspective correction
 - **Image Enhancement**: Apply filters (grayscale, contrast, sharpening)
 - **OCR**: Offline text recognition with Tesseract (fast models included, optional best models via Language-Pack APKs)
+- **OCR Review**: Interactive review and correction of OCR results with word-level editing, dictionary-based suggestions, confidence highlighting, and re-OCR for individual words
 - **PDF Export**: Save as searchable PDF with recognized text
 - **JPEG Export**: Export scans as high-quality JPEG images (configurable quality, color/BW)
 - **Multi-page Scanning**: Combine multiple pages into one document; reorder and manage pages before export

@@ -126,6 +126,7 @@
         <li><strong>Perspektivkorrektur</strong>: Anpassen und Zuschneiden von Dokumenten mit manueller oder automatischer Perspektivkorrektur</li>
         <li><strong>Bildverbesserung</strong>: Filter anwenden (Graustufen, Kontrast, Schärfen)</li>
         <li><strong>OCR</strong>: Offline-Texterkennung mit Tesseract</li>
+        <li><strong>OCR Review</strong>: Interaktive Überprüfung und Korrektur von OCR-Ergebnissen mit Wort-Level-Bearbeitung, wörterbuchbasierten Vorschlägen, Konfidenz-Hervorhebung und Re-OCR für einzelne Wörter</li>
         <li><strong>PDF-Export</strong>: Speichern als durchsuchbares PDF mit erkanntem Text</li>
         <li><strong>JPEG-Export</strong>: Export als hochwertige JPEG-Bilder (Qualität, Farbe/Schwarzweiß konfigurierbar)</li>
         <li><strong>Mehrseitige Scans</strong>: Mehrere Seiten zu einem Dokument zusammenführen; Seiten vor dem Export verwalten und anordnen</li>
@@ -385,6 +386,49 @@ appverifier verify MakeACopy-vX.Y.Z.apk
             - „Sprachpakete entdecken“: Installierte Language‑Pack‑Apps finden (z. B. „MakeACopy OCR Latin (Best)“) und Modelle daraus importieren. <br>
             - „Best‑Modell löschen“: Ein zuvor importiertes Best‑Modell der aktuell gewählten Sprache entfernen (das integrierte schnelle Modell bleibt erhalten). <br>
             <em>Tipp:</em> Die App bringt kompakte, schnelle Modelle mit. Für höhere Genauigkeit kannst du optional größere „Best“-Modelle per Language‑Pack installieren (Link oben auf dieser Seite). Eine Internetverbindung ist dafür nicht erforderlich.
+        </li>
+    </ul>
+
+    <h3 id="faq-ocr-review">OCR Review</h3>
+    <ul>
+        <li><strong>Was ist OCR Review?</strong><br>
+            OCR Review ist ein interaktiver Bildschirm, auf dem du den erkannten Text vor dem Export überprüfen und korrigieren kannst. Jedes erkannte Wort wird als Box über dem Dokument angezeigt, mit farbcodierter Konfidenz-Hervorhebung (grün = hohe Konfidenz, rot = niedrige Konfidenz).
+        </li>
+        <li><strong>Wie öffne ich OCR Review?</strong><br>
+            Nach Abschluss der OCR-Verarbeitung tippe auf die Schaltfläche „Review" (Stift-Symbol) im OCR-Bildschirm. Dies öffnet den Review-Bildschirm, in dem du die Ergebnisse prüfen und bearbeiten kannst.
+        </li>
+        <li><strong>Welche Ansichtsmodi gibt es?</strong><br>
+            Der Review-Bildschirm hat drei Tabs:<br>
+            - <strong>Layout</strong>: Zeigt Wort-Boxen auf neutralem Hintergrund. Tippe auf ein Wort zum Bearbeiten, halte gedrückt für weitere Optionen.<br>
+            - <strong>Document</strong>: Zeigt das Original-Scan-Bild mit darüberliegenden Wort-Boxen. Nützlich zum Vergleichen der OCR-Ergebnisse mit dem tatsächlichen Dokument.<br>
+            - <strong>Text</strong>: Eine reine Texteditor-Ansicht, in der du den gesamten Text direkt bearbeiten kannst.
+        </li>
+        <li id="faq-ocr-review-tap-vs-longpress"><strong>Was ist der Unterschied zwischen Tippen und langem Drücken auf ein Wort?</strong><br>
+            <strong>Tippen (kurzer Klick)</strong>: Öffnet den Inline-Bearbeitungsdialog, in dem du:<br>
+            - Den Worttext direkt bearbeiten kannst<br>
+            - Wörterbuch-basierte Vorschläge siehst (falls verfügbar) und auf einen Vorschlag tippen kannst, um ihn anzuwenden<br>
+            <br>
+            <strong>Langes Drücken (gedrückt halten)</strong>: Öffnet ein Kontextmenü mit zusätzlichen Optionen:<br>
+            - <em>Bearbeiten…</em>: Wie Tippen — öffnet den Inline-Bearbeitungsdialog<br>
+            - <em>Mit nächstem zusammenführen</em>: Kombiniert dieses Wort mit dem folgenden Wort zu einem<br>
+            - <em>Teilen</em>: Teilt das Wort in der Mitte in zwei separate Wörter<br>
+            - <em>Löschen</em>: Entfernt das Wort vollständig<br>
+            - <em>Groß-/Kleinschreibung</em>: Ändert die Schreibweise (GROSSBUCHSTABEN, kleinbuchstaben, Titel-Schreibweise)<br>
+            - <em>Sprache…</em>: Legt die Sprache für dieses spezifische Wort fest und führt optional die OCR nur für dieses Wort erneut aus
+        </li>
+        <li><strong>Was sind die Wörterbuch-Vorschläge?</strong><br>
+            Wenn du auf ein Wort tippst, um es zu bearbeiten, zeigt die App Vorschläge aus dem Wörterbuch basierend auf der Ähnlichkeit zum aktuellen Wort. Dies hilft, häufige OCR-Fehler zu korrigieren. Tippe auf einen Vorschlags-Chip, um ihn anzuwenden. Vorschläge werden nach Levenshtein-Ähnlichkeit sortiert, mit spezieller Gewichtung für typische OCR-Verwechslungen (0↔O, 1↔l, 5↔S usw.).
+        </li>
+        <li><strong>Was macht „Re-OCR"?</strong><br>
+            Im Sprach-Dialog (langes Drücken → Sprache…) kannst du eine andere Sprache auswählen und auf „Re-OCR" tippen. Dies führt die Texterkennung nur für dieses einzelne Wort mit der ausgewählten Sprache erneut aus. Nützlich, wenn ein Wort in einer anderen Schrift (z. B. Persisch in einem englischen Dokument) falsch erkannt wurde.
+        </li>
+        <li><strong>Wie speichere ich meine Änderungen?</strong><br>
+            Tippe auf die Schaltfläche „Speichern" am unteren Rand des Review-Bildschirms. Dies übernimmt deine Korrekturen in das OCR-Ergebnis. Wenn du auf „Zurück" oder die X-Schaltfläche tippst und ungespeicherte Änderungen vorliegen, wirst du gefragt, ob du sie verwerfen möchtest.
+        </li>
+        <li><strong>Was bedeuten die farbcodierten Boxen?</strong><br>
+            - <strong>Grüner/türkiser Rand</strong>: Hohe Konfidenz — die OCR-Engine ist ziemlich sicher bei diesem Wort<br>
+            - <strong>Roter Rand</strong>: Niedrige Konfidenz (unter 60 %) — das Wort sollte manuell überprüft werden<br>
+            - <strong>Gelber Rand</strong>: Aktuell ausgewähltes Wort
         </li>
     </ul>
 

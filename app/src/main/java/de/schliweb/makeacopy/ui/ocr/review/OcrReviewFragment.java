@@ -1291,8 +1291,26 @@ public class OcrReviewFragment extends Fragment {
                     propagateAndAutosave();
                 })
                 .create();
-        dialog.setOnShowListener(d ->
-                de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext()));
+        dialog.setOnShowListener(d -> {
+            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext());
+            // Force horizontal button layout to prevent stacking on narrow screens
+            try {
+                android.widget.Button btnPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                android.widget.Button btnNegative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                android.widget.Button btnNeutral = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+                // Reduce text size slightly to fit all buttons horizontally
+                float smallerSize = 12 * getResources().getDisplayMetrics().density;
+                if (btnPositive != null) btnPositive.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, smallerSize);
+                if (btnNegative != null) btnNegative.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, smallerSize);
+                if (btnNeutral != null) btnNeutral.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, smallerSize);
+                // Reduce padding to save space
+                int smallPadding = (int) (8 * getResources().getDisplayMetrics().density);
+                if (btnPositive != null) btnPositive.setPadding(smallPadding, 0, smallPadding, 0);
+                if (btnNegative != null) btnNegative.setPadding(smallPadding, 0, smallPadding, 0);
+                if (btnNeutral != null) btnNeutral.setPadding(smallPadding, 0, smallPadding, 0);
+            } catch (Throwable ignore) {
+            }
+        });
         dialog.show();
     }
 

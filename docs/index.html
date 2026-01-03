@@ -126,6 +126,7 @@
         <li><strong>Perspective Correction</strong>: Adjust and crop documents with manual or automatic perspective correction</li>
         <li><strong>Image Enhancement</strong>: Apply filters (grayscale, contrast, sharpening)</li>
         <li><strong>OCR</strong>: Offline text recognition with Tesseract</li>
+        <li><strong>OCR Review</strong>: Interactive review and correction of OCR results with word-level editing, dictionary-based suggestions, confidence highlighting, and re-OCR for individual words</li>
         <li><strong>PDF Export</strong>: Save as searchable PDF with recognized text</li>
         <li><strong>JPEG Export</strong>: Export scans as high-quality JPEG images (configurable quality, color/BW)</li>
         <li><strong>Multi-page Scanning</strong>: Combine multiple pages into one document; reorder and manage pages before export</li>
@@ -387,6 +388,49 @@ appverifier verify MakeACopy-vX.Y.Z.apk
             - “Discover language packs”: Find installed Language‑Pack apps (e.g., “MakeACopy OCR Latin (Best)”) and import models from them. <br>
             - “Delete Best model”: Remove a previously imported Best model for the currently selected language (the built‑in fast model remains available). <br>
             <em>Tip:</em> The app ships with compact, fast models. For higher accuracy you can optionally install larger “Best” models via a Language‑Pack (link above on this page). No internet connection is required.
+        </li>
+    </ul>
+
+    <h3 id="faq-ocr-review">OCR Review</h3>
+    <ul>
+        <li><strong>What is OCR Review?</strong><br>
+            OCR Review is an interactive screen where you can check and correct the recognized text before exporting. It shows each recognized word as a box overlaid on the document, with color-coded confidence highlighting (green = high confidence, red = low confidence).
+        </li>
+        <li><strong>How do I open OCR Review?</strong><br>
+            After OCR processing is complete, tap the "Review" button (pen icon) in the OCR screen. This opens the Review screen where you can inspect and edit the results.
+        </li>
+        <li><strong>What are the different view modes?</strong><br>
+            The Review screen has three tabs:<br>
+            - <strong>Layout</strong>: Shows word boxes overlaid on a neutral background. Tap a word to edit it, long-press for more options.<br>
+            - <strong>Document</strong>: Shows the original scanned image with word boxes overlaid. Useful for comparing OCR results with the actual document.<br>
+            - <strong>Text</strong>: A plain text editor view where you can edit the full text directly.
+        </li>
+        <li id="faq-ocr-review-tap-vs-longpress"><strong>What is the difference between tap and long-press on a word?</strong><br>
+            <strong>Tap (short click)</strong>: Opens the inline edit dialog where you can:<br>
+            - Edit the word text directly<br>
+            - See dictionary-based suggestions (if available) and tap a suggestion to apply it<br>
+            <br>
+            <strong>Long-press (hold)</strong>: Opens a context menu with additional options:<br>
+            - <em>Edit…</em>: Same as tap — opens the inline edit dialog<br>
+            - <em>Merge with next</em>: Combines this word with the following word into one<br>
+            - <em>Split</em>: Splits the word in the middle into two separate words<br>
+            - <em>Delete</em>: Removes the word entirely<br>
+            - <em>Case</em>: Change capitalization (UPPERCASE, lowercase, Title Case)<br>
+            - <em>Language…</em>: Set the language for this specific word and optionally re-run OCR for just this word
+        </li>
+        <li><strong>What are the dictionary suggestions?</strong><br>
+            When you tap a word to edit it, the app shows suggestions from the dictionary based on similarity to the current word. This helps correct common OCR errors. Tap a suggestion chip to apply it. Suggestions are ranked by Levenshtein similarity with special weighting for typical OCR confusions (0↔O, 1↔l, 5↔S, etc.).
+        </li>
+        <li><strong>What does "Re-OCR" do?</strong><br>
+            In the language dialog (long-press → Language…), you can select a different language and tap "Re-OCR". This re-runs text recognition for just that single word using the selected language. Useful when a word in a different script (e.g., Persian in an English document) was misrecognized.
+        </li>
+        <li><strong>How do I save my changes?</strong><br>
+            Tap the "Save" button at the bottom of the Review screen. This applies your corrections to the OCR result. If you tap "Back" or the X button with unsaved changes, you will be asked whether to discard them.
+        </li>
+        <li><strong>What do the color-coded boxes mean?</strong><br>
+            - <strong>Green/teal border</strong>: High confidence — the OCR engine is fairly certain about this word<br>
+            - <strong>Red border</strong>: Low confidence (below 60%) — the word may need manual review<br>
+            - <strong>Yellow border</strong>: Currently selected word
         </li>
     </ul>
 
