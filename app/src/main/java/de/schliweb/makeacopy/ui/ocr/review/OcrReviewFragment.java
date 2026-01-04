@@ -1491,6 +1491,7 @@ public class OcrReviewFragment extends Fragment {
                 de.schliweb.makeacopy.utils.OCRHelper ocrHelper = new de.schliweb.makeacopy.utils.OCRHelper(ctx);
                 ocrHelper.setLanguage(newLang);
                 // Use PSM_SINGLE_WORD for single word recognition
+                // TODO
                 ocrHelper.setPageSegMode(com.googlecode.tesseract.android.TessBaseAPI.PageSegMode.PSM_SINGLE_WORD);
 
                 if (ocrHelper.initTesseract()) {

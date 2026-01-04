@@ -1,4 +1,4 @@
-MakeACopy 2.4.1 (Release Candidate)
+MakeACopy 2.4.1 (Release)
 - Multi-language OCR: Select up to 2 languages simultaneously for documents with mixed scripts (e.g., Persian + English, Arabic + French, German + English).
 - Combined dictionaries: OCR post-processing now uses combined dictionaries from all selected languages for improved error correction in multilingual documents.
 - Improved multi-language support: Enhanced handling of RTL + LTR script combinations and proper whitelist management for mixed-script recognition.
@@ -8,6 +8,3 @@ MakeACopy 2.4.1 (Release Candidate)
   - Confidence updates: After Re-OCR, the confidence score is recalculated and displayed with color-coded highlighting.
   - Language persistence: Word-level language assignments are now correctly saved and restored when reopening the Review screen.
   - UI polish: Improved button spacing in the inline edit dialog.
-
-Notes
-- This is a Release Candidate build; feedback on camera stability and preview behavior is especially welcome.
