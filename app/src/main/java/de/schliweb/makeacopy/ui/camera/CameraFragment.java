@@ -2125,6 +2125,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             cameraViewModel.setImagePath(null);
             cameraViewModel.setImageUri(uri);
 
+            // Keep behavior consistent with camera scan: always reset OCR state for a newly imported image.
+            OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
+            ocrVm.resetForNewImage();
+
             // Navigate to next step depending on preference
             if (isAdded()) {
                 boolean skipOcr = false;
@@ -2136,10 +2140,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     skipCropping = prefs.getBoolean("skip_cropping", false);
                 }
                 int dest = skipCropping ? (skipOcr ? R.id.navigation_export : R.id.navigation_ocr) : R.id.navigation_crop;
-                if (skipCropping && !skipOcr) {
-                    OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
-                    ocrVm.resetForNewImage();
-                }
                 try {
                     Navigation.findNavController(requireView()).navigate(dest);
                 } catch (IllegalArgumentException | IllegalStateException ignored) {
@@ -2451,6 +2451,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             cameraViewModel.setImageUri(null);  // No direct URI
         }
 
+        // Keep behavior consistent with camera scan: reset OCR state for a newly imported PDF page.
+        OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
+        ocrVm.resetForNewImage();
+
         // Navigation based on settings
         boolean skipOcr = false;
         boolean skipCropping = false;
@@ -2462,10 +2466,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
 
         int dest = skipCropping ? (skipOcr ? R.id.navigation_export : R.id.navigation_ocr) : R.id.navigation_crop;
-        if (skipCropping && !skipOcr) {
-            OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
-            ocrVm.resetForNewImage();
-        }
 
         try {
             Navigation.findNavController(requireView()).navigate(dest);
