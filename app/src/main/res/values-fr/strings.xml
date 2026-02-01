@@ -33,6 +33,7 @@
     <string name="include_ocr_text">Inclure le texte OCR</string>
     <string name="language">Langue :</string>
     <string name="ocr_results_will_appear_here">Les résultats OCR apparaîtront ici</string>
+    <string name="ocr_no_text_detected">Aucun texte détecté</string>
     <string name="no_image_loaded_capture_an_image_first">Aucune image chargée. Capturez d’abord une image.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Ajustez les coins du trapèze pour sélectionner la zone à recadrer, puis touchez le bouton Recadrer.</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Vérifiez votre image recadrée. Touchez Suivant pour continuer ou Retour pour réessayer.</string>

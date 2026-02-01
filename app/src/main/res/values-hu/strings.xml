@@ -32,6 +32,7 @@
     <string name="include_ocr_text">OCR szöveg beillesztése</string>
     <string name="language">Nyelv:</string>
     <string name="ocr_results_will_appear_here">Az OCR eredményei itt jelennek meg</string>
+    <string name="ocr_no_text_detected">Nem észlelhető szöveg</string>
     <string name="no_image_loaded_capture_an_image_first">Nincs kép betöltve. Először készítsen egy képet.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Állítsa be a trapéz sarkait a kivágandó terület kijelöléséhez, majd nyomja meg a Kivágás gombot.</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Ellenőrizze a kivágott képet. Nyomja meg a Tovább gombot a folytatáshoz vagy a Vissza gombot az újrakivágáshoz.</string>

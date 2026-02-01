@@ -32,6 +32,7 @@
     <string name="include_ocr_text">OCR-Text einfügen</string>
     <string name="language">Sprache:</string>
     <string name="ocr_results_will_appear_here">OCR-Ergebnisse werden hier angezeigt</string>
+    <string name="ocr_no_text_detected">Kein Text erkannt</string>
     <string name="no_image_loaded_capture_an_image_first">Kein Bild geladen. Nimm zuerst ein Bild auf.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Passe die Trapezecken an, um den zuzuschneidenden Bereich auszuwählen, und tippe dann auf Zuschneiden.</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Überprüfe dein zugeschnittenes Bild. Tippe auf Weiter, um fortzufahren, oder auf Zurück, um es noch einmal zu versuchen.</string>

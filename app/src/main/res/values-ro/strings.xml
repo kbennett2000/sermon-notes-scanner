@@ -32,6 +32,7 @@
     <string name="include_ocr_text">Include text OCR</string>
     <string name="language">Limbă:</string>
     <string name="ocr_results_will_appear_here">Rezultatele OCR vor apărea aici</string>
+    <string name="ocr_no_text_detected">Nu a fost detectat niciun text</string>
     <string name="no_image_loaded_capture_an_image_first">Nicio imagine încărcată. Capturează mai întâi o imagine.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Ajustează colțurile trapezului pentru a selecta zona de decupat, apoi apasă butonul Decupare.</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Verifică imaginea decupată. Atinge „Următor” pentru a continua sau „Înapoi” pentru a reîncerca.</string>

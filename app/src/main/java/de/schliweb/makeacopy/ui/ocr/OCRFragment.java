@@ -996,6 +996,11 @@ public class OCRFragment extends Fragment {
 
                     // Fresh Tesseract per job
                     localHelper = new OCRHelper(requireContext().getApplicationContext());
+                    // 1 job = 1 engine instance. No automatic reinitialization per run.
+                    try {
+                        localHelper.setReinitPerRun(false);
+                    } catch (Throwable ignore) {
+                    }
 
                     String lang = ocrViewModel.getLanguage().getValue();
                     if (lang == null || lang.isEmpty()) lang = "eng";
@@ -1118,30 +1123,57 @@ public class OCRFragment extends Fragment {
                         // Early-exit: if the first attempt (extra=0) is already strong enough, skip other rotations
                         if (extra == 0) {
                             int mc0 = (r.meanConfidence != null ? r.meanConfidence : 0);
-                            if (mc0 >= OCR_EARLY_EXIT_MEAN_CONF_THRESHOLD) {
+                            boolean hasWords0 = r.words != null && !r.words.isEmpty();
+                            boolean hasText0 = r.text != null && !r.text.trim().isEmpty();
+                            boolean hasContent0 = hasWords0 || hasText0;
+                            if (hasContent0 && mc0 >= OCR_EARLY_EXIT_MEAN_CONF_THRESHOLD) {
                                 bestResult = r;
                                 bestTx = tx;
                                 bestRot = 0;
-                                Log.d(TAG, LP + "Early-exit: meanConf=" + mc0 + " >= " + OCR_EARLY_EXIT_MEAN_CONF_THRESHOLD + ", skipping further rotations");
+                                Log.d(TAG, LP + "Early-exit: meanConf=" + mc0 + " >= " + OCR_EARLY_EXIT_MEAN_CONF_THRESHOLD
+                                        + ", hasContent=true, words=" + (r.words != null ? r.words.size() : 0)
+                                        + ", textLen=" + (r.text != null ? r.text.length() : 0)
+                                        + ", skipping further rotations");
                                 break;
                             }
                         }
 
-                        // Choose best by mean confidence, then by text length as tiebreaker
+                        // Choose best deterministically:
+                        // 1) content presence (words/text)
+                        // 2) mean confidence
+                        // 3) content size (words count, then text length)
                         boolean take;
                         if (bestResult == null) {
                             take = true;
                         } else {
-                            float mc = (r.meanConfidence != null ? r.meanConfidence : 0f);
-                            float bestMc = (bestResult.meanConfidence != null ? bestResult.meanConfidence : 0f);
-                            if (mc > bestMc + 0.01f) { // small epsilon
-                                take = true;
-                            } else if (Math.abs(mc - bestMc) <= 0.01f) {
-                                int len = (r.text != null ? r.text.length() : 0);
-                                int bestLen = (bestResult.text != null ? bestResult.text.length() : 0);
-                                take = len > bestLen;
+                            boolean hasWords = r.words != null && !r.words.isEmpty();
+                            boolean hasText = r.text != null && !r.text.trim().isEmpty();
+                            boolean hasContent = hasWords || hasText;
+
+                            boolean bestHasWords = bestResult.words != null && !bestResult.words.isEmpty();
+                            boolean bestHasText = bestResult.text != null && !bestResult.text.trim().isEmpty();
+                            boolean bestHasContent = bestHasWords || bestHasText;
+
+                            if (hasContent != bestHasContent) {
+                                take = hasContent; // non-empty beats empty
                             } else {
-                                take = false;
+                                float mc = (r.meanConfidence != null ? r.meanConfidence : 0f);
+                                float bestMc = (bestResult.meanConfidence != null ? bestResult.meanConfidence : 0f);
+                                if (mc > bestMc + 0.01f) { // small epsilon
+                                    take = true;
+                                } else if (Math.abs(mc - bestMc) <= 0.01f) {
+                                    int wc = (r.words != null ? r.words.size() : 0);
+                                    int bestWc = (bestResult.words != null ? bestResult.words.size() : 0);
+                                    if (wc != bestWc) {
+                                        take = wc > bestWc;
+                                    } else {
+                                        int len = (r.text != null ? r.text.length() : 0);
+                                        int bestLen = (bestResult.text != null ? bestResult.text.length() : 0);
+                                        take = len > bestLen;
+                                    }
+                                } else {
+                                    take = false;
+                                }
                             }
                         }
 
@@ -1174,8 +1206,10 @@ public class OCRFragment extends Fragment {
                     });
 
                     long durMs = (System.nanoTime() - t0) / 1_000_000L;
+                    // Never persist UI placeholder strings as OCR output.
+                    // Persist only real OCR output; use "" when OCR returned nothing.
                     String ocrText = (bestResult.text == null || bestResult.text.trim().isEmpty())
-                            ? getString(R.string.ocr_results_will_appear_here)
+                            ? ""
                             : bestResult.text;
                     List<RecognizedWord> ocrWords = (bestResult.words != null) ? bestResult.words : new ArrayList<>();
 
@@ -1193,9 +1227,7 @@ public class OCRFragment extends Fragment {
                             ocrWords = OCRPostProcessor.processWithDictionary(ocrWords, lang, requireContext());
                             // Derive text from processed words instead of processing text separately
                             ocrText = OCRPostProcessor.wordsToText(ocrWords);
-                            if (ocrText == null || ocrText.trim().isEmpty()) {
-                                ocrText = getString(R.string.ocr_results_will_appear_here);
-                            }
+                            if (ocrText == null || ocrText.trim().isEmpty()) ocrText = "";
                             // Log quality statistics
                             OCRPostProcessor.OcrQualityStats stats = OCRPostProcessor.analyzeQuality(ocrWords);
                             Log.d(TAG, LP + "OCR Quality: " + stats);
@@ -1206,9 +1238,7 @@ public class OCRFragment extends Fragment {
                         Log.d(TAG, LP + "OCR post-processing disabled by user preference");
                         // Even without post-processing, derive text from words for consistency
                         ocrText = OCRPostProcessor.wordsToText(ocrWords); // TODO
-                        if (ocrText == null || ocrText.trim().isEmpty()) {
-                            ocrText = getString(R.string.ocr_results_will_appear_here);
-                        }
+                        if (ocrText == null || ocrText.trim().isEmpty()) ocrText = "";
                     }
 
                     // Create final variables for lambda
@@ -1217,7 +1247,13 @@ public class OCRFragment extends Fragment {
 
                     int appliedExtraRot = bestRot; // for logging only
                     Integer bestMeanConf = bestResult.meanConfidence;
-                    Log.d(TAG, LP + "Best rotation extra=" + appliedExtraRot + "°, meanConf=" + bestMeanConf + ", textLen=" + (bestResult.text == null ? 0 : bestResult.text.length()));
+                    boolean bestHasWords = bestResult.words != null && !bestResult.words.isEmpty();
+                    boolean bestHasText = bestResult.text != null && !bestResult.text.trim().isEmpty();
+                    boolean bestHasContent = bestHasWords || bestHasText;
+                    Log.d(TAG, LP + "Best rotation extra=" + appliedExtraRot + "°, meanConf=" + bestMeanConf
+                            + ", hasContent=" + bestHasContent
+                            + ", words=" + (bestResult.words != null ? bestResult.words.size() : 0)
+                            + ", textLen=" + (bestResult.text == null ? 0 : bestResult.text.length()));
 
                     final Integer meanConfFinal = bestMeanConf;
                     runOnUiThreadSafe(() -> {
@@ -1227,7 +1263,19 @@ public class OCRFragment extends Fragment {
                         try {
                             android.content.SharedPreferences p = requireContext().getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
                             boolean apply = p.getBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, false);
-                            int score = (meanConfFinal != null ? meanConfFinal : -1);
+                            // UX guard: never show a high confidence score for an empty OCR result.
+                            // Determine content based on the final values persisted to the ViewModel.
+                            boolean hasWordsFinal = words != null && !words.isEmpty();
+                            boolean hasTextFinal = finalText != null && !finalText.trim().isEmpty();
+                            boolean hasContentFinal = hasWordsFinal || hasTextFinal;
+                            int score = hasContentFinal ? (meanConfFinal != null ? meanConfFinal : -1) : -1;
+
+                            // UX hint: If no text was detected, show a neutral toast once per OCR run.
+                            // In this case we also suppress any score/rotation toast to avoid multiple toasts.
+                            if (!hasContentFinal) {
+                                UIUtils.showToast(requireContext(), getString(R.string.ocr_no_text_detected), Toast.LENGTH_SHORT);
+                                return;
+                            }
                             // When enabled, also apply the detected rotation to the current scan for export,
                             // respecting the unified rotation model (apply in-memory; persist will bake).
                             if (apply) {

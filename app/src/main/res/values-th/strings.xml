@@ -32,6 +32,7 @@
     <string name="include_ocr_text">รวมข้อความ OCR</string>
     <string name="language">ภาษา:</string>
     <string name="ocr_results_will_appear_here">ผลลัพธ์ OCR จะแสดงที่นี่</string>
+    <string name="ocr_no_text_detected">ไม่พบข้อความ</string>
     <string name="no_image_loaded_capture_an_image_first">ยังไม่มีรูปภาพ โหลดรูปภาพก่อน</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">ปรับมุมสี่เหลี่ยมคางหมูเพื่อเลือกพื้นที่ที่ต้องการครอบตัด แล้วแตะปุ่มครอบตัด</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">ตรวจสอบรูปที่ครอบตัด แตะ “ถัดไป” เพื่อดำเนินการต่อ หรือ “ย้อนกลับ” เพื่อลองใหม่</string>

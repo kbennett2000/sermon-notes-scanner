@@ -32,6 +32,7 @@
     <string name="include_ocr_text">Includi testo OCR</string>
     <string name="language">Lingua:</string>
     <string name="ocr_results_will_appear_here">I risultati OCR verranno visualizzati qui</string>
+    <string name="ocr_no_text_detected">Nessun testo rilevato</string>
     <string name="no_image_loaded_capture_an_image_first">Nessuna immagine caricata. Acquisisci prima un’immagine.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Regola gli angoli del trapezio per selezionare l’area da ritagliare, quindi tocca il pulsante Ritaglia.</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Controlla l’immagine ritagliata. Tocca Avanti per procedere o Indietro per riprovare.</string>

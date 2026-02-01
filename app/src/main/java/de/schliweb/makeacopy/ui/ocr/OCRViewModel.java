@@ -189,8 +189,21 @@ public class OCRViewModel extends ViewModel {
         OcrUiState s = mState.getValue();
         if (s == null) return;
         if (words == null) words = new ArrayList<>();
-        mState.setValue(new OcrUiState(false, true, s.language, text != null ? text : "", words, durationMs, meanConf, tx != null ? tx : s.transform, null, null, false));
-        Log.d(TAG, "finishSuccess: " + (text != null ? Math.min(text.length(), 100) : 0) + " chars, words=" + words.size() + ", ms=" + durationMs + ", conf=" + meanConf);
+        String safeText = text != null ? text : "";
+// Normalize confidence for empty results (no text, no words).
+// This prevents a “high-confidence but empty” result from being treated as successful content in the state.
+
+        boolean hasWords = !words.isEmpty();
+        boolean hasText = safeText != null && !safeText.trim().isEmpty();
+        boolean hasContent = hasWords || hasText;
+        Integer normalizedConf = hasContent ? meanConf : 0;
+        if (!hasContent) {
+            safeText = "";
+            words = new ArrayList<>();
+        }
+
+        mState.setValue(new OcrUiState(false, true, s.language, safeText, words, durationMs, normalizedConf, tx != null ? tx : s.transform, null, null, false));
+        Log.d(TAG, "finishSuccess: " + Math.min(safeText.length(), 100) + " chars, words=" + words.size() + ", ms=" + durationMs + ", conf=" + normalizedConf);
     }
 
     /**

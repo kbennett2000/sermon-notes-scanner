@@ -33,6 +33,7 @@
     <string name="include_ocr_text">شامل‌کردن متن OCR</string>
     <string name="language">زبان:</string>
     <string name="ocr_results_will_appear_here">نتایج OCR اینجا نمایش داده می‌شود</string>
+    <string name="ocr_no_text_detected">هیچ متنی شناسایی نشد</string>
     <string name="no_image_loaded_capture_an_image_first">هیچ تصویری بارگذاری نشده است. ابتدا یک تصویر بگیرید.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">گوشه‌های ذوزنقه را تنظیم کنید تا ناحیهٔ برش انتخاب شود، سپس دکمهٔ «برش» را بزنید.</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">تصویر برش‌خورده را بررسی کنید. برای ادامه «بعدی» را بزنید یا برای تلاش دوباره «بازگشت» را انتخاب کنید.</string>

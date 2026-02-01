@@ -33,6 +33,7 @@
     <string name="include_ocr_text">تضمين نص OCR</string>
     <string name="language">اللغة:</string>
     <string name="ocr_results_will_appear_here">ستظهر نتائج OCR هنا</string>
+    <string name="ocr_no_text_detected">لم يتم اكتشاف أي نص</string>
     <string name="no_image_loaded_capture_an_image_first">لم يتم تحميل أي صورة. التقط صورة أولًا.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">اضبط زوايا شبه المنحرف لتحديد منطقة الاقتصاص، ثم اضغط على زر «اقتصاص».</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">راجع الصورة المقصوصة. اضغط على «التالي» للمتابعة أو «رجوع» لإعادة المحاولة.</string>

@@ -613,22 +613,70 @@ public class OCRHelper {
         }
     }
 
+    private static boolean isEmptyResult(OcrResultWords r) {
+        if (r == null) return true;
+        boolean hasWords = r.words != null && !r.words.isEmpty();
+        if (hasWords) return false;
+        String t = r.text;
+        return t == null || t.trim().isEmpty();
+    }
+
     public OcrResultWords runOcrWithRetry(Bitmap bitmap) {
         logAllVariables();
         OcrResultWords result = runOcrWithWords(bitmap);
 
-        // Bei niedriger Konfidenz mit anderen Einstellungen wiederholen
-        if (result.meanConfidence != null && result.meanConfidence < 50) {
-            Log.i(TAG, "Low confidence (" + result.meanConfidence + "), retrying with PSM_AUTO");
+        boolean baseEmpty = isEmptyResult(result);
+        boolean lowConf = result.meanConfidence != null && result.meanConfidence < 50;
+
+        // Deterministic fallback retry when either confidence is low OR result is empty.
+        // This covers the observed edge-case: high meanConfidence but empty text/words.
+        if (lowConf || baseEmpty) {
             int originalPsm = pageSegMode;
-            setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
+
+            int retryPsm;
+            if (baseEmpty && originalPsm == TessBaseAPI.PageSegMode.PSM_AUTO) {
+                retryPsm = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
+            } else {
+                retryPsm = TessBaseAPI.PageSegMode.PSM_AUTO;
+            }
+
+            Log.i(TAG, "runOcrWithRetry: triggering retry, lowConf=" + lowConf + ", baseEmpty=" + baseEmpty
+                    + ", baseMc=" + result.meanConfidence + ", psm=" + originalPsm + " -> " + retryPsm);
+            setPageSegMode(retryPsm);
 
             OcrResultWords retryResult = runOcrWithWords(bitmap);
             setPageSegMode(originalPsm);
 
-            if (retryResult.meanConfidence != null &&
-                    retryResult.meanConfidence > result.meanConfidence + 10) {
+            boolean retryEmpty = isEmptyResult(retryResult);
+
+            // Hard guard: empty result must never replace a non-empty one
+            if (!baseEmpty && retryEmpty) {
+                return result;
+            }
+            if (baseEmpty && !retryEmpty) {
                 return retryResult;
+            }
+
+            Log.i(TAG, "runOcrWithRetry: baseEmpty=" + baseEmpty + ", retryEmpty=" + retryEmpty
+                    + ", baseMc=" + result.meanConfidence + ", retryMc=" + retryResult.meanConfidence);
+
+            // Same emptiness class -> compare by confidence, then by content size
+            float baseMc = (result.meanConfidence != null) ? result.meanConfidence : 0f;
+            float retryMc = (retryResult.meanConfidence != null) ? retryResult.meanConfidence : 0f;
+            if (retryMc > baseMc + 10f) {
+                return retryResult;
+            }
+            if (Math.abs(retryMc - baseMc) <= 10f) {
+                int baseWords = (result.words != null) ? result.words.size() : 0;
+                int retryWords = (retryResult.words != null) ? retryResult.words.size() : 0;
+                if (retryWords > baseWords) {
+                    return retryResult;
+                }
+                int baseLen = (result.text != null) ? result.text.length() : 0;
+                int retryLen = (retryResult.text != null) ? retryResult.text.length() : 0;
+                if (retryLen > baseLen) {
+                    return retryResult;
+                }
             }
         }
         return result;

@@ -32,6 +32,7 @@
     <string name="include_ocr_text">包含识别文本</string>
     <string name="language">语言：</string>
     <string name="ocr_results_will_appear_here">识别结果将在此显示</string>
+    <string name="ocr_no_text_detected">未检测到文本</string>
     <string name="no_image_loaded_capture_an_image_first">尚未加载图像。请先拍摄图像。</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">调整四边形的角点以选择裁剪区域，然后点按“裁剪”。</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">请检查已裁剪的图像。点按“下一步”继续，或点按“返回”重试。</string>

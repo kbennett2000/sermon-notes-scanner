@@ -32,6 +32,7 @@
     <string name="include_ocr_text">Inkluder OCR-tekst</string>
     <string name="language">Språk:</string>
     <string name="ocr_results_will_appear_here">OCR-resultater vises her</string>
+    <string name="ocr_no_text_detected">Ingen tekst oppdaget</string>
     <string name="no_image_loaded_capture_an_image_first">Ingen bilder lastet inn. Ta et bilde først.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Juster hjørnene på trapeset for å velge området som skal beskjæres, og trykk deretter på Beskjær-knappen.</string>
     <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Se gjennom det beskårne bildet ditt. Trykk Neste for å fortsette eller Tilbake for å prøve igjen.</string>
