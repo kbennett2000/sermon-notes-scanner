@@ -2,3 +2,20 @@
 plugins {
     alias(libs.plugins.android.application) apply false
 }
+
+// Dependency substitution for tesseract4android JitPack custom domain issue
+// See: https://github.com/adaptech-cz/Tesseract4Android/issues/86
+// JitPack's custom domain path (cz.adaptech) doesn't work reliably in CI,
+// so we redirect to the working GitHub path (com.github.adaptech-cz)
+subprojects {
+    configurations.all {
+        resolutionStrategy.dependencySubstitution {
+            substitute(module("cz.adaptech.tesseract4android:tesseract4android-openmp"))
+                .using(module("com.github.adaptech-cz.Tesseract4Android:tesseract4android-openmp:4.9.0"))
+                .because("JitPack custom domain path doesn't work reliably")
+            substitute(module("cz.adaptech.tesseract4android:tesseract4android"))
+                .using(module("com.github.adaptech-cz.Tesseract4Android:tesseract4android:4.9.0"))
+                .because("JitPack custom domain path doesn't work reliably")
+        }
+    }
+}
