@@ -329,7 +329,7 @@
     <string name="a11y_no_document_detected">ไม่พบเอกสาร</string>
     <string name="a11y_orientation_portrait_tip">ดูเหมือนเป็นโหมดตั้ง โทรศัพท์ในแนวตั้งมักเหมาะที่สุดสำหรับหน้ากระดาษที่มีความสูง</string>
     <string name="a11y_orientation_landscape_tip">ดูเหมือนเป็นโหมดแนวนอน ลองถือโทรศัพท์ในแนวนอนสำหรับหน้ากระดาษที่กว้าง</string>
-    <string name="a11y_crop_summary_detected">การวิเคราะห์ภาพที่บันทึก: พบเอกสาร คุณภาพประมาณ %1$d%%</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">การวิเคราะห์ภาพที่บันทึก: ไม่พบเอกสาร</string>
     <string name="accessibility_mode_label">โหมดการเข้าถึง</string>
     <string name="a11y_camera_ready">กล้องพร้อมแล้ว แตะสองครั้งที่ “สแกน” เพื่อถ่ายภาพ</string>

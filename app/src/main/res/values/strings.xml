@@ -318,17 +318,19 @@
     <string name="a11y_hint_move_down">Move down</string>
     <string name="a11y_hint_move_closer">Closer to the surface</string>
     <string name="a11y_hint_move_back">Further from the surface</string>
+    <string name="a11y_hint_too_far">Move closer. Document is too far away.</string>
     <string name="a11y_hint_tilt_left">Tilt left</string>
     <string name="a11y_hint_tilt_right">Tilt right</string>
     <string name="a11y_hint_tilt_forward">Tilt forward</string>
     <string name="a11y_hint_tilt_back">Tilt back</string>
+    <string name="a11y_hold_still">Hold still</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document detected – ready to capture.</string>
     <string name="a11y_no_document_detected">No document detected.</string>
     <string name="a11y_orientation_portrait_tip">This looks like portrait. Holding the phone in portrait usually fits best for tall pages.</string>
     <string name="a11y_orientation_landscape_tip">This looks like landscape. Try holding the phone in landscape for wide pages.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected, quality about %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Captured image analysis: no document detected.</string>
     <string name="accessibility_mode_label">Accessibility Mode</string>
     <string name="a11y_camera_ready">Camera ready. Double tap Scan to capture.</string>

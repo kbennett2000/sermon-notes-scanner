@@ -325,7 +325,7 @@
     <string name="a11y_no_document_detected">Geen document gedetecteerd.</string>
     <string name="a11y_orientation_portrait_tip">Dit lijkt portretstand. Het vasthouden van de telefoon in portretmodus werkt meestal het beste voor hoge pagina’s.</string>
     <string name="a11y_orientation_landscape_tip">Dit lijkt liggend. Probeer de telefoon in liggende stand te houden voor brede pagina’s.</string>
-    <string name="a11y_crop_summary_detected">Analyse van de vastgelegde afbeelding: document gedetecteerd, kwaliteit ongeveer %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Analyse van de vastgelegde afbeelding: geen document gedetecteerd.</string>
     <string name="accessibility_mode_label">Toegankelijkheidsmodus</string>
     <string name="a11y_camera_ready">Camera klaar. Dubbel tik op Scannen om vast te leggen.</string>

@@ -17,5 +17,11 @@ public enum GuidanceHint {
     TILT_FORWARD, TILT_BACK,
     NO_DOCUMENT_DETECTED,
     ORIENTATION_PORTRAIT_TIP,
-    ORIENTATION_LANDSCAPE_TIP
+    ORIENTATION_LANDSCAPE_TIP,
+    /** Indicates the user should hold the device still for stability */
+    HOLD_STILL,
+    /** Indicates the document is detected and ready to capture */
+    READY_ENTER,
+    /** Indicates the document is too far away (detected but too small in frame) */
+    TOO_FAR
 }

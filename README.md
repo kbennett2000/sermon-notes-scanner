@@ -16,11 +16,11 @@ This significantly increases the app size, but avoids any cloud dependencies or 
 **100 MB are not a sign of excess, but of consistency.**
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/de.schliweb.makeacopy/)
+alt="Get it on F-Droid"
+height="80">](https://f-droid.org/packages/de.schliweb.makeacopy/)
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=de.schliweb.makeacopy)
+alt="Get it on Google Play"
+height="80">](https://play.google.com/store/apps/details?id=de.schliweb.makeacopy)
 
 Or download the latest APK from the [Releases Section](https://github.com/egdels/makeacopy/releases/latest).
 
@@ -31,11 +31,11 @@ Or download the latest APK from the [Releases Section](https://github.com/egdels
 All official releases of MakeACopy are signed with one of the following certificates:
 
 - **Upload key** (used for GitHub releases, F-Droid, and sideload APKs)  
-  SHA-256: AE:32:2D:3F:B7:1A:FE:21:DF:47:27:E3:7A:5C:68:03:51:1D:5A:2F:E1:FC:31:35:43:0C:EE:06:99:FA:1B:34  
+  SHA-256: AE:32:2D:3F:B7:1A:FE:21:DF:47:27:E3:7A:5C:68:03:51:1D:5A:2F:E1:FC:31:35:43:0C:EE:06:99:FA:1B:34
 
 - **Google Play App Signing key** (used for Play Store releases)  
-  SHA-256: C0:71:44:39:CB:51:62:32:A4:47:91:7A:6F:C2:28:1E:45:FA:AA:DD:37:F8:30:B1:01:1F:B4:85:68:8E:0D:64  
-  
+  SHA-256: C0:71:44:39:CB:51:62:32:A4:47:91:7A:6F:C2:28:1E:45:FA:AA:DD:37:F8:30:B1:01:1F:B4:85:68:8E:0D:64
+
 ### Verify with apksigner
 ```bash
 apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
@@ -44,7 +44,7 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
 ## Features
 
 - **Camera Scanning**: Capture documents using the device camera
-- **Edge Detection**: Automatic document edge detection using OpenCV, enhanced with a machine learning model ([ONNX, from DocAligner](https://github.com/DocsaidLab/DocAligner) – Apache 2.0)
+- **Edge Detection**: Automatic document edge detection using OpenCV, enhanced with a custom-trained machine learning model (ONNX, Apache 2.0)
 - **Perspective Correction**: Adjust and crop documents with manual or automatic perspective correction
 - **Image Enhancement**: Apply filters (grayscale, contrast, sharpening)
 - **OCR**: Offline text recognition with Tesseract (fast models included, optional best models via Language-Pack APKs)
@@ -57,7 +57,7 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
 - **Dark Mode**: Material 3 theme with day/night support
 - **Privacy-Focused**: 100% offline functionality, no internet connection required
 
-### Accessibility Mode 
+### Accessibility Mode
 - MakeACopy includes an Accessibility Mode that provides spoken and haptic feedback and lets you use the hardware volume keys as the shutter.
 - Guide:
   - English: docs/accessibility_mode_guide_en.md
@@ -156,7 +156,7 @@ MakeACopy follows the Single-Activity + Multi-Fragment pattern with MVVM archite
 | Purpose | Library / Model | License |
 |--------|-----------------|---------|
 | Image Processing | OpenCV for Android | Apache 2.0 |
-| Document Corner Detection | [DocAligner ONNX model](https://github.com/DocsaidLab/DocAligner) | Apache 2.0 |
+| Document Corner Detection | Custom-trained ONNX model | Apache 2.0 |
 | OCR | tess-two (Tesseract JNI) | Apache 2.0 |
 | PDF | Android PdfDocument, pdfbox-android | Apache 2.0 |
 | UI | Material Components | Apache 2.0 |
@@ -209,10 +209,62 @@ Notes:
 - Packs are signed with the same key as the main app, so you can verify them with `apksigner`.
 - They rarely change (only when new Tesseract models are published).
 
-Alternatively: You can also use the original Tesseract "best" models from the official tessdata repository.  
-- Source: https://github.com/tesseract-ocr/tessdata_best  
+Alternatively: You can also use the original Tesseract "best" models from the official tessdata repository.
+- Source: https://github.com/tesseract-ocr/tessdata_best
 - Tesseract project: https://github.com/tesseract-ocr/tesseract  
-Install or download the desired `.traineddata` files and add them via the same import dialog in MakeACopy.
+  Install or download the desired `.traineddata` files and add them via the same import dialog in MakeACopy.
+
+## Training data & models
+
+This project includes a machine-learning model for document corner detection.
+Only the **exported ONNX inference model** is distributed with the application.
+No training datasets, images, labels, or intermediate checkpoints are included
+or redistributed.
+
+### Datasets used during training (not redistributed)
+
+The following publicly available datasets were used **internally** for training
+and evaluation purposes only:
+
+- **UVDoc Dataset**  
+  Used for pretraining to learn generic document geometry and perspective
+  across a wide range of layouts and capture conditions.
+
+- **SmartDoc Dataset (ICDAR 2015)**  
+  Used for fine-tuning and robustness training on real smartphone document
+  capture scenarios.
+
+- **Describable Textures Dataset (DTD)**  
+  Used exclusively during internal training experiments for background
+  diversification (background replacement) to reduce dataset bias.  
+  The dataset itself and any derived images are **not included** in this
+  repository or the application.
+
+- **CORD Dataset (Consolidated Receipt Dataset)**  
+  Used for fine-tuning and evaluation on receipt-specific document layouts
+  and capture conditions (e.g. narrow formats, long aspect ratios, cluttered
+  backgrounds).
+
+  License: Creative Commons Attribution 4.0 International (CC BY 4.0)  
+  https://creativecommons.org/licenses/by/4.0/
+
+  The dataset and its annotations remain the property of their respective
+  authors. No CORD images, labels, or derivatives are included or redistributed
+  with this project or the application.
+
+### Licensing note
+
+The exported ONNX inference model is an independently created work and is
+licensed under the **Apache License 2.0**, consistent with the rest of this
+project.
+
+Dataset licenses remain with their respective authors.
+All datasets mentioned above (including UVDoc, SmartDoc, DTD, and CORD) are used
+strictly for **internal training and evaluation**. No dataset images, labels,
+derived images, or training checkpoints are redistributed as part of this
+project or the application.
+
+For details, see the `NOTICE` file.
 
 ## Privacy
 
@@ -299,7 +351,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-## Technical Documentation
-
-For a complete technical overview of the project, see [TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md).

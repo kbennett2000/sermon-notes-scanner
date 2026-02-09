@@ -328,7 +328,7 @@
     <string name="a11y_no_document_detected">Nu a fost detectat niciun document.</string>
     <string name="a11y_orientation_portrait_tip">Pare a fi modul portret. Ținerea telefonului în poziție verticală este de obicei cea mai potrivită pentru paginile înalte.</string>
     <string name="a11y_orientation_landscape_tip">Pare a fi modul peisaj. Încercați să țineți telefonul în poziție orizontală pentru paginile late.</string>
-    <string name="a11y_crop_summary_detected">Analiza imaginii capturate: document detectat, calitate aproximativ %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Analiza imaginii capturate: nu a fost detectat niciun document.</string>
     <string name="accessibility_mode_label">Mod de accesibilitate</string>
     <string name="a11y_camera_ready">Camera este gata. Atingeți de două ori „Scanare” pentru a captura.</string>

@@ -325,7 +325,7 @@
     <string name="a11y_no_document_detected">Nessun documento rilevato.</string>
     <string name="a11y_orientation_portrait_tip">Sembra un orientamento verticale. Tenere il telefono in verticale di solito è l’ideale per pagine alte.</string>
     <string name="a11y_orientation_landscape_tip">Sembra un orientamento orizzontale. Prova a tenere il telefono in orizzontale per pagine larghe.</string>
-    <string name="a11y_crop_summary_detected">Analisi dell’immagine acquisita: documento rilevato, qualità circa %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Analisi dell’immagine acquisita: nessun documento rilevato.</string>
     <string name="accessibility_mode_label">Modalità accessibilità</string>
     <string name="a11y_camera_ready">Fotocamera pronta. Tocca due volte su “Scansiona” per catturare.</string>

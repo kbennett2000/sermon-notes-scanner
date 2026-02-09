@@ -5,7 +5,11 @@ import android.content.Context;
 import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.espresso.Espresso;
+import androidx.test.espresso.NoMatchingViewException;
+import androidx.test.espresso.PerformException;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.assertion.ViewAssertions;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import de.schliweb.makeacopy.R;
@@ -71,10 +75,21 @@ public class CameraA11yTorchTest extends de.schliweb.makeacopy.a11y.util.A11yBas
             hasFlashRef.set(has);
         });
 
-        // If we know we don't have a bound camera yet, still proceed; the click will be a no-op.
+        // If the flash button is not visible (e.g. emulator/no-flash device), skip gracefully.
+        try {
+            Espresso.onView(ViewMatchers.withId(R.id.button_flash))
+                    .check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        } catch (NoMatchingViewException | AssertionError e) {
+            assumeTrue("Skipping: flash button not visible in this environment.", false);
+        }
+
         // Try toggling the flash button.
-        Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.button_flash))
-                .perform(ViewActions.click());
+        try {
+            Espresso.onView(ViewMatchers.withId(R.id.button_flash))
+                    .perform(ViewActions.click());
+        } catch (PerformException e) {
+            assumeTrue("Skipping: cannot click flash button (animations/device constraints).", false);
+        }
 
         // Expect either an announcement for ON or OFF, depending on prior state
         CharSequence ann = de.schliweb.makeacopy.a11y.util.A11yCapture.await(2500);

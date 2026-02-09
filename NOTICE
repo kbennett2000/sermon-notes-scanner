@@ -10,13 +10,7 @@ includes third-party components under their respective licenses as noted below.
       copied into this project to enable OpenCV-based image processing.
       Original Apache 2.0 license headers are preserved in the vendored files.
 
-2) DocAligner model (ONNX)
-    - Project: https://github.com/DocsaidLab/DocAligner
-    - License: Apache License, Version 2.0
-    - Notes: The FastViT-based document corner detection model is included as an
-      application asset for fully offline inference.
-
-3) ONNX Runtime (submodule, required runtime)
+2) ONNX Runtime (submodule, required runtime)
     - Project: https://github.com/microsoft/onnxruntime
     - Path: external/onnxruntime (Git submodule)
     - License: MIT License
@@ -25,7 +19,7 @@ includes third-party components under their respective licenses as noted below.
       Java JAR are integrated into app/jniLibs and app/libs respectively as part
       of the required ONNX Runtime support.
 
-4) Noto Sans CJK (fonts; used for CJK PDF text layer)
+3) Noto Sans CJK (fonts; used for CJK PDF text layer)
     - Project: https://github.com/notofonts/noto-cjk
     - License: SIL Open Font License 1.1
     - Notes: The bundled fonts are derived from the official Noto Sans CJK OTF
@@ -34,33 +28,87 @@ includes third-party components under their respective licenses as noted below.
       been modified. The OFL license notice is included at
       third_party_licenses/OFL.txt.
 
-5) Tesseract OCR language data (tessdata)
+4) Tesseract OCR language data (tessdata)
     - Project: https://github.com/tesseract-ocr/tessdata
     - License: Apache License, Version 2.0
     - Notes: Extended to include chi_sim and chi_tra for Chinese OCR where
       applicable.
 
-6) Noto Sans (fonts; e.g., NotoSans-Regular.ttf)
+5) Noto Sans (fonts; e.g., NotoSans-Regular.ttf)
     - Project: https://github.com/notofonts/noto-fonts
     - License: SIL Open Font License 1.1
     - Notes: Distributed under the OFL without modification and without changes
       to Reserved Font Names. When bundled, the OFL notice is included at
       third_party_licenses/OFL.txt.
 
-7) Noto Naskh Arabic (fonts; NotoNaskhArabic-Regular.ttf)
+6) Noto Naskh Arabic (fonts; NotoNaskhArabic-Regular.ttf)
     - Project: https://github.com/notofonts/arabic
     - License: SIL Open Font License 1.1
     - Notes: Used for Arabic and Persian (Farsi) script rendering in PDF text
       layers. Distributed under the OFL without modification. The OFL notice
       is included at third_party_licenses/OFL.txt.
 
-8) FrequencyWords (OCR dictionaries)
+7) FrequencyWords (OCR dictionaries)
     - Project: https://github.com/hermitdave/FrequencyWords
     - License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     - Notes: Word frequency dictionaries derived from Wikipedia are used for OCR
       post-processing to improve text recognition accuracy. Dictionaries for 21
       languages are included. The license notice is included at
       app/src/main/assets/dictionaries/LICENSE.txt.
+
+8) Training Datasets (not redistributed)
+
+This project uses ideas and publicly available datasets for training and
+evaluation purposes only. No datasets, images, labels, or training
+checkpoints/weights are included or redistributed in this repository.
+
+The following datasets were used:
+
+8.1) UVDoc Dataset
+     - Project: https://github.com/tanguymagne/UVDoc-Dataset
+     - License: MIT License
+     - Reference: Floor Verhoeven et al., "Neural Grid-based Document Unwarping"
+       (SIGGRAPH Asia 2023)
+     - Usage: Pretraining of document geometry and perspective.
+
+8.2) SmartDoc Dataset
+     - Reference: Jean-Christophe Burie et al.,
+       "ICDAR 2015 Competition on Smartphone Document Capture and OCR (SmartDoc)"
+     - License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+       https://creativecommons.org/licenses/by/4.0/
+     - Usage: Finetuning and robustness training on real smartphone document images.
+     - Notes: Original images remain the property of their respective authors.
+       Attribution is provided here as required by the CC BY 4.0 license.
+
+8.3) Describable Textures Dataset (DTD)
+
+     - Project: https://www.robots.ox.ac.uk/~vgg/data/dtd/
+     - Reference: M. Cimpoi et al., "Describing Textures in the Wild"
+       (CVPR 2014)
+     - License: No explicit license text is included in the original
+       dataset distribution.
+     - Usage: Used exclusively during internal training for background
+       diversification and robustness experiments (background replacement).
+     - Notes: The dataset and any images derived from it are not included
+       or redistributed as part of this repository or application.
+       This project does not ship any DTD images or derivatives.
+
+8.4) CORD Dataset (Consolidated Receipt Dataset)
+     - Project: https://github.com/clovaai/cord
+     - Reference: Jaewook Kim et al.,
+       "CORD: A Consolidated Receipt Dataset for Post-OCR Parsing"
+       (ICDAR 2019)
+     - License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+       https://creativecommons.org/licenses/by/4.0/
+     - Usage: Finetuning and evaluation for receipt-specific document geometry
+       and robustness.
+     - Notes: Original images and annotations remain the property of their
+       respective authors. Attribution is provided here as required by the
+       CC BY 4.0 license. No CORD images, annotations, or derivatives are
+       redistributed with this project.
+
+The exported ONNX inference model is an independently created work and is
+licensed under the Apache License 2.0.
 
 For full license texts, see the corresponding upstream repositories and their
 LICENSE files. The Apache License 2.0 for this project is provided in LICENSE.

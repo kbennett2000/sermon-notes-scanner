@@ -1,0 +1,7 @@
+MakeACopy 3.0.0 (Release-Candidate)
+
+* Replaced DocAligner with a custom-trained document corner detection model.
+* New ONNX-based model developed specifically for MakeACopy.
+* Improved robustness and accuracy for document edge detection.
+* Fully offline operation and privacy guarantees preserved.
+* Validated with existing production post-processing pipeline.

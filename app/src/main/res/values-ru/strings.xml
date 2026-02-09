@@ -327,7 +327,7 @@
     <string name="a11y_no_document_detected">Документ не обнаружен.</string>
     <string name="a11y_orientation_portrait_tip">Похоже на портретную ориентацию. Держать телефон вертикально обычно лучше всего подходит для высоких страниц.</string>
     <string name="a11y_orientation_landscape_tip">Похоже на альбомную ориентацию. Попробуйте держать телефон горизонтально для широких страниц.</string>
-    <string name="a11y_crop_summary_detected">Анализ полученного изображения: документ обнаружен, качество примерно %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Анализ полученного изображения: документ не обнаружен.</string>
     <string name="accessibility_mode_label">Режим доступности</string>
     <string name="a11y_camera_ready">Камера готова. Дважды нажмите «Сканировать», чтобы сделать снимок.</string>

@@ -25,7 +25,7 @@ local.properties
 /langpack-latin-best/build/
 /server/build/
 /venv/
-/training/checkpoints/
+/training/runs/
 /training/data/
 /training/labels/
 /training/dataset/

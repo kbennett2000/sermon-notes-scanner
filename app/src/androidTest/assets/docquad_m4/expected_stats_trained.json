@@ -1,0 +1,13 @@
+{
+  "mask_area_definition": "mask_prob_gt_0.5",
+  "samples": {
+    "sample0": {
+      "corner_heatmaps_mean": -11.667314653912399,
+      "corner_heatmaps_std": 2.4452545417530303,
+      "mask_area": 1063,
+      "mask_logits_mean": -7.159425147339789,
+      "mask_logits_std": 12.133989193287979
+    }
+  },
+  "version": 1
+}

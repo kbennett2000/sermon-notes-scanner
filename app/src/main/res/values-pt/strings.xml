@@ -327,7 +327,7 @@
     <string name="a11y_no_document_detected">Nenhum documento detectado.</string>
     <string name="a11y_orientation_portrait_tip">Parece estar em modo retrato. Segurar o telefone na vertical normalmente funciona melhor para páginas altas.</string>
     <string name="a11y_orientation_landscape_tip">Parece estar em modo paisagem. Tente segurar o telefone na horizontal para páginas largas.</string>
-    <string name="a11y_crop_summary_detected">Análise da imagem capturada: documento detectado, qualidade de aproximadamente %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Análise da imagem capturada: nenhum documento detectado.</string>
     <string name="accessibility_mode_label">Modo de acessibilidade</string>
     <string name="a11y_camera_ready">Câmara pronta. Toque duas vezes em “Digitalizar” para capturar.</string>

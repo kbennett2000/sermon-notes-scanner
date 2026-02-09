@@ -1,0 +1,26 @@
+# Python dependencies for document corner model training
+# Installation: pip install -r requirements.txt
+# PyTorch (CPU version, for GPU see https://pytorch.org/get-started/locally/)
+torch>=2.0
+torchvision>=0.15
+# Computer Vision
+opencv-python>=4.8
+# Image metadata (width/height) for dataset conversion
+Pillow>=10.0
+# Numerical computations
+numpy>=1.24
+# HDF5 (for UVDoc .mat files)
+h5py>=3.8
+# ONNX export and optimization
+onnx>=1.14
+onnxsim>=0.4
+onnxconverter-common>=1.13
+onnxscript>=0.1
+# ONNX Runtime (for validation and inference)
+onnxruntime>=1.15
+
+# Tests
+pytest>=8.0
+
+# Optional: For GPU training with CUDA
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118

@@ -142,7 +142,12 @@ public class TrapezoidSelectionView extends View {
 
     // ===== User-adjustment/auto-init suppression state =====
     private boolean isUserAdjusting = false;           // true while user is dragging a handle or shortly after release
+    private boolean userHasEdited = false;             // latched once user moved a corner; prevents auto-init overwriting
     private int autoInitIdleDelayMs = 400;             // idle time after release before auto-init may run
+
+    // Phase X / Spec compliance: ensure DocQuad is attempted only once per image (until a new image is set).
+    // This is strictly gated behind docquad_prod_enabled in the callsites.
+    private boolean docQuadAutoInitConsumed = false;
     @Nullable
     private Runnable adjustIdleClearRunnable = null;   // clears isUserAdjusting after idle
 
@@ -542,6 +547,7 @@ public class TrapezoidSelectionView extends View {
         final int width = getWidth();
         final int height = getHeight();
 
+        // Suppress re-init while user is adjusting corners
         if (isUserAdjusting) {
             if (debugLogsEnabled)
                 Log.d(TAG, "initializeCornersAsync: suppressed (user adjusting), will retry after idle");
@@ -639,8 +645,28 @@ public class TrapezoidSelectionView extends View {
     private Point[] detectCornersWithBudget(Bitmap work, float scaleToOrig, int viewW, int viewH, long budgetMs) {
         long t0 = android.os.SystemClock.uptimeMillis();
         try {
-            org.opencv.core.Point[] imgCorners = OpenCVUtils.detectDocumentCorners(getContext(), work);
-            if (imgCorners == null || imgCorners.length != 4) return null;
+            // Use the central policy factory (DocQuad with OpenCV fallback).
+            // DocQuad is used only once per image until a new image is set.
+            org.opencv.core.Point[] imgCorners;
+            if (!userHasEdited && !docQuadAutoInitConsumed) {
+                de.schliweb.makeacopy.ml.corners.CornerDetector detector =
+                        de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forCrop(getContext());
+
+                de.schliweb.makeacopy.ml.corners.DetectionResult r = detector.detect(work, getContext());
+                if (r == null || !r.success || r.cornersOriginalTLTRBRBL == null || r.cornersOriginalTLTRBRBL.length != 4) {
+                    return null;
+                }
+                // Even if the result came from OpenCV fallback inside the composite, we still consider the attempt consumed.
+                docQuadAutoInitConsumed = true;
+                imgCorners = new org.opencv.core.Point[4];
+                for (int i = 0; i < 4; i++) {
+                    imgCorners[i] = new org.opencv.core.Point(r.cornersOriginalTLTRBRBL[i][0], r.cornersOriginalTLTRBRBL[i][1]);
+                }
+            } else {
+                // After user edit or DocQuad consumed, use OpenCV directly
+                imgCorners = OpenCVUtils.detectDocumentCorners(getContext(), work);
+                if (imgCorners == null || imgCorners.length != 4) return null;
+            }
 
             // back-project to original image scale if we downscaled
             if (scaleToOrig < 1f) {
@@ -1413,6 +1439,8 @@ public class TrapezoidSelectionView extends View {
                 // Check if a corner was touched
                 activeCornerIndex = findCornerIndex(x, y);
                 if (activeCornerIndex != -1) {
+                    // Mark that user has edited corners (suppresses DocQuad re-init)
+                    userHasEdited = true;
                     // Mark that the user is adjusting and cancel any pending idle-clear
                     isUserAdjusting = true;
                     cancelAdjustIdle();
@@ -1653,11 +1681,19 @@ public class TrapezoidSelectionView extends View {
     public void setImageBitmap(Bitmap bitmap) {
         this.imageBitmap = bitmap;
         Log.d(TAG, "Image bitmap set: " + (bitmap != null ? bitmap.getWidth() + "x" + bitmap.getHeight() : "null"));
+
         // Update last bitmap dimensions; if unchanged and already initialized, avoid redundant auto-init
         if (bitmap != null) {
             int bw = bitmap.getWidth();
             int bh = bitmap.getHeight();
             boolean sameDims = (bw == lastBitmapWidth && bh == lastBitmapHeight);
+
+            // New image (or dimension change) should allow fresh auto-init again.
+            if (!sameDims) {
+                userHasEdited = false;
+                docQuadAutoInitConsumed = false;
+            }
+
             lastBitmapWidth = bw;
             lastBitmapHeight = bh;
             if (sameDims && initialized) {
@@ -1669,6 +1705,8 @@ public class TrapezoidSelectionView extends View {
         } else {
             lastBitmapWidth = -1;
             lastBitmapHeight = -1;
+            userHasEdited = false;
+            docQuadAutoInitConsumed = false;
         }
 
         // If the bitmap is null, do not (re)start corner initialization. Just cancel pending work and redraw.

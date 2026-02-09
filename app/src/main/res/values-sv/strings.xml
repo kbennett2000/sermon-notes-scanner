@@ -327,7 +327,7 @@
     <string name="a11y_no_document_detected">Inget dokument upptäcktes.</string>
     <string name="a11y_orientation_portrait_tip">Detta ser ut som porträttläge. Att hålla telefonen i porträttläge fungerar vanligtvis bäst för höga sidor.</string>
     <string name="a11y_orientation_landscape_tip">Detta ser ut som landskapsläge. Prova att hålla telefonen i landskapsläge för breda sidor.</string>
-    <string name="a11y_crop_summary_detected">Analys av den fångade bilden: dokument upptäckt, kvalitet ungefär %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Analys av den fångade bilden: inget dokument upptäcktes.</string>
     <string name="accessibility_mode_label">Tillgänglighetsläge</string>
     <string name="a11y_camera_ready">Kameran är redo. Dubbeltryck på Skanna för att ta bilden.</string>

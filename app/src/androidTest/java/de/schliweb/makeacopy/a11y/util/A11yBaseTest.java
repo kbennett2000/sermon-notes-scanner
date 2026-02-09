@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import androidx.test.rule.GrantPermissionRule;
 
+import androidx.test.platform.app.InstrumentationRegistry;
+
 /**
  * Base class enabling Google Accessibility Test Framework (ATF) checks
  * for all instrumented UI tests that extend it. This helps catch missing
@@ -18,6 +20,10 @@ public abstract class A11yBaseTest {
 
     @Before
     public void enableAccessibilityChecks() {
+        // Espresso requires animations/transitions to be disabled, otherwise UI actions can be flaky
+        // or blocked entirely (see Espresso setup docs).
+        disableSystemAnimationsBestEffort();
+
         // Use reflection to avoid compile-time dependency issues if ATF is not on classpath.
         try {
             Class<?> cls = Class.forName(
@@ -32,6 +38,18 @@ public abstract class A11yBaseTest {
             }
         } catch (Throwable ignored) {
             // Be resilient if the framework is not available for any reason.
+        }
+    }
+
+    private static void disableSystemAnimationsBestEffort() {
+        try {
+            var uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+            // NOTE: `executeShellCommand` works on emulators/devices in instrumentation context.
+            uiAutomation.executeShellCommand("settings put global window_animation_scale 0");
+            uiAutomation.executeShellCommand("settings put global transition_animation_scale 0");
+            uiAutomation.executeShellCommand("settings put global animator_duration_scale 0");
+        } catch (Throwable ignored) {
+            // Best-effort only.
         }
     }
 }

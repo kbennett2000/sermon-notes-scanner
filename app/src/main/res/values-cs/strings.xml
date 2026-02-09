@@ -326,7 +326,7 @@
     <string name="a11y_no_document_detected">Nebyl rozpoznán žádný dokument.</string>
     <string name="a11y_orientation_portrait_tip">Vypadá to na portrét. Držení telefonu na výšku obvykle nejlépe sedí pro vysoké stránky.</string>
     <string name="a11y_orientation_landscape_tip">Vypadá to na krajinu. Zkuste držet telefon na šířku pro široké stránky.</string>
-    <string name="a11y_crop_summary_detected">Analýza pořízení snímku: dokument rozpoznán, kvalita přibližně %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Analýza pořízení snímku: žádný dokument nebyl rozpoznán.</string>
     <string name="accessibility_mode_label">Režim přístupnosti</string>
     <string name="a11y_camera_ready">Kamera připravena. Dvojitým klepnutím na Skenovat zachytíte.</string>

@@ -237,25 +237,26 @@ public class CropFragment extends Fragment {
                 de.schliweb.makeacopy.utils.OpenCVUtils.init(requireContext().getApplicationContext());
             } catch (Throwable ignore) {
             }
-            de.schliweb.makeacopy.utils.OpenCVUtils.DetectionResult det = null;
+            
+            boolean hasValid = false;
+            
+            // Use DocQuad detector with OpenCV fallback (via forCrop)
             try {
-                det = de.schliweb.makeacopy.utils.OpenCVUtils.detectDocumentCornersResult(requireContext(), bmp);
+                de.schliweb.makeacopy.ml.corners.CornerDetector detector = 
+                        de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forCrop(requireContext());
+                de.schliweb.makeacopy.ml.corners.DetectionResult r = detector.detect(bmp, requireContext());
+                if (r != null && r.success && r.cornersOriginalTLTRBRBL != null && r.cornersOriginalTLTRBRBL.length == 4) {
+                    hasValid = true;
+                }
             } catch (Throwable ignore) {
             }
-            boolean hasValid = (det != null && det.corners() != null && det.corners().length == 4);
 
-            // Use the same score as in the CameraFragment for A11y outputs
-            double scoreForA11y = 0.0;
-            try {
-                scoreForA11y = (det != null) ? det.score() : 0.0; // 0..1
-            } catch (Throwable ignore) {
-            }
-            final int percent = Math.max(0, Math.min(100, (int) Math.round(scoreForA11y * 100.0)));
+            final boolean finalHasValid = hasValid;
             if (!isAdded() || binding == null) return;
             requireActivity().runOnUiThread(() -> {
                 if (binding == null) return;
-                if (hasValid) {
-                    announceText(getString(R.string.a11y_crop_summary_detected, percent));
+                if (finalHasValid) {
+                    announceText(getString(R.string.a11y_crop_summary_detected));
                 } else {
                     // Be polite: only a short non-intrusive note
                     announceText(getString(R.string.a11y_crop_summary_no_doc));

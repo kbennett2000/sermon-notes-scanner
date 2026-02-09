@@ -328,7 +328,7 @@
     <string name="a11y_no_document_detected">未检测到文档。</string>
     <string name="a11y_orientation_portrait_tip">看起来是竖屏。对较高的页面而言，竖着握持手机通常效果最好。</string>
     <string name="a11y_orientation_landscape_tip">看起来是横屏。对于较宽的页面，试试横着握持手机。</string>
-    <string name="a11y_crop_summary_detected">已捕获图像分析：检测到文档，质量约为 %1$d%%。</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">已捕获图像分析：未检测到文档。</string>
     <string name="accessibility_mode_label">无障碍模式</string>
     <string name="a11y_camera_ready">相机已就绪。双击“扫描”即可拍摄。</string>

@@ -59,6 +59,7 @@ Feedback in detail
    - “Move up” / “Move down”
  - Distance:
    - “Move closer” / “Move back”
+   - "Move closer. Document is too far away." (when the document is detected but too small in the frame)
  - Tilt:
    - “Tilt left” / “Tilt right”
    - “Tilt forward” / “Tilt back”
@@ -112,7 +113,9 @@ Q: Do I need to enable the visual “Preview corner detection” (Analysis) for 
 A: No. Accessibility Mode runs the required analysis internally even if the visual analysis option is turned off. The app still analyzes frames to provide audio/haptic feedback.
 
 Q: If both “Preview corner detection” (Live analysis) and Accessibility Mode are enabled, is the camera preview visible?
-A: Yes. The normal camera preview remains visible. If "Preview corner detection" is enabled, the visual corner overlay is also shown even in Accessibility Mode. Analysis runs in the background regardless, to power scoring and feedback.
+A: Yes. The normal camera preview remains visible. If "Preview corner detection" is enabled, the visual corner overlay is also shown even in Accessibility Mode. Analysis runs in the background regardless, to power guidance and readiness feedback.
+
+In Accessibility Mode, the app does not rely on a single “model score”. Instead it uses the detected document shape (a quadrilateral) plus stability over multiple frames to decide when guidance is useful and when the document is “ready”.
 
 Q: Does Accessibility Mode work without TalkBack?
 A: Partly. Spoken output requires an active screen reader (e.g., TalkBack or Select‑to‑Speak). Without a screen reader, you still get tones and gentle haptics, but no speech.
@@ -137,12 +140,12 @@ The tip is only given when
 
 To stay calm, the tip goes through the same guidance logic as other announcements (brief stability over multiple frames) and is rate-limited. You may hear, for example, “This looks like portrait …” or “… like landscape …”. Normal directional guidance stays the same.
 
-Q: What does the framing/quality score mean?
-A: While aligning the page, Accessibility Mode may announce a percentage (0–100%). This value is a confidence indicator for the current corner detection: it is based on (a) the detected quadrilateral’s area relative to the image, (b) how rectangular the corners are (angles closer to 90°), and (c) how symmetric opposite side lengths are.
+Q: How does the app decide when a document is “ready to capture”?
+A: The app looks for a plausible document shape (a quadrilateral) and checks whether it stays stable for a brief moment. Only then it plays a short tone + light vibration and announces “Document detected – ready to capture.”
 
-Important: stability over multiple frames is used separately to keep announcements calm — it is not part of this percentage. If the value drops below about 20%, the app treats this as “No document detected”.
+If the detection is unstable (e.g., because you are moving, the page is partially out of frame, or the lighting is difficult), you may hear directional hints instead.
 
-Q: How can I improve the score?
+Q: How can I improve detection and guidance?
 A: Use even, bright lighting and avoid glare; hold the phone parallel to the page; keep all four corners in view with a small margin; if you’re too close, step back a little and crop later; place the paper on a high‑contrast, matte background; keep still briefly so detection can stabilize; match orientation (A4/Letter: portrait usually fits best).
 
 Tip: A more detailed explanation with examples is available on the website: docs/index.html → FAQ → “Scanning (Camera)”.
@@ -150,6 +153,12 @@ Tip: A more detailed explanation with examples is available on the website: docs
 <a id="guide-en-move-back"></a>
 Q: I keep hearing “Move back” all the time.
 A: Distance prompts are suppressed without a plausible document and rate‑limited. Improve lighting, include the whole page, and hold still briefly.
+
+—
+
+Technical note (for contributors)
+
+For a detailed explanation of the underlying “plausibility + framing metrics + stability” concept (including a spec sheet and QA scenarios), see: `docs/accessibility_mode_docquad_concept.md`.
 
 —
 

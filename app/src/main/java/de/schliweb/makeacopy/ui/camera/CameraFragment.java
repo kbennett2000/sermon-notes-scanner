@@ -46,10 +46,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.databinding.FragmentCameraBinding;
+import de.schliweb.makeacopy.framing.A11yStateMachine;
 import de.schliweb.makeacopy.framing.AccessibilityGuidanceController;
 import de.schliweb.makeacopy.framing.FramingEngine;
 import de.schliweb.makeacopy.framing.FramingResult;
 import de.schliweb.makeacopy.framing.GuidanceHint;
+import de.schliweb.makeacopy.framing.QuadPlausibility;
 import de.schliweb.makeacopy.ui.crop.CropViewModel;
 import de.schliweb.makeacopy.ui.ocr.OCRViewModel;
 import de.schliweb.makeacopy.utils.FeatureFlags;
@@ -94,6 +96,16 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private static final String TAG = "CameraFragment";
 
+    // Live corner detection: cache detector instance to make DocQuad caching/throttle effective.
+    // Important: we must NOT instantiate any DocQuad/ORT objects when the prod flag is OFF.
+    private volatile de.schliweb.makeacopy.ml.corners.CornerDetector cachedLiveCornerDetector = null;
+    private volatile boolean cachedLiveCornerDetectorFlag = false;
+
+    // Live-analysis allocation guardrails (avoid per-frame large allocations on analyzer thread)
+    // ThreadLocal because CameraX analyzer runs on a dedicated background thread.
+    private final ThreadLocal<byte[]> nv21ReuseBuffer = new ThreadLocal<>();
+    private final ThreadLocal<java.io.ByteArrayOutputStream> jpegReuseStream = new ThreadLocal<>();
+
     // Light sensor constants
     private static final float LOW_LIGHT_THRESHOLD = 10.0f; // lux
     private static final long MIN_TIME_BETWEEN_PROMPTS = 60000; // ms
@@ -128,9 +140,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private long lastA11yLowLightTs = 0L;
     private long lastVolumeShutterTs = 0L;
     private long lastA11yVolumeHintTs = 0L;
-    // Accessibility Mode – scoring accessibility
-    private long lastA11yScoreAnnounceTs = 0L;
-    private int lastA11ySpokenScore = -1;
     // Overlay stabilization (jitter reduction)
     // Exponential smoothing for corners + score and hysteresis for visibility
     private android.graphics.PointF[] lastFilteredCorners = null; // in view coordinates
@@ -151,10 +160,19 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private boolean streamObserverAttached = false;
     private BindTier lastTier = null;
     private AccessibilityGuidanceController a11yGuidanceController;
+    // New state machine for accessibility guidance (concept-based implementation)
+    private A11yStateMachine a11yStateMachine;
     // Let both ScreenReader and Debug-Overlay follow the exact same cadence:
     // we persist the last hint emitted by the AccessibilityGuidanceController.
     private volatile GuidanceHint lastGuidanceEventHint = null;
     private volatile long lastGuidanceEventTs = 0L;
+
+    // Model-free distance estimation via autofocus (Camera2 API)
+    // Value in diopters (1/meters). 0 or negative means unavailable.
+    private volatile float lastFocusDistanceDiopters = 0f;
+    // Threshold: if focus distance < this value (in diopters), object is too far
+    // 2.0 diopters = 0.5m, 1.0 diopters = 1.0m, 0.5 diopters = 2.0m
+    private static final float TOO_FAR_FOCUS_THRESHOLD_DIOPTERS = 1.0f; // ~1 meter
 
     /**
      * Converts a given surface rotation value to its corresponding degree representation.
@@ -1403,6 +1421,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     }
 
     // NEU: strikt 1280x960 / YUV und 4:3
+    @OptIn(markerClass = ExperimentalCamera2Interop.class)
     private void setupOrUpdateImageAnalysis(int rotation) {
         ResolutionSelector analysisRs = new ResolutionSelector.Builder()
                 .setAspectRatioStrategy(
@@ -1417,12 +1436,28 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 .build();
 
         if (imageAnalysis == null) {
-            imageAnalysis = new ImageAnalysis.Builder()
+            ImageAnalysis.Builder analysisBuilder = new ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                     .setTargetRotation(rotation)
-                    .setResolutionSelector(analysisRs)
-                    .build();
+                    .setResolutionSelector(analysisRs);
+
+            // Add Camera2 interop to read focus distance from each frame
+            Camera2Interop.Extender<ImageAnalysis> analysisExt = new Camera2Interop.Extender<>(analysisBuilder);
+            analysisExt.setSessionCaptureCallback(new android.hardware.camera2.CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureCompleted(@NonNull android.hardware.camera2.CameraCaptureSession session,
+                                               @NonNull android.hardware.camera2.CaptureRequest request,
+                                               @NonNull android.hardware.camera2.TotalCaptureResult result) {
+                    // Read focus distance (in diopters = 1/meters)
+                    Float focusDist = result.get(android.hardware.camera2.CaptureResult.LENS_FOCUS_DISTANCE);
+                    if (focusDist != null) {
+                        lastFocusDistanceDiopters = focusDist;
+                    }
+                }
+            });
+
+            imageAnalysis = analysisBuilder.build();
         } else {
             imageAnalysis.setTargetRotation(rotation);
         }
@@ -1475,6 +1510,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         } else {
             a11yGuidanceController.reset();
         }
+        // Initialize new state machine (concept-based implementation)
+        if (a11yStateMachine == null) {
+            a11yStateMachine = new A11yStateMachine();
+        } else {
+            a11yStateMachine.reset();
+        }
         // Reset last event for overlay cadence
         lastGuidanceEventHint = null;
         lastGuidanceEventTs = 0L;
@@ -1482,11 +1523,13 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private void clearA11yGuidanceController() {
         a11yGuidanceController = null;
+        a11yStateMachine = null;
         lastGuidanceEventHint = null;
         lastGuidanceEventTs = 0L;
     }
 
     private void analyzeFrameForCorners(@NonNull ImageProxy image) {
+        Bitmap bmp = null;
         try {
             // Note: Do NOT adapt exposure during live corner preview.
             // Running adaptive EC per analyzed frame caused progressive darkening when the torch is on.
@@ -1510,13 +1553,18 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             // Consequently, directional guidance (left/right/up/down) refers to the physical
             // sides of the phone as currently held.
             int imgRotDeg = image.getImageInfo().getRotationDegrees();
-            Bitmap bmp = yuvToBitmapUprightSmall(image, de.schliweb.makeacopy.utils.OpenCVUtils.DETECTION_MAX_EDGE); // use central constant for consistent corner detection
+            bmp = yuvToBitmapUprightSmall(image, de.schliweb.makeacopy.utils.OpenCVUtils.DETECTION_MAX_EDGE); // use central constant for consistent corner detection
             if (BuildConfig.DEBUG) {
                 int dispRot = getViewFinderRotation();
                 Log.d(TAG, "[A11Y_DIR] displayRot=" + dispRot + ", imgRotDeg=" + imgRotDeg
                         + ", a11y=" + isAccessibilityModeEnabled());
             }
             if (bmp == null) return;
+
+            // Capture bitmap dimensions for any deferred/lambda usage.
+            // (bmp itself is not effectively-final anymore because we recycle it in finally.)
+            final int bmpW = bmp.getWidth();
+            final int bmpH = bmp.getHeight();
 
             // Init CV once
             if (!de.schliweb.makeacopy.utils.OpenCVUtils.isInitialized()) {
@@ -1527,12 +1575,35 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }
             }
 
-            de.schliweb.makeacopy.utils.OpenCVUtils.DetectionResult det = de.schliweb.makeacopy.utils.OpenCVUtils.detectDocumentCornersResult(requireContext(), bmp);
-            org.opencv.core.Point[] pts = det != null ? det.corners() : null;
-            boolean hasValid = (pts != null && pts.length == 4);
+            // DocQuad is the standard detector with OpenCV as fallback.
+            // Cache the detector so DocQuad runner/throttle actually persist across frames.
+            de.schliweb.makeacopy.ml.corners.CornerDetector liveDetector = cachedLiveCornerDetector;
+            if (liveDetector == null || !cachedLiveCornerDetectorFlag) {
+                liveDetector = de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forLive(requireContext());
+                cachedLiveCornerDetector = liveDetector;
+                cachedLiveCornerDetectorFlag = true;
+            }
+
+            de.schliweb.makeacopy.utils.OpenCVUtils.DetectionResult det;
+            org.opencv.core.Point[] pts;
+            boolean hasValid;
+
+            de.schliweb.makeacopy.ml.corners.DetectionResult r = liveDetector.detect(bmp, requireContext());
+            if (r != null && r.success && r.cornersOriginalTLTRBRBL != null && r.cornersOriginalTLTRBRBL.length == 4) {
+                pts = new org.opencv.core.Point[4];
+                for (int i = 0; i < 4; i++) {
+                    pts[i] = new org.opencv.core.Point(r.cornersOriginalTLTRBRBL[i][0], r.cornersOriginalTLTRBRBL[i][1]);
+                }
+                hasValid = true;
+            } else {
+                pts = null;
+                hasValid = false;
+            }
+            // Live-DocQuad liefert aktuell keinen Score (Determinismus/Performance).
+            det = new de.schliweb.makeacopy.utils.OpenCVUtils.DetectionResult(pts, 0.0);
 
             // Map bitmap coords to overlay coords (PreviewView with FIT_CENTER) when valid
-            android.graphics.PointF[] viewPts = hasValid ? mapToOverlayPoints(pts, bmp.getWidth(), bmp.getHeight()) : null;
+            android.graphics.PointF[] viewPts = hasValid ? mapToOverlayPoints(pts, bmpW, bmpH) : null;
 
             // Optional: Evaluate FramingEngine (logging and/or accessibility guidance)
             boolean wantFraming = de.schliweb.makeacopy.utils.FeatureFlags.isFramingLoggingEnabled()
@@ -1549,9 +1620,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         }
                     }
                     android.graphics.RectF fbRect = de.schliweb.makeacopy.utils.OpenCVUtils.getFallbackRectF(
-                            bmp.getWidth(), bmp.getHeight());
+                            bmpW, bmpH);
                     FramingEngine.Input feIn = new FramingEngine.Input(
-                            bmp.getWidth(), bmp.getHeight(),
+                            bmpW, bmpH,
                             quad,
                             fbRect
                     );
@@ -1570,49 +1641,56 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         Log.d(TAG, "estimateTextOrientation failed", e);
                     }
 
-                    // A11y guidance (consolidated, incl. orientation)
-                    // Ensure controller exists so overlay can mirror cadence even without a screen reader
-                    if (a11yGuidanceController == null) {
+                    // A11y guidance using new state machine (concept-based implementation)
+                    // Ensure state machine exists so overlay can mirror cadence even without a screen reader
+                    if (a11yStateMachine == null) {
                         initA11yGuidanceController();
                     }
-                    if (a11yGuidanceController != null) {
-                        // Score for A11y and overlay logic (without EMA, to respond quickly)
-                        final double scoreForA11y = (det != null) ? det.score() : 0.0;
-                        final EffectiveFraming eff = computeEffectiveFraming(fr, scoreForA11y);
-
-                        // Optional orientation hint (only when useful in context)
-                        GuidanceHint oriHint = computeEffectiveOrientation(orientBucketLocal, orientConfLocal, eff);
-                        final FramingResult toSpeak = (oriHint != null)
-                                ? new FramingResult(
-                                eff.result.quality,
-                                eff.result.dxNorm,
-                                eff.result.dyNorm,
-                                eff.result.scaleRatio,
-                                eff.result.tiltHorizontal,
-                                eff.result.tiltVertical,
-                                oriHint,
-                                false /* hasDocument: Orientierung als allgemeiner Tipp behandeln */)
-                                : eff.result;
-
-                        // Suppress noisy distance hints when we don't even have a plausible document
-                        a11yGuidanceController.onResult(toSpeak, now, hint -> {
-                            boolean suppressDistance = (oriHint == null) && eff.suppressDistance;
-                            if (suppressDistance && (hint == GuidanceHint.MOVE_CLOSER || hint == GuidanceHint.MOVE_BACK)) {
-                                return; // stay quiet on distance until a candidate exists
+                    if (a11yStateMachine != null) {
+                        // Convert detected points to PointF array for state machine
+                        android.graphics.PointF[] quadForA11y = null;
+                        if (hasValid && pts != null && pts.length == 4) {
+                            quadForA11y = new android.graphics.PointF[4];
+                            for (int i = 0; i < 4; i++) {
+                                quadForA11y[i] = new android.graphics.PointF((float) pts[i].x, (float) pts[i].y);
                             }
+                        }
+
+                        // Optional: inject orientation hint into FramingResult if no document
+                        FramingResult frForA11y = fr;
+                        if (fr != null && !fr.hasDocument && orientConfLocal >= 0.30) {
+                            GuidanceHint oriHint = (orientBucketLocal == 90)
+                                    ? GuidanceHint.ORIENTATION_LANDSCAPE_TIP
+                                    : GuidanceHint.ORIENTATION_PORTRAIT_TIP;
+                            frForA11y = new FramingResult(
+                                    fr.quality, fr.dxNorm, fr.dyNorm, fr.scaleRatio,
+                                    fr.tiltHorizontal, fr.tiltVertical, oriHint, false);
+                        }
+
+                        // Process frame through state machine (with model-free focus distance)
+                        final FramingResult finalFrForA11y = frForA11y;
+                        final android.graphics.PointF[] finalQuadForA11y = quadForA11y;
+                        final float focusDist = lastFocusDistanceDiopters; // model-free distance signal
+                        a11yStateMachine.onFrame(finalQuadForA11y, bmpW, bmpH, finalFrForA11y, focusDist, now, (event, state) -> {
+                            // Map event to GuidanceHint for compatibility
+                            GuidanceHint hint = mapEventToHint(event);
+                            if (hint == null) return;
+
                             // Update shared cadence state for overlay
                             lastGuidanceEventHint = hint;
                             lastGuidanceEventTs = now;
+
                             // Optional: emit debug log for QA when framing logging is enabled
                             if (BuildConfig.FEATURE_FRAMING_LOGGING) {
-                                Log.d(TAG, "[A11Y_GUIDE] emit hint=" + hint + " ts=" + now
-                                        + ", scoreRaw=" + String.format(java.util.Locale.US, "%.2f", scoreForA11y)
-                                        + ", effHasDoc=" + (eff.result != null && eff.result.hasDocument)
-                                        + ", oriHint=" + (oriHint != null ? oriHint.name() : "-")
-                                );
+                                A11yStateMachine.DebugInfo dbg = a11yStateMachine.getDebugInfo();
+                                Log.d(TAG, "[A11Y_STATE] event=" + event + ", state=" + state
+                                        + ", hint=" + hint + ", ts=" + now
+                                        + ", debug=" + dbg);
                             }
+
                             // Optional micro haptic for central hints (A11y mode only)
                             maybeVibrateForHint(hint);
+
                             // Only announce via TTS when accessibility mode is enabled
                             if (isAccessibilityModeEnabled()) {
                                 int resId = mapHintToRes(hint);
@@ -1621,7 +1699,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                                 }
                             }
                         });
-                        // Removed redundant idle/timeout path for "No document detected".
                     }
                 } catch (Exception ignored) {
                 }
@@ -1656,7 +1733,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
 
             // Compute score EMA only when a value exists
-            double rawScore = (det != null) ? det.score() : 0.0;
+            // Use FramingEngine quality (0..1) instead of det.score() which is always 0.0 for DocQuad
+            double rawScore = (fr != null) ? fr.quality : 0.0;
             if (hasValid) {
                 if (lastScoreEma < 0) lastScoreEma = rawScore;
                 else lastScoreEma = SCORE_EMA_ALPHA * rawScore + (1.0 - SCORE_EMA_ALPHA) * lastScoreEma;
@@ -1682,23 +1760,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                             lastFilteredCorners = null;
                         }
                     }
-                    // Visualize score: for valid frames via EMA; otherwise clear only after hysteresis
-                    if (hasValid) {
-                        binding.cornerOverlay.setScore(lastScoreEma >= 0 ? lastScoreEma : rawScore);
-                    } else {
-                        if (consecutiveInvalidFrames >= OVERLAY_HIDE_AFTER_INVALID) {
-                            binding.cornerOverlay.setScore(null);
-                        }
-                    }
                 } else {
-                    // Visual analysis off → do not draw corners/score
+                    // Visual analysis off → do not draw corners
                     binding.cornerOverlay.setCorners(null);
-                    binding.cornerOverlay.setScore(null);
                 }
 
                 // Dev overlay: modelRect + metrics when logging flag is active
                 if (de.schliweb.makeacopy.utils.FeatureFlags.isFramingLoggingEnabled() && frUi != null && fbRectUi != null) {
-                    android.graphics.RectF viewRect = mapToOverlayRect(fbRectUi, bmp.getWidth(), bmp.getHeight());
+                    android.graphics.RectF viewRect = mapToOverlayRect(fbRectUi, bmpW, bmpH);
                     binding.cornerOverlay.setModelRect(viewRect);
                     // Compact debug text in percentages, 1 decimal place
                     // Orientation was already estimated above → just display here
@@ -1721,38 +1790,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     binding.cornerOverlay.setModelRect(null);
                     binding.cornerOverlay.setDebugText(null);
                 }
-
-                // A11y: reset the scan button's content description when no valid corners are present
-                if (isAccessibilityModeEnabled() && binding.buttonScan != null && !hasValid) {
-                    // Only reset if we would also visually hide
-                    if (consecutiveInvalidFrames >= OVERLAY_HIDE_AFTER_INVALID) {
-                        binding.buttonScan.setContentDescription(null);
-                    }
-                }
             });
 
-            // Accessibility feedback when score is stable and good
+            // Accessibility feedback when framing is stable and good
             if (isAccessibilityModeEnabled()) {
                 // Use the smoothed score for stability logic when available
-                lastScore = (lastScoreEma >= 0 ? lastScoreEma : (det != null ? det.score() : 0.0));
-                // Make scoring accessible in A11y mode:
-                // 1) Update the scan button's contentDescription with the current percentage value
-                // 2) Occasionally announce the score when it has changed significantly (≥15 points), debounced
-                final int pct = (int) Math.round(Math.max(0.0, Math.min(1.0, lastScore)) * 100.0);
-                runOnUiThreadSafe(() -> {
-                    if (binding != null && binding.buttonScan != null) {
-                        // Set a meaningful contentDescription for screen readers
-                        binding.buttonScan.setContentDescription(getString(R.string.a11y_scan_with_score, pct));
-                    }
-                });
-
-                long nowTs = System.currentTimeMillis();
-                boolean bigChange = (lastA11ySpokenScore < 0) || (Math.abs(pct - lastA11ySpokenScore) >= 15);
-                if (pct > 0 && bigChange && (nowTs - lastA11yScoreAnnounceTs >= 4000L)) {
-                    lastA11yScoreAnnounceTs = nowTs;
-                    lastA11ySpokenScore = pct;
-                    announceText(getString(R.string.a11y_score_now, pct));
-                }
+                lastScore = (lastScoreEma >= 0 ? lastScoreEma : rawScore);
                 if (isStableFor(5, 0.8)) {
                     maybeSignalGoodFraming();
                 }
@@ -1764,6 +1807,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         } catch (Exception e) {
             Log.w(TAG, "analyzeFrameForCorners failed: " + e.getMessage(), e);
         } finally {
+            // Avoid per-frame bitmap accumulation / GC pressure in live analysis.
+            // This bitmap is a temporary downscaled analysis image.
+            try {
+                if (bmp != null && !bmp.isRecycled()) bmp.recycle();
+            } catch (Throwable ignore) {
+            }
             image.close();
         }
     }
@@ -1788,6 +1837,55 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         );
     }
 
+    /**
+     * Maps A11yStateMachine.Event to GuidanceHint for compatibility with existing code.
+     */
+    private GuidanceHint mapEventToHint(A11yStateMachine.Event event) {
+        if (event == null) return null;
+        switch (event) {
+            case READY_ENTER:
+                return GuidanceHint.READY_ENTER;
+            case HOLD_STILL:
+                return GuidanceHint.HOLD_STILL;
+            case TILT_LEFT:
+                return GuidanceHint.TILT_LEFT;
+            case TILT_RIGHT:
+                return GuidanceHint.TILT_RIGHT;
+            case TILT_FORWARD:
+                return GuidanceHint.TILT_FORWARD;
+            case TILT_BACK:
+                return GuidanceHint.TILT_BACK;
+            case MOVE_LEFT:
+                return GuidanceHint.MOVE_LEFT;
+            case MOVE_RIGHT:
+                return GuidanceHint.MOVE_RIGHT;
+            case MOVE_UP:
+                return GuidanceHint.MOVE_UP;
+            case MOVE_DOWN:
+                return GuidanceHint.MOVE_DOWN;
+            case MOVE_CLOSER:
+                return GuidanceHint.MOVE_CLOSER;
+            case MOVE_BACK:
+                return GuidanceHint.MOVE_BACK;
+            case TOO_FAR:
+                return GuidanceHint.TOO_FAR;
+            case ORIENTATION_PORTRAIT_TIP:
+                return GuidanceHint.ORIENTATION_PORTRAIT_TIP;
+            case ORIENTATION_LANDSCAPE_TIP:
+                return GuidanceHint.ORIENTATION_LANDSCAPE_TIP;
+            case OK:
+                return GuidanceHint.OK;
+            case LOW_LIGHT:
+            case CAMERA_READY:
+            case FLASHLIGHT_ON:
+            case FLASHLIGHT_OFF:
+                // System events don't map to guidance hints
+                return null;
+            default:
+                return null;
+        }
+    }
+
     private int mapHintToRes(GuidanceHint hint) {
         if (hint == null) return 0;
         switch (hint) {
@@ -1805,6 +1903,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 return R.string.a11y_hint_move_closer;
             case MOVE_BACK:
                 return R.string.a11y_hint_move_back;
+            case TOO_FAR:
+                return R.string.a11y_hint_too_far;
             case TILT_LEFT:
                 return R.string.a11y_hint_tilt_left;
             case TILT_RIGHT:
@@ -1819,6 +1919,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 return R.string.a11y_orientation_portrait_tip;
             case ORIENTATION_LANDSCAPE_TIP:
                 return R.string.a11y_orientation_landscape_tip;
+            case HOLD_STILL:
+                return R.string.a11y_hold_still;
+            case READY_ENTER:
+                return R.string.a11y_doc_ready;
         }
         return 0;
     }
@@ -2015,10 +2119,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             int w = image.getWidth();
             int h = image.getHeight();
             android.graphics.YuvImage yuv = new android.graphics.YuvImage(nv21, android.graphics.ImageFormat.NV21, w, h, null);
-            java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            java.io.ByteArrayOutputStream out = jpegReuseStream.get();
+            if (out == null) {
+                out = new java.io.ByteArrayOutputStream(64 * 1024);
+                jpegReuseStream.set(out);
+            }
+            out.reset();
             yuv.compressToJpeg(new android.graphics.Rect(0, 0, w, h), 60, out);
             byte[] jpeg = out.toByteArray();
-            out.close();
             // Decode with inSampleSize
             android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
             opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -2049,7 +2157,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         ImageProxy.PlaneProxy[] planes = image.getPlanes();
         int width = image.getWidth();
         int height = image.getHeight();
-        byte[] out = new byte[width * height * 3 / 2];
+        int needed = width * height * 3 / 2;
+        byte[] out = nv21ReuseBuffer.get();
+        if (out == null || out.length < needed) {
+            out = new byte[needed];
+            nv21ReuseBuffer.set(out);
+        }
         int offset = 0;
 
         // ----- Y -----

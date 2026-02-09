@@ -327,7 +327,7 @@
     <string name="a11y_no_document_detected">No se ha detectado ningún documento.</string>
     <string name="a11y_orientation_portrait_tip">Parece un formato vertical. Sostener el teléfono en vertical suele funcionar mejor para páginas altas.</string>
     <string name="a11y_orientation_landscape_tip">Parece un formato horizontal. Intenta sostener el teléfono en horizontal para páginas anchas.</string>
-    <string name="a11y_crop_summary_detected">Análisis de la imagen capturada: documento detectado, calidad aproximadamente %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Análisis de la imagen capturada: no se ha detectado ningún documento.</string>
     <string name="accessibility_mode_label">Modo de accesibilidad</string>
     <string name="a11y_camera_ready">Cámara lista. Doble toque en Escanear para capturar.</string>

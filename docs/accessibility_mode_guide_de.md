@@ -59,6 +59,7 @@ Rückmeldungen im Detail
    - „Nach oben bewegen“ / „Nach unten bewegen“
  - Abstand:
    - „Näher ran“ / „Weiter weg“
+   - „Näher ran. Dokument ist zu weit entfernt." (wenn das Dokument erkannt wurde, aber zu klein im Bild ist)
  - Kippen (Neigung):
    - „Kippen nach links“ / „Kippen nach rechts“
    - „Kippen nach vorn“ / „Kippen nach hinten“
@@ -150,6 +151,18 @@ Hinweis: Eine ausführlichere Erklärung mit Beispielen findest du auf der Websi
 <a id="guide-de-move-back"></a>
 F: Ich höre ständig „Weiter weg/Move back“.
 A: Die App unterdrückt Entfernungs‑Hinweise, wenn kein plausibler Dokument‑Kandidat erkannt wird, und bremst Wiederholungen. Verbessere die Beleuchtung (Taschenlampe einschalten, falls nötig), nimm die komplette Seite mit kleinem Rand ins Bild und halte kurz ruhig, damit sich die Erkennung stabilisieren kann.
+
+<a id="guide-de-ready-decision"></a>
+F: Wie entscheidet die App, wann ein Dokument „bereit zur Aufnahme" ist?
+A: Die App sucht nach einer plausiblen Dokumentform (einem Viereck) und prüft, ob diese für einen kurzen Moment stabil bleibt. Erst dann spielt sie einen kurzen Ton + leichte Vibration ab und sagt „Dokument erkannt – bereit zum Aufnehmen."
+
+Wenn die Erkennung instabil ist (z. B. weil du dich bewegst, die Seite teilweise außerhalb des Bildes ist oder die Beleuchtung schwierig ist), hörst du stattdessen Richtungshinweise.
+
+—
+
+Technischer Hinweis (für Mitwirkende)
+
+Eine detaillierte Erklärung des zugrundeliegenden Konzepts „Plausibilität + Framing‑Metriken + Stabilität" (einschließlich Spec‑Sheet und QA‑Szenarien) findest du in: `docs/accessibility_mode_docquad_concept.md`.
 
 —
 

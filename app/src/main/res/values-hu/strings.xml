@@ -327,7 +327,7 @@
     <string name="a11y_no_document_detected">Nem észlelhető dokumentum.</string>
     <string name="a11y_orientation_portrait_tip">Ez portré tájolásúnak tűnik. A telefon álló helyzetben tartása általában a magas oldalakhoz a legjobb.</string>
     <string name="a11y_orientation_landscape_tip">Ez fekvő tájolásúnak tűnik. Próbáld meg a telefont fekvő helyzetben tartani a széles oldalakhoz.</string>
-    <string name="a11y_crop_summary_detected">A rögzített kép elemzése: dokumentum észlelve, a minőség körülbelül %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">A rögzített kép elemzése: nem észlelhető dokumentum.</string>
     <string name="accessibility_mode_label">Kisegítő mód</string>
     <string name="a11y_camera_ready">A kamera kész. A rögzítéshez koppintson duplán a Szkennelésre.</string>

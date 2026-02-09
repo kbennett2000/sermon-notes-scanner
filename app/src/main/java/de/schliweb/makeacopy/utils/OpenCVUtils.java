@@ -1,8 +1,6 @@
 package de.schliweb.makeacopy.utils;
 
-import ai.onnxruntime.*;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.*;
 import android.os.Build;
 import android.util.Log;
@@ -17,16 +15,12 @@ import org.opencv.photo.Photo;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.FloatBuffer;
 import java.util.*;
 
 /**
- * Utility class for performing various operations with OpenCV and ONNX runtime.
- * This class provides methods for initializing OpenCV, configuring safe mode,
- * manipulating images, and interacting with ONNX runtime models.
- * <p>
- * This class cannot be instantiated.
+ * Utility class for performing various operations with OpenCV.
+ *
+ * <p>This class cannot be instantiated.
  */
 public class OpenCVUtils {
     private static final String TAG = "OpenCVUtils";
@@ -39,40 +33,13 @@ public class OpenCVUtils {
     private static final boolean USE_DEBUG_IMAGES = false;
 
     /**
-     * When set to true, OpenCV-based corner detection is disabled and only the ONNX model is used.
-     * This is useful for testing the ONNX model's performance in isolation.
+     * When set to true, OpenCV-based corner detection is disabled.
      */
     private static boolean DISABLE_OPENCV_DETECTION = false;
 
     /**
-     * When set to true, ONNX-based corner detection is disabled and only OpenCV is used.
-     * This is useful for testing the OpenCV detection pipeline in isolation.
-     */
-    private static boolean DISABLE_ONNX_DETECTION = false;
-
-    /**
-     * Enables or disables ONNX-based corner detection.
-     * When disabled, only OpenCV-based detection is used.
-     *
-     * @param disable true to disable ONNX detection, false to enable it
-     */
-    public static void setDisableOnnxDetection(boolean disable) {
-        DISABLE_ONNX_DETECTION = disable;
-        Log.i(TAG, "ONNX detection " + (disable ? "disabled" : "enabled"));
-    }
-
-    /**
-     * Returns whether ONNX-based corner detection is currently disabled.
-     *
-     * @return true if ONNX detection is disabled, false otherwise
-     */
-    public static boolean isOnnxDetectionDisabled() {
-        return DISABLE_ONNX_DETECTION;
-    }
-
-    /**
      * Enables or disables OpenCV-based corner detection.
-     * When disabled, only ONNX-based detection is used.
+     * When disabled, {@link #detectDocumentCorners(Context, Bitmap)} will return a fallback rectangle.
      *
      * @param disable true to disable OpenCV detection, false to enable it
      */
@@ -90,9 +57,6 @@ public class OpenCVUtils {
         return DISABLE_OPENCV_DETECTION;
     }
 
-    // ONNX model settings
-    private static final String MODEL_ASSET_PATH = "docaligner/fastvit_t8_h_e_bifpn_256_fp32.onnx";
-    private static volatile OrtEnvironment ortEnv;
     /**
      * Maximum edge size (in pixels) for corner detection preprocessing.
      * <p>
@@ -103,10 +67,8 @@ public class OpenCVUtils {
      * <p>
      */
     public static final int DETECTION_MAX_EDGE = 720;
-    private static volatile OrtSession ortSession;
 
     // ---- thresholds (tuned) ----
-    private static final double AREA_FRAC_MIN_ONNX = 0.008; // 0.8% of the image area instead of 5%
     private static final double SIDE_FRAC_MIN = 0.010; // 1% of the short image side instead of 2%
     private static final double CONF_MIN_AREA_FRAC = 0.008; // same lower bound for the confidence
     // Corner-angle sanity bounds: reject quads with too acute or too obtuse internal angles
@@ -141,100 +103,12 @@ public class OpenCVUtils {
             System.loadLibrary("opencv_java4");
             Log.i(TAG, "OpenCV loaded manually via System.loadLibrary");
             configureSafeMode();
-            initOnnxRuntime(context);
             isInitialized = true;
         } catch (Throwable t) {
             Log.e(TAG, "OpenCV init error", t);
         }
 
         return isInitialized;
-    }
-
-    /**
-     * Initializes the ONNX runtime for inference.
-     * This method loads the ONNX model from the assets directory and creates an inference session.
-     *
-     * @param context The application context.
-     */
-    private static volatile String onnxInputName;
-
-    /**
-     * Initializes the ONNX runtime environment and loads the ONNX model for inference.
-     * This method ensures that the ONNX runtime is properly set up, enabling optional
-     * accelerations such as NNAPI and XNNPACK when available. The model is copied from
-     * the application assets to a cache location and loaded with optimization options.
-     *
-     * @param context the application context used for accessing resources and cache directories
-     */
-    private static void initOnnxRuntime(Context context) {
-        if (ortSession != null) return;
-        Log.i(TAG, "Initializing ONNX runtime");
-
-        try {
-            File modelFile = copyAssetToCache(context, MODEL_ASSET_PATH);
-            if (ortEnv == null) {
-                synchronized (OpenCVUtils.class) {
-                    if (ortEnv == null) {
-                        ortEnv = OrtEnvironment.getEnvironment();
-                    }
-                }
-            }
-            try (OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
-                opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
-                opts.setIntraOpNumThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
-
-                // Try NNAPI, then XNNPACK (both optional, fall back to CPU)
-                try {
-                    opts.addNnapi();
-                    Log.i(TAG, "NNAPI EP enabled");
-                } catch (Throwable t) {
-                    Log.i(TAG, "NNAPI not available: " + t.getMessage());
-                }
-
-                try {
-                    opts.addXnnpack(java.util.Collections.emptyMap());
-                    Log.i(TAG, "XNNPACK EP enabled");
-                } catch (Throwable t) {
-                    Log.i(TAG, "XNNPACK not available: " + t.getMessage());
-                }
-
-                ortSession = ortEnv.createSession(modelFile.getAbsolutePath(), opts);
-                onnxInputName = ortSession.getInputNames().iterator().next();
-            }
-            Log.i(TAG, "ONNX model loaded from " + modelFile.getAbsolutePath());
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to load ONNX model", e);
-        }
-    }
-
-
-    /**
-     * Copies an asset from the app's assets folder to the application's cache directory.
-     * If the asset already exists in the cache, it will not be copied again.
-     *
-     * @param context   the application context used to access the assets and cache directory
-     * @param assetPath the path of the asset file to be copied, relative to the assets directory
-     * @return a File object pointing to the copied asset in the cache directory
-     * @throws IOException if an I/O error occurs during file copy
-     */
-    private static File copyAssetToCache(Context context, String assetPath) throws IOException {
-        Log.i(TAG, "Copying asset " + assetPath + " to cache");
-        AssetManager am = context.getAssets();
-        File outFile = new File(context.getCacheDir(), new File(assetPath).getName());
-        if (!outFile.exists()) {
-            Log.i(TAG, "Asset " + assetPath + " not found in cache, copying...");
-            try (InputStream is = am.open(assetPath);
-                 FileOutputStream fos = new FileOutputStream(outFile)) {
-                byte[] buffer = new byte[4096];
-                int len;
-                while ((len = is.read(buffer)) != -1) {
-                    fos.write(buffer, 0, len);
-                }
-            }
-        } else {
-            Log.i(TAG, "Asset " + assetPath + " already exists in cache");
-        }
-        return outFile;
     }
 
     /**
@@ -856,101 +730,6 @@ public class OpenCVUtils {
     }
 
     /**
-     * Executes inference on the provided input tensor using the ONNX runtime.
-     * The input tensor is expected to be in BGR format and NCHW order.
-     *
-     * @param inputTensor A float array representing the input tensor with a shape of [1, 3, 256, 256].
-     *                    The tensor must be in BGR format and NCHW layout.
-     * @return A float array containing the inference output.
-     * The shape and interpretation of the output depend on the specific ONNX model.
-     * @throws OrtException          If an error occurs during the inference process with the ONNX runtime.
-     * @throws IllegalStateException If the ONNX runtime is not initialized before calling this method.
-     */
-    private static float[] runInferenceBgrNchw(float[] inputTensor) throws OrtException {
-        if (ortEnv == null || ortSession == null) {
-            Log.e(TAG, "ONNX Runtime not initialized. Call initOnnxRuntime(context) first.");
-            throw new IllegalStateException("ONNX Runtime not initialized. Call initOnnxRuntime(context) first.");
-        }
-
-        if (onnxInputName == null) {
-            synchronized (OpenCVUtils.class) {
-                if (onnxInputName == null) {
-                    onnxInputName = ortSession.getInputNames().iterator().next();
-                }
-            }
-        }
-        String inputName = onnxInputName;
-        long[] shape = new long[]{1, 3, 256, 256};
-
-        long start = System.nanoTime();
-        try (OnnxTensor input = OnnxTensor.createTensor(ortEnv, FloatBuffer.wrap(inputTensor), shape);
-             OrtSession.Result result = ortSession.run(Collections.singletonMap(inputName, input))) {
-
-            long elapsedNs = System.nanoTime() - start;
-            double elapsedMs = elapsedNs / 1_000_000.0;
-            Log.i(TAG, String.format("Elapsed: %.3f ms", elapsedMs));
-
-            OnnxValue out0 = result.get(0);
-            if (!(out0 instanceof OnnxTensor ot)) {
-                throw new RuntimeException("Unexpected output type: " + out0.getClass());
-            }
-            long[] outShape = ot.getInfo().getShape();
-            Log.i(TAG, "ONNX output shape=" + Arrays.toString(outShape));
-
-            FloatBuffer fb = ot.getFloatBuffer();
-            float[] pred = new float[fb.remaining()];
-            fb.get(pred);
-
-            // Debug: show a few values
-            if (pred.length > 0) {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < Math.min(8, pred.length); i++) {
-                    if (i > 0) sb.append(", ");
-                    sb.append(pred[i]);
-                }
-                Log.i(TAG, "ONNX raw pred[0..7]=" + sb);
-            }
-            return pred;
-        }
-    }
-
-    /**
-     * Detects and processes a model inference based on the input bitmap image.
-     *
-     * @param bitmap the input image in the form of a Bitmap, to be processed for model inference
-     * @return a float array representing the results of the model inference
-     * @throws OrtException if an error occurs during the inference process
-     */
-    private static float[] detectModel(Bitmap bitmap) throws OrtException {
-        float[] inputTensor = fromBitmapBGR(bitmap);
-        return runInferenceBgrNchw(inputTensor);
-    }
-
-    /**
-     * Detects the corners of a document from the given bitmap image using an ONNX model.
-     *
-     * @param bitmap The input bitmap image containing the document to process.
-     * @return An array of Points representing the corners of the detected document or null
-     * if the detection fails or returns invalid results.
-     */
-    private static Point[] detectDocumentCornersWithOnnx(Bitmap bitmap) {
-        Log.i(TAG, "Starting detectDocumentCornersWithOnnx()");
-        try {
-            float[] pred = detectModel(bitmap);
-            Point[] pts = parsePrediction(pred, bitmap.getWidth(), bitmap.getHeight());
-            if (pts != null) {
-                Log.i(TAG, "ONNX corners OK: area=" + quadArea(pts) + ", corners=" + Arrays.toString(pts));
-            } else {
-                Log.w(TAG, "ONNX corners invalid → null");
-            }
-            return pts;
-        } catch (Exception e) {
-            Log.e(TAG, "ONNX inference failed", e);
-            return null;
-        }
-    }
-
-    /**
      * Determines if the provided points form a fallback condition based on specific coordinates.
      *
      * @param p an array of four {@code Point} objects to be evaluated
@@ -976,151 +755,6 @@ public class OpenCVUtils {
     }
 
     /**
-     * Parses the prediction output array into an array of points that represent coordinates.
-     *
-     * @param pred The prediction array, which could contain either 8 values for 4 points
-     *             or be a flattened grid of values representing 128x128 spatial resolution.
-     * @param outW The width of the output space used for scaling the prediction coordinates.
-     * @param outH The height of the output space used for scaling the prediction coordinates.
-     * @return An array of Points representing the parsed coordinates, or null if the input
-     * array is null or unsupported in length.
-     */
-    private static Point[] parsePrediction(float[] pred, int outW, int outH) {
-        if (pred == null) return null;
-        Log.i(TAG, "Pred len=" + pred.length + " → " +
-                (pred.length == 4 * 128 * 128 ? "heatmap" : pred.length == 8 ? "coords8" : "unknown"));
-        if (pred.length == 8) {
-            Point[] pts = new Point[4];
-            for (int i = 0; i < 4; i++) {
-                double x = Math.max(0, Math.min(pred[2 * i] * outW, outW - 1));
-                double y = Math.max(0, Math.min(pred[2 * i + 1] * outH, outH - 1));
-                pts[i] = new Point(x, y);
-            }
-            return validateAndSort(pts, outW, outH);
-        }
-
-        if (pred.length == 4 * 128 * 128) {
-            Point[] pts = predictionToPoints(pred, outW, outH);
-            return validateAndSort(pts, outW, outH);
-        }
-
-        Log.w(TAG, "Unsupported ONNX output length=" + pred.length);
-        return null;
-    }
-
-    /**
-     * Converts a prediction heatmap into a set of points corresponding to specific coordinates
-     * in the output image. The method performs peak detection in each channel of the heatmap,
-     * applies subpixel refinement, rescales the coordinates to the target output resolution,
-     * and validates the resulting quadrilateral for minimum area and side length constraints.
-     *
-     * @param pred The predicted heatmap values as a flattened array of size 4 * 128 * 128.
-     *             Each channel corresponds to a specific corner of a quadrilateral.
-     * @param outW The width of the target output image.
-     * @param outH The height of the target output image.
-     * @return An array of 4 points representing the refined and validated coordinates of the
-     * quadrilateral corners in the output image. Returns null if the input prediction is
-     * invalid, contains insufficient peak data, or produces a quadrilateral that fails
-     * validation checks.
-     */
-    private static Point[] predictionToPoints(float[] pred, int outW, int outH) {
-        if (pred == null || pred.length != 4 * 128 * 128) {
-            Log.w(TAG, "predictionToPoints: unexpected pred length " + (pred == null ? -1 : pred.length));
-            return null;
-        }
-        final int C = 4, H = 128, W = 128;
-        Point[] pts = new Point[C];
-
-        for (int c = 0; c < C; c++) {
-            int base = c * H * W;
-
-            int maxIdx = base;
-            float maxVal = -Float.MAX_VALUE;
-            for (int i = 0; i < H * W; i++) {
-                float v = pred[base + i];
-                if (v > maxVal) {
-                    maxVal = v;
-                    maxIdx = base + i;
-                }
-            }
-
-            if (maxVal <= 1e-5f) {
-                Log.w(TAG, "Heatmap peak too low for corner " + c + " → rejecting ONNX");
-                return null;
-            }
-
-            int peak = maxIdx - base;
-            int py = peak / W;
-            int px = peak % W;
-
-            // Subpixel-Refinement (quadratisch)
-            Point2d sub = refinePeakQuadratic(pred, base, W, H, px, py);
-            double fx = sub.x, fy = sub.y;
-
-            Point pOrig = mapFromHeatmapToOrig(fx, fy, outW, outH);
-            pts[c] = pOrig;
-        }
-
-        pts = sortPointsRobust(pts);
-        double area = quadArea(pts);
-        double imgArea = (double) outW * outH;
-
-        // --- weichere Fläche ---
-        if (area < AREA_FRAC_MIN_ONNX * imgArea) {
-            Log.w(TAG, String.format(java.util.Locale.US,
-                    "predictionToPoints: area too small (%.2f%%).",
-                    100.0 * area / imgArea));
-            return null;
-        }
-
-        // --- weichere Mindest-Seitenlänge ---
-        final double minSide = SIDE_FRAC_MIN * Math.min(outW, outH);
-        for (int i = 0; i < 4; i++) {
-            Point a = pts[i], b = pts[(i + 1) % 4];
-            if (Math.hypot(a.x - b.x, a.y - b.y) < minSide) {
-                Log.w(TAG, "predictionToPoints: side too small.");
-                return null;
-            }
-        }
-        // --- corner angle sanity check ---
-        if (hasAcuteOrReflexAngles(pts)) {
-            Log.w(TAG, "predictionToPoints: rejected due to acute/obtuse corner angle");
-            // return null;
-        }
-        return pts;
-    }
-
-    /**
-     * Validates a set of four points and sorts them into a consistent order if they form a valid
-     * quadrilateral based on specified conditions. The method checks whether the quadrilateral's
-     * area is significant compared to the image area, and whether the side lengths are above
-     * a minimum threshold.
-     *
-     * @param pts  an array of four points representing a quadrilateral
-     * @param outW the width of the output image
-     * @param outH the height of the output image
-     * @return a sorted array of four points if validation succeeds, or null if the points do not form
-     * a valid quadrilateral under the given conditions
-     */
-    private static Point[] validateAndSort(Point[] pts, int outW, int outH) {
-        if (pts == null || pts.length != 4) return null;
-        pts = sortPointsRobust(pts);
-
-        double area = quadArea(pts);
-        double imgArea = (double) outW * outH;
-        if (area < AREA_FRAC_MIN_ONNX * imgArea) return null;
-
-        final double minSide = SIDE_FRAC_MIN * Math.min(outW, outH);
-        for (int i = 0; i < 4; i++) {
-            Point a = pts[i], b = pts[(i + 1) % 4];
-            if (Math.hypot(a.x - b.x, a.y - b.y) < minSide) return null;
-        }
-        if (hasAcuteOrReflexAngles(pts)) return null;
-        return pts;
-    }
-
-
-    /**
      * Calculates the area of a quadrilateral defined by four points.
      * The calculation is based on the Shoelace formula and assumes the points are ordered
      * in a consistent clockwise or counterclockwise manner.
@@ -1136,42 +770,6 @@ public class OpenCVUtils {
             area += (a.x * b.y - b.x * a.y);
         }
         return Math.abs(area) / 2.0;
-    }
-
-    /**
-     * Refines the location of a peak in a 2D map using quadratic interpolation.
-     * This method adjusts the peak location to sub-pixel accuracy based on the surrounding pixel values.
-     *
-     * @param mapAll The flattened array representing the 2D map.
-     *               Values within this array are used for quadratic interpolation.
-     * @param base   The starting index in the array, used as an offset for the map.
-     * @param W      The width of the 2D map.
-     * @param H      The height of the 2D map.
-     * @param px     The x-coordinate of the initial peak location in the map.
-     * @param py     The y-coordinate of the initial peak location in the map.
-     * @return A Point2d object representing the refined peak location with sub-pixel adjustments.
-     */
-    private static Point2d refinePeakQuadratic(float[] mapAll, int base, int W, int H, int px, int py) {
-        if (px <= 0 || py <= 0 || px >= W - 1 || py >= H - 1) return new Point2d(px, py);
-        float l = mapAll[base + py * W + (px - 1)];
-        float m = mapAll[base + py * W + px];
-        float r = mapAll[base + py * W + (px + 1)];
-        double denomX = (l - 2 * m + r);
-        double dx = (denomX == 0) ? 0 : 0.5 * (l - r) / denomX;
-
-        float t = mapAll[base + (py - 1) * W + px];
-        float b = mapAll[base + (py + 1) * W + px];
-        double denomY = (t - 2 * m + b);
-        double dy = (denomY == 0) ? 0 : 0.5 * (t - b) / denomY;
-
-        return new Point2d(px + dx, py + dy);
-    }
-
-    /**
-     * Represents a point in a two-dimensional space.
-     * This class encapsulates the x and y coordinates of the point.
-     */
-    private record Point2d(double x, double y) {
     }
 
     /**
@@ -1360,26 +958,6 @@ public class OpenCVUtils {
     }
 
     /**
-     * Maps a point from a 128x128 heatmap (model output) back to
-     * original image coordinates when the input was stretched to 256x256.
-     *
-     * @param fx   subpixel x in heatmap coordinates (0..128)
-     * @param fy   subpixel y in heatmap coordinates (0..128)
-     * @param outW original image width
-     * @param outH original image height
-     */
-    private static Point mapFromHeatmapToOrig(double fx, double fy, int outW, int outH) {
-        final int HM = 128;
-
-        double x = (fx + 0.5) * (outW / (double) HM);
-        double y = (fy + 0.5) * (outH / (double) HM);
-
-        x = Math.max(0, Math.min(x, outW - 1));
-        y = Math.max(0, Math.min(y, outH - 1));
-        return new Point(x, y);
-    }
-
-    /**
      * Applies adaptive edge detection on the provided grayscale image and stores the result.
      * This method uses a combination of median blur, mean and standard deviation calculations,
      * and Canny edge detection to adaptively determine the edge detection thresholds.
@@ -1558,31 +1136,13 @@ public class OpenCVUtils {
      * @return an array of Point objects representing the detected corners of the document
      */
     public static Point[] detectDocumentCorners(Context context, Bitmap bitmap) {
-        Log.i(TAG, "Starting detectDocumentCorners() [ONNX=" + (DISABLE_ONNX_DETECTION ? "OFF" : "ON") + ", OpenCV=" + (DISABLE_OPENCV_DETECTION ? "OFF" : "ON") + "]");
+        Log.i(TAG, "Starting detectDocumentCorners() OpenCV=" + (DISABLE_OPENCV_DETECTION ? "OFF" : "ON") + "]");
 
-        // Detect low-light condition for context-aware fusion
-        boolean lowLight = false;
-        try {
-            Mat gray = new Mat();
-            Mat rgba = new Mat();
-            Utils.bitmapToMat(bitmap, rgba);
-            Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
-            lowLight = isLowLight(gray);
-            gray.release();
-            rgba.release();
-            Log.d(TAG, "Low-light detection: " + lowLight);
-        } catch (Throwable t) {
-            Log.w(TAG, "Low-light detection failed", t);
-        }
-
-        Point[] onnx = DISABLE_ONNX_DETECTION ? null : detectDocumentCornersWithOnnx(bitmap);
         Point[] cv = DISABLE_OPENCV_DETECTION ? null : detectDocumentCornersWithOpenCV(context, bitmap);
-        Point[] best = getBestCorners(onnx, cv, bitmap.getWidth(), bitmap.getHeight(), lowLight);
-        if (best == null) {
-            // Only apply fallback if BOTH detectors failed
-            best = getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight());
+        if (cv == null) {
+            cv = getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight());
         }
-        return best;
+        return cv;
     }
 
     /**
@@ -1622,141 +1182,6 @@ public class OpenCVUtils {
             }
         }
         return new DetectionResult(corners, score);
-    }
-
-    /**
-     * Selects the best set of corner points between two provided sets of corners,
-     * one detected by ONNX and the other by OpenCV, based on confidence, consensus, and context.
-     * Uses consensus-based fusion when both detectors agree, and applies a low-light bonus
-     * for OpenCV when the image is detected as low-light.
-     *
-     * @param cornersOnnx   An array of points representing the corners detected by the ONNX model.
-     *                      The array must contain exactly 4 points to be considered valid.
-     * @param cornersOpenCV An array of points representing the corners detected by the OpenCV model.
-     *                      The array must contain exactly 4 points to be considered valid.
-     * @param w             The width of the rectangle or frame.
-     * @param h             The height of the rectangle or frame.
-     * @param isLowLight    Whether the image was detected as low-light (dark background).
-     * @return An array of 4 points representing the selected best corners.
-     * This could be from ONNX, OpenCV, averaged corners, or null if both inputs are invalid.
-     */
-    private static Point[] getBestCorners(Point[] cornersOnnx, Point[] cornersOpenCV, int w, int h, boolean isLowLight) {
-        Log.i(TAG, "getBestCorners() [lowLight=" + isLowLight + "]");
-        if ((cornersOnnx == null || cornersOnnx.length != 4) && (cornersOpenCV == null || cornersOpenCV.length != 4)) {
-            Log.i(TAG, "Chosen source=none");
-            return null;
-        }
-        if (cornersOnnx == null || cornersOnnx.length != 4) {
-            Log.i(TAG, "Chosen source=OpenCV (ONNX null/invalid)");
-            return sortPointsRobust(cornersOpenCV);
-        }
-        if (cornersOpenCV == null || cornersOpenCV.length != 4) {
-            Log.i(TAG, "Chosen source=ONNX (OpenCV null/invalid)");
-            return sortPointsRobust(cornersOnnx);
-        }
-
-        if (isFallback(cornersOpenCV, w, h)) {
-            Log.i(TAG, "OpenCV returned fallback → choosing ONNX");
-            return sortPointsRobust(cornersOnnx);
-        }
-
-        cornersOnnx = sortPointsRobust(cornersOnnx);
-        cornersOpenCV = sortPointsRobust(cornersOpenCV);
-
-        // CONSENSUS CHECK: If both detectors agree (corners are close), average them for better precision
-        double avgDist = averageCornerDistance(cornersOnnx, cornersOpenCV);
-        double diag = Math.sqrt(w * (double) w + h * (double) h);
-        double consensusThreshold = diag * 0.03; // 3% of image diagonal
-        if (avgDist < consensusThreshold) {
-            Point[] averaged = averageCorners(cornersOnnx, cornersOpenCV);
-            // Validate the averaged result
-            if (averaged != null && !hasAcuteOrReflexAngles(averaged)) {
-                Log.i(TAG, String.format(java.util.Locale.US,
-                        "Chosen source=CONSENSUS (avgDist=%.1f < threshold=%.1f)", avgDist, consensusThreshold));
-                return averaged;
-            }
-        }
-
-        double cOnnx = quadConfidence(cornersOnnx, w, h);
-        double cCv = quadConfidence(cornersOpenCV, w, h);
-
-        // LOW-LIGHT BONUS: OpenCV performs better on dark backgrounds
-        if (isLowLight) {
-            cCv *= 1.15; // +15% bonus for OpenCV in low-light conditions
-            Log.d(TAG, String.format(java.util.Locale.US,
-                    "Low-light bonus applied: OpenCV conf %.3f → %.3f", cCv / 1.15, cCv));
-        }
-
-        // LARGE DOCUMENT BONUS: Wenn ONNX ein sehr großes Dokument (>40% des Bildes) sieht, leicht bevorzugen
-        double areaFracOnnx = quadArea(cornersOnnx) / (w * (double) h);
-        if (areaFracOnnx > 0.4) {
-            cOnnx *= 1.05; // leichter Bias Richtung ONNX
-        }
-
-        Point[] chosen;
-        boolean chosenIsOnnx = cOnnx >= cCv;
-
-        if (chosenIsOnnx) {
-            Log.i(TAG, String.format(java.util.Locale.US,
-                    "Chosen source=ONNX (conf %.3f vs %.3f)", cOnnx, cCv));
-            chosen = cornersOnnx;
-        } else {
-            Log.i(TAG, String.format(java.util.Locale.US,
-                    "Chosen source=OpenCV (conf %.3f vs %.3f)", cCv, cOnnx));
-            chosen = cornersOpenCV;
-        }
-        // Final safety: reject quads with too acute/obtuse angles and prefer the other candidate if sane
-        if (hasAcuteOrReflexAngles(chosen)) {
-            Log.w(TAG, "Chosen candidate has acute/obtuse corner → trying the other");
-            Point[] other = chosenIsOnnx ? cornersOpenCV : cornersOnnx;
-            if (other != null && other.length == 4 && !hasAcuteOrReflexAngles(other)) {
-                return other;
-            } else {
-                return null; // let caller fallback to standard rectangle
-            }
-        }
-        return chosen;
-    }
-
-    /**
-     * Calculates the average distance between corresponding corners of two quadrilaterals.
-     * Both arrays must be sorted in the same order (e.g., TL, TR, BR, BL).
-     *
-     * @param q1 First quadrilateral corners (4 points)
-     * @param q2 Second quadrilateral corners (4 points)
-     * @return Average Euclidean distance between corresponding corners, or Double.MAX_VALUE if invalid
-     */
-    private static double averageCornerDistance(Point[] q1, Point[] q2) {
-        if (q1 == null || q2 == null || q1.length != 4 || q2.length != 4) {
-            return Double.MAX_VALUE;
-        }
-        double sum = 0;
-        for (int i = 0; i < 4; i++) {
-            sum += distance(q1[i], q2[i]);
-        }
-        return sum / 4.0;
-    }
-
-    /**
-     * Computes the average of two quadrilaterals by averaging corresponding corner positions.
-     * Both arrays must be sorted in the same order (e.g., TL, TR, BR, BL).
-     *
-     * @param q1 First quadrilateral corners (4 points)
-     * @param q2 Second quadrilateral corners (4 points)
-     * @return A new array of 4 points representing the averaged quadrilateral
-     */
-    private static Point[] averageCorners(Point[] q1, Point[] q2) {
-        if (q1 == null || q2 == null || q1.length != 4 || q2.length != 4) {
-            return q1 != null ? q1 : q2;
-        }
-        Point[] avg = new Point[4];
-        for (int i = 0; i < 4; i++) {
-            avg[i] = new Point(
-                    (q1[i].x + q2[i].x) / 2.0,
-                    (q1[i].y + q2[i].y) / 2.0
-            );
-        }
-        return avg;
     }
 
     /**
@@ -1983,26 +1408,6 @@ public class OpenCVUtils {
                 }
             }
         }
-    }
-
-    /**
-     * Releases all OpenCV Mat objects in the provided list to free up memory.
-     * This method safely handles null elements within the list as well as null inputs.
-     * Any exceptions during the release process are caught and ignored.
-     *
-     * @param mats A list of Mat objects to be released. If the list is null or empty, the method does nothing.
-     */
-    private static void releaseAll(List<Mat> mats) {
-        if (mats == null) return;
-        for (Mat m : mats) {
-            if (m != null) {
-                try {
-                    m.release();
-                } catch (Throwable ignore) {
-                }
-            }
-        }
-        mats.clear();
     }
 
     /**

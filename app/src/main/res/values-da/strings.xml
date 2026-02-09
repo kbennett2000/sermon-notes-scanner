@@ -326,7 +326,7 @@
     <string name="a11y_no_document_detected">Intet dokument registreret.</string>
     <string name="a11y_orientation_portrait_tip">Det ligner portræt. At holde telefonen lodret passer normalt bedst til høje sider.</string>
     <string name="a11y_orientation_landscape_tip">Det ligner landskab. Prøv at holde telefonen vandret til brede sider.</string>
-    <string name="a11y_crop_summary_detected">Analyse af det optagede billede: dokument registreret, kvalitet cirka %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Analyse af det optagede billede: intet dokument registreret.</string>
     <string name="accessibility_mode_label">Tilgængelighedstilstand</string>
     <string name="a11y_camera_ready">Kamera klar. Dobbelttryk på Scan for at optage.</string>

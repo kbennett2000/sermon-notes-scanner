@@ -326,7 +326,7 @@
     <string name="a11y_no_document_detected">Nie wykryto dokumentu.</string>
     <string name="a11y_orientation_portrait_tip">Wygląda na orientację pionową. Trzymanie telefonu pionowo zazwyczaj najlepiej sprawdza się przy wysokich stronach.</string>
     <string name="a11y_orientation_landscape_tip">Wygląda na orientację poziomą. Spróbuj trzymać telefon poziomo dla szerokich stron.</string>
-    <string name="a11y_crop_summary_detected">Analiza przechwyconego obrazu: wykryto dokument, jakość około %1$d%%.</string>
+    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
     <string name="a11y_crop_summary_no_doc">Analiza przechwyconego obrazu: nie wykryto dokumentu.</string>
     <string name="accessibility_mode_label">Tryb dostępności</string>
     <string name="a11y_camera_ready">Aparat gotowy. Stuknij dwukrotnie „Skanuj”, aby wykonać zdjęcie.</string>
