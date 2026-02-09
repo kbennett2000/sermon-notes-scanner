@@ -313,17 +313,19 @@
     <string name="a11y_hint_move_down">به پایین حرکت کنید</string>
     <string name="a11y_hint_move_closer">به سطح نزدیک‌تر شوید</string>
     <string name="a11y_hint_move_back">از سطح دورتر شوید</string>
-    <string name="a11y_hint_tilt_left">به چپ کج کنید</string>
-    <string name="a11y_hint_tilt_right">به راست کج کنید</string>
-    <string name="a11y_hint_tilt_forward">به جلو کج کنید</string>
-    <string name="a11y_hint_tilt_back">به عقب کج کنید</string>
+    <string name="a11y_hint_too_far">نزدیک‌تر شوید. سند بیش از حد دور است.</string>
+    <string name="a11y_hint_tilt_left">به چپ متمایل شوید</string>
+    <string name="a11y_hint_tilt_right">به راست متمایل شوید</string>
+    <string name="a11y_hint_tilt_forward">به جلو متمایل شوید</string>
+    <string name="a11y_hint_tilt_back">به عقب متمایل شوید</string>
+    <string name="a11y_hold_still">بی‌حرکت بمانید</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">سند شناسایی شد – آمادهٔ ثبت.</string>
     <string name="a11y_no_document_detected">هیچ سندی شناسایی نشد.</string>
     <string name="a11y_orientation_portrait_tip">به نظر می‌رسد حالت عمودی است. نگه‌داشتن گوشی به صورت عمودی معمولاً برای صفحات بلند بهتر است.</string>
     <string name="a11y_orientation_landscape_tip">به نظر می‌رسد حالت افقی است. برای صفحات عریض، گوشی را افقی نگه دارید.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">تحلیل تصویر ثبت‌شده: سند شناسایی شد.</string>
     <string name="a11y_crop_summary_no_doc">تحلیل تصویر ثبت‌شده: هیچ سندی شناسایی نشد.</string>
     <string name="accessibility_mode_label">حالت دسترس‌پذیری</string>
     <string name="a11y_camera_ready">دوربین آماده است. برای ثبت، روی «اسکن» دوبار ضربه بزنید.</string>

@@ -317,17 +317,19 @@
     <string name="a11y_hint_move_down">Posuňte nadol</string>
     <string name="a11y_hint_move_closer">Bližšie k povrchu</string>
     <string name="a11y_hint_move_back">Ďalej od povrchu</string>
+    <string name="a11y_hint_too_far">Priblížte sa. Dokument je príliš ďaleko.</string>
     <string name="a11y_hint_tilt_left">Nakloňte doľava</string>
     <string name="a11y_hint_tilt_right">Nakloňte doprava</string>
     <string name="a11y_hint_tilt_forward">Nakloňte dopredu</string>
     <string name="a11y_hint_tilt_back">Nakloňte dozadu</string>
+    <string name="a11y_hold_still">Držte nehybne</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument zistený — pripravený na zachytenie.</string>
     <string name="a11y_no_document_detected">Nebol zistený žiadny dokument.</string>
     <string name="a11y_orientation_portrait_tip">Vyzerá to na portrét. Držanie telefónu na výšku zvyčajne najlepšie vyhovuje vysokým stránkam.</string>
     <string name="a11y_orientation_landscape_tip">Vyzerá to na krajinu. Skúste držať telefón na šírku pre široké stránky.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analýza zachyteného obrázka: dokument bol rozpoznaný.</string>
     <string name="a11y_crop_summary_no_doc">Analýza zachyteného obrázka: nebol zistený žiadny dokument.</string>
     <string name="accessibility_mode_label">Režim prístupnosti</string>
     <string name="a11y_camera_ready">Fotoaparát pripravený. Dvojitým ťuknutím na „Skenovať“ zachytíte.</string>

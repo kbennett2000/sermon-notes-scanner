@@ -316,17 +316,19 @@
     <string name="a11y_hint_move_down">Nach unten bewegen</string>
     <string name="a11y_hint_move_closer">Näher an die Oberfläche</string>
     <string name="a11y_hint_move_back">Weiter weg von der Oberfläche</string>
-    <string name="a11y_hint_tilt_left">Nach links kippen</string>
-    <string name="a11y_hint_tilt_right">Nach rechts kippen</string>
-    <string name="a11y_hint_tilt_forward">Nach vorne kippen</string>
-    <string name="a11y_hint_tilt_back">Nach hinten kippen</string>
+    <string name="a11y_hint_too_far">Gehen Sie näher heran. Das Dokument ist zu weit entfernt.</string>
+    <string name="a11y_hint_tilt_left">Nach links neigen</string>
+    <string name="a11y_hint_tilt_right">Nach rechts neigen</string>
+    <string name="a11y_hint_tilt_forward">Nach vorne neigen</string>
+    <string name="a11y_hint_tilt_back">Nach hinten neigen</string>
+    <string name="a11y_hold_still">Ruhig halten</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument erkannt – bereit zum Aufnehmen.</string>
     <string name="a11y_no_document_detected">Kein Dokument erkannt.</string>
     <string name="a11y_orientation_portrait_tip">Das sieht nach Hochformat aus. Das Halten des Telefons im Hochformat passt normalerweise am besten für hohe Seiten.</string>
     <string name="a11y_orientation_landscape_tip">Das sieht nach Querformat aus. Versuche, das Telefon im Querformat zu halten – das eignet sich besser für breite Seiten.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analyse des aufgenommenen Bildes: Dokument erkannt.</string>
     <string name="a11y_crop_summary_no_doc">Analyse des aufgenommenen Bildes: Kein Dokument erkannt.</string>
     <string name="accessibility_mode_label">Barrierefreiheitsmodus</string>
     <string name="a11y_camera_ready">Kamera bereit. Doppeltippen auf „Scannen“ zum Aufnehmen.</string>

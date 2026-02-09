@@ -315,20 +315,23 @@
     <string name="a11y_hint_move_down">تحرّك للأسفل</string>
     <string name="a11y_hint_move_closer">اقترب من السطح</string>
     <string name="a11y_hint_move_back">ابتعد عن السطح</string>
-    <string name="a11y_hint_tilt_left">أمل الهاتف لليسار</string>
-    <string name="a11y_hint_tilt_right">أمل الهاتف لليمين</string>
-    <string name="a11y_hint_tilt_forward">أمل الهاتف للأمام</string>
-    <string name="a11y_hint_tilt_back">أمل الهاتف للخلف</string>
+    <string name="a11y_hint_too_far">اقترب أكثر. المستند بعيد جدًا.</string>
+    <string name="a11y_hint_tilt_left">أمل إلى اليسار</string>
+    <string name="a11y_hint_tilt_right">أمل إلى اليمين</string>
+    <string name="a11y_hint_tilt_forward">أمل إلى الأمام</string>
+    <string name="a11y_hint_tilt_back">أمل إلى الخلف</string>
+    <string name="a11y_hold_still">ابقَ ثابتًا</string>
+
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">تم اكتشاف المستند – جاهز للالتقاط.</string>
     <string name="a11y_no_document_detected">لم يتم اكتشاف أي مستند.</string>
     <string name="a11y_orientation_portrait_tip">يبدو أن هذا بوضع عمودي. عادةً ما يناسب حمل الهاتف عموديًا الصفحات الطويلة.</string>
     <string name="a11y_orientation_landscape_tip">يبدو أن هذا بوضع أفقي. جرّب حمل الهاتف أفقيًا للصفحات العريضة.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
-    <string name="a11y_crop_summary_no_doc">تحليل الصورة الملتقطة: لم يتم اكتشاف مستند.</string>
+    <string name="a11y_crop_summary_detected">تحليل الصورة الملتقطة: تم اكتشاف مستند.</string>
     <string name="accessibility_mode_label">وضع إمكانية الوصول</string>
     <string name="a11y_camera_ready">الكاميرا جاهزة. انقر نقرتين على «مسح» للالتقاط.</string>
+    <string name="a11y_crop_summary_no_doc">تحليل الصورة الملتقطة: لم يتم اكتشاف أي مستند.</string>
     <string name="a11y_low_light_toggle_flash">تم اكتشاف إضاءة منخفضة. انقر نقرتين على «الفلاش» للتفعيل.</string>
     <string name="a11y_capture_failed">فشل الالتقاط.</string>
     <string name="a11y_volume_shutter_hint">نصيحة: في وضع إمكانية الوصول، اضغط على أزرار الصوت للالتقاط.</string>

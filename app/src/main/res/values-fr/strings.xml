@@ -315,17 +315,20 @@
     <string name="a11y_hint_move_down">Déplacez-vous vers le bas</string>
     <string name="a11y_hint_move_closer">Plus près de la surface</string>
     <string name="a11y_hint_move_back">Plus loin de la surface</string>
-    <string name="a11y_hint_tilt_left">Inclinez vers la gauche</string>
-    <string name="a11y_hint_tilt_right">Inclinez vers la droite</string>
+    <string name="a11y_hint_too_far">Approchez-vous. Le document est trop éloigné.</string>
+    <string name="a11y_hint_tilt_left">Inclinez à gauche</string>
+    <string name="a11y_hint_tilt_right">Inclinez à droite</string>
     <string name="a11y_hint_tilt_forward">Inclinez vers l’avant</string>
     <string name="a11y_hint_tilt_back">Inclinez vers l’arrière</string>
+    <string name="a11y_hold_still">Restez immobile</string>
+
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document détecté — prêt à capturer.</string>
     <string name="a11y_no_document_detected">Aucun document détecté.</string>
     <string name="a11y_orientation_portrait_tip">Cela ressemble à un format portrait. Tenir le téléphone en mode portrait convient généralement mieux aux pages hautes.</string>
     <string name="a11y_orientation_landscape_tip">Cela ressemble à un format paysage. Essayez de tenir le téléphone en mode paysage pour les pages larges.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analyse de l’image capturée : document détecté.</string>
     <string name="a11y_crop_summary_no_doc">Analyse de l’image capturée : aucun document détecté.</string>
     <string name="accessibility_mode_label">Mode accessibilité</string>
     <string name="a11y_camera_ready">Caméra prête. Double-tapez sur Scanner pour capturer.</string>

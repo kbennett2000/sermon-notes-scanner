@@ -318,17 +318,19 @@
     <string name="a11y_hint_move_down">Flytt ned</string>
     <string name="a11y_hint_move_closer">Nærmere overflaten</string>
     <string name="a11y_hint_move_back">Lenger bort fra overflaten</string>
+    <string name="a11y_hint_too_far">Kom nærmere. Dokumentet er for langt unna.</string>
     <string name="a11y_hint_tilt_left">Vipp til venstre</string>
     <string name="a11y_hint_tilt_right">Vipp til høyre</string>
     <string name="a11y_hint_tilt_forward">Vipp fremover</string>
     <string name="a11y_hint_tilt_back">Vipp bakover</string>
+    <string name="a11y_hold_still">Hold stille</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument oppdaget — klart for opptak.</string>
     <string name="a11y_no_document_detected">Ingen dokumenter ble oppdaget.</string>
     <string name="a11y_orientation_portrait_tip">Dette ser ut som portrett. Å holde telefonen i portrettmodus passer vanligvis best for høye sider.</string>
     <string name="a11y_orientation_landscape_tip">Dette ser ut som landskap. Prøv å holde telefonen i landskapsmodus for brede sider.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analyse av det fangede bildet: dokument oppdaget.</string>
     <string name="a11y_crop_summary_no_doc">Analyse av det fangede bildet: ingen dokumenter ble oppdaget.</string>
     <string name="accessibility_mode_label">Tilgjengelighetsmodus</string>
     <string name="a11y_camera_ready">Kamera klart. Dobbelttrykk på Skann for å ta bilde.</string>

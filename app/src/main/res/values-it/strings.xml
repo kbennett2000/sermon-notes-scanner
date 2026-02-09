@@ -315,17 +315,19 @@
     <string name="a11y_hint_move_down">Spostati verso il basso</string>
     <string name="a11y_hint_move_closer">Più vicino alla superficie</string>
     <string name="a11y_hint_move_back">Più lontano dalla superficie</string>
+    <string name="a11y_hint_too_far">Avvicinarsi. Il documento è troppo lontano.</string>
     <string name="a11y_hint_tilt_left">Inclina a sinistra</string>
     <string name="a11y_hint_tilt_right">Inclina a destra</string>
     <string name="a11y_hint_tilt_forward">Inclina in avanti</string>
     <string name="a11y_hint_tilt_back">Inclina all’indietro</string>
+    <string name="a11y_hold_still">Resta fermo</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Documento rilevato — pronto per la cattura.</string>
     <string name="a11y_no_document_detected">Nessun documento rilevato.</string>
     <string name="a11y_orientation_portrait_tip">Sembra un orientamento verticale. Tenere il telefono in verticale di solito è l’ideale per pagine alte.</string>
     <string name="a11y_orientation_landscape_tip">Sembra un orientamento orizzontale. Prova a tenere il telefono in orizzontale per pagine larghe.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analisi dell’immagine acquisita: documento rilevato.</string>
     <string name="a11y_crop_summary_no_doc">Analisi dell’immagine acquisita: nessun documento rilevato.</string>
     <string name="accessibility_mode_label">Modalità accessibilità</string>
     <string name="a11y_camera_ready">Fotocamera pronta. Tocca due volte su “Scansiona” per catturare.</string>

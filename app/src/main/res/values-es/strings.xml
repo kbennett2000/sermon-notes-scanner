@@ -317,17 +317,20 @@
     <string name="a11y_hint_move_down">Muévete hacia abajo</string>
     <string name="a11y_hint_move_closer">Más cerca de la superficie</string>
     <string name="a11y_hint_move_back">Más lejos de la superficie</string>
-    <string name="a11y_hint_tilt_left">Inclina a la izquierda</string>
-    <string name="a11y_hint_tilt_right">Inclina a la derecha</string>
-    <string name="a11y_hint_tilt_forward">Inclina hacia adelante</string>
-    <string name="a11y_hint_tilt_back">Inclina hacia atrás</string>
+    <string name="a11y_hint_too_far">Acérquese más. El documento está demasiado lejos.</string>
+    <string name="a11y_hint_tilt_left">Incline a la izquierda</string>
+    <string name="a11y_hint_tilt_right">Incline a la derecha</string>
+    <string name="a11y_hint_tilt_forward">Incline hacia adelante</string>
+    <string name="a11y_hint_tilt_back">Incline hacia atrás</string>
+    <string name="a11y_hold_still">Manténgase quieto</string>
+
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Documento detectado — listo para capturar.</string>
     <string name="a11y_no_document_detected">No se ha detectado ningún documento.</string>
     <string name="a11y_orientation_portrait_tip">Parece un formato vertical. Sostener el teléfono en vertical suele funcionar mejor para páginas altas.</string>
     <string name="a11y_orientation_landscape_tip">Parece un formato horizontal. Intenta sostener el teléfono en horizontal para páginas anchas.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Análisis de la imagen capturada: documento detectado.</string>
     <string name="a11y_crop_summary_no_doc">Análisis de la imagen capturada: no se ha detectado ningún documento.</string>
     <string name="accessibility_mode_label">Modo de accesibilidad</string>
     <string name="a11y_camera_ready">Cámara lista. Doble toque en Escanear para capturar.</string>

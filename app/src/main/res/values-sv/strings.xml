@@ -317,17 +317,19 @@
     <string name="a11y_hint_move_down">Flytta nedåt</string>
     <string name="a11y_hint_move_closer">Närmare ytan</string>
     <string name="a11y_hint_move_back">Längre bort från ytan</string>
+    <string name="a11y_hint_too_far">Kom närmare. Dokumentet är för långt bort.</string>
     <string name="a11y_hint_tilt_left">Luta åt vänster</string>
     <string name="a11y_hint_tilt_right">Luta åt höger</string>
     <string name="a11y_hint_tilt_forward">Luta framåt</string>
     <string name="a11y_hint_tilt_back">Luta bakåt</string>
+    <string name="a11y_hold_still">Håll stilla</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument upptäckt — klart att fångas.</string>
     <string name="a11y_no_document_detected">Inget dokument upptäcktes.</string>
     <string name="a11y_orientation_portrait_tip">Detta ser ut som porträttläge. Att hålla telefonen i porträttläge fungerar vanligtvis bäst för höga sidor.</string>
     <string name="a11y_orientation_landscape_tip">Detta ser ut som landskapsläge. Prova att hålla telefonen i landskapsläge för breda sidor.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analys av den fångade bilden: dokument upptäckt.</string>
     <string name="a11y_crop_summary_no_doc">Analys av den fångade bilden: inget dokument upptäcktes.</string>
     <string name="accessibility_mode_label">Tillgänglighetsläge</string>
     <string name="a11y_camera_ready">Kameran är redo. Dubbeltryck på Skanna för att ta bilden.</string>

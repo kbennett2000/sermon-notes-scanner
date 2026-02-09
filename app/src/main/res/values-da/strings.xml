@@ -316,17 +316,20 @@
     <string name="a11y_hint_move_down">Flyt ned</string>
     <string name="a11y_hint_move_closer">Blíže k povrchu</string>
     <string name="a11y_hint_move_back">Dále od povrchu</string>
+    <string name="a11y_hint_too_far">Kom tættere på. Dokumentet er for langt væk.</string>
     <string name="a11y_hint_tilt_left">Vip til venstre</string>
     <string name="a11y_hint_tilt_right">Vip til højre</string>
     <string name="a11y_hint_tilt_forward">Vip fremad</string>
     <string name="a11y_hint_tilt_back">Vip bagud</string>
+    <string name="a11y_hold_still">Hold stille</string>
+
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokument registreret – klar til optagelse.</string>
     <string name="a11y_no_document_detected">Intet dokument registreret.</string>
     <string name="a11y_orientation_portrait_tip">Det ligner portræt. At holde telefonen lodret passer normalt bedst til høje sider.</string>
     <string name="a11y_orientation_landscape_tip">Det ligner landskab. Prøv at holde telefonen vandret til brede sider.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analyse af det optagne billede: dokument fundet.</string>
     <string name="a11y_crop_summary_no_doc">Analyse af det optagede billede: intet dokument registreret.</string>
     <string name="accessibility_mode_label">Tilgængelighedstilstand</string>
     <string name="a11y_camera_ready">Kamera klar. Dobbelttryk på Scan for at optage.</string>

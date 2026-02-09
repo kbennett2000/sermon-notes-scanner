@@ -318,17 +318,19 @@
     <string name="a11y_hint_move_down">Mutați în jos</string>
     <string name="a11y_hint_move_closer">Mai aproape de suprafață</string>
     <string name="a11y_hint_move_back">Mai departe de suprafață</string>
+    <string name="a11y_hint_too_far">Apropiați-vă. Documentul este prea departe.</string>
     <string name="a11y_hint_tilt_left">Înclinați spre stânga</string>
     <string name="a11y_hint_tilt_right">Înclinați spre dreapta</string>
-    <string name="a11y_hint_tilt_forward">Înclinați în față</string>
-    <string name="a11y_hint_tilt_back">Înclinați în spate</string>
+    <string name="a11y_hint_tilt_forward">Înclinați înainte</string>
+    <string name="a11y_hint_tilt_back">Înclinați înapoi</string>
+    <string name="a11y_hold_still">Stați nemișcat</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document detectat — gata pentru captură.</string>
     <string name="a11y_no_document_detected">Nu a fost detectat niciun document.</string>
     <string name="a11y_orientation_portrait_tip">Pare a fi modul portret. Ținerea telefonului în poziție verticală este de obicei cea mai potrivită pentru paginile înalte.</string>
     <string name="a11y_orientation_landscape_tip">Pare a fi modul peisaj. Încercați să țineți telefonul în poziție orizontală pentru paginile late.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analiza imaginii capturate: document detectat.</string>
     <string name="a11y_crop_summary_no_doc">Analiza imaginii capturate: nu a fost detectat niciun document.</string>
     <string name="accessibility_mode_label">Mod de accesibilitate</string>
     <string name="a11y_camera_ready">Camera este gata. Atingeți de două ori „Scanare” pentru a captura.</string>

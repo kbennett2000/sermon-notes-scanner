@@ -317,17 +317,20 @@
     <string name="a11y_hint_move_down">Mozduljon lefelé</string>
     <string name="a11y_hint_move_closer">Közelebb a felülethez</string>
     <string name="a11y_hint_move_back">Távolabb a felülettől</string>
+    <string name="a11y_hint_too_far">Közelebb jöjjön. A dokumentum túl messze van.</string>
     <string name="a11y_hint_tilt_left">Döntse balra</string>
     <string name="a11y_hint_tilt_right">Döntse jobbra</string>
     <string name="a11y_hint_tilt_forward">Döntse előre</string>
     <string name="a11y_hint_tilt_back">Döntse hátra</string>
+    <string name="a11y_hold_still">Tartsa mozdulatlanul</string>
+
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Dokumentum érzékelve — készen áll a rögzítésre.</string>
     <string name="a11y_no_document_detected">Nem észlelhető dokumentum.</string>
     <string name="a11y_orientation_portrait_tip">Ez portré tájolásúnak tűnik. A telefon álló helyzetben tartása általában a magas oldalakhoz a legjobb.</string>
     <string name="a11y_orientation_landscape_tip">Ez fekvő tájolásúnak tűnik. Próbáld meg a telefont fekvő helyzetben tartani a széles oldalakhoz.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">A rögzített kép elemzése: dokumentum felismerve.</string>
     <string name="a11y_crop_summary_no_doc">A rögzített kép elemzése: nem észlelhető dokumentum.</string>
     <string name="accessibility_mode_label">Kisegítő mód</string>
     <string name="a11y_camera_ready">A kamera kész. A rögzítéshez koppintson duplán a Szkennelésre.</string>

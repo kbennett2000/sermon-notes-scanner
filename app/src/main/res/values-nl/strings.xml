@@ -315,17 +315,19 @@
     <string name="a11y_hint_move_down">Beweeg omlaag</string>
     <string name="a11y_hint_move_closer">Dichter bij het oppervlak</string>
     <string name="a11y_hint_move_back">Verder van het oppervlak</string>
+    <string name="a11y_hint_too_far">Kom dichterbij. Het document is te ver weg.</string>
     <string name="a11y_hint_tilt_left">Kantel naar links</string>
     <string name="a11y_hint_tilt_right">Kantel naar rechts</string>
     <string name="a11y_hint_tilt_forward">Kantel naar voren</string>
     <string name="a11y_hint_tilt_back">Kantel naar achteren</string>
+    <string name="a11y_hold_still">Houd stil</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Document gedetecteerd — klaar om vast te leggen.</string>
     <string name="a11y_no_document_detected">Geen document gedetecteerd.</string>
     <string name="a11y_orientation_portrait_tip">Dit lijkt portretstand. Het vasthouden van de telefoon in portretmodus werkt meestal het beste voor hoge pagina’s.</string>
     <string name="a11y_orientation_landscape_tip">Dit lijkt liggend. Probeer de telefoon in liggende stand te houden voor brede pagina’s.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Analyse van de vastgelegde afbeelding: document gedetecteerd.</string>
     <string name="a11y_crop_summary_no_doc">Analyse van de vastgelegde afbeelding: geen document gedetecteerd.</string>
     <string name="accessibility_mode_label">Toegankelijkheidsmodus</string>
     <string name="a11y_camera_ready">Camera klaar. Dubbel tik op Scannen om vast te leggen.</string>

@@ -317,17 +317,19 @@
     <string name="a11y_hint_move_down">Сместитесь вниз</string>
     <string name="a11y_hint_move_closer">Ближе к поверхности</string>
     <string name="a11y_hint_move_back">Дальше от поверхности</string>
+    <string name="a11y_hint_too_far">Подойдите ближе. Документ слишком далеко.</string>
     <string name="a11y_hint_tilt_left">Наклоните влево</string>
     <string name="a11y_hint_tilt_right">Наклоните вправо</string>
     <string name="a11y_hint_tilt_forward">Наклоните вперёд</string>
     <string name="a11y_hint_tilt_back">Наклоните назад</string>
+    <string name="a11y_hold_still">Держите неподвижно</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Документ обнаружен — готов к съёмке.</string>
     <string name="a11y_no_document_detected">Документ не обнаружен.</string>
     <string name="a11y_orientation_portrait_tip">Похоже на портретную ориентацию. Держать телефон вертикально обычно лучше всего подходит для высоких страниц.</string>
     <string name="a11y_orientation_landscape_tip">Похоже на альбомную ориентацию. Попробуйте держать телефон горизонтально для широких страниц.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Анализ захваченного изображения: документ обнаружен.</string>
     <string name="a11y_crop_summary_no_doc">Анализ полученного изображения: документ не обнаружен.</string>
     <string name="accessibility_mode_label">Режим доступности</string>
     <string name="a11y_camera_ready">Камера готова. Дважды нажмите «Сканировать», чтобы сделать снимок.</string>

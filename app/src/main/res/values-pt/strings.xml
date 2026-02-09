@@ -317,17 +317,19 @@
     <string name="a11y_hint_move_down">Desloque-se para baixo</string>
     <string name="a11y_hint_move_closer">Mais perto da superfície</string>
     <string name="a11y_hint_move_back">Mais longe da superfície</string>
+    <string name="a11y_hint_too_far">Aproxime-se. O documento está muito longe.</string>
     <string name="a11y_hint_tilt_left">Incline para a esquerda</string>
     <string name="a11y_hint_tilt_right">Incline para a direita</string>
     <string name="a11y_hint_tilt_forward">Incline para a frente</string>
     <string name="a11y_hint_tilt_back">Incline para trás</string>
+    <string name="a11y_hold_still">Fique imóvel</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">Documento detetado — pronto para capturar.</string>
     <string name="a11y_no_document_detected">Nenhum documento detectado.</string>
     <string name="a11y_orientation_portrait_tip">Parece estar em modo retrato. Segurar o telefone na vertical normalmente funciona melhor para páginas altas.</string>
     <string name="a11y_orientation_landscape_tip">Parece estar em modo paisagem. Tente segurar o telefone na horizontal para páginas largas.</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">Análise da imagem capturada: documento detectado.</string>
     <string name="a11y_crop_summary_no_doc">Análise da imagem capturada: nenhum documento detectado.</string>
     <string name="accessibility_mode_label">Modo de acessibilidade</string>
     <string name="a11y_camera_ready">Câmara pronta. Toque duas vezes em “Digitalizar” para capturar.</string>

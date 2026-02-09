@@ -319,17 +319,19 @@
     <string name="a11y_hint_move_down">ขยับลง</string>
     <string name="a11y_hint_move_closer">เข้าใกล้พื้นผิวมากขึ้น</string>
     <string name="a11y_hint_move_back">ถอยห่างจากพื้นผิวมากขึ้น</string>
+    <string name="a11y_hint_too_far">ขยับเข้าใกล้ขึ้น เอกสารอยู่ไกลเกินไป</string>
     <string name="a11y_hint_tilt_left">เอียงไปทางซ้าย</string>
     <string name="a11y_hint_tilt_right">เอียงไปทางขวา</string>
-    <string name="a11y_hint_tilt_forward">เอียงไปด้านหน้า</string>
-    <string name="a11y_hint_tilt_back">เอียงไปด้านหลัง</string>
+    <string name="a11y_hint_tilt_forward">เอียงไปข้างหน้า</string>
+    <string name="a11y_hint_tilt_back">เอียงไปข้างหลัง</string>
+    <string name="a11y_hold_still">อยู่นิ่งๆ</string>
 
     <!-- Accessibility Mode -->
     <string name="a11y_doc_ready">ตรวจพบเอกสาร — พร้อมถ่ายภาพ</string>
     <string name="a11y_no_document_detected">ไม่พบเอกสาร</string>
     <string name="a11y_orientation_portrait_tip">ดูเหมือนเป็นโหมดตั้ง โทรศัพท์ในแนวตั้งมักเหมาะที่สุดสำหรับหน้ากระดาษที่มีความสูง</string>
     <string name="a11y_orientation_landscape_tip">ดูเหมือนเป็นโหมดแนวนอน ลองถือโทรศัพท์ในแนวนอนสำหรับหน้ากระดาษที่กว้าง</string>
-    <string name="a11y_crop_summary_detected">Captured image analysis: document detected.</string>
+    <string name="a11y_crop_summary_detected">การวิเคราะห์ภาพที่บันทึกไว้: ตรวจพบเอกสาร</string>
     <string name="a11y_crop_summary_no_doc">การวิเคราะห์ภาพที่บันทึก: ไม่พบเอกสาร</string>
     <string name="accessibility_mode_label">โหมดการเข้าถึง</string>
     <string name="a11y_camera_ready">กล้องพร้อมแล้ว แตะสองครั้งที่ “สแกน” เพื่อถ่ายภาพ</string>
