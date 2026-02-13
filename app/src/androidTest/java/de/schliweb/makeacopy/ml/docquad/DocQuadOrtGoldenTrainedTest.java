@@ -10,14 +10,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import org.junit.Assume;
 
 /**
@@ -28,9 +23,7 @@ import org.junit.Assume;
  * - `mask_area` ist v1-definiert als `sigmoid(mask_logits) > 0.5` (strict).
  */
 @RunWith(AndroidJUnit4.class)
-public class DocQuadOrtGoldenTrainedTest {
-
-    private static final String MASK_AREA_DEFINITION_V1 = "mask_prob_gt_0.5";
+public class DocQuadOrtGoldenTrainedTest extends DocQuadGoldenTestBase {
 
     // Toleranz analog zur Python-Prüfung (Float-Stats, ddof=0).
     private static final double EPS = 1e-4;
@@ -89,71 +82,6 @@ public class DocQuadOrtGoldenTrainedTest {
         assertClose(sample0.get("mask_logits_std").getAsDouble(), maskStats.std, EPS);
     }
 
-    /**
-     * Entspricht exakt `training/docquad_m3/golden_samples.py` → `_make_input_sample_v1()`.
-     *
-     * Shape: [1,3,256,256] NCHW, float32, Wertebereich 0..1.
-     */
-    private static float[] makeGoldenInputV1Nchw() {
-        int h = DocQuadOrtRunner.IN_H;
-        int w = DocQuadOrtRunner.IN_W;
-        float[] out = new float[1 * 3 * h * w];
-
-        // Channel 0 (R): horizontal gradient x/255
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                out[idx(0, y, x)] = (float) x / 255.0f;
-            }
-        }
-        // Channel 1 (G): vertical gradient y/255
-        for (int y = 0; y < h; y++) {
-            float v = (float) y / 255.0f;
-            for (int x = 0; x < w; x++) {
-                out[idx(1, y, x)] = v;
-            }
-        }
-        // Channel 2 (B): constant 0.25
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                out[idx(2, y, x)] = 0.25f;
-            }
-        }
-
-        // R-channel block: [64:192, 64:192] = 1.0
-        for (int y = 64; y < 192; y++) {
-            for (int x = 64; x < 192; x++) {
-                out[idx(0, y, x)] = 1.0f;
-            }
-        }
-        return out;
-    }
-
-    private static int idx(int c, int y, int x) {
-        // NCHW: ((c * H) + y) * W + x
-        return ((c * DocQuadOrtRunner.IN_H) + y) * DocQuadOrtRunner.IN_W + x;
-    }
-
-    /**
-     * `mask_area` Definition v1 (FIX):
-     * - `mask_prob = sigmoid(mask_logits)`
-     * - `mask_bin = mask_prob > 0.5` (strict)
-     * - `mask_area = sum(mask_bin)`
-     */
-    private static int computeMaskAreaV1(float[][][][] maskLogits) {
-        float[][] m = maskLogits[0][0];
-        int area = 0;
-        for (int y = 0; y < DocQuadOrtRunner.OUT_H; y++) {
-            for (int x = 0; x < DocQuadOrtRunner.OUT_W; x++) {
-                double logit = (double) m[y][x];
-                double prob = 1.0 / (1.0 + Math.exp(-logit));
-                if (prob > 0.5) {
-                    area++;
-                }
-            }
-        }
-        return area;
-    }
-
     private static final class Stats {
         final double mean;
         final double std;
@@ -193,18 +121,5 @@ public class DocQuadOrtGoldenTrainedTest {
     private static void assertClose(double expected, double actual, double eps) {
         assertTrue("expected=" + expected + " actual=" + actual + " eps=" + eps,
                 Math.abs(expected - actual) <= eps);
-    }
-
-    private static JsonObject readJsonAsset(Context ctx, String assetPath) throws Exception {
-        try (InputStream is = ctx.getAssets().open(assetPath);
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            byte[] buf = new byte[8 * 1024];
-            int n;
-            while ((n = is.read(buf)) >= 0) {
-                if (n > 0) baos.write(buf, 0, n);
-            }
-            String s = baos.toString(StandardCharsets.UTF_8);
-            return JsonParser.parseString(s).getAsJsonObject();
-        }
     }
 }

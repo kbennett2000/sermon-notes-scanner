@@ -60,18 +60,12 @@ public class ColumnDetector {
      * or a single region covering the entire image if no columns detected
      */
     public List<DocumentRegion> detectColumns(Mat binaryImage) {
-        if (binaryImage == null || binaryImage.empty()) {
-            Log.w(TAG, "detectColumns: empty or null image");
+        if (!ImageValidator.validateImage(binaryImage, TAG, "detectColumns")) {
             return createSingleColumnResult(0, 0);
         }
 
         int width = binaryImage.cols();
         int height = binaryImage.rows();
-
-        if (width < 100 || height < 100) {
-            Log.d(TAG, "detectColumns: image too small for column detection");
-            return createSingleColumnResult(width, height);
-        }
 
         try {
             // 1. Compute vertical projection (count black pixels per column)
