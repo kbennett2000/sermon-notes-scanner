@@ -40,7 +40,7 @@ sedi(){ if sed --version >/dev/null 2>&1; then sed -i "$@"; else sed -i '' "$@";
 if [ "${QUICK_PATCH5_CHECK:-0}" = "1" ]; then
   info "Running QUICK_PATCH5_CHECK: validating pinned JNI files in PINNED_JNI_DIR='$PINNED_JNI_DIR'"
   COPIED=0; MISSING=()
-  for f in core.inl.hpp imgcodecs.inl.hpp imgproc.inl.hpp video.inl.hpp videoio.inl.hpp; do
+  for f in core.inl.hpp imgcodecs.inl.hpp imgproc.inl.hpp photo.inl.hpp video.inl.hpp videoio.inl.hpp; do
     if [ -f "$PINNED_JNI_DIR/$f" ]; then
       echo "[pinned-jni] would copy $f -> gen/cpp"; COPIED=$((COPIED+1))
     else MISSING+=("$f"); fi
@@ -231,7 +231,7 @@ build_for_arch(){
   mkdir -p "$GEN_CPP_DIR"
   local COPIED=0
   if [ -d "$PINNED_JNI_DIR" ]; then
-    for f in core.inl.hpp imgcodecs.inl.hpp imgproc.inl.hpp video.inl.hpp videoio.inl.hpp opencv_jni.hpp; do
+    for f in core.inl.hpp imgcodecs.inl.hpp imgproc.inl.hpp photo.inl.hpp video.inl.hpp videoio.inl.hpp opencv_jni.hpp; do
       if [ -f "$PINNED_JNI_DIR/$f" ]; then
         cp -f "$PINNED_JNI_DIR/$f" "$GEN_CPP_DIR/" && info "[pinned-jni] copied $f"
         COPIED=$((COPIED+1))
