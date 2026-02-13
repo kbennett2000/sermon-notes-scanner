@@ -3,6 +3,7 @@
 //
 package org.opencv.imgcodecs;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -21,7 +22,8 @@ public class Imgcodecs {
             IMAGE_METADATA_EXIF = 0,
             IMAGE_METADATA_XMP = 1,
             IMAGE_METADATA_ICCP = 2,
-            IMAGE_METADATA_MAX = 2;
+            IMAGE_METADATA_CICP = 3,
+            IMAGE_METADATA_MAX = 3;
 
 
     // C++: enum ImreadModes (cv.ImreadModes)
@@ -41,6 +43,12 @@ public class Imgcodecs {
             IMREAD_REDUCED_COLOR_8 = 65,
             IMREAD_IGNORE_ORIENTATION = 128,
             IMREAD_COLOR_RGB = 256;
+
+
+    // C++: enum ImwriteBMPCompressionFlags (cv.ImwriteBMPCompressionFlags)
+    public static final int
+            IMWRITE_BMP_COMPRESSION_RGB = 0,
+            IMWRITE_BMP_COMPRESSION_BITFIELDS = 3;
 
 
     // C++: enum ImwriteEXRCompressionFlags (cv.ImwriteEXRCompressionFlags)
@@ -76,6 +84,7 @@ public class Imgcodecs {
             IMWRITE_PNG_STRATEGY = 17,
             IMWRITE_PNG_BILEVEL = 18,
             IMWRITE_PNG_FILTER = 19,
+            IMWRITE_PNG_ZLIBBUFFER_SIZE = 20,
             IMWRITE_PXM_BINARY = 32,
             IMWRITE_EXR_TYPE = (3 << 4) + 0,
             IMWRITE_EXR_COMPRESSION = (3 << 4) + 1,
@@ -97,6 +106,7 @@ public class Imgcodecs {
             IMWRITE_JPEGXL_EFFORT = 641,
             IMWRITE_JPEGXL_DISTANCE = 642,
             IMWRITE_JPEGXL_DECODING_SPEED = 643,
+            IMWRITE_BMP_COMPRESSION = 768,
             IMWRITE_GIF_LOOP = 1024,
             IMWRITE_GIF_SPEED = 1025,
             IMWRITE_GIF_QUALITY = 1026,
@@ -206,6 +216,13 @@ public class Imgcodecs {
             IMWRITE_TIFF_PREDICTOR_FLOATINGPOINT = 3;
 
 
+    // C++: enum ImwriteTiffResolutionUnitFlags (cv.ImwriteTiffResolutionUnitFlags)
+    public static final int
+            IMWRITE_TIFF_RESOLUTION_UNIT_NONE = 1,
+            IMWRITE_TIFF_RESOLUTION_UNIT_INCH = 2,
+            IMWRITE_TIFF_RESOLUTION_UNIT_CENTIMETER = 3;
+
+
     //
     // C++:  Mat cv::imread(String filename, int flags = IMREAD_COLOR_BGR)
     //
@@ -311,7 +328,7 @@ public class Imgcodecs {
      * </ul>
      *
      * @param filename Name of the file to be loaded.
-     * @param flags Flag that can take values of {@code cv::ImreadModes}.
+     * @param flags Flag that can take values of cv::ImreadModes, default with cv::IMREAD_COLOR_BGR.
      * @return automatically generated
      */
     public static Mat imread(String filename, int flags) {
@@ -436,7 +453,7 @@ public class Imgcodecs {
      * This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts and the return value.
      * @param filename Name of file to be loaded.
      * @param dst object in which the image will be loaded.
-     * @param flags Flag that can take values of cv::ImreadModes
+     * @param flags Flag that can take values of cv::ImreadModes, default with cv::IMREAD_COLOR_BGR.
      * <b>Note:</b>
      * The image passing through the img parameter can be pre-allocated. The memory is reused if the shape and the type match with the load image.
      */
@@ -463,14 +480,19 @@ public class Imgcodecs {
     //
 
     /**
-     * Reads an image from a file together with associated metadata.
+     * Reads an image from a file along with associated metadata.
      *
-     * The function imreadWithMetadata reads image from the specified file. It does the same thing as imread, but additionally reads metadata if the corresponding file contains any.
+     * This function behaves similarly to cv::imread(), loading an image from the specified file.
+     * In addition to the image pixel data, it also attempts to extract any available metadata
+     * embedded in the file (such as EXIF, XMP, etc.), depending on file format support.
+     *
+     * <b>Note:</b> In the case of color images, the decoded images will have the channels stored in <b>B G R</b> order.
      * @param filename Name of the file to be loaded.
-     * @param metadataTypes Output vector with types of metadata chucks returned in metadata, see ImageMetadataType.
-     * @param metadata Output vector of vectors or vector of matrices to store the retrieved metadata
-     * @param flags Flag that can take values of cv::ImreadModes
-     * @return automatically generated
+     * @param metadataTypes Output vector with types of metadata chunks returned in metadata, see ImageMetadataType.
+     * @param metadata Output vector of vectors or vector of matrices to store the retrieved metadata.
+     * @param flags Flag that can take values of cv::ImreadModes, default with cv::IMREAD_ANYCOLOR.
+     *
+     * @return The loaded image as a cv::Mat object. If the image cannot be read, the function returns an empty matrix.
      */
     public static Mat imreadWithMetadata(String filename, MatOfInt metadataTypes, List<Mat> metadata, int flags) {
         Mat metadataTypes_mat = metadataTypes;
@@ -482,13 +504,18 @@ public class Imgcodecs {
     }
 
     /**
-     * Reads an image from a file together with associated metadata.
+     * Reads an image from a file along with associated metadata.
      *
-     * The function imreadWithMetadata reads image from the specified file. It does the same thing as imread, but additionally reads metadata if the corresponding file contains any.
+     * This function behaves similarly to cv::imread(), loading an image from the specified file.
+     * In addition to the image pixel data, it also attempts to extract any available metadata
+     * embedded in the file (such as EXIF, XMP, etc.), depending on file format support.
+     *
+     * <b>Note:</b> In the case of color images, the decoded images will have the channels stored in <b>B G R</b> order.
      * @param filename Name of the file to be loaded.
-     * @param metadataTypes Output vector with types of metadata chucks returned in metadata, see ImageMetadataType.
-     * @param metadata Output vector of vectors or vector of matrices to store the retrieved metadata
-     * @return automatically generated
+     * @param metadataTypes Output vector with types of metadata chunks returned in metadata, see ImageMetadataType.
+     * @param metadata Output vector of vectors or vector of matrices to store the retrieved metadata.
+     *
+     * @return The loaded image as a cv::Mat object. If the image cannot be read, the function returns an empty matrix.
      */
     public static Mat imreadWithMetadata(String filename, MatOfInt metadataTypes, List<Mat> metadata) {
         Mat metadataTypes_mat = metadataTypes;
@@ -822,7 +849,17 @@ public class Imgcodecs {
      *
      * <ul>
      *   <li>
-     *  With OpenEXR encoder, only 32-bit float (CV_32F) images can be saved.
+     *  With BMP encoder, 8-bit unsigned (CV_8U) images can be saved.
+     *   <ul>
+     *     <li>
+     *    BMP images with an alpha channel can be saved using this function.
+     *     To achieve this, create an 8-bit 4-channel (CV_8UC4) BGRA image, ensuring the alpha channel is the last component.
+     *     Fully transparent pixels should have an alpha value of 0, while fully opaque pixels should have an alpha value of 255.
+     *     OpenCV v4.13.0 or later use BI_BITFIELDS compression as default. See IMWRITE_BMP_COMPRESSION.
+     *     </li>
+     *   </ul>
+     *   <li>
+     *  With OpenEXR encoder, only 32-bit float (CV_32F) images can be saved. More than 4 channels can be saved. (imread can load it then.)
      *   <ul>
      *     <li>
      *    8-bit unsigned (CV_8U) images are not supported.
@@ -886,6 +923,18 @@ public class Imgcodecs {
      *     </li>
      *     <li>
      *    8-bit single-channel images (CV_8UC1) are not supported due to GIF's limitation to indexed color formats.
+     *     </li>
+     *   </ul>
+     *   <li>
+     *  With AVIF encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+     *   <ul>
+     *     <li>
+     *    CV_16U images can be saved as only 10-bit or 12-bit (not 16-bit). See IMWRITE_AVIF_DEPTH.
+     *     </li>
+     *     <li>
+     *    AVIF images with an alpha channel can be saved using this function.
+     *     To achieve this, create an 8-bit 4-channel (CV_8UC4) / 16-bit 4-channel (CV_16UC4) BGRA image, ensuring the alpha channel is the last component.
+     *     Fully transparent pixels should have an alpha value of 0, while fully opaque pixels should have an alpha value of 255 (8-bit) / 1023 (10-bit) / 4095 (12-bit) (see the code sample below).
      *     </li>
      *   </ul>
      *
@@ -903,7 +952,7 @@ public class Imgcodecs {
      * @param filename Name of the file.
      * @param img (Mat or vector of Mat) Image or Images to be saved.
      * @param params Format-specific parameters encoded as pairs (paramId_1, paramValue_1, paramId_2, paramValue_2, ... .) see cv::ImwriteFlags
-     * @return automatically generated
+     * @return true if the image is successfully written to the specified file; false otherwise.
      */
     public static boolean imwrite(String filename, Mat img, MatOfInt params) {
         Mat params_mat = params;
@@ -920,7 +969,17 @@ public class Imgcodecs {
      *
      * <ul>
      *   <li>
-     *  With OpenEXR encoder, only 32-bit float (CV_32F) images can be saved.
+     *  With BMP encoder, 8-bit unsigned (CV_8U) images can be saved.
+     *   <ul>
+     *     <li>
+     *    BMP images with an alpha channel can be saved using this function.
+     *     To achieve this, create an 8-bit 4-channel (CV_8UC4) BGRA image, ensuring the alpha channel is the last component.
+     *     Fully transparent pixels should have an alpha value of 0, while fully opaque pixels should have an alpha value of 255.
+     *     OpenCV v4.13.0 or later use BI_BITFIELDS compression as default. See IMWRITE_BMP_COMPRESSION.
+     *     </li>
+     *   </ul>
+     *   <li>
+     *  With OpenEXR encoder, only 32-bit float (CV_32F) images can be saved. More than 4 channels can be saved. (imread can load it then.)
      *   <ul>
      *     <li>
      *    8-bit unsigned (CV_8U) images are not supported.
@@ -986,6 +1045,18 @@ public class Imgcodecs {
      *    8-bit single-channel images (CV_8UC1) are not supported due to GIF's limitation to indexed color formats.
      *     </li>
      *   </ul>
+     *   <li>
+     *  With AVIF encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+     *   <ul>
+     *     <li>
+     *    CV_16U images can be saved as only 10-bit or 12-bit (not 16-bit). See IMWRITE_AVIF_DEPTH.
+     *     </li>
+     *     <li>
+     *    AVIF images with an alpha channel can be saved using this function.
+     *     To achieve this, create an 8-bit 4-channel (CV_8UC4) / 16-bit 4-channel (CV_16UC4) BGRA image, ensuring the alpha channel is the last component.
+     *     Fully transparent pixels should have an alpha value of 0, while fully opaque pixels should have an alpha value of 255 (8-bit) / 1023 (10-bit) / 4095 (12-bit) (see the code sample below).
+     *     </li>
+     *   </ul>
      *
      * If the image format is not supported, the image will be converted to 8-bit unsigned (CV_8U) and saved that way.
      *   </li>
@@ -1000,7 +1071,7 @@ public class Imgcodecs {
      * INCLUDE: snippets/imgcodecs_imwrite.cpp
      * @param filename Name of the file.
      * @param img (Mat or vector of Mat) Image or Images to be saved.
-     * @return automatically generated
+     * @return true if the image is successfully written to the specified file; false otherwise.
      */
     public static boolean imwrite(String filename, Mat img) {
         return imwrite_1(filename, img.nativeObj);
@@ -1076,7 +1147,7 @@ public class Imgcodecs {
      *
      * <b>Note:</b> In the case of color images, the decoded images will have the channels stored in <b>B G R</b> order.
      * @param buf Input array or vector of bytes.
-     * @param flags The same flags as in cv::imread, see cv::ImreadModes.
+     * @param flags Flag that can take values of cv::ImreadModes.
      * @return automatically generated
      */
     public static Mat imdecode(Mat buf, int flags) {
@@ -1089,19 +1160,20 @@ public class Imgcodecs {
     //
 
     /**
-     * Reads an image from a buffer in memory together with associated metadata.
+     * Reads an image from a memory buffer and extracts associated metadata.
      *
-     * The function imdecode reads an image from the specified buffer in the memory. If the buffer is too short or
+     * This function decodes an image from the specified memory buffer. If the buffer is too short or
      * contains invalid data, the function returns an empty matrix ( Mat::data==NULL ).
      *
      * See cv::imread for the list of supported formats and flags description.
      *
      * <b>Note:</b> In the case of color images, the decoded images will have the channels stored in <b>B G R</b> order.
-     * @param buf Input array or vector of bytes.
-     * @param metadataTypes Output vector with types of metadata chucks returned in metadata, see ImageMetadataType.
+     * @param buf Input array or vector of bytes containing the encoded image data.
+     * @param metadataTypes Output vector with types of metadata chucks returned in metadata, see cv::ImageMetadataType
      * @param metadata Output vector of vectors or vector of matrices to store the retrieved metadata
-     * @param flags The same flags as in cv::imread, see cv::ImreadModes.
-     * @return automatically generated
+     * @param flags Flag that can take values of cv::ImreadModes, default with cv::IMREAD_ANYCOLOR.
+     *
+     * @return The decoded image as a cv::Mat object. If decoding fails, the function returns an empty matrix.
      */
     public static Mat imdecodeWithMetadata(Mat buf, MatOfInt metadataTypes, List<Mat> metadata, int flags) {
         Mat metadataTypes_mat = metadataTypes;
@@ -1113,18 +1185,19 @@ public class Imgcodecs {
     }
 
     /**
-     * Reads an image from a buffer in memory together with associated metadata.
+     * Reads an image from a memory buffer and extracts associated metadata.
      *
-     * The function imdecode reads an image from the specified buffer in the memory. If the buffer is too short or
+     * This function decodes an image from the specified memory buffer. If the buffer is too short or
      * contains invalid data, the function returns an empty matrix ( Mat::data==NULL ).
      *
      * See cv::imread for the list of supported formats and flags description.
      *
      * <b>Note:</b> In the case of color images, the decoded images will have the channels stored in <b>B G R</b> order.
-     * @param buf Input array or vector of bytes.
-     * @param metadataTypes Output vector with types of metadata chucks returned in metadata, see ImageMetadataType.
+     * @param buf Input array or vector of bytes containing the encoded image data.
+     * @param metadataTypes Output vector with types of metadata chucks returned in metadata, see cv::ImageMetadataType
      * @param metadata Output vector of vectors or vector of matrices to store the retrieved metadata
-     * @return automatically generated
+     *
+     * @return The decoded image as a cv::Mat object. If decoding fails, the function returns an empty matrix.
      */
     public static Mat imdecodeWithMetadata(Mat buf, MatOfInt metadataTypes, List<Mat> metadata) {
         Mat metadataTypes_mat = metadataTypes;
@@ -1150,7 +1223,7 @@ public class Imgcodecs {
      *
      * <b>Note:</b> In the case of color images, the decoded images will have the channels stored in <b>B G R</b> order.
      * @param buf Input array or vector of bytes.
-     * @param flags The same flags as in cv::imread, see cv::ImreadModes.
+     * @param flags Flag that can take values of cv::ImreadModes.
      * @param mats A vector of Mat objects holding each page, if more than one.
      * @param range A continuous selection of pages.
      * @return automatically generated
@@ -1173,7 +1246,7 @@ public class Imgcodecs {
      *
      * <b>Note:</b> In the case of color images, the decoded images will have the channels stored in <b>B G R</b> order.
      * @param buf Input array or vector of bytes.
-     * @param flags The same flags as in cv::imread, see cv::ImreadModes.
+     * @param flags Flag that can take values of cv::ImreadModes.
      * @param mats A vector of Mat objects holding each page, if more than one.
      * @return automatically generated
      */

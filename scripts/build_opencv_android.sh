@@ -73,7 +73,7 @@ cat <<'EOF' >> "$OPENCV_UTILS"
 
 # Patched: deterministic ocv_output_status()
 function(ocv_output_status msg)
-  set(OPENCV_BUILD_INFO_STR "\"OpenCV 4.12.0 (reproducible build)\\n\"" CACHE INTERNAL "")
+  set(OPENCV_BUILD_INFO_STR "\"OpenCV 4.13.0 (reproducible build)\\n\"" CACHE INTERNAL "")
 endfunction()
 EOF
 

@@ -2,6 +2,7 @@ package org.opencv.android;
 
 import org.opencv.core.Core;
 
+import java.util.StringTokenizer;
 import android.util.Log;
 
 class StaticHelper {

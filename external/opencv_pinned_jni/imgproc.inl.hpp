@@ -1,6 +1,6 @@
 //
 // This file is auto-generated. Please don't modify it!
-// egdels did ;-)
+//
 
 #undef LOG_TAG
 
@@ -13,8 +13,8 @@
 
 #include "/tmp/opencv-src/modules/imgproc/include/opencv2/imgproc/types_c.h"
 #include "/tmp/opencv-src/modules/imgproc/include/opencv2/imgproc.hpp"
-#include "/tmp/opencv-src/modules/imgproc/include/opencv2/imgproc/bindings.hpp"
 #include "/tmp/opencv-src/modules/imgproc/include/opencv2/imgproc/segmentation.hpp"
+#include "/tmp/opencv-src/modules/imgproc/include/opencv2/imgproc/bindings.hpp"
 
 #define LOG_TAG "org.opencv.imgproc"
 #include "common.h"
@@ -177,6 +177,55 @@ JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_CLAHE_getTilesGridSize_10
 
 
 //
+//  void cv::CLAHE::setBitShift(int bitShift)
+//
+
+JNIEXPORT void JNICALL Java_org_opencv_imgproc_CLAHE_setBitShift_10 (JNIEnv*, jclass, jlong, jint);
+
+JNIEXPORT void JNICALL Java_org_opencv_imgproc_CLAHE_setBitShift_10
+  (JNIEnv* env, jclass , jlong self, jint bitShift)
+{
+    
+    static const char method_name[] = "imgproc::setBitShift_10()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::CLAHE>* me = (Ptr<cv::CLAHE>*) self; //TODO: check for NULL
+        (*me)->setBitShift( (int)bitShift );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+}
+
+
+
+//
+//  int cv::CLAHE::getBitShift()
+//
+
+JNIEXPORT jint JNICALL Java_org_opencv_imgproc_CLAHE_getBitShift_10 (JNIEnv*, jclass, jlong);
+
+JNIEXPORT jint JNICALL Java_org_opencv_imgproc_CLAHE_getBitShift_10
+  (JNIEnv* env, jclass , jlong self)
+{
+    
+    static const char method_name[] = "imgproc::getBitShift_10()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::CLAHE>* me = (Ptr<cv::CLAHE>*) self; //TODO: check for NULL
+        return (*me)->getBitShift();
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+//
 //  void cv::CLAHE::collectGarbage()
 //
 
@@ -201,7 +250,7 @@ JNIEXPORT void JNICALL Java_org_opencv_imgproc_CLAHE_collectGarbage_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::CLAHE>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgproc_CLAHE_delete(JNIEnv*, jclass, jlong);
@@ -659,7 +708,7 @@ JNIEXPORT jint JNICALL Java_org_opencv_imgproc_GeneralizedHough_getMaxBufferSize
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::GeneralizedHough>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgproc_GeneralizedHough_delete(JNIEnv*, jclass, jlong);
@@ -770,7 +819,7 @@ JNIEXPORT jint JNICALL Java_org_opencv_imgproc_GeneralizedHoughBallard_getVotesT
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::GeneralizedHoughBallard>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgproc_GeneralizedHoughBallard_delete(JNIEnv*, jclass, jlong);
@@ -1371,7 +1420,7 @@ JNIEXPORT jint JNICALL Java_org_opencv_imgproc_GeneralizedHoughGuil_getPosThresh
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::GeneralizedHoughGuil>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgproc_GeneralizedHoughGuil_delete(JNIEnv*, jclass, jlong);
@@ -5323,6 +5372,82 @@ JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_Imgproc_phaseCorrelate_12
 
 
 //
+//  Point2d cv::phaseCorrelateIterative(Mat src1, Mat src2, int L2size = 7, int maxIters = 10)
+//
+
+JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_Imgproc_phaseCorrelateIterative_10 (JNIEnv*, jclass, jlong, jlong, jint, jint);
+
+JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_Imgproc_phaseCorrelateIterative_10
+  (JNIEnv* env, jclass , jlong src1_nativeObj, jlong src2_nativeObj, jint L2size, jint maxIters)
+{
+    
+    static const char method_name[] = "imgproc::phaseCorrelateIterative_10()";
+    try {
+        LOGD("%s", method_name);
+        Mat& src1 = *((Mat*)src1_nativeObj);
+        Mat& src2 = *((Mat*)src2_nativeObj);
+        Point2d _retval_ = cv::phaseCorrelateIterative( src1, src2, (int)L2size, (int)maxIters );
+        jdoubleArray _da_retval_ = env->NewDoubleArray(2);  jdouble _tmp_retval_[2] = {(jdouble)_retval_.x, (jdouble)_retval_.y}; env->SetDoubleArrayRegion(_da_retval_, 0, 2, _tmp_retval_);
+        return _da_retval_;
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_Imgproc_phaseCorrelateIterative_11 (JNIEnv*, jclass, jlong, jlong, jint);
+
+JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_Imgproc_phaseCorrelateIterative_11
+  (JNIEnv* env, jclass , jlong src1_nativeObj, jlong src2_nativeObj, jint L2size)
+{
+    
+    static const char method_name[] = "imgproc::phaseCorrelateIterative_11()";
+    try {
+        LOGD("%s", method_name);
+        Mat& src1 = *((Mat*)src1_nativeObj);
+        Mat& src2 = *((Mat*)src2_nativeObj);
+        Point2d _retval_ = cv::phaseCorrelateIterative( src1, src2, (int)L2size );
+        jdoubleArray _da_retval_ = env->NewDoubleArray(2);  jdouble _tmp_retval_[2] = {(jdouble)_retval_.x, (jdouble)_retval_.y}; env->SetDoubleArrayRegion(_da_retval_, 0, 2, _tmp_retval_);
+        return _da_retval_;
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_Imgproc_phaseCorrelateIterative_12 (JNIEnv*, jclass, jlong, jlong);
+
+JNIEXPORT jdoubleArray JNICALL Java_org_opencv_imgproc_Imgproc_phaseCorrelateIterative_12
+  (JNIEnv* env, jclass , jlong src1_nativeObj, jlong src2_nativeObj)
+{
+    
+    static const char method_name[] = "imgproc::phaseCorrelateIterative_12()";
+    try {
+        LOGD("%s", method_name);
+        Mat& src1 = *((Mat*)src1_nativeObj);
+        Mat& src2 = *((Mat*)src2_nativeObj);
+        Point2d _retval_ = cv::phaseCorrelateIterative( src1, src2 );
+        jdoubleArray _da_retval_ = env->NewDoubleArray(2);  jdouble _tmp_retval_[2] = {(jdouble)_retval_.x, (jdouble)_retval_.y}; env->SetDoubleArrayRegion(_da_retval_, 0, 2, _tmp_retval_);
+        return _da_retval_;
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+//
 //  void cv::createHanningWindow(Mat& dst, Size winSize, int type)
 //
 
@@ -7207,6 +7332,32 @@ JNIEXPORT jdouble JNICALL Java_org_opencv_imgproc_Imgproc_minEnclosingTriangle_1
         Mat& points = *((Mat*)points_nativeObj);
         Mat& triangle = *((Mat*)triangle_nativeObj);
         return cv::minEnclosingTriangle( points, triangle );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+//
+//  double cv::minEnclosingConvexPolygon(Mat points, Mat& polygon, int k)
+//
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_imgproc_Imgproc_minEnclosingConvexPolygon_10 (JNIEnv*, jclass, jlong, jlong, jint);
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_imgproc_Imgproc_minEnclosingConvexPolygon_10
+  (JNIEnv* env, jclass , jlong points_nativeObj, jlong polygon_nativeObj, jint k)
+{
+    
+    static const char method_name[] = "imgproc::minEnclosingConvexPolygon_10()";
+    try {
+        LOGD("%s", method_name);
+        Mat& points = *((Mat*)points_nativeObj);
+        Mat& polygon = *((Mat*)polygon_nativeObj);
+        return cv::minEnclosingConvexPolygon( points, polygon, (int)k );
     } catch(const std::exception &e) {
         throwJavaException(env, &e, method_name);
     } catch (...) {
@@ -9580,7 +9731,7 @@ JNIEXPORT jint JNICALL Java_org_opencv_imgproc_LineSegmentDetector_compareSegmen
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::LineSegmentDetector>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgproc_LineSegmentDetector_delete(JNIEnv*, jclass, jlong);
@@ -10168,7 +10319,7 @@ JNIEXPORT jint JNICALL Java_org_opencv_imgproc_Subdiv2D_edgeDst_11
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::Subdiv2D>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgproc_Subdiv2D_delete(JNIEnv*, jclass, jlong);
@@ -10553,7 +10704,7 @@ JNIEXPORT void JNICALL Java_org_opencv_imgproc_IntelligentScissorsMB_getContour_
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void cv::segmentation::IntelligentScissorsMB::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgproc_IntelligentScissorsMB_delete(JNIEnv*, jclass, jlong);

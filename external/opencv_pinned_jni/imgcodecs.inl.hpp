@@ -1,6 +1,6 @@
 //
 // This file is auto-generated. Please don't modify it!
-// egdels did ;-)
+//
 
 #undef LOG_TAG
 
@@ -377,7 +377,7 @@ JNIEXPORT void JNICALL Java_org_opencv_imgcodecs_Animation_set_1still_1image_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void cv::Animation::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_imgcodecs_Animation_delete(JNIEnv*, jclass, jlong);
