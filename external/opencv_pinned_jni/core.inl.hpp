@@ -1,6 +1,6 @@
 //
 // This file is auto-generated. Please don't modify it!
-// egdels did ;-)
+//
 
 #undef LOG_TAG
 
@@ -150,7 +150,7 @@ JNIEXPORT jstring JNICALL Java_org_opencv_core_Algorithm_getDefaultName_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::Algorithm>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_core_Algorithm_delete(JNIEnv*, jclass, jlong);
@@ -5779,7 +5779,7 @@ JNIEXPORT void JNICALL Java_org_opencv_core_TickMeter_reset_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::TickMeter>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_core_TickMeter_delete(JNIEnv*, jclass, jlong);

@@ -5644,6 +5644,65 @@ public class Imgproc {
 
 
     //
+    // C++:  Point2d cv::phaseCorrelateIterative(Mat src1, Mat src2, int L2size = 7, int maxIters = 10)
+    //
+
+    /**
+     * Detects translational shifts between two images.
+     *
+     * This function extends the standard REF: phaseCorrelate method by improving sub-pixel accuracy
+     * through iterative shift refinement in the phase-correlation space, as described in
+     * CITE: hrazdira2020iterative.
+     *
+     * @param src1 Source floating point array (CV_32FC1 or CV_64FC1)
+     * @param src2 Source floating point array (CV_32FC1 or CV_64FC1)
+     * @param L2size The size of the correlation neighborhood used by the iterative shift refinement algorithm.
+     * @param maxIters The maximum number of iterations the iterative refinement algorithm will run.
+     * @return detected sub-pixel shift between the two arrays.
+     *
+     * SEE: phaseCorrelate, dft, idft, createHanningWindow
+     */
+    public static Point phaseCorrelateIterative(Mat src1, Mat src2, int L2size, int maxIters) {
+        return new Point(phaseCorrelateIterative_0(src1.nativeObj, src2.nativeObj, L2size, maxIters));
+    }
+
+    /**
+     * Detects translational shifts between two images.
+     *
+     * This function extends the standard REF: phaseCorrelate method by improving sub-pixel accuracy
+     * through iterative shift refinement in the phase-correlation space, as described in
+     * CITE: hrazdira2020iterative.
+     *
+     * @param src1 Source floating point array (CV_32FC1 or CV_64FC1)
+     * @param src2 Source floating point array (CV_32FC1 or CV_64FC1)
+     * @param L2size The size of the correlation neighborhood used by the iterative shift refinement algorithm.
+     * @return detected sub-pixel shift between the two arrays.
+     *
+     * SEE: phaseCorrelate, dft, idft, createHanningWindow
+     */
+    public static Point phaseCorrelateIterative(Mat src1, Mat src2, int L2size) {
+        return new Point(phaseCorrelateIterative_1(src1.nativeObj, src2.nativeObj, L2size));
+    }
+
+    /**
+     * Detects translational shifts between two images.
+     *
+     * This function extends the standard REF: phaseCorrelate method by improving sub-pixel accuracy
+     * through iterative shift refinement in the phase-correlation space, as described in
+     * CITE: hrazdira2020iterative.
+     *
+     * @param src1 Source floating point array (CV_32FC1 or CV_64FC1)
+     * @param src2 Source floating point array (CV_32FC1 or CV_64FC1)
+     * @return detected sub-pixel shift between the two arrays.
+     *
+     * SEE: phaseCorrelate, dft, idft, createHanningWindow
+     */
+    public static Point phaseCorrelateIterative(Mat src1, Mat src2) {
+        return new Point(phaseCorrelateIterative_2(src1.nativeObj, src2.nativeObj));
+    }
+
+
+    //
     // C++:  void cv::createHanningWindow(Mat& dst, Size winSize, int type)
     //
 
@@ -7205,6 +7264,7 @@ public class Imgproc {
      * channels is derived automatically from src and code.
      * @param hint Implementation modfication flags. See #AlgorithmHint
      *
+     * <b>Note:</b> The source image (src) must be of an appropriate type for the desired color conversion. see ColorConversionCodes
      * SEE: REF: imgproc_color_conversions
      */
     public static void cvtColor(Mat src, Mat dst, int code, int dstCn, int hint) {
@@ -7259,6 +7319,7 @@ public class Imgproc {
      * @param dstCn number of channels in the destination image; if the parameter is 0, the number of the
      * channels is derived automatically from src and code.
      *
+     * <b>Note:</b> The source image (src) must be of an appropriate type for the desired color conversion. see ColorConversionCodes
      * SEE: REF: imgproc_color_conversions
      */
     public static void cvtColor(Mat src, Mat dst, int code, int dstCn) {
@@ -7312,6 +7373,7 @@ public class Imgproc {
      * @param code color space conversion code (see #ColorConversionCodes).
      * channels is derived automatically from src and code.
      *
+     * <b>Note:</b> The source image (src) must be of an appropriate type for the desired color conversion. see ColorConversionCodes
      * SEE: REF: imgproc_color_conversions
      */
     public static void cvtColor(Mat src, Mat dst, int code) {
@@ -7456,6 +7518,7 @@ public class Imgproc {
      *
      *     #COLOR_BayerBG2BGRA , #COLOR_BayerGB2BGRA , #COLOR_BayerRG2BGRA , #COLOR_BayerGR2BGRA
      *
+     * <b>Note:</b> The source image (src) must be of an appropriate type for the desired color conversion. see ColorConversionCodes
      * SEE: cvtColor
      */
     public static void demosaicing(Mat src, Mat dst, int code, int dstCn) {
@@ -7506,6 +7569,7 @@ public class Imgproc {
      *
      *     #COLOR_BayerBG2BGRA , #COLOR_BayerGB2BGRA , #COLOR_BayerRG2BGRA , #COLOR_BayerGR2BGRA
      *
+     * <b>Note:</b> The source image (src) must be of an appropriate type for the desired color conversion. see ColorConversionCodes
      * SEE: cvtColor
      */
     public static void demosaicing(Mat src, Mat dst, int code) {
@@ -7532,6 +7596,18 @@ public class Imgproc {
      * <b>Note:</b> Only applicable to contour moments calculations from Python bindings: Note that the numpy
      * type for the input array should be either np.int32 or np.float32.
      *
+     * <b>Note:</b> For contour-based moments, the zeroth-order moment \c m00 represents
+     * the contour area.
+     *
+     * If the input contour is degenerate (for example, a single point or all points
+     * are collinear), the area is zero and therefore \c m00 == 0.
+     *
+     * In this case, the centroid coordinates (\c m10/m00, \c m01/m00) are undefined
+     * and must be handled explicitly by the caller.
+     *
+     * A common workaround is to compute the center using cv::boundingRect() or by
+     * averaging the input points.
+     *
      * SEE:  contourArea, arcLength
      */
     public static Moments moments(Mat array, boolean binaryImage) {
@@ -7551,6 +7627,18 @@ public class Imgproc {
      *
      * <b>Note:</b> Only applicable to contour moments calculations from Python bindings: Note that the numpy
      * type for the input array should be either np.int32 or np.float32.
+     *
+     * <b>Note:</b> For contour-based moments, the zeroth-order moment \c m00 represents
+     * the contour area.
+     *
+     * If the input contour is degenerate (for example, a single point or all points
+     * are collinear), the area is zero and therefore \c m00 == 0.
+     *
+     * In this case, the centroid coordinates (\c m10/m00, \c m01/m00) are undefined
+     * and must be handled explicitly by the caller.
+     *
+     * A common workaround is to compute the center using cv::boundingRect() or by
+     * averaging the input points.
      *
      * SEE:  contourArea, arcLength
      */
@@ -7935,7 +8023,7 @@ public class Imgproc {
      * @param approxCurve Result of the approximation. The type is vector of a 2D point (Point2f or Point) in std::vector or Mat.
      * @param nsides The parameter defines the number of sides of the result polygon.
      * @param epsilon_percentage defines the percentage of the maximum of additional area.
-     * If it equals -1, it is not used. Otherwise algorighm stops if additional area is greater than contourArea(_curve) * percentage.
+     * If it equals -1, it is not used. Otherwise algorithm stops if additional area is greater than contourArea(_curve) * percentage.
      * If additional area exceeds the limit, algorithm returns as many vertices as there were at the moment the limit was exceeded.
      * @param ensure_convex If it is true, algorithm creates a convex hull of input contour. Otherwise input vector should be convex.
      */
@@ -7958,7 +8046,7 @@ public class Imgproc {
      * @param approxCurve Result of the approximation. The type is vector of a 2D point (Point2f or Point) in std::vector or Mat.
      * @param nsides The parameter defines the number of sides of the result polygon.
      * @param epsilon_percentage defines the percentage of the maximum of additional area.
-     * If it equals -1, it is not used. Otherwise algorighm stops if additional area is greater than contourArea(_curve) * percentage.
+     * If it equals -1, it is not used. Otherwise algorithm stops if additional area is greater than contourArea(_curve) * percentage.
      * If additional area exceeds the limit, algorithm returns as many vertices as there were at the moment the limit was exceeded.
      */
     public static void approxPolyN(Mat curve, Mat approxCurve, int nsides, float epsilon_percentage) {
@@ -7979,7 +8067,7 @@ public class Imgproc {
      * @param curve Input vector of a 2D points stored in std::vector or Mat, points must be float or integer.
      * @param approxCurve Result of the approximation. The type is vector of a 2D point (Point2f or Point) in std::vector or Mat.
      * @param nsides The parameter defines the number of sides of the result polygon.
-     * If it equals -1, it is not used. Otherwise algorighm stops if additional area is greater than contourArea(_curve) * percentage.
+     * If it equals -1, it is not used. Otherwise algorithm stops if additional area is greater than contourArea(_curve) * percentage.
      * If additional area exceeds the limit, algorithm returns as many vertices as there were at the moment the limit was exceeded.
      */
     public static void approxPolyN(Mat curve, Mat approxCurve, int nsides) {
@@ -8135,7 +8223,8 @@ public class Imgproc {
      * in clockwise order starting from the point with greatest \(y\). If two points have the
      * same \(y\) coordinate the rightmost is the starting point. This function is useful to draw the
      * rectangle. In C++, instead of using this function, you can directly use RotatedRect::points method. Please
-     * visit the REF: tutorial_bounding_rotated_ellipses "tutorial on Creating Bounding rotated boxes and ellipses for contours" for more information.
+     * visit the REF: tutorial_bounding_rotated_ellipses "tutorial on Creating Bounding rotated boxes and ellipses
+     * for contours" for more information.
      *
      * @param box The input rotated rectangle. It may be the output of REF: minAreaRect.
      * @param points The output array of four vertices of rectangles.
@@ -8195,6 +8284,35 @@ public class Imgproc {
      */
     public static double minEnclosingTriangle(Mat points, Mat triangle) {
         return minEnclosingTriangle_0(points.nativeObj, triangle.nativeObj);
+    }
+
+
+    //
+    // C++:  double cv::minEnclosingConvexPolygon(Mat points, Mat& polygon, int k)
+    //
+
+    /**
+     * Finds a convex polygon of minimum area enclosing a 2D point set and returns its area.
+     *
+     * This function takes a given set of 2D points and finds the enclosing polygon with k vertices and minimal
+     * area. It takes the set of points and the parameter k as input and returns the area of the minimal
+     * enclosing polygon.
+     *
+     * The Implementation is based on a paper by Aggarwal, Chang and Yap CITE: Aggarwal1985. They
+     * provide a \(\theta(n²log(n)log(k))\) algorithm for finding the minimal convex polygon with k
+     * vertices enclosing a 2D convex polygon with n vertices (k &lt; n). Since the #minEnclosingConvexPolygon
+     * function takes a 2D point set as input, an additional preprocessing step of computing the convex hull
+     * of the 2D point set is required. The complexity of the #convexHull function is \(O(n log(n))\) which
+     * is lower than \(\theta(n²log(n)log(k))\). Thus the overall complexity of the function is
+     * \(O(n²log(n)log(k))\).
+     *
+     * @param points   Input vector of 2D points, stored in std::vector&lt;&gt; or Mat
+     * @param polygon  Output vector of 2D points defining the vertices of the enclosing polygon
+     * @param k        Number of vertices of the output polygon
+     * @return automatically generated
+     */
+    public static double minEnclosingConvexPolygon(Mat points, Mat polygon, int k) {
+        return minEnclosingConvexPolygon_0(points.nativeObj, polygon.nativeObj, k);
     }
 
 
@@ -10452,6 +10570,11 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
     private static native double[] phaseCorrelate_1(long src1_nativeObj, long src2_nativeObj, long window_nativeObj);
     private static native double[] phaseCorrelate_2(long src1_nativeObj, long src2_nativeObj);
 
+    // C++:  Point2d cv::phaseCorrelateIterative(Mat src1, Mat src2, int L2size = 7, int maxIters = 10)
+    private static native double[] phaseCorrelateIterative_0(long src1_nativeObj, long src2_nativeObj, int L2size, int maxIters);
+    private static native double[] phaseCorrelateIterative_1(long src1_nativeObj, long src2_nativeObj, int L2size);
+    private static native double[] phaseCorrelateIterative_2(long src1_nativeObj, long src2_nativeObj);
+
     // C++:  void cv::createHanningWindow(Mat& dst, Size winSize, int type)
     private static native void createHanningWindow_0(long dst_nativeObj, double winSize_width, double winSize_height, int type);
 
@@ -10610,6 +10733,9 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
 
     // C++:  double cv::minEnclosingTriangle(Mat points, Mat& triangle)
     private static native double minEnclosingTriangle_0(long points_nativeObj, long triangle_nativeObj);
+
+    // C++:  double cv::minEnclosingConvexPolygon(Mat points, Mat& polygon, int k)
+    private static native double minEnclosingConvexPolygon_0(long points_nativeObj, long polygon_nativeObj, int k);
 
     // C++:  double cv::matchShapes(Mat contour1, Mat contour2, int method, double parameter)
     private static native double matchShapes_0(long contour1_nativeObj, long contour2_nativeObj, int method, double parameter);

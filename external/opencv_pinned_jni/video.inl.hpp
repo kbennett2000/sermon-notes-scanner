@@ -1,6 +1,6 @@
 //
 // This file is auto-generated. Please don't modify it!
-// egdels did ;-)
+//
 
 #undef LOG_TAG
 
@@ -11,8 +11,8 @@
 
 #include "opencv2/video.hpp"
 
-#include "/tmp/opencv-src/modules/video/include/opencv2/video/tracking.hpp"
 #include "/tmp/opencv-src/modules/video/include/opencv2/video/background_segm.hpp"
+#include "/tmp/opencv-src/modules/video/include/opencv2/video/tracking.hpp"
 #include "/tmp/opencv-src/modules/video/include/opencv2/video/detail/tracking.detail.hpp"
 
 #define LOG_TAG "org.opencv.video"
@@ -97,6 +97,56 @@ JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractor_apply_11
 
 
 //
+//  void cv::BackgroundSubtractor::apply(Mat image, Mat knownForegroundMask, Mat& fgmask, double learningRate = -1)
+//
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractor_apply_12 (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jdouble);
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractor_apply_12
+  (JNIEnv* env, jclass , jlong self, jlong image_nativeObj, jlong knownForegroundMask_nativeObj, jlong fgmask_nativeObj, jdouble learningRate)
+{
+    
+    static const char method_name[] = "video::apply_12()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::BackgroundSubtractor>* me = (Ptr<cv::BackgroundSubtractor>*) self; //TODO: check for NULL
+        Mat& image = *((Mat*)image_nativeObj);
+        Mat& knownForegroundMask = *((Mat*)knownForegroundMask_nativeObj);
+        Mat& fgmask = *((Mat*)fgmask_nativeObj);
+        (*me)->apply( image, knownForegroundMask, fgmask, (double)learningRate );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+}
+
+
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractor_apply_13 (JNIEnv*, jclass, jlong, jlong, jlong, jlong);
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractor_apply_13
+  (JNIEnv* env, jclass , jlong self, jlong image_nativeObj, jlong knownForegroundMask_nativeObj, jlong fgmask_nativeObj)
+{
+    
+    static const char method_name[] = "video::apply_13()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::BackgroundSubtractor>* me = (Ptr<cv::BackgroundSubtractor>*) self; //TODO: check for NULL
+        Mat& image = *((Mat*)image_nativeObj);
+        Mat& knownForegroundMask = *((Mat*)knownForegroundMask_nativeObj);
+        Mat& fgmask = *((Mat*)fgmask_nativeObj);
+        (*me)->apply( image, knownForegroundMask, fgmask );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+}
+
+
+
+//
 //  void cv::BackgroundSubtractor::getBackgroundImage(Mat& backgroundImage)
 //
 
@@ -122,7 +172,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractor_getBackgroundI
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::BackgroundSubtractor>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractor_delete(JNIEnv*, jclass, jlong);
@@ -478,7 +528,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorKNN_setShadowTh
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::BackgroundSubtractorKNN>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorKNN_delete(JNIEnv*, jclass, jlong);
@@ -1127,7 +1177,57 @@ JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorMOG2_apply_11
 
 
 //
-//  native support for java finalize()
+//  void cv::BackgroundSubtractorMOG2::apply(Mat image, Mat knownForegroundMask, Mat& fgmask, double learningRate = -1)
+//
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorMOG2_apply_12 (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jdouble);
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorMOG2_apply_12
+  (JNIEnv* env, jclass , jlong self, jlong image_nativeObj, jlong knownForegroundMask_nativeObj, jlong fgmask_nativeObj, jdouble learningRate)
+{
+    
+    static const char method_name[] = "video::apply_12()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::BackgroundSubtractorMOG2>* me = (Ptr<cv::BackgroundSubtractorMOG2>*) self; //TODO: check for NULL
+        Mat& image = *((Mat*)image_nativeObj);
+        Mat& knownForegroundMask = *((Mat*)knownForegroundMask_nativeObj);
+        Mat& fgmask = *((Mat*)fgmask_nativeObj);
+        (*me)->apply( image, knownForegroundMask, fgmask, (double)learningRate );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+}
+
+
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorMOG2_apply_13 (JNIEnv*, jclass, jlong, jlong, jlong, jlong);
+
+JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorMOG2_apply_13
+  (JNIEnv* env, jclass , jlong self, jlong image_nativeObj, jlong knownForegroundMask_nativeObj, jlong fgmask_nativeObj)
+{
+    
+    static const char method_name[] = "video::apply_13()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::BackgroundSubtractorMOG2>* me = (Ptr<cv::BackgroundSubtractorMOG2>*) self; //TODO: check for NULL
+        Mat& image = *((Mat*)image_nativeObj);
+        Mat& knownForegroundMask = *((Mat*)knownForegroundMask_nativeObj);
+        Mat& fgmask = *((Mat*)fgmask_nativeObj);
+        (*me)->apply( image, knownForegroundMask, fgmask );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+}
+
+
+
+//
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::BackgroundSubtractorMOG2>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_BackgroundSubtractorMOG2_delete(JNIEnv*, jclass, jlong);
@@ -1184,6 +1284,55 @@ JNIEXPORT void JNICALL Java_org_opencv_video_DISOpticalFlow_setFinestScale_10
     } catch (...) {
         throwJavaException(env, 0, method_name);
     }
+}
+
+
+
+//
+//  void cv::DISOpticalFlow::setCoarsestScale(int val)
+//
+
+JNIEXPORT void JNICALL Java_org_opencv_video_DISOpticalFlow_setCoarsestScale_10 (JNIEnv*, jclass, jlong, jint);
+
+JNIEXPORT void JNICALL Java_org_opencv_video_DISOpticalFlow_setCoarsestScale_10
+  (JNIEnv* env, jclass , jlong self, jint val)
+{
+    
+    static const char method_name[] = "video::setCoarsestScale_10()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::DISOpticalFlow>* me = (Ptr<cv::DISOpticalFlow>*) self; //TODO: check for NULL
+        (*me)->setCoarsestScale( (int)val );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+}
+
+
+
+//
+//  int cv::DISOpticalFlow::getCoarsestScale()
+//
+
+JNIEXPORT jint JNICALL Java_org_opencv_video_DISOpticalFlow_getCoarsestScale_10 (JNIEnv*, jclass, jlong);
+
+JNIEXPORT jint JNICALL Java_org_opencv_video_DISOpticalFlow_getCoarsestScale_10
+  (JNIEnv* env, jclass , jlong self)
+{
+    
+    static const char method_name[] = "video::getCoarsestScale_10()";
+    try {
+        LOGD("%s", method_name);
+        Ptr<cv::DISOpticalFlow>* me = (Ptr<cv::DISOpticalFlow>*) self; //TODO: check for NULL
+        return (*me)->getCoarsestScale();
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
 }
 
 
@@ -1727,7 +1876,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_video_DISOpticalFlow_create_11
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::DISOpticalFlow>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_DISOpticalFlow_delete(JNIEnv*, jclass, jlong);
@@ -1791,7 +1940,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_DenseOpticalFlow_collectGarbage_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::DenseOpticalFlow>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_DenseOpticalFlow_delete(JNIEnv*, jclass, jlong);
@@ -2398,7 +2547,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_video_FarnebackOpticalFlow_create_18
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::FarnebackOpticalFlow>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_FarnebackOpticalFlow_delete(JNIEnv*, jclass, jlong);
@@ -3089,7 +3238,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_KalmanFilter_set_1errorCovPost_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::KalmanFilter>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_KalmanFilter_delete(JNIEnv*, jclass, jlong);
@@ -3157,7 +3306,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_SparseOpticalFlow_calc_11
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::SparseOpticalFlow>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_SparseOpticalFlow_delete(JNIEnv*, jclass, jlong);
@@ -3565,7 +3714,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_video_SparsePyrLKOpticalFlow_create_15
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::SparsePyrLKOpticalFlow>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_SparsePyrLKOpticalFlow_delete(JNIEnv*, jclass, jlong);
@@ -3633,7 +3782,7 @@ JNIEXPORT jboolean JNICALL Java_org_opencv_video_Tracker_update_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::Tracker>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_Tracker_delete(JNIEnv*, jclass, jlong);
@@ -3719,7 +3868,7 @@ JNIEXPORT jfloat JNICALL Java_org_opencv_video_TrackerDaSiamRPN_getTrackingScore
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::TrackerDaSiamRPN>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerDaSiamRPN_delete(JNIEnv*, jclass, jlong);
@@ -4008,7 +4157,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_TrackerDaSiamRPN_1Params_set_1targe
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void cv::TrackerDaSiamRPN::Params::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerDaSiamRPN_1Params_delete(JNIEnv*, jclass, jlong);
@@ -4069,7 +4218,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_video_TrackerGOTURN_create_11
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::TrackerGOTURN>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerGOTURN_delete(JNIEnv*, jclass, jlong);
@@ -4209,7 +4358,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_TrackerGOTURN_1Params_set_1modelBin
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void cv::TrackerGOTURN::Params::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerGOTURN_1Params_delete(JNIEnv*, jclass, jlong);
@@ -4270,7 +4419,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_video_TrackerMIL_create_11
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::TrackerMIL>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerMIL_delete(JNIEnv*, jclass, jlong);
@@ -4651,7 +4800,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_TrackerMIL_1Params_set_1featureSetN
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void cv::TrackerMIL::Params::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerMIL_1Params_delete(JNIEnv*, jclass, jlong);
@@ -4737,7 +4886,7 @@ JNIEXPORT jfloat JNICALL Java_org_opencv_video_TrackerNano_getTrackingScore_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::TrackerNano>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerNano_delete(JNIEnv*, jclass, jlong);
@@ -4975,7 +5124,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_TrackerNano_1Params_set_1target_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void cv::TrackerNano::Params::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerNano_1Params_delete(JNIEnv*, jclass, jlong);
@@ -5061,7 +5210,7 @@ JNIEXPORT jfloat JNICALL Java_org_opencv_video_TrackerVit_getTrackingScore_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::TrackerVit>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerVit_delete(JNIEnv*, jclass, jlong);
@@ -5401,7 +5550,7 @@ JNIEXPORT void JNICALL Java_org_opencv_video_TrackerVit_1Params_set_1tracking_1s
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void cv::TrackerVit::Params::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_TrackerVit_1Params_delete(JNIEnv*, jclass, jlong);
@@ -5811,7 +5960,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_video_VariationalRefinement_create_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::VariationalRefinement>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_video_VariationalRefinement_delete(JNIEnv*, jclass, jlong);
@@ -5821,6 +5970,190 @@ JNIEXPORT void JNICALL Java_org_opencv_video_VariationalRefinement_delete
 {
     delete (Ptr<cv::VariationalRefinement>*) self;
 }
+
+
+//
+//  Ptr_BackgroundSubtractorMOG2 cv::createBackgroundSubtractorMOG2(int history = 500, double varThreshold = 16, bool detectShadows = true)
+//
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_10 (JNIEnv*, jclass, jint, jdouble, jboolean);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_10
+  (JNIEnv* env, jclass , jint history, jdouble varThreshold, jboolean detectShadows)
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorMOG2_10()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
+        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2( (int)history, (double)varThreshold, (bool)detectShadows );
+        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_11 (JNIEnv*, jclass, jint, jdouble);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_11
+  (JNIEnv* env, jclass , jint history, jdouble varThreshold)
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorMOG2_11()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
+        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2( (int)history, (double)varThreshold );
+        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_12 (JNIEnv*, jclass, jint);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_12
+  (JNIEnv* env, jclass , jint history)
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorMOG2_12()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
+        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2( (int)history );
+        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_13 (JNIEnv*, jclass);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_13
+  (JNIEnv* env, jclass )
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorMOG2_13()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
+        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2();
+        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+//
+//  Ptr_BackgroundSubtractorKNN cv::createBackgroundSubtractorKNN(int history = 500, double dist2Threshold = 400.0, bool detectShadows = true)
+//
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_10 (JNIEnv*, jclass, jint, jdouble, jboolean);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_10
+  (JNIEnv* env, jclass , jint history, jdouble dist2Threshold, jboolean detectShadows)
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorKNN_10()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
+        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN( (int)history, (double)dist2Threshold, (bool)detectShadows );
+        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_11 (JNIEnv*, jclass, jint, jdouble);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_11
+  (JNIEnv* env, jclass , jint history, jdouble dist2Threshold)
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorKNN_11()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
+        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN( (int)history, (double)dist2Threshold );
+        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_12 (JNIEnv*, jclass, jint);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_12
+  (JNIEnv* env, jclass , jint history)
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorKNN_12()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
+        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN( (int)history );
+        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_13 (JNIEnv*, jclass);
+
+JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_13
+  (JNIEnv* env, jclass )
+{
+    
+    static const char method_name[] = "video::createBackgroundSubtractorKNN_13()";
+    try {
+        LOGD("%s", method_name);
+        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
+        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN();
+        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
 
 
 //
@@ -6436,6 +6769,112 @@ JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECC_14
 
 
 //
+//  double cv::findTransformECCWithMask(Mat templateImage, Mat inputImage, Mat templateMask, Mat inputMask, Mat& warpMatrix, int motionType = MOTION_AFFINE, TermCriteria criteria = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 50, 1e-6), int gaussFiltSize = 5)
+//
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_10 (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jlong, jint, jint, jint, jdouble, jint);
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_10
+  (JNIEnv* env, jclass , jlong templateImage_nativeObj, jlong inputImage_nativeObj, jlong templateMask_nativeObj, jlong inputMask_nativeObj, jlong warpMatrix_nativeObj, jint motionType, jint criteria_type, jint criteria_maxCount, jdouble criteria_epsilon, jint gaussFiltSize)
+{
+    
+    static const char method_name[] = "video::findTransformECCWithMask_10()";
+    try {
+        LOGD("%s", method_name);
+        Mat& templateImage = *((Mat*)templateImage_nativeObj);
+        Mat& inputImage = *((Mat*)inputImage_nativeObj);
+        Mat& templateMask = *((Mat*)templateMask_nativeObj);
+        Mat& inputMask = *((Mat*)inputMask_nativeObj);
+        Mat& warpMatrix = *((Mat*)warpMatrix_nativeObj);
+        TermCriteria criteria(criteria_type, criteria_maxCount, criteria_epsilon);
+        return cv::findTransformECCWithMask( templateImage, inputImage, templateMask, inputMask, warpMatrix, (int)motionType, criteria, (int)gaussFiltSize );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_11 (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jlong, jint, jint, jint, jdouble);
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_11
+  (JNIEnv* env, jclass , jlong templateImage_nativeObj, jlong inputImage_nativeObj, jlong templateMask_nativeObj, jlong inputMask_nativeObj, jlong warpMatrix_nativeObj, jint motionType, jint criteria_type, jint criteria_maxCount, jdouble criteria_epsilon)
+{
+    
+    static const char method_name[] = "video::findTransformECCWithMask_11()";
+    try {
+        LOGD("%s", method_name);
+        Mat& templateImage = *((Mat*)templateImage_nativeObj);
+        Mat& inputImage = *((Mat*)inputImage_nativeObj);
+        Mat& templateMask = *((Mat*)templateMask_nativeObj);
+        Mat& inputMask = *((Mat*)inputMask_nativeObj);
+        Mat& warpMatrix = *((Mat*)warpMatrix_nativeObj);
+        TermCriteria criteria(criteria_type, criteria_maxCount, criteria_epsilon);
+        return cv::findTransformECCWithMask( templateImage, inputImage, templateMask, inputMask, warpMatrix, (int)motionType, criteria );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_12 (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jlong, jint);
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_12
+  (JNIEnv* env, jclass , jlong templateImage_nativeObj, jlong inputImage_nativeObj, jlong templateMask_nativeObj, jlong inputMask_nativeObj, jlong warpMatrix_nativeObj, jint motionType)
+{
+    
+    static const char method_name[] = "video::findTransformECCWithMask_12()";
+    try {
+        LOGD("%s", method_name);
+        Mat& templateImage = *((Mat*)templateImage_nativeObj);
+        Mat& inputImage = *((Mat*)inputImage_nativeObj);
+        Mat& templateMask = *((Mat*)templateMask_nativeObj);
+        Mat& inputMask = *((Mat*)inputMask_nativeObj);
+        Mat& warpMatrix = *((Mat*)warpMatrix_nativeObj);
+        return cv::findTransformECCWithMask( templateImage, inputImage, templateMask, inputMask, warpMatrix, (int)motionType );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_13 (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jlong);
+
+JNIEXPORT jdouble JNICALL Java_org_opencv_video_Video_findTransformECCWithMask_13
+  (JNIEnv* env, jclass , jlong templateImage_nativeObj, jlong inputImage_nativeObj, jlong templateMask_nativeObj, jlong inputMask_nativeObj, jlong warpMatrix_nativeObj)
+{
+    
+    static const char method_name[] = "video::findTransformECCWithMask_13()";
+    try {
+        LOGD("%s", method_name);
+        Mat& templateImage = *((Mat*)templateImage_nativeObj);
+        Mat& inputImage = *((Mat*)inputImage_nativeObj);
+        Mat& templateMask = *((Mat*)templateMask_nativeObj);
+        Mat& inputMask = *((Mat*)inputMask_nativeObj);
+        Mat& warpMatrix = *((Mat*)warpMatrix_nativeObj);
+        return cv::findTransformECCWithMask( templateImage, inputImage, templateMask, inputMask, warpMatrix );
+    } catch(const std::exception &e) {
+        throwJavaException(env, &e, method_name);
+    } catch (...) {
+        throwJavaException(env, 0, method_name);
+    }
+    return 0;
+}
+
+
+
+//
 //  Mat cv::readOpticalFlow(String path)
 //
 
@@ -6477,190 +6916,6 @@ JNIEXPORT jboolean JNICALL Java_org_opencv_video_Video_writeOpticalFlow_10
         const char* utf_path = env->GetStringUTFChars(path, 0); String n_path( utf_path ? utf_path : "" ); env->ReleaseStringUTFChars(path, utf_path);
         Mat& flow = *((Mat*)flow_nativeObj);
         return cv::writeOpticalFlow( n_path, flow );
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-//
-//  Ptr_BackgroundSubtractorMOG2 cv::createBackgroundSubtractorMOG2(int history = 500, double varThreshold = 16, bool detectShadows = true)
-//
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_10 (JNIEnv*, jclass, jint, jdouble, jboolean);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_10
-  (JNIEnv* env, jclass , jint history, jdouble varThreshold, jboolean detectShadows)
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorMOG2_10()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
-        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2( (int)history, (double)varThreshold, (bool)detectShadows );
-        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_11 (JNIEnv*, jclass, jint, jdouble);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_11
-  (JNIEnv* env, jclass , jint history, jdouble varThreshold)
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorMOG2_11()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
-        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2( (int)history, (double)varThreshold );
-        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_12 (JNIEnv*, jclass, jint);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_12
-  (JNIEnv* env, jclass , jint history)
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorMOG2_12()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
-        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2( (int)history );
-        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_13 (JNIEnv*, jclass);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorMOG2_13
-  (JNIEnv* env, jclass )
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorMOG2_13()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorMOG2> Ptr_BackgroundSubtractorMOG2;
-        Ptr_BackgroundSubtractorMOG2 _retval_ = cv::createBackgroundSubtractorMOG2();
-        return (jlong)(new Ptr_BackgroundSubtractorMOG2(_retval_));
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-//
-//  Ptr_BackgroundSubtractorKNN cv::createBackgroundSubtractorKNN(int history = 500, double dist2Threshold = 400.0, bool detectShadows = true)
-//
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_10 (JNIEnv*, jclass, jint, jdouble, jboolean);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_10
-  (JNIEnv* env, jclass , jint history, jdouble dist2Threshold, jboolean detectShadows)
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorKNN_10()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
-        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN( (int)history, (double)dist2Threshold, (bool)detectShadows );
-        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_11 (JNIEnv*, jclass, jint, jdouble);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_11
-  (JNIEnv* env, jclass , jint history, jdouble dist2Threshold)
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorKNN_11()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
-        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN( (int)history, (double)dist2Threshold );
-        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_12 (JNIEnv*, jclass, jint);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_12
-  (JNIEnv* env, jclass , jint history)
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorKNN_12()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
-        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN( (int)history );
-        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
-    } catch(const std::exception &e) {
-        throwJavaException(env, &e, method_name);
-    } catch (...) {
-        throwJavaException(env, 0, method_name);
-    }
-    return 0;
-}
-
-
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_13 (JNIEnv*, jclass);
-
-JNIEXPORT jlong JNICALL Java_org_opencv_video_Video_createBackgroundSubtractorKNN_13
-  (JNIEnv* env, jclass )
-{
-    
-    static const char method_name[] = "video::createBackgroundSubtractorKNN_13()";
-    try {
-        LOGD("%s", method_name);
-        typedef Ptr<cv::BackgroundSubtractorKNN> Ptr_BackgroundSubtractorKNN;
-        Ptr_BackgroundSubtractorKNN _retval_ = cv::createBackgroundSubtractorKNN();
-        return (jlong)(new Ptr_BackgroundSubtractorKNN(_retval_));
     } catch(const std::exception &e) {
         throwJavaException(env, &e, method_name);
     } catch (...) {

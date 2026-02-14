@@ -21,7 +21,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Add a note about OpenCV being built from source
-        buildConfigField "String", "OPENCV_VERSION", "\"4.12.0\""
+        buildConfigField "String", "OPENCV_VERSION", "\"4.13.0\""
         // Feature flags
         buildConfigField "boolean", "FEATURE_SCAN_LIBRARY", "true"
         buildConfigField "boolean", "FEATURE_REVIEW_OCR", "true"

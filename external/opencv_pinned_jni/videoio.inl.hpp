@@ -1,6 +1,6 @@
 //
 // This file is auto-generated. Please don't modify it!
-// egdels did ;-)
+//
 
 #undef LOG_TAG
 
@@ -100,7 +100,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_videoio_IStreamReader_seek_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::IStreamReader>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_videoio_IStreamReader_delete(JNIEnv*, jclass, jlong);
@@ -771,7 +771,7 @@ JNIEXPORT jboolean JNICALL Java_org_opencv_videoio_VideoCapture_getExceptionMode
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::VideoCapture>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_videoio_VideoCapture_delete(JNIEnv*, jclass, jlong);
@@ -1303,7 +1303,7 @@ JNIEXPORT jstring JNICALL Java_org_opencv_videoio_VideoWriter_getBackendName_10
 
 
 //
-//  native support for java finalize()
+//  native support for java finalize() or cleaner
 //  static void Ptr<cv::VideoWriter>::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_videoio_VideoWriter_delete(JNIEnv*, jclass, jlong);

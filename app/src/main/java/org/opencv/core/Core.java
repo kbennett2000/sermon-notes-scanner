@@ -3,10 +3,12 @@
 //
 package org.opencv.core;
 
+import java.util.ArrayList;
 import java.util.List;
-
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfInt;
+import org.opencv.core.Scalar;
 import org.opencv.core.TermCriteria;
 import org.opencv.utils.Converters;
 
@@ -14,10 +16,10 @@ import org.opencv.utils.Converters;
 
 public class Core {
     // these constants are wrapped inside functions to prevent inlining
-    private static String getVersion() { return "4.12.0"; }
-    private static String getNativeLibraryName() { return "opencv_java4120"; }
+    private static String getVersion() { return "4.13.0"; }
+    private static String getNativeLibraryName() { return "opencv_java4130"; }
     private static int getVersionMajorJ() { return 4; }
-    private static int getVersionMinorJ() { return 12; }
+    private static int getVersionMinorJ() { return 13; }
     private static int getVersionRevisionJ() { return 0; }
     private static String getVersionStatusJ() { return ""; }
 
@@ -1211,9 +1213,9 @@ public class Core {
      * are taken from the input array. That is, the function processes each element of src as follows:
      * \(\texttt{dst} (I)  \leftarrow \texttt{lut(src(I) + d)}\)
      * where
-     * \(d =  \fork{0}{if \(\texttt{src}\) has depth \(\texttt{CV_8U}\)}{128}{if \(\texttt{src}\) has depth \(\texttt{CV_8S}\)}\)
-     * @param src input array of 8-bit elements.
-     * @param lut look-up table of 256 elements; in case of multi-channel input array, the table should
+     * \(d =  \forkthree{0}{if \(\texttt{src}\) has depth \(\texttt{CV_8U}\) or \(\texttt{CV_16U}\)}{128}{if \(\texttt{src}\) has depth \(\texttt{CV_8S}\)}{32768}{if \(\texttt{src}\) has depth \(\texttt{CV_16S}\)}\)
+     * @param src input array of 8-bit or 16-bit integer elements.
+     * @param lut look-up table of 256 elements (if src has depth CV_8U or CV_8S) or 65536 elements(if src has depth CV_16U or CV_16S); in case of multi-channel input array, the table should
      * either have a single channel (in this case the same table is used for all channels) or the same
      * number of channels as in the input array.
      * @param dst output array of the same size and number of channels as src, and the same depth as lut.
@@ -3415,17 +3417,25 @@ public class Core {
     //
 
     /**
-     * Replaces NaNs by given number
-     * @param a input/output matrix (CV_32F type).
-     * @param val value to convert the NaNs
+     * Replaces NaNs (Not-a-Number values) in a matrix with the specified value.
+     *
+     * This function modifies the input matrix in-place.
+     * The input matrix must be of type {@code CV_32F} or {@code CV_64F}; other types are not supported.
+     *
+     * @param a Input/output matrix (CV_32F or CV_64F type).
+     * @param val Value used to replace NaNs (defaults to 0).
      */
     public static void patchNaNs(Mat a, double val) {
         patchNaNs_0(a.nativeObj, val);
     }
 
     /**
-     * Replaces NaNs by given number
-     * @param a input/output matrix (CV_32F type).
+     * Replaces NaNs (Not-a-Number values) in a matrix with the specified value.
+     *
+     * This function modifies the input matrix in-place.
+     * The input matrix must be of type {@code CV_32F} or {@code CV_64F}; other types are not supported.
+     *
+     * @param a Input/output matrix (CV_32F or CV_64F type).
      */
     public static void patchNaNs(Mat a) {
         patchNaNs_1(a.nativeObj);
