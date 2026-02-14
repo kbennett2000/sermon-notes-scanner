@@ -19,7 +19,7 @@ import org.junit.runner.RunWith;
  * M6d: Pfadwahl A/B (Corner vs Mask) muss deterministisch sein.
  */
 @RunWith(AndroidJUnit4.class)
-public class DocQuadPostprocessTrainedChooseTest {
+public class DocQuadPostprocessTrainedChooseTest extends DocQuadGoldenTestBase {
 
     private static final String TAG = "DocQuadChooseTest";
 
@@ -91,47 +91,5 @@ public class DocQuadPostprocessTrainedChooseTest {
         }
     }
 
-    /**
-     * Entspricht exakt `training/docquad_m3/golden_samples.py` → `_make_input_sample_v1()`.
-     *
-     * Shape: [1,3,256,256] NCHW, float32, Wertebereich 0..1.
-     */
-    private static float[] makeGoldenInputV1Nchw() {
-        int h = DocQuadOrtRunner.IN_H;
-        int w = DocQuadOrtRunner.IN_W;
-        float[] out = new float[1 * 3 * h * w];
 
-        // Channel 0 (R): horizontal gradient x/255
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                out[idx(0, y, x)] = (float) x / 255.0f;
-            }
-        }
-        // Channel 1 (G): vertical gradient y/255
-        for (int y = 0; y < h; y++) {
-            float v = (float) y / 255.0f;
-            for (int x = 0; x < w; x++) {
-                out[idx(1, y, x)] = v;
-            }
-        }
-        // Channel 2 (B): constant 0.25
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                out[idx(2, y, x)] = 0.25f;
-            }
-        }
-
-        // R-channel block: [64:192, 64:192] = 1.0
-        for (int y = 64; y < 192; y++) {
-            for (int x = 64; x < 192; x++) {
-                out[idx(0, y, x)] = 1.0f;
-            }
-        }
-        return out;
-    }
-
-    private static int idx(int c, int y, int x) {
-        // NCHW: ((c * H) + y) * W + x
-        return ((c * DocQuadOrtRunner.IN_H) + y) * DocQuadOrtRunner.IN_W + x;
-    }
 }
