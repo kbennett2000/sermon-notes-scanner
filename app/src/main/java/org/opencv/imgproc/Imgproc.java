@@ -8,19 +8,14 @@ import java.util.List;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfInt4;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.CLAHE;
-import org.opencv.imgproc.GeneralizedHoughBallard;
-import org.opencv.imgproc.GeneralizedHoughGuil;
-import org.opencv.imgproc.LineSegmentDetector;
 import org.opencv.utils.Converters;
 
 // C++: class Imgproc
@@ -567,12 +562,6 @@ public class Imgproc {
             INTER_TAB_SIZE2 = INTER_TAB_SIZE * INTER_TAB_SIZE;
 
 
-    // C++: enum LineSegmentDetectorModes (cv.LineSegmentDetectorModes)
-    public static final int
-            LSD_REFINE_NONE = 0,
-            LSD_REFINE_STD = 1,
-            LSD_REFINE_ADV = 2;
-
 
     // C++: enum LineTypes (cv.LineTypes)
     public static final int
@@ -670,153 +659,6 @@ public class Imgproc {
             WARP_POLAR_LOG = 256;
 
 
-    //
-    // C++:  Ptr_LineSegmentDetector cv::createLineSegmentDetector(int refine = LSD_REFINE_STD, double scale = 0.8, double sigma_scale = 0.6, double quant = 2.0, double ang_th = 22.5, double log_eps = 0, double density_th = 0.7, int n_bins = 1024)
-    //
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @param scale The scale of the image that will be used to find the lines. Range (0..1].
-     * @param sigma_scale Sigma for Gaussian filter. It is computed as sigma = sigma_scale/scale.
-     * @param quant Bound to the quantization error on the gradient norm.
-     * @param ang_th Gradient angle tolerance in degrees.
-     * @param log_eps Detection threshold: -log10(NFA) &gt; log_eps. Used only when advance refinement is chosen.
-     * @param density_th Minimal density of aligned region points in the enclosing rectangle.
-     * @param n_bins Number of bins in pseudo-ordering of gradient modulus.
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine, double scale, double sigma_scale, double quant, double ang_th, double log_eps, double density_th, int n_bins) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_0(refine, scale, sigma_scale, quant, ang_th, log_eps, density_th, n_bins));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @param scale The scale of the image that will be used to find the lines. Range (0..1].
-     * @param sigma_scale Sigma for Gaussian filter. It is computed as sigma = sigma_scale/scale.
-     * @param quant Bound to the quantization error on the gradient norm.
-     * @param ang_th Gradient angle tolerance in degrees.
-     * @param log_eps Detection threshold: -log10(NFA) &gt; log_eps. Used only when advance refinement is chosen.
-     * @param density_th Minimal density of aligned region points in the enclosing rectangle.
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine, double scale, double sigma_scale, double quant, double ang_th, double log_eps, double density_th) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_1(refine, scale, sigma_scale, quant, ang_th, log_eps, density_th));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @param scale The scale of the image that will be used to find the lines. Range (0..1].
-     * @param sigma_scale Sigma for Gaussian filter. It is computed as sigma = sigma_scale/scale.
-     * @param quant Bound to the quantization error on the gradient norm.
-     * @param ang_th Gradient angle tolerance in degrees.
-     * @param log_eps Detection threshold: -log10(NFA) &gt; log_eps. Used only when advance refinement is chosen.
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine, double scale, double sigma_scale, double quant, double ang_th, double log_eps) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_2(refine, scale, sigma_scale, quant, ang_th, log_eps));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @param scale The scale of the image that will be used to find the lines. Range (0..1].
-     * @param sigma_scale Sigma for Gaussian filter. It is computed as sigma = sigma_scale/scale.
-     * @param quant Bound to the quantization error on the gradient norm.
-     * @param ang_th Gradient angle tolerance in degrees.
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine, double scale, double sigma_scale, double quant, double ang_th) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_3(refine, scale, sigma_scale, quant, ang_th));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @param scale The scale of the image that will be used to find the lines. Range (0..1].
-     * @param sigma_scale Sigma for Gaussian filter. It is computed as sigma = sigma_scale/scale.
-     * @param quant Bound to the quantization error on the gradient norm.
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine, double scale, double sigma_scale, double quant) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_4(refine, scale, sigma_scale, quant));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @param scale The scale of the image that will be used to find the lines. Range (0..1].
-     * @param sigma_scale Sigma for Gaussian filter. It is computed as sigma = sigma_scale/scale.
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine, double scale, double sigma_scale) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_5(refine, scale, sigma_scale));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @param scale The scale of the image that will be used to find the lines. Range (0..1].
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine, double scale) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_6(refine, scale));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @param refine The way found lines will be refined, see #LineSegmentDetectorModes
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector(int refine) {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_7(refine));
-    }
-
-    /**
-     * Creates a smart pointer to a LineSegmentDetector object and initializes it.
-     *
-     * The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
-     * to edit those, as to tailor it for their own application.
-     *
-     * @return automatically generated
-     */
-    public static LineSegmentDetector createLineSegmentDetector() {
-        return LineSegmentDetector.__fromPtr__(createLineSegmentDetector_8());
-    }
 
 
     //
@@ -7577,84 +7419,6 @@ public class Imgproc {
     }
 
 
-    //
-    // C++:  Moments cv::moments(Mat array, bool binaryImage = false)
-    //
-
-    /**
-     * Calculates all of the moments up to the third order of a polygon or rasterized shape.
-     *
-     * The function computes moments, up to the 3rd order, of a vector shape or a rasterized shape. The
-     * results are returned in the structure cv::Moments.
-     *
-     * @param array Single chanel raster image (CV_8U, CV_16U, CV_16S, CV_32F, CV_64F) or an array (
-     * \(1 \times N\) or \(N \times 1\) ) of 2D points (Point or Point2f).
-     * @param binaryImage If it is true, all non-zero image pixels are treated as 1's. The parameter is
-     * used for images only.
-     * @return moments.
-     *
-     * <b>Note:</b> Only applicable to contour moments calculations from Python bindings: Note that the numpy
-     * type for the input array should be either np.int32 or np.float32.
-     *
-     * <b>Note:</b> For contour-based moments, the zeroth-order moment \c m00 represents
-     * the contour area.
-     *
-     * If the input contour is degenerate (for example, a single point or all points
-     * are collinear), the area is zero and therefore \c m00 == 0.
-     *
-     * In this case, the centroid coordinates (\c m10/m00, \c m01/m00) are undefined
-     * and must be handled explicitly by the caller.
-     *
-     * A common workaround is to compute the center using cv::boundingRect() or by
-     * averaging the input points.
-     *
-     * SEE:  contourArea, arcLength
-     */
-    public static Moments moments(Mat array, boolean binaryImage) {
-        return new Moments(moments_0(array.nativeObj, binaryImage));
-    }
-
-    /**
-     * Calculates all of the moments up to the third order of a polygon or rasterized shape.
-     *
-     * The function computes moments, up to the 3rd order, of a vector shape or a rasterized shape. The
-     * results are returned in the structure cv::Moments.
-     *
-     * @param array Single chanel raster image (CV_8U, CV_16U, CV_16S, CV_32F, CV_64F) or an array (
-     * \(1 \times N\) or \(N \times 1\) ) of 2D points (Point or Point2f).
-     * used for images only.
-     * @return moments.
-     *
-     * <b>Note:</b> Only applicable to contour moments calculations from Python bindings: Note that the numpy
-     * type for the input array should be either np.int32 or np.float32.
-     *
-     * <b>Note:</b> For contour-based moments, the zeroth-order moment \c m00 represents
-     * the contour area.
-     *
-     * If the input contour is degenerate (for example, a single point or all points
-     * are collinear), the area is zero and therefore \c m00 == 0.
-     *
-     * In this case, the centroid coordinates (\c m10/m00, \c m01/m00) are undefined
-     * and must be handled explicitly by the caller.
-     *
-     * A common workaround is to compute the center using cv::boundingRect() or by
-     * averaging the input points.
-     *
-     * SEE:  contourArea, arcLength
-     */
-    public static Moments moments(Mat array) {
-        return new Moments(moments_1(array.nativeObj));
-    }
-
-
-    //
-    // C++:  void cv::HuMoments(Moments m, Mat& hu)
-    //
-
-    public static void HuMoments(Moments m, Mat hu) {
-        HuMoments_0(m.m00, m.m10, m.m01, m.m20, m.m11, m.m02, m.m30, m.m21, m.m12, m.m03, hu.nativeObj);
-    }
-
 
     //
     // C++:  void cv::matchTemplate(Mat image, Mat templ, Mat& result, int method, Mat mask = Mat())
@@ -8188,50 +7952,6 @@ public class Imgproc {
     }
 
 
-    //
-    // C++:  RotatedRect cv::minAreaRect(vector_Point2f points)
-    //
-
-    /**
-     * Finds a rotated rectangle of the minimum area enclosing the input 2D point set.
-     *
-     * The function calculates and returns the minimum-area bounding rectangle (possibly rotated) for a
-     * specified point set. The angle of rotation represents the angle between the line connecting the starting
-     * and ending points (based on the clockwise order with greatest index for the corner with greatest \(y\))
-     * and the horizontal axis. This angle always falls between \([-90, 0)\) because, if the object
-     * rotates more than a rect angle, the next edge is used to measure the angle. The starting and ending points change
-     * as the object rotates.Developer should keep in mind that the returned RotatedRect can contain negative
-     * indices when data is close to the containing Mat element boundary.
-     *
-     * @param points Input vector of 2D points, stored in std::vector&lt;&gt; or Mat
-     * @return automatically generated
-     */
-    public static RotatedRect minAreaRect(MatOfPoint2f points) {
-        Mat points_mat = points;
-        return new RotatedRect(minAreaRect_0(points_mat.nativeObj));
-    }
-
-
-    //
-    // C++:  void cv::boxPoints(RotatedRect box, Mat& points)
-    //
-
-    /**
-     * Finds the four vertices of a rotated rect. Useful to draw the rotated rectangle.
-     *
-     * The function finds the four vertices of a rotated rectangle. The four vertices are returned
-     * in clockwise order starting from the point with greatest \(y\). If two points have the
-     * same \(y\) coordinate the rightmost is the starting point. This function is useful to draw the
-     * rectangle. In C++, instead of using this function, you can directly use RotatedRect::points method. Please
-     * visit the REF: tutorial_bounding_rotated_ellipses "tutorial on Creating Bounding rotated boxes and ellipses
-     * for contours" for more information.
-     *
-     * @param box The input rotated rectangle. It may be the output of REF: minAreaRect.
-     * @param points The output array of four vertices of rectangles.
-     */
-    public static void boxPoints(RotatedRect box, Mat points) {
-        boxPoints_0(box.center.x, box.center.y, box.size.width, box.size.height, box.angle, points.nativeObj);
-    }
 
 
     //
@@ -8406,35 +8126,6 @@ public class Imgproc {
     }
 
 
-    //
-    // C++:  void cv::convexityDefects(vector_Point contour, vector_int convexhull, vector_Vec4i& convexityDefects)
-    //
-
-    /**
-     * Finds the convexity defects of a contour.
-     *
-     * The figure below displays convexity defects of a hand contour:
-     *
-     * ![image](pics/defects.png)
-     *
-     * @param contour Input contour.
-     * @param convexhull Convex hull obtained using convexHull that should contain indices of the contour
-     * points that make the hull.
-     * @param convexityDefects The output vector of convexity defects. In C++ and the new Python/Java
-     * interface each convexity defect is represented as 4-element integer vector (a.k.a. #Vec4i):
-     * (start_index, end_index, farthest_pt_index, fixpt_depth), where indices are 0-based indices
-     * in the original contour of the convexity defect beginning, end and the farthest point, and
-     * fixpt_depth is fixed-point approximation (with 8 fractional bits) of the distance between the
-     * farthest contour point and the hull. That is, to get the floating-point value of the depth will be
-     * fixpt_depth/256.0.
-     */
-    public static void convexityDefects(MatOfPoint contour, MatOfInt convexhull, MatOfInt4 convexityDefects) {
-        Mat contour_mat = contour;
-        Mat convexhull_mat = convexhull;
-        Mat convexityDefects_mat = convexityDefects;
-        convexityDefects_0(contour_mat.nativeObj, convexhull_mat.nativeObj, convexityDefects_mat.nativeObj);
-    }
-
 
     //
     // C++:  bool cv::isContourConvex(vector_Point contour)
@@ -8494,160 +8185,6 @@ public class Imgproc {
         return intersectConvexConvex_1(p1.nativeObj, p2.nativeObj, p12.nativeObj);
     }
 
-
-    //
-    // C++:  RotatedRect cv::fitEllipse(vector_Point2f points)
-    //
-
-    /**
-     * Fits an ellipse around a set of 2D points.
-     *
-     * The function calculates the ellipse that fits (in a least-squares sense) a set of 2D points best of
-     * all. It returns the rotated rectangle in which the ellipse is inscribed. The first algorithm described by CITE: Fitzgibbon95
-     * is used. Developer should keep in mind that it is possible that the returned
-     * ellipse/rotatedRect data contains negative indices, due to the data points being close to the
-     * border of the containing Mat element.
-     *
-     * @param points Input 2D point set, stored in std::vector&lt;&gt; or Mat
-     *
-     * <b>Note:</b> Input point types are REF: Point2i or REF: Point2f and at least 5 points are required.
-     * <b>Note:</b> REF: getClosestEllipsePoints function can be used to compute the ellipse fitting error.
-     * @return automatically generated
-     */
-    public static RotatedRect fitEllipse(MatOfPoint2f points) {
-        Mat points_mat = points;
-        return new RotatedRect(fitEllipse_0(points_mat.nativeObj));
-    }
-
-
-    //
-    // C++:  RotatedRect cv::fitEllipseAMS(Mat points)
-    //
-
-    /**
-     * Fits an ellipse around a set of 2D points.
-     *
-     *  The function calculates the ellipse that fits a set of 2D points.
-     *  It returns the rotated rectangle in which the ellipse is inscribed.
-     *  The Approximate Mean Square (AMS) proposed by CITE: Taubin1991 is used.
-     *
-     *  For an ellipse, this basis set is \( \chi= \left(x^2, x y, y^2, x, y, 1\right) \),
-     *  which is a set of six free coefficients \( A^T=\left\{A_{\text{xx}},A_{\text{xy}},A_{\text{yy}},A_x,A_y,A_0\right\} \).
-     *  However, to specify an ellipse, all that is needed is five numbers; the major and minor axes lengths \( (a,b) \),
-     *  the position \( (x_0,y_0) \), and the orientation \( \theta \). This is because the basis set includes lines,
-     *  quadratics, parabolic and hyperbolic functions as well as elliptical functions as possible fits.
-     *  If the fit is found to be a parabolic or hyperbolic function then the standard #fitEllipse method is used.
-     *  The AMS method restricts the fit to parabolic, hyperbolic and elliptical curves
-     *  by imposing the condition that \( A^T ( D_x^T D_x  +   D_y^T D_y) A = 1 \) where
-     *  the matrices \( Dx \) and \( Dy \) are the partial derivatives of the design matrix \( D \) with
-     *  respect to x and y. The matrices are formed row by row applying the following to
-     *  each of the points in the set:
-     *  \(align*}{
-     *  D(i,:)&amp;=\left\{x_i^2, x_i y_i, y_i^2, x_i, y_i, 1\right\} &amp;
-     *  D_x(i,:)&amp;=\left\{2 x_i,y_i,0,1,0,0\right\} &amp;
-     *  D_y(i,:)&amp;=\left\{0,x_i,2 y_i,0,1,0\right\}
-     *  \)
-     *  The AMS method minimizes the cost function
-     *  \(equation*}{
-     *  \epsilon ^2=\frac{ A^T D^T D A }{ A^T (D_x^T D_x +  D_y^T D_y) A^T }
-     *  \)
-     *
-     *  The minimum cost is found by solving the generalized eigenvalue problem.
-     *
-     *  \(equation*}{
-     *  D^T D A = \lambda  \left( D_x^T D_x +  D_y^T D_y\right) A
-     *  \)
-     *
-     *  @param points Input 2D point set, stored in std::vector&lt;&gt; or Mat
-     *
-     *  <b>Note:</b> Input point types are REF: Point2i or REF: Point2f and at least 5 points are required.
-     *  <b>Note:</b> REF: getClosestEllipsePoints function can be used to compute the ellipse fitting error.
-     * @return automatically generated
-     */
-    public static RotatedRect fitEllipseAMS(Mat points) {
-        return new RotatedRect(fitEllipseAMS_0(points.nativeObj));
-    }
-
-
-    //
-    // C++:  RotatedRect cv::fitEllipseDirect(Mat points)
-    //
-
-    /**
-     * Fits an ellipse around a set of 2D points.
-     *
-     *  The function calculates the ellipse that fits a set of 2D points.
-     *  It returns the rotated rectangle in which the ellipse is inscribed.
-     *  The Direct least square (Direct) method by CITE: oy1998NumericallySD is used.
-     *
-     *  For an ellipse, this basis set is \( \chi= \left(x^2, x y, y^2, x, y, 1\right) \),
-     *  which is a set of six free coefficients \( A^T=\left\{A_{\text{xx}},A_{\text{xy}},A_{\text{yy}},A_x,A_y,A_0\right\} \).
-     *  However, to specify an ellipse, all that is needed is five numbers; the major and minor axes lengths \( (a,b) \),
-     *  the position \( (x_0,y_0) \), and the orientation \( \theta \). This is because the basis set includes lines,
-     *  quadratics, parabolic and hyperbolic functions as well as elliptical functions as possible fits.
-     *  The Direct method confines the fit to ellipses by ensuring that \( 4 A_{xx} A_{yy}- A_{xy}^2 &gt; 0 \).
-     *  The condition imposed is that \( 4 A_{xx} A_{yy}- A_{xy}^2=1 \) which satisfies the inequality
-     *  and as the coefficients can be arbitrarily scaled is not overly restrictive.
-     *
-     *  \(equation*}{
-     *  \epsilon ^2= A^T D^T D A \quad \text{with} \quad A^T C A =1 \quad \text{and} \quad C=\left(\begin{matrix}
-     *  0 &amp; 0  &amp; 2  &amp; 0  &amp; 0  &amp;  0  \\
-     *  0 &amp; -1  &amp; 0  &amp; 0  &amp; 0  &amp;  0 \\
-     *  2 &amp; 0  &amp; 0  &amp; 0  &amp; 0  &amp;  0 \\
-     *  0 &amp; 0  &amp; 0  &amp; 0  &amp; 0  &amp;  0 \\
-     *  0 &amp; 0  &amp; 0  &amp; 0  &amp; 0  &amp;  0 \\
-     *  0 &amp; 0  &amp; 0  &amp; 0  &amp; 0  &amp;  0
-     *  \end{matrix} \right)
-     *  \)
-     *
-     *  The minimum cost is found by solving the generalized eigenvalue problem.
-     *
-     *  \(equation*}{
-     *  D^T D A = \lambda  \left( C\right) A
-     *  \)
-     *
-     *  The system produces only one positive eigenvalue \( \lambda\) which is chosen as the solution
-     *  with its eigenvector \(\mathbf{u}\). These are used to find the coefficients
-     *
-     *  \(equation*}{
-     *  A = \sqrt{\frac{1}{\mathbf{u}^T C \mathbf{u}}}  \mathbf{u}
-     *  \)
-     *  The scaling factor guarantees that  \(A^T C A =1\).
-     *
-     *  @param points Input 2D point set, stored in std::vector&lt;&gt; or Mat
-     *
-     *  <b>Note:</b> Input point types are REF: Point2i or REF: Point2f and at least 5 points are required.
-     *  <b>Note:</b> REF: getClosestEllipsePoints function can be used to compute the ellipse fitting error.
-     * @return automatically generated
-     */
-    public static RotatedRect fitEllipseDirect(Mat points) {
-        return new RotatedRect(fitEllipseDirect_0(points.nativeObj));
-    }
-
-
-    //
-    // C++:  void cv::getClosestEllipsePoints(RotatedRect ellipse_params, Mat points, Mat& closest_pts)
-    //
-
-    /**
-     * Compute for each 2d point the nearest 2d point located on a given ellipse.
-     *
-     *  The function computes the nearest 2d location on a given ellipse for a vector of 2d points and is based on CITE: Chatfield2017 code.
-     *  This function can be used to compute for instance the ellipse fitting error.
-     *
-     *  @param ellipse_params Ellipse parameters
-     *  @param points Input 2d points
-     *  @param closest_pts For each 2d point, their corresponding closest 2d point located on a given ellipse
-     *
-     *  <b>Note:</b> Input point types are REF: Point2i or REF: Point2f
-     *  SEE: fitEllipse, fitEllipseAMS, fitEllipseDirect
-     */
-    public static void getClosestEllipsePoints(RotatedRect ellipse_params, Mat points, Mat closest_pts) {
-        getClosestEllipsePoints_0(ellipse_params.center.x, ellipse_params.center.y, ellipse_params.size.width, ellipse_params.size.height, ellipse_params.angle, points.nativeObj, closest_pts.nativeObj);
-    }
-
-
-    //
     // C++:  void cv::fitLine(Mat points, Mat& line, int distType, double param, double reps, double aeps)
     //
 
@@ -8732,56 +8269,6 @@ public class Imgproc {
         return pointPolygonTest_0(contour_mat.nativeObj, pt.x, pt.y, measureDist);
     }
 
-
-    //
-    // C++:  int cv::rotatedRectangleIntersection(RotatedRect rect1, RotatedRect rect2, Mat& intersectingRegion)
-    //
-
-    /**
-     * Finds out if there is any intersection between two rotated rectangles.
-     *
-     * If there is then the vertices of the intersecting region are returned as well.
-     *
-     * Below are some examples of intersection configurations. The hatched pattern indicates the
-     * intersecting region and the red vertices are returned by the function.
-     *
-     * ![intersection examples](pics/intersection.png)
-     *
-     * @param rect1 First rectangle
-     * @param rect2 Second rectangle
-     * @param intersectingRegion The output array of the vertices of the intersecting region. It returns
-     * at most 8 vertices. Stored as std::vector&lt;cv::Point2f&gt; or cv::Mat as Mx1 of type CV_32FC2.
-     * @return One of #RectanglesIntersectTypes
-     */
-    public static int rotatedRectangleIntersection(RotatedRect rect1, RotatedRect rect2, Mat intersectingRegion) {
-        return rotatedRectangleIntersection_0(rect1.center.x, rect1.center.y, rect1.size.width, rect1.size.height, rect1.angle, rect2.center.x, rect2.center.y, rect2.size.width, rect2.size.height, rect2.angle, intersectingRegion.nativeObj);
-    }
-
-
-    //
-    // C++:  Ptr_GeneralizedHoughBallard cv::createGeneralizedHoughBallard()
-    //
-
-    /**
-     * Creates a smart pointer to a cv::GeneralizedHoughBallard class and initializes it.
-     * @return automatically generated
-     */
-    public static GeneralizedHoughBallard createGeneralizedHoughBallard() {
-        return GeneralizedHoughBallard.__fromPtr__(createGeneralizedHoughBallard_0());
-    }
-
-
-    //
-    // C++:  Ptr_GeneralizedHoughGuil cv::createGeneralizedHoughGuil()
-    //
-
-    /**
-     * Creates a smart pointer to a cv::GeneralizedHoughGuil class and initializes it.
-     * @return automatically generated
-     */
-    public static GeneralizedHoughGuil createGeneralizedHoughGuil() {
-        return GeneralizedHoughGuil.__fromPtr__(createGeneralizedHoughGuil_0());
-    }
 
 
     //
@@ -9302,52 +8789,6 @@ public class Imgproc {
     public static void ellipse(Mat img, Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color) {
         ellipse_3(img.nativeObj, center.x, center.y, axes.width, axes.height, angle, startAngle, endAngle, color.val[0], color.val[1], color.val[2], color.val[3]);
     }
-
-
-    //
-    // C++:  void cv::ellipse(Mat& img, RotatedRect box, Scalar color, int thickness = 1, int lineType = LINE_8)
-    //
-
-    /**
-     *
-     * @param img Image.
-     * @param box Alternative ellipse representation via RotatedRect. This means that the function draws
-     * an ellipse inscribed in the rotated rectangle.
-     * @param color Ellipse color.
-     * @param thickness Thickness of the ellipse arc outline, if positive. Otherwise, this indicates that
-     * a filled ellipse sector is to be drawn.
-     * @param lineType Type of the ellipse boundary. See #LineTypes
-     */
-    public static void ellipse(Mat img, RotatedRect box, Scalar color, int thickness, int lineType) {
-        ellipse_4(img.nativeObj, box.center.x, box.center.y, box.size.width, box.size.height, box.angle, color.val[0], color.val[1], color.val[2], color.val[3], thickness, lineType);
-    }
-
-    /**
-     *
-     * @param img Image.
-     * @param box Alternative ellipse representation via RotatedRect. This means that the function draws
-     * an ellipse inscribed in the rotated rectangle.
-     * @param color Ellipse color.
-     * @param thickness Thickness of the ellipse arc outline, if positive. Otherwise, this indicates that
-     * a filled ellipse sector is to be drawn.
-     */
-    public static void ellipse(Mat img, RotatedRect box, Scalar color, int thickness) {
-        ellipse_5(img.nativeObj, box.center.x, box.center.y, box.size.width, box.size.height, box.angle, color.val[0], color.val[1], color.val[2], color.val[3], thickness);
-    }
-
-    /**
-     *
-     * @param img Image.
-     * @param box Alternative ellipse representation via RotatedRect. This means that the function draws
-     * an ellipse inscribed in the rotated rectangle.
-     * @param color Ellipse color.
-     * a filled ellipse sector is to be drawn.
-     */
-    public static void ellipse(Mat img, RotatedRect box, Scalar color) {
-        ellipse_6(img.nativeObj, box.center.x, box.center.y, box.size.width, box.size.height, box.angle, color.val[0], color.val[1], color.val[2], color.val[3]);
-    }
-
-
     //
     // C++:  void cv::drawMarker(Mat& img, Point position, Scalar color, int markerType = MARKER_CROSS, int markerSize = 20, int thickness = 1, int line_type = 8)
     //
@@ -10291,17 +9732,6 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
 
 
 
-    // C++:  Ptr_LineSegmentDetector cv::createLineSegmentDetector(int refine = LSD_REFINE_STD, double scale = 0.8, double sigma_scale = 0.6, double quant = 2.0, double ang_th = 22.5, double log_eps = 0, double density_th = 0.7, int n_bins = 1024)
-    private static native long createLineSegmentDetector_0(int refine, double scale, double sigma_scale, double quant, double ang_th, double log_eps, double density_th, int n_bins);
-    private static native long createLineSegmentDetector_1(int refine, double scale, double sigma_scale, double quant, double ang_th, double log_eps, double density_th);
-    private static native long createLineSegmentDetector_2(int refine, double scale, double sigma_scale, double quant, double ang_th, double log_eps);
-    private static native long createLineSegmentDetector_3(int refine, double scale, double sigma_scale, double quant, double ang_th);
-    private static native long createLineSegmentDetector_4(int refine, double scale, double sigma_scale, double quant);
-    private static native long createLineSegmentDetector_5(int refine, double scale, double sigma_scale);
-    private static native long createLineSegmentDetector_6(int refine, double scale);
-    private static native long createLineSegmentDetector_7(int refine);
-    private static native long createLineSegmentDetector_8();
-
     // C++:  Mat cv::getGaussianKernel(int ksize, double sigma, int ktype = CV_64F)
     private static native long getGaussianKernel_0(int ksize, double sigma, int ktype);
     private static native long getGaussianKernel_1(int ksize, double sigma);
@@ -10667,12 +10097,6 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
     private static native void demosaicing_0(long src_nativeObj, long dst_nativeObj, int code, int dstCn);
     private static native void demosaicing_1(long src_nativeObj, long dst_nativeObj, int code);
 
-    // C++:  Moments cv::moments(Mat array, bool binaryImage = false)
-    private static native double[] moments_0(long array_nativeObj, boolean binaryImage);
-    private static native double[] moments_1(long array_nativeObj);
-
-    // C++:  void cv::HuMoments(Moments m, Mat& hu)
-    private static native void HuMoments_0(double m_m00, double m_m10, double m_m01, double m_m20, double m_m11, double m_m02, double m_m30, double m_m21, double m_m12, double m_m03, long hu_nativeObj);
 
     // C++:  void cv::matchTemplate(Mat image, Mat templ, Mat& result, int method, Mat mask = Mat())
     private static native void matchTemplate_0(long image_nativeObj, long templ_nativeObj, long result_nativeObj, int method, long mask_nativeObj);
@@ -10722,11 +10146,6 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
     private static native double contourArea_0(long contour_nativeObj, boolean oriented);
     private static native double contourArea_1(long contour_nativeObj);
 
-    // C++:  RotatedRect cv::minAreaRect(vector_Point2f points)
-    private static native double[] minAreaRect_0(long points_mat_nativeObj);
-
-    // C++:  void cv::boxPoints(RotatedRect box, Mat& points)
-    private static native void boxPoints_0(double box_center_x, double box_center_y, double box_size_width, double box_size_height, double box_angle, long points_nativeObj);
 
     // C++:  void cv::minEnclosingCircle(vector_Point2f points, Point2f& center, float& radius)
     private static native void minEnclosingCircle_0(long points_mat_nativeObj, double[] center_out, double[] radius_out);
@@ -10744,8 +10163,6 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
     private static native void convexHull_0(long points_mat_nativeObj, long hull_mat_nativeObj, boolean clockwise);
     private static native void convexHull_2(long points_mat_nativeObj, long hull_mat_nativeObj);
 
-    // C++:  void cv::convexityDefects(vector_Point contour, vector_int convexhull, vector_Vec4i& convexityDefects)
-    private static native void convexityDefects_0(long contour_mat_nativeObj, long convexhull_mat_nativeObj, long convexityDefects_mat_nativeObj);
 
     // C++:  bool cv::isContourConvex(vector_Point contour)
     private static native boolean isContourConvex_0(long contour_mat_nativeObj);
@@ -10754,17 +10171,9 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
     private static native float intersectConvexConvex_0(long p1_nativeObj, long p2_nativeObj, long p12_nativeObj, boolean handleNested);
     private static native float intersectConvexConvex_1(long p1_nativeObj, long p2_nativeObj, long p12_nativeObj);
 
-    // C++:  RotatedRect cv::fitEllipse(vector_Point2f points)
-    private static native double[] fitEllipse_0(long points_mat_nativeObj);
 
-    // C++:  RotatedRect cv::fitEllipseAMS(Mat points)
-    private static native double[] fitEllipseAMS_0(long points_nativeObj);
 
-    // C++:  RotatedRect cv::fitEllipseDirect(Mat points)
-    private static native double[] fitEllipseDirect_0(long points_nativeObj);
 
-    // C++:  void cv::getClosestEllipsePoints(RotatedRect ellipse_params, Mat points, Mat& closest_pts)
-    private static native void getClosestEllipsePoints_0(double ellipse_params_center_x, double ellipse_params_center_y, double ellipse_params_size_width, double ellipse_params_size_height, double ellipse_params_angle, long points_nativeObj, long closest_pts_nativeObj);
 
     // C++:  void cv::fitLine(Mat points, Mat& line, int distType, double param, double reps, double aeps)
     private static native void fitLine_0(long points_nativeObj, long line_nativeObj, int distType, double param, double reps, double aeps);
@@ -10772,14 +10181,7 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
     // C++:  double cv::pointPolygonTest(vector_Point2f contour, Point2f pt, bool measureDist)
     private static native double pointPolygonTest_0(long contour_mat_nativeObj, double pt_x, double pt_y, boolean measureDist);
 
-    // C++:  int cv::rotatedRectangleIntersection(RotatedRect rect1, RotatedRect rect2, Mat& intersectingRegion)
-    private static native int rotatedRectangleIntersection_0(double rect1_center_x, double rect1_center_y, double rect1_size_width, double rect1_size_height, double rect1_angle, double rect2_center_x, double rect2_center_y, double rect2_size_width, double rect2_size_height, double rect2_angle, long intersectingRegion_nativeObj);
 
-    // C++:  Ptr_GeneralizedHoughBallard cv::createGeneralizedHoughBallard()
-    private static native long createGeneralizedHoughBallard_0();
-
-    // C++:  Ptr_GeneralizedHoughGuil cv::createGeneralizedHoughGuil()
-    private static native long createGeneralizedHoughGuil_0();
 
     // C++:  void cv::applyColorMap(Mat src, Mat& dst, int colormap)
     private static native void applyColorMap_0(long src_nativeObj, long dst_nativeObj, int colormap);
@@ -10824,10 +10226,6 @@ public static Size getTextSize(String text, int fontFace, double fontScale, int 
     private static native void ellipse_2(long img_nativeObj, double center_x, double center_y, double axes_width, double axes_height, double angle, double startAngle, double endAngle, double color_val0, double color_val1, double color_val2, double color_val3, int thickness);
     private static native void ellipse_3(long img_nativeObj, double center_x, double center_y, double axes_width, double axes_height, double angle, double startAngle, double endAngle, double color_val0, double color_val1, double color_val2, double color_val3);
 
-    // C++:  void cv::ellipse(Mat& img, RotatedRect box, Scalar color, int thickness = 1, int lineType = LINE_8)
-    private static native void ellipse_4(long img_nativeObj, double box_center_x, double box_center_y, double box_size_width, double box_size_height, double box_angle, double color_val0, double color_val1, double color_val2, double color_val3, int thickness, int lineType);
-    private static native void ellipse_5(long img_nativeObj, double box_center_x, double box_center_y, double box_size_width, double box_size_height, double box_angle, double color_val0, double color_val1, double color_val2, double color_val3, int thickness);
-    private static native void ellipse_6(long img_nativeObj, double box_center_x, double box_center_y, double box_size_width, double box_size_height, double box_angle, double color_val0, double color_val1, double color_val2, double color_val3);
 
     // C++:  void cv::drawMarker(Mat& img, Point position, Scalar color, int markerType = MARKER_CROSS, int markerSize = 20, int thickness = 1, int line_type = 8)
     private static native void drawMarker_0(long img_nativeObj, double position_x, double position_y, double color_val0, double color_val1, double color_val2, double color_val3, int markerType, int markerSize, int thickness, int line_type);
