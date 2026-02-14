@@ -324,7 +324,7 @@ for ABI in $ABIS; do
 
   # Copy Java JAR once
   if [ ! -f "$APP_LIBS/onnxruntime-1.24.1.jar" ]; then
-    JAR_PATH="$(find "$ORT_DIR/java/build/libs" -type f -name 'onnxruntime-*.jar' \
+    JAR_PATH="$(find "$ORT_DIR/java/build/libs" -type f -name 'onnxruntime.jar' \
       ! -name '*sources*.jar' ! -name '*javadoc*.jar' -print -quit || true)"
     [ -n "$JAR_PATH" ] || { echo "ERROR: onnxruntime JAR not found."; exit 1; }
     if ! jar tf "$JAR_PATH" | grep -q 'ai/onnxruntime/OrtEnvironment.class'; then
