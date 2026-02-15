@@ -1,6 +1,8 @@
 # Contributing to MakeACopy
 
-Thank you for your interest in contributing to MakeACopy! This guide explains how to set up a development environment on **Linux** and **macOS**.
+This guide explains how to set up a development environment for MakeACopy on **Linux** and **macOS**.
+
+> **Version alignment:** All local tool versions (JDK, NDK, CMake, Python) must match the versions defined in the GitHub Actions workflow (`.github/workflows/build-release.yml`) to ensure reproducible builds and F-Droid compatibility. The versions listed below are derived from that workflow.
 
 ## Prerequisites
 
@@ -138,9 +140,9 @@ python3 --version   # should show 3.11.x
 
 The app requires native libraries (OpenCV and ONNX Runtime). You have two options:
 
-### Option A: Extract from a Release APK (recommended for app-only contributors)
+### Option A: Extract from a Release APK (recommended for contributors not modifying native code)
 
-If you only want to work on the Android/Java side and skip the native build entirely, you can extract the prebuilt libraries from an official release APK or download them from CI artifacts.
+Recommended for contributors working exclusively on Java/Kotlin code, UI, OCR flow, business logic, or tests — without modifying native code. You can obtain the prebuilt libraries from CI artifacts or extract them from an official release APK.
 
 #### From CI artifacts
 
@@ -172,7 +174,7 @@ For the ONNX Runtime JAR, download it from the same CI artifact or from [Maven C
 
 > **Note:** Each APK contains only one ABI. For development on an emulator (x86_64) or a physical device (arm64-v8a), you only need the matching ABI. Extract from the corresponding APK.
 
-> **Note:** The `jniLibs/` directory is listed in `.gitignore` and must not be committed.
+> **Important:** The `app/src/main/jniLibs/` directory is listed in `.gitignore` and must **not** be committed to the repository. The same applies to `app/libs/` (ONNX Runtime JAR). These directories contain build artifacts that are either built from source (Option B) or obtained from CI/release APKs (Option A). Committing them would violate the project's policy of not storing prebuilt binaries in the repository.
 
 ### Option B: Build from source (required for native changes and F-Droid)
 
