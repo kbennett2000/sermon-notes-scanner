@@ -79,6 +79,12 @@
     <string name="flashlight_not_available">Svítilna není na tomto zařízení dostupná</string>
     <string name="low_light_detected">Zjištěno slabé osvětlení. Zapnout svítilnu?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Posuvník kompenzace expozice</string>
+    <string name="exposure_reset_cd">Obnovit expozici na nulu</string>
+    <string name="exposure_compensation_option">Kompenzace expozice</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Bez vylepšení (JPEG)</string>
     <string name="jpeg_mode_auto">Automatické vylepšení (JPEG)</string>

@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">此设备不支持闪光灯</string>
     <string name="low_light_detected">检测到光线较暗。要打开闪光灯吗？</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">曝光补偿滑块</string>
+    <string name="exposure_reset_cd">将曝光重置为零</string>
+    <string name="exposure_compensation_option">曝光补偿</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">无增强（JPEG）</string>
     <string name="jpeg_mode_auto">自动增强（JPEG）</string>

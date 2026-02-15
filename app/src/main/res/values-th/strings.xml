@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">อุปกรณ์นี้ไม่มีไฟฉาย</string>
     <string name="low_light_detected">ตรวจพบแสงน้อย เปิดไฟฉายหรือไม่?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">แถบเลื่อนชดเชยแสง</string>
+    <string name="exposure_reset_cd">รีเซ็ตการชดเชยแสงเป็นศูนย์</string>
+    <string name="exposure_compensation_option">การชดเชยแสง</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">ไม่ปรับแต่ง (JPEG)</string>
     <string name="jpeg_mode_auto">ปรับแต่งอัตโนมัติ (JPEG)</string>

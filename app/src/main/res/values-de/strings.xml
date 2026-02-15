@@ -77,6 +77,12 @@
     <string name="flashlight_off">Taschenlampe aus</string>
     <string name="flashlight_not_available">Taschenlampe auf diesem Gerät nicht verfügbar</string>
     <string name="low_light_detected">Schwaches Licht erkannt. Taschenlampe einschalten?</string>
+
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">BK %1$s</string>
+    <string name="exposure_compensation_cd">Schieberegler für Belichtungskorrektur</string>
+    <string name="exposure_reset_cd">Belichtung auf Null zurücksetzen</string>
+    <string name="exposure_compensation_option">Belichtungskorrektur</string>
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Keine Verbesserung (JPEG)</string>
     <string name="jpeg_mode_auto">Automatisch verbessern (JPEG)</string>

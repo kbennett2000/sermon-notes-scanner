@@ -78,6 +78,12 @@
     <string name="flashlight_off">Lampe éteinte</string>
     <string name="flashlight_not_available">Lampe non disponible sur cet appareil</string>
     <string name="low_light_detected">Faible luminosité détectée. Allumer la lampe ?</string>
+
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Curseur de compensation d\'exposition</string>
+    <string name="exposure_reset_cd">Réinitialiser l\'exposition à zéro</string>
+    <string name="exposure_compensation_option">Compensation d\'exposition</string>
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Aucune amélioration (JPEG)</string>
     <string name="jpeg_mode_auto">Amélioration automatique (JPEG)</string>

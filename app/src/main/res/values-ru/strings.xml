@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">На этом устройстве нет фонарика</string>
     <string name="low_light_detected">Обнаружено слабое освещение. Включить фонарик?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Ползунок компенсации экспозиции</string>
+    <string name="exposure_reset_cd">Сбросить экспозицию на ноль</string>
+    <string name="exposure_compensation_option">Компенсация экспозиции</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Без улучшений (JPEG)</string>
     <string name="jpeg_mode_auto">Автоулучшение (JPEG)</string>

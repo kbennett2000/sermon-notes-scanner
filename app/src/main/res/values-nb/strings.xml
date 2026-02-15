@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">Lommelykt er ikke tilgjengelig på denne enheten</string>
     <string name="low_light_detected">Svakt lys oppdaget. Vil du slå på lommelykten?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Glidebryter for eksponeringskompensasjon</string>
+    <string name="exposure_reset_cd">Tilbakestill eksponering til null</string>
+    <string name="exposure_compensation_option">Eksponeringskompensasjon</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Ingen forbedring (JPEG)</string>
     <string name="jpeg_mode_auto">Automatisk forbedring (JPEG)</string>

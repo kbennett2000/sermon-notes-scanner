@@ -79,6 +79,12 @@
     <string name="flashlight_not_available">الفلاش غير متوفر على هذا الجهاز</string>
     <string name="low_light_detected">تم اكتشاف إضاءة منخفضة. تشغيل الفلاش؟</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">تعويض التعريض %1$s</string>
+    <string name="exposure_compensation_cd">شريط تمرير تعويض التعريض</string>
+    <string name="exposure_reset_cd">إعادة تعيين التعريض إلى الصفر</string>
+    <string name="exposure_compensation_option">تعويض التعريض</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">بدون تحسين (JPEG)</string>
     <string name="jpeg_mode_auto">تحسين تلقائي (JPEG)</string>

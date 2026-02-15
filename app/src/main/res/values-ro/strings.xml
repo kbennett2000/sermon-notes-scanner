@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">Lanterna nu este disponibilă pe acest dispozitiv</string>
     <string name="low_light_detected">Luminozitate scăzută detectată. Dorești să pornești lanterna?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Cursor compensare expunere</string>
+    <string name="exposure_reset_cd">Resetare expunere la zero</string>
+    <string name="exposure_compensation_option">Compensare expunere</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Fără îmbunătățire (JPEG)</string>
     <string name="jpeg_mode_auto">Îmbunătățire automată (JPEG)</string>

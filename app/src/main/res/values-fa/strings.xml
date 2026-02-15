@@ -78,6 +78,12 @@
     <string name="flashlight_off">چراغ‌قوه خاموش</string>
     <string name="flashlight_not_available">چراغ‌قوه در این دستگاه در دسترس نیست</string>
     <string name="low_light_detected">نور کم تشخیص داده شد. چراغ‌قوه روشن شود؟</string>
+
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">جبران نوردهی %1$s</string>
+    <string name="exposure_compensation_cd">لغزنده جبران نوردهی</string>
+    <string name="exposure_reset_cd">بازنشانی نوردهی به صفر</string>
+    <string name="exposure_compensation_option">جبران نوردهی</string>
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">بدون بهبود (JPEG)</string>
     <string name="jpeg_mode_auto">بهبود خودکار (JPEG)</string>

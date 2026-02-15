@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">Torcia non disponibile su questo dispositivo</string>
     <string name="low_light_detected">Scarsa luminosità rilevata. Accendere la torcia?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Cursore compensazione esposizione</string>
+    <string name="exposure_reset_cd">Reimposta esposizione a zero</string>
+    <string name="exposure_compensation_option">Compensazione esposizione</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Nessun miglioramento (JPEG)</string>
     <string name="jpeg_mode_auto">Miglioramento automatico (JPEG)</string>

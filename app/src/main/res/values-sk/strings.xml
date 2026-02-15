@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">Blesk nie je dostupný na tomto zariadení</string>
     <string name="low_light_detected">Zistené slabé osvetlenie. Zapnúť blesk?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Posuvník kompenzácie expozície</string>
+    <string name="exposure_reset_cd">Obnoviť expozíciu na nulu</string>
+    <string name="exposure_compensation_option">Kompenzácia expozície</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Bez vylepšenia (JPEG)</string>
     <string name="jpeg_mode_auto">Automatické vylepšenie (JPEG)</string>

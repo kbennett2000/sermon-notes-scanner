@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">A vaku nem érhető el ezen az eszközön</string>
     <string name="low_light_detected">Gyenge fényviszonyok észlelve. Bekapcsolja a vakut?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Expozíció-kompenzáció csúszka</string>
+    <string name="exposure_reset_cd">Expozíció visszaállítása nullára</string>
+    <string name="exposure_compensation_option">Expozíció-kompenzáció</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Nincs javítás (JPEG)</string>
     <string name="jpeg_mode_auto">Automatikus javítás (JPEG)</string>

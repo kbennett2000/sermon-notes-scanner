@@ -79,6 +79,12 @@
     <string name="flashlight_not_available">Linterna no disponible en este dispositivo</string>
     <string name="low_light_detected">Baja luz detectada. ¿Encender la linterna?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Control deslizante de compensación de exposición</string>
+    <string name="exposure_reset_cd">Restablecer exposición a cero</string>
+    <string name="exposure_compensation_option">Compensación de exposición</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Sin mejora (JPEG)</string>
     <string name="jpeg_mode_auto">Mejora automática (JPEG)</string>

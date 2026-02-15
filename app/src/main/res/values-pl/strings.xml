@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">Latarka niedostępna na tym urządzeniu</string>
     <string name="low_light_detected">Wykryto słabe oświetlenie. Włączyć latarkę?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Suwak kompensacji ekspozycji</string>
+    <string name="exposure_reset_cd">Zresetuj ekspozycję do zera</string>
+    <string name="exposure_compensation_option">Kompensacja ekspozycji</string>
+
     <!-- Tryby JPEG -->
     <string name="jpeg_mode_none">Bez ulepszeń (JPEG)</string>
     <string name="jpeg_mode_auto">Auto-ulepszenie (JPEG)</string>

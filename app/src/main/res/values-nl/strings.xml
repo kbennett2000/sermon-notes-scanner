@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">Zaklamp niet beschikbaar op dit apparaat</string>
     <string name="low_light_detected">Weinig licht gedetecteerd. Zaklamp inschakelen?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Schuifregelaar belichtingscompensatie</string>
+    <string name="exposure_reset_cd">Belichting terugzetten naar nul</string>
+    <string name="exposure_compensation_option">Belichtingscompensatie</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Geen verbetering (JPEG)</string>
     <string name="jpeg_mode_auto">Automatisch verbeteren (JPEG)</string>

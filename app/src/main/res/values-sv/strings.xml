@@ -78,6 +78,12 @@
     <string name="flashlight_not_available">Ficklampa inte tillgänglig på den här enheten</string>
     <string name="low_light_detected">Svagt ljus upptäckt. Vill du slå på ficklampan?</string>
 
+    <!-- Exposure compensation -->
+    <string name="exposure_compensation_label">EV %1$s</string>
+    <string name="exposure_compensation_cd">Reglage för exponeringskompensation</string>
+    <string name="exposure_reset_cd">Återställ exponering till noll</string>
+    <string name="exposure_compensation_option">Exponeringskompensation</string>
+
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">Ingen förbättring (JPEG)</string>
     <string name="jpeg_mode_auto">Automatisk förbättring (JPEG)</string>
