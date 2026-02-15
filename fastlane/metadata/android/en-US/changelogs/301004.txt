@@ -1,4 +1,4 @@
-MakeACopy 3.1.0 (Release-Candidate)
+MakeACopy 3.1.0 (Release)
 
 * Upgraded document detection model from ONNX small to large for higher accuracy (FP16-quantized, 50% smaller)
 * Added exposure correction for improved scan quality
@@ -8,5 +8,3 @@ MakeACopy 3.1.0 (Release-Candidate)
 * Improved code quality and maintainability
 * Performance optimizations throughout the app
 * Fully offline, no cloud or tracking
-
-Hint: This is a release candidate. Please report any issues you find.
