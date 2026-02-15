@@ -420,4 +420,11 @@
     <string name="label_text">ข้อความ</string>
     <string name="label_document">เอกสาร</string>
 
+    <!-- Page format selection (PDF export) -->
+    <string name="page_format_label">ขนาดหน้า</string>
+    <string name="page_format_fit">ปรับตามภาพ (แนะนำ)</string>
+    <string name="page_format_a4">A4</string>
+    <string name="page_format_letter">US Letter</string>
+    <string name="page_format_legal">Legal</string>
+
 </resources>

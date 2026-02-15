@@ -161,6 +161,12 @@
     <string name="pdf_preset_small">Small (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">Very small (110 dpi, q52)</string>
     <string name="export_options_title">Export options</string>
+    <!-- Page format selection (PDF export) -->
+    <string name="page_format_label">Page size</string>
+    <string name="page_format_fit">Fit to image (recommended)</string>
+    <string name="page_format_a4">A4</string>
+    <string name="page_format_letter">US Letter</string>
+    <string name="page_format_legal">Legal</string>
     <string name="jpeg_enhancement_title">JPEG enhancement</string>
     <string name="btn_options">Options</string>
     <string name="btn_save">Save</string>

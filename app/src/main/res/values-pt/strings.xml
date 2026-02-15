@@ -419,4 +419,11 @@
     <string name="label_text">Texto</string>
     <string name="label_document">Documento</string>
 
+    <!-- Page format selection (PDF export) -->
+    <string name="page_format_label">Tamanho da página</string>
+    <string name="page_format_fit">Ajustar à imagem (recomendado)</string>
+    <string name="page_format_a4">A4</string>
+    <string name="page_format_letter">US Letter</string>
+    <string name="page_format_legal">Legal</string>
+
 </resources>

@@ -903,6 +903,14 @@ public class ExportFragment extends Fragment {
                 else tmpBwMode = null;
                 final de.schliweb.makeacopy.utils.PdfCreator.BwMode bwMode = tmpBwMode;
 
+                // Determine page format from SharedPreferences
+                String pageFormatSaved = null;
+                if (prefsCtx != null) {
+                    android.content.SharedPreferences pf = prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
+                    pageFormatSaved = pf.getString("page_format", null);
+                }
+                final PageFormat pageFormat = PageFormat.fromName(pageFormatSaved, PageFormat.FIT_TO_IMAGE);
+
                 Uri exportUri;
                 if (isMulti) {
                     Log.d(TAG, "performExport: Creating PDF for multipage session");
@@ -1014,7 +1022,8 @@ public class ExportFragment extends Fragment {
                             preset.targetDpi,
                             (pageIndex, total) -> postToUiSafe(() ->
                                     exportViewModel.setExportProgress(Math.max(0, Math.min(pageIndex, total)))),
-                            bwMode
+                            bwMode,
+                            pageFormat
                     );
                     // Recycle any temporary bitmaps we created (those not part of the session's in-memory references)
                     final HashSet<Bitmap> sessionBitmaps = new HashSet<>();
@@ -1040,7 +1049,8 @@ public class ExportFragment extends Fragment {
                             convertGrayEffective,
                             convertBwEffective,
                             preset.targetDpi,
-                            bwMode
+                            bwMode,
+                            pageFormat
                     );
                 }
 

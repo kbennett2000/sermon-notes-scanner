@@ -419,4 +419,11 @@
     <string name="label_document">Dokument</string>
 
 
+    <!-- Page format selection (PDF export) -->
+    <string name="page_format_label">Velikost stránky</string>
+    <string name="page_format_fit">Přizpůsobit obrázku (doporučeno)</string>
+    <string name="page_format_a4">A4</string>
+    <string name="page_format_letter">US Letter</string>
+    <string name="page_format_legal">Legal</string>
+
 </resources>

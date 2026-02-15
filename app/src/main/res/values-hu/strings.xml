@@ -420,4 +420,11 @@
     <string name="label_text">Szöveg</string>
     <string name="label_document">Dokumentum</string>
 
+    <!-- Page format selection (PDF export) -->
+    <string name="page_format_label">Oldalméret</string>
+    <string name="page_format_fit">Képhez igazítás (ajánlott)</string>
+    <string name="page_format_a4">A4</string>
+    <string name="page_format_letter">US Letter</string>
+    <string name="page_format_legal">Legal</string>
+
 </resources>

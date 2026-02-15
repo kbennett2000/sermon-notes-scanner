@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.utils.PageFormat;
 import de.schliweb.makeacopy.utils.PdfQualityPreset;
 import de.schliweb.makeacopy.utils.jpeg.JpegExportOptions;
 
@@ -52,6 +53,7 @@ public class ExportOptionsDialogFragment extends DialogFragment {
     public static final String BUNDLE_JPEG_MODE = "jpeg_mode"; // enum name
     public static final String BUNDLE_PDF_PRESET = "pdf_preset"; // enum name
     public static final String BUNDLE_CONVERT_TO_BLACKWHITE = "convert_to_blackwhite";
+    public static final String BUNDLE_PAGE_FORMAT = "page_format"; // enum name
 
     public static void show(@NonNull FragmentManager fm) {
         new ExportOptionsDialogFragment().show(fm, "ExportOptionsDialogFragment");
@@ -82,6 +84,12 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         RadioButton rbJpegBwRobust = view.findViewById(R.id.dialog_radio_jpeg_bw_robust);
         RadioButton rbJpegOcrRobust = view.findViewById(R.id.dialog_radio_jpeg_ocr_robust);
 
+        RadioGroup pageFormatGroup = view.findViewById(R.id.dialog_page_format_group);
+        RadioButton rbPageFit = view.findViewById(R.id.dialog_radio_page_fit);
+        RadioButton rbPageA4 = view.findViewById(R.id.dialog_radio_page_a4);
+        RadioButton rbPageLetter = view.findViewById(R.id.dialog_radio_page_letter);
+        RadioButton rbPageLegal = view.findViewById(R.id.dialog_radio_page_legal);
+
         View pdfBwModeGroup = view.findViewById(R.id.dialog_pdf_bw_mode_group);
         CheckBox rbPdfGray = view.findViewById(R.id.dialog_pdf_grayscale);
         CheckBox rbPdfBwRobust = view.findViewById(R.id.dialog_pdf_bw_robust);
@@ -103,6 +111,8 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         }
         String pdfBwModeSaved = prefs.getString("pdf_bw_mode", null);
         String presetSaved = prefs.getString("pdf_preset", null);
+        String pageFormatSaved = prefs.getString("page_format", PageFormat.FIT_TO_IMAGE.name());
+        PageFormat pageFormat = PageFormat.fromName(pageFormatSaved, PageFormat.FIT_TO_IMAGE);
 
         cbIncludeOcr.setChecked(includeOcr);
         // Initialize format selection from preference (PDF default)
@@ -111,6 +121,12 @@ public class ExportOptionsDialogFragment extends DialogFragment {
         } else {
             rbExportPdf.setChecked(true);
         }
+
+        // Initialize page format selection
+        if (pageFormat == PageFormat.FIT_TO_IMAGE) rbPageFit.setChecked(true);
+        else if (pageFormat == PageFormat.A4) rbPageA4.setChecked(true);
+        else if (pageFormat == PageFormat.US_LETTER) rbPageLetter.setChecked(true);
+        else if (pageFormat == PageFormat.LEGAL) rbPageLegal.setChecked(true);
 
         // pick default preset if none saved: High for single page, Standard for multi (ExportFragment will compute page count; here fallback Standard)
         PdfQualityPreset preset = presetSaved != null ? PdfQualityPreset.fromName(presetSaved, PdfQualityPreset.STANDARD) : PdfQualityPreset.STANDARD;
@@ -191,12 +207,21 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                     else if (checkedId == rbSmall.getId()) sel = PdfQualityPreset.SMALL;
                     else if (checkedId == rbVerySmall.getId()) sel = PdfQualityPreset.VERY_SMALL;
 
+                    // determine page format
+                    PageFormat selFormat = PageFormat.FIT_TO_IMAGE;
+                    int pageFormatCheckedId = pageFormatGroup.getCheckedRadioButtonId();
+                    if (pageFormatCheckedId == rbPageFit.getId()) selFormat = PageFormat.FIT_TO_IMAGE;
+                    else if (pageFormatCheckedId == rbPageA4.getId()) selFormat = PageFormat.A4;
+                    else if (pageFormatCheckedId == rbPageLetter.getId()) selFormat = PageFormat.US_LETTER;
+                    else if (pageFormatCheckedId == rbPageLegal.getId()) selFormat = PageFormat.LEGAL;
+
                     // persist
                     SharedPreferences.Editor editor = prefs.edit()
                             .putBoolean("include_ocr", incOcr)
                             .putBoolean("export_as_jpeg", asJpeg)
                             .putString("jpeg_mode", mode.name())
-                            .putString("pdf_preset", sel.name());
+                            .putString("pdf_preset", sel.name())
+                            .putString("page_format", selFormat.name());
                     if (pdfBwMode != null) editor.putString("pdf_bw_mode", pdfBwMode);
                     else editor.remove("pdf_bw_mode");
                     editor.apply();
@@ -208,6 +233,7 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                     if (pdfBwMode != null) result.putString("pdf_bw_mode", pdfBwMode);
                     else result.remove("pdf_bw_mode");
                     result.putString(BUNDLE_PDF_PRESET, sel.name());
+                    result.putString(BUNDLE_PAGE_FORMAT, selFormat.name());
                     getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
                 })
                 .create();

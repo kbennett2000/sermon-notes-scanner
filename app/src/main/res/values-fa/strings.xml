@@ -414,4 +414,11 @@
     <string name="label_document">سند</string>
 
 
+    <!-- Page format selection (PDF export) -->
+    <string name="page_format_label">اندازه صفحه</string>
+    <string name="page_format_fit">تناسب با تصویر (پیشنهادی)</string>
+    <string name="page_format_a4">A4</string>
+    <string name="page_format_letter">US Letter</string>
+    <string name="page_format_legal">Legal</string>
+
 </resources>

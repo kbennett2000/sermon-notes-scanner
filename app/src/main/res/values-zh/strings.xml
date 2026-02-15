@@ -419,4 +419,11 @@
     <string name="label_text">文本</string>
     <string name="label_document">文档</string>
 
+    <!-- Page format selection (PDF export) -->
+    <string name="page_format_label">页面大小</string>
+    <string name="page_format_fit">适应图像（推荐）</string>
+    <string name="page_format_a4">A4</string>
+    <string name="page_format_letter">US Letter</string>
+    <string name="page_format_legal">Legal</string>
+
 </resources>

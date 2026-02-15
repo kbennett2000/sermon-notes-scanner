@@ -94,8 +94,29 @@ public class PdfCreator {
      * @return The URI pointing to the created PDF, or null if the PDF creation failed.
      */
     public static Uri createSearchablePdf(Context context, Bitmap bitmap, List<RecognizedWord> words, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi, BwMode bwMode) {
-        Log.d(TAG, "createSearchablePdf: uri=" + outputUri + ", words=" + (words == null ? 0 : words.size()));
+        return createSearchablePdf(context, bitmap, words, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, targetDpi, bwMode, PageFormat.A4);
+    }
+
+    /**
+     * Creates a searchable PDF from the given bitmap and recognized text words, and writes it to the specified URI.
+     * The method allows customization of image processing, PDF properties, OCR text handling, and page format.
+     *
+     * @param context             The application context used for PDF library initialization and resource access.
+     * @param bitmap              The input bitmap image to be included in the PDF.
+     * @param words               A list of recognized words with their coordinates, used to create the text layer in the PDF.
+     * @param outputUri           The URI where the generated PDF will be saved.
+     * @param jpegQuality         The quality of the JPEG compression for the image in the range of 0-100 (100 for lossless).
+     * @param convertToGrayscale  True to convert the image to grayscale before adding it to the PDF.
+     * @param convertToBlackWhite True to convert the image to black-and-white using thresholding techniques.
+     * @param targetDpi           The target resolution (dots per inch) for the output image in the PDF.
+     * @param bwMode              The black-and-white conversion mode (e.g., robust or simple thresholding). Ignored if {@code convertToBlackWhite} is false.
+     * @param pageFormat          The page format to use for the PDF (e.g., A4, US Letter, Fit to Image).
+     * @return The URI pointing to the created PDF, or null if the PDF creation failed.
+     */
+    public static Uri createSearchablePdf(Context context, Bitmap bitmap, List<RecognizedWord> words, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi, BwMode bwMode, PageFormat pageFormat) {
+        Log.d(TAG, "createSearchablePdf: uri=" + outputUri + ", words=" + (words == null ? 0 : words.size()) + ", format=" + pageFormat);
         if (bitmap == null || outputUri == null) return null;
+        if (pageFormat == null) pageFormat = PageFormat.A4;
 
         try {
             PDFBoxResourceLoader.init(context);
@@ -112,7 +133,7 @@ public class PdfCreator {
         try {
             // Detect if text contains RTL scripts (Arabic, Persian, Hebrew) for gentle B/W processing
             boolean useGentleMode = convertToBlackWhite && containsRtlText(words);
-            prepared = processImageForPdf(bitmap, convertToGrayscale, convertToBlackWhite, targetDpi, bwMode, useGentleMode);
+            prepared = processImageForPdf(bitmap, convertToGrayscale, convertToBlackWhite, targetDpi, bwMode, useGentleMode, pageFormat);
             if (prepared == null) {
                 Log.e(TAG, "Image preparation via OpenCV failed");
                 return null;
@@ -126,7 +147,7 @@ public class PdfCreator {
                 document.getDocumentInformation().setCreator("MakeACopy");
                 document.getDocumentInformation().setProducer("MakeACopy");
 
-                PDRectangle pageSize = PDRectangle.A4;
+                PDRectangle pageSize = pageFormat.toPageRectangle(prepared.getWidth(), prepared.getHeight());
                 float pageW = pageSize.getWidth();
                 float pageH = pageSize.getHeight();
 
@@ -562,11 +583,37 @@ public class PdfCreator {
      * or black and white. Returns null if the original Bitmap is null or if an error occurs during conversion.
      */
     private static Bitmap processImageForPdf(Bitmap original, boolean toGray, boolean toBw, int targetDpi, BwMode bwMode, boolean gentleMode) {
-        if (original == null) return null;
+        return processImageForPdf(original, toGray, toBw, targetDpi, bwMode, gentleMode, PageFormat.A4);
+    }
 
-        int[] a4px = a4PixelsForDpi(targetDpi <= 0 ? 300 : targetDpi);
-        int maxW = a4px[0];
-        int maxH = a4px[1];
+    /**
+     * Processes an image to prepare it for inclusion in a PDF by resizing, and optionally converting it to grayscale or
+     * black and white (BW) based on the parameters provided.
+     *
+     * @param original   The original Bitmap image to process. Must not be null.
+     * @param toGray     If true, the image will be converted to grayscale.
+     * @param toBw       If true, the image will be converted to black and white.
+     * @param targetDpi  The target DPI (dots per inch) for the processed image.
+     * @param bwMode     The mode for black-and-white conversion.
+     * @param gentleMode If true, uses gentle B/W processing that preserves fine strokes and diacritics.
+     * @param pageFormat The page format determining the maximum pixel dimensions for scaling.
+     * @return A processed Bitmap object, or null if an error occurs.
+     */
+    private static Bitmap processImageForPdf(Bitmap original, boolean toGray, boolean toBw, int targetDpi, BwMode bwMode, boolean gentleMode, PageFormat pageFormat) {
+        if (original == null) return null;
+        if (pageFormat == null) pageFormat = PageFormat.A4;
+
+        int effectiveDpi = targetDpi <= 0 ? 300 : targetDpi;
+        int[] formatPx = pageFormat.pixelsForDpi(effectiveDpi);
+        int maxW, maxH;
+        if (formatPx != null) {
+            maxW = formatPx[0];
+            maxH = formatPx[1];
+        } else {
+            // FIT_TO_IMAGE: no fixed-format constraint, but cap at a sensible maximum
+            maxW = original.getWidth();
+            maxH = original.getHeight();
+        }
 
         boolean preScaled = Math.abs(original.getWidth() - maxW) <= 1 && Math.abs(original.getHeight() - maxH) <= 1;
 
@@ -917,7 +964,28 @@ public class PdfCreator {
      * @return the URI of the generated PDF file, or null if an error occurred
      */
     public static Uri createSearchablePdf(Context context, List<Bitmap> bitmaps, List<List<RecognizedWord>> perPageWords, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi, ProgressListener listener, BwMode bwMode) {
+        return createSearchablePdf(context, bitmaps, perPageWords, outputUri, jpegQuality, convertToGrayscale, convertToBlackWhite, targetDpi, listener, bwMode, PageFormat.A4);
+    }
+
+    /**
+     * Creates a searchable PDF from a collection of bitmap images and their corresponding recognized words.
+     *
+     * @param context             the application context required for resource initialization and file handling
+     * @param bitmaps             a list of bitmap images representing the pages of the PDF
+     * @param perPageWords        a list containing recognized words for each page
+     * @param outputUri           the URI where the resulting PDF will be saved
+     * @param jpegQuality         the quality level for encoding images into the PDF as a percentage (0-100)
+     * @param convertToGrayscale  a flag indicating whether the images should be converted to grayscale
+     * @param convertToBlackWhite a flag indicating whether the images should be converted to black-and-white
+     * @param targetDpi           the target resolution in dots per inch (DPI) for the PDF pages
+     * @param listener            a progress listener to receive updates on the processing of pages
+     * @param bwMode              the black-and-white processing mode
+     * @param pageFormat          the page format to use for the PDF
+     * @return the URI of the generated PDF file, or null if an error occurred
+     */
+    public static Uri createSearchablePdf(Context context, List<Bitmap> bitmaps, List<List<RecognizedWord>> perPageWords, Uri outputUri, int jpegQuality, boolean convertToGrayscale, boolean convertToBlackWhite, int targetDpi, ProgressListener listener, BwMode bwMode, PageFormat pageFormat) {
         if (bitmaps == null || bitmaps.isEmpty() || outputUri == null) return null;
+        if (pageFormat == null) pageFormat = PageFormat.A4;
         try {
             PDFBoxResourceLoader.init(context);
             try {
@@ -935,10 +1003,6 @@ public class PdfCreator {
             }
             document.getDocumentInformation().setCreator("MakeACopy");
             document.getDocumentInformation().setProducer("MakeACopy");
-
-            PDRectangle pageSize = PDRectangle.A4;
-            float pageW = pageSize.getWidth();
-            float pageH = pageSize.getHeight();
 
             // Load fonts once (file-based; subset-embedded)
             List<PDFont> fonts = loadFontsWithFallbacks(document, context);
@@ -958,11 +1022,15 @@ public class PdfCreator {
                     // Detect if text contains RTL scripts for gentle B/W processing
                     List<RecognizedWord> pageWords = (perPageWords != null && i < perPageWords.size()) ? perPageWords.get(i) : null;
                     boolean useGentleMode = convertToBlackWhite && containsRtlText(pageWords);
-                    prepared = processImageForPdf(src, convertToGrayscale, convertToBlackWhite, targetDpi, bwMode, useGentleMode);
+                    prepared = processImageForPdf(src, convertToGrayscale, convertToBlackWhite, targetDpi, bwMode, useGentleMode, pageFormat);
                     if (prepared == null) {
                         Log.e(TAG, "Image preparation via OpenCV failed for page " + (i + 1));
                         return null;
                     }
+
+                    PDRectangle pageSize = pageFormat.toPageRectangle(prepared.getWidth(), prepared.getHeight());
+                    float pageW = pageSize.getWidth();
+                    float pageH = pageSize.getHeight();
 
                     PDPage page = new PDPage(pageSize);
                     // Harmonize page boxes to avoid viewer-specific cropping/offset interpretations
