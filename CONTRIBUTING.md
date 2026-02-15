@@ -8,9 +8,9 @@ Thank you for your interest in contributing to MakeACopy! This guide explains ho
 |------|---------|-------|
 | **JDK** | 17 (Temurin recommended) | Required for Gradle and Android builds |
 | **Android SDK** | API 36 | `compileSdk = 36`, `minSdk = 29` |
-| **Android NDK** | 28.0.13004108 | Exact version required |
-| **CMake** | 3.31.6 | Must match F-Droid reproducible build |
-| **Python** | 3.11.x | Used by CMake scripts during native builds |
+| **Android NDK** | 28.0.13004108 | Only needed if building native libs from source (Option B) |
+| **CMake** | 3.31.6 | Only needed if building native libs from source (Option B) |
+| **Python** | 3.11.x | Only needed if building native libs from source (Option B) |
 | **Git** | any recent | With submodule support |
 
 ## 1. Clone the Repository
@@ -134,11 +134,51 @@ Verify:
 python3 --version   # should show 3.11.x
 ```
 
-## 6. Build Native Libraries
+## 6. Obtain Native Libraries
 
-Before building the Android app, you must compile the native libraries (OpenCV and ONNX Runtime) from source.
+The app requires native libraries (OpenCV and ONNX Runtime). You have two options:
 
-### Set environment variables
+### Option A: Extract from a Release APK (recommended for app-only contributors)
+
+If you only want to work on the Android/Java side and skip the native build entirely, you can extract the prebuilt libraries from an official release APK or download them from CI artifacts.
+
+#### From CI artifacts
+
+Every CI build on `main` uploads a **`native-libs`** artifact containing `jniLibs/` and `libs/`. Download it from the [Actions tab](https://github.com/egdels/makeacopy/actions/workflows/build-release.yml), extract it, and place the contents into your project:
+
+```bash
+# After downloading and unzipping native-libs.zip:
+cp -r app/src/main/jniLibs/ <project>/app/src/main/jniLibs/
+cp -r app/libs/              <project>/app/libs/
+```
+
+#### From a release APK
+
+You can also extract the native libraries from any official release APK:
+
+```bash
+# 1. Download a release APK (e.g. arm64-v8a)
+wget https://github.com/egdels/makeacopy/releases/latest/download/MakeACopy-v3.1.0-arm64-v8a-release.apk
+
+# 2. Extract native libraries
+unzip -o MakeACopy-v3.1.0-arm64-v8a-release.apk 'lib/*' -d /tmp/apk_extract
+
+# 3. Copy to project (APK uses lib/<abi>/, project uses jniLibs/<abi>/)
+mkdir -p app/src/main/jniLibs/arm64-v8a
+cp /tmp/apk_extract/lib/arm64-v8a/*.so app/src/main/jniLibs/arm64-v8a/
+```
+
+For the ONNX Runtime JAR, download it from the same CI artifact or from [Maven Central](https://central.sonatype.com/artifact/com.microsoft.onnxruntime/onnxruntime-android) (version 1.24.1) and place it in `app/libs/`.
+
+> **Note:** Each APK contains only one ABI. For development on an emulator (x86_64) or a physical device (arm64-v8a), you only need the matching ABI. Extract from the corresponding APK.
+
+> **Note:** The `jniLibs/` directory is listed in `.gitignore` and must not be committed.
+
+### Option B: Build from source (required for native changes and F-Droid)
+
+If you need to modify native code or reproduce F-Droid builds, compile the native libraries from source.
+
+#### Set environment variables
 
 ```bash
 export ANDROID_HOME="$HOME/Android/Sdk"                    # adjust for your system
@@ -150,14 +190,14 @@ export PY3_BIN="$(which python3)"
 export BUILD_GENERATOR="Unix Makefiles"
 ```
 
-### Build OpenCV
+#### Build OpenCV
 
 ```bash
 chmod +x scripts/build_opencv_android.sh
 VERBOSE=1 ./scripts/build_opencv_android.sh
 ```
 
-### Prepare OpenCV for the app
+#### Prepare OpenCV for the app
 
 ```bash
 chmod +x scripts/prepare_opencv.sh
@@ -166,7 +206,7 @@ chmod +x scripts/prepare_opencv.sh
 
 This copies the compiled `.so` files into `app/src/main/jniLibs/`.
 
-### Build ONNX Runtime
+#### Build ONNX Runtime
 
 ```bash
 chmod +x scripts/build_onnxruntime_android.sh
