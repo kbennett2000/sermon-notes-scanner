@@ -17,7 +17,7 @@ public final class DocQuadDetector implements CornerDetector {
     private static final String TAG = "DocQuadDetector";
 
     // Release-Asset (F-Droid kompatibel, kein Download)
-    public static final String DEFAULT_MODEL_ASSET_PATH = "docquad/docquadnet256_trained_opset17.onnx";
+    public static final String DEFAULT_MODEL_ASSET_PATH = "docquad/docquadnet256_trained_opset17.ort";
 
     private final String modelAssetPath;
 

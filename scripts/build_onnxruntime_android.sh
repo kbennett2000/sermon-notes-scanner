@@ -32,6 +32,34 @@ JNI_LIBS_BASE="$REPO_DIR/app/src/main/jniLibs"
 APP_LIBS="$REPO_DIR/app/libs"
 BUILD_ROOT="/tmp/onnxruntime-build"
 
+# Minimal build with reduced operator config
+# The .required_operators.config is shipped in the repo alongside the model.
+# It is copied to /tmp/ for path-neutral, reproducible builds across environments.
+# Override with ORT_OPS_CONFIG env var to use a different config file,
+# or set ORT_OPS_CONFIG=none to disable minimal build entirely.
+REPO_OPS_CONFIG="$REPO_DIR/app/src/main/assets/docquad/docquadnet256_trained_opset17.required_operators.config"
+ORT_OPS_CONFIG="${ORT_OPS_CONFIG:-}"
+
+if [ "$ORT_OPS_CONFIG" = "none" ]; then
+  ORT_OPS_CONFIG=""
+  info "Minimal build: disabled (ORT_OPS_CONFIG=none)"
+elif [ -n "$ORT_OPS_CONFIG" ]; then
+  # Explicit override from environment
+  if [ ! -f "$ORT_OPS_CONFIG" ]; then
+    echo "ERROR: ORT_OPS_CONFIG file not found: $ORT_OPS_CONFIG" >&2
+    exit 1
+  fi
+  ORT_OPS_CONFIG="$(cd "$(dirname "$ORT_OPS_CONFIG")" && pwd)/$(basename "$ORT_OPS_CONFIG")"
+  info "Minimal build: enabled (custom ops config: $ORT_OPS_CONFIG)"
+elif [ -f "$REPO_OPS_CONFIG" ]; then
+  # Default: use repo config, copied to /tmp/ for neutral paths
+  ORT_OPS_CONFIG="/tmp/ort_required_operators.config"
+  cp -f "$REPO_OPS_CONFIG" "$ORT_OPS_CONFIG"
+  info "Minimal build: enabled (repo config copied to $ORT_OPS_CONFIG)"
+else
+  info "Minimal build: disabled (no config found at $REPO_OPS_CONFIG)"
+fi
+
 # ABIs (extend if needed)
 ABIS="${ABIS:-arm64-v8a armeabi-v7a x86 x86_64}"
 info "ONNX Runtime ABIs: $ABIS"
@@ -228,6 +256,14 @@ for ABI in $ABIS; do
     --skip_submodule_sync
     --compile_no_warning_as_error
   )
+
+  # Minimal build flags (when ORT_OPS_CONFIG is set)
+  if [ -n "$ORT_OPS_CONFIG" ]; then
+    COMMON_ARGS+=(
+      --minimal_build extended
+      --include_ops_by_config "$ORT_OPS_CONFIG"
+    )
+  fi
   # Prefer Ninja if available
   if [ -n "${CMAKE_GENERATOR:-}" ]; then
     COMMON_ARGS+=( --cmake_generator "$CMAKE_GENERATOR" )

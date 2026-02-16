@@ -458,6 +458,7 @@ shasum -a 256 \
 | `analyze_cord_receipts.py` | Analyze CORD receipt aspect ratios |
 | `synthesize_receipt_on_background.py` | Place receipts on DTD backgrounds with perspective |
 | `quantize_fp16_compare.py` | FP16 quantization with quality comparison |
+| `convert_onnx_to_ort.py` | Convert ONNX to ORT format with reduced op config |
 
 ---
 
@@ -625,11 +626,84 @@ python3 training/scripts/train_docquad_heatmap.py \
 | 9 | (Optional) V2 hard-focus | Repeat mix + train with HARD emphasis |
 | 10 | Export ONNX | `export_onnx` module |
 | 11 | FP16 quantization | `quantize_fp16_compare.py` |
-| 12 | Integrate into app | Copy to `app/src/main/assets/docquad/` |
+| 12 | (Optional) ORT conversion | `convert_onnx_to_ort.py` |
+| 13 | Integrate into app | Copy to `app/src/main/assets/docquad/` |
 
 ---
 
-## 17) Notes
+## 17) ORT Format Conversion (Optional, Size-Optimized)
+
+The `.ort` format is ONNX Runtime's optimized flatbuffer format. It reduces model load time and enables `--minimal_build extended` for smaller `libonnxruntime.so` binaries.
+
+### Prerequisites
+
+```bash
+pip install onnxruntime==1.24.1 numpy
+```
+
+> **Version alignment**: The Python `onnxruntime` version **must match** the version used in the Android app (currently 1.24.1). See Section 11 for details.
+
+### Convert ONNX → ORT
+
+```bash
+python3 training/scripts/convert_onnx_to_ort.py \
+  --model app/src/main/assets/docquad/docquadnet256_trained_opset17.onnx \
+  --out_dir /tmp/ort_output \
+  --optimization_level basic \
+  --show_ops \
+  --verify
+```
+
+This produces:
+
+| File | Purpose |
+|------|---------|
+| `docquadnet256_trained_opset17.ort` | ORT-format model for Android |
+| `docquadnet256_trained_opset17.required_operators.config` | Reduced op config for minimal build |
+| `docquadnet256_trained_opset17.optimized.onnx` | Intermediate optimized ONNX (debugging) |
+
+### Optimization Levels
+
+| Level | Description | Recommended for |
+|-------|-------------|-----------------|
+| `basic` | Constant folding, redundant node elimination | Production (safest) |
+| `extended` | + operator fusions (Conv+BN, etc.) | Production (if validated) |
+| `all` | + layout optimizations | Desktop only (may not work on mobile) |
+
+### Validate the ORT Model
+
+The script automatically validates that the `.ort` model loads and reports input/output shapes. Use `--verify` to additionally compare inference outputs against the original ONNX model with random input.
+
+### Build ONNX Runtime with Minimal Operators
+
+Using the generated `.required_operators.config`, build a smaller `libonnxruntime.so` via the project's build script:
+
+```bash
+# Use the project build script with ORT_OPS_CONFIG:
+ORT_OPS_CONFIG=/tmp/ort_output/docquadnet256_trained_opset17.required_operators.config \
+  ./scripts/build_onnxruntime_android.sh
+```
+
+This passes `--minimal_build extended` and `--include_ops_by_config` to the ONNX Runtime build, stripping all operators not used by the model and significantly reducing binary size.
+
+Without `ORT_OPS_CONFIG`, the script builds a full (non-minimal) ONNX Runtime as before.
+
+### Android Integration
+
+```bash
+# Copy ORT model to assets
+cp /tmp/ort_output/docquadnet256_trained_opset17.ort \
+  app/src/main/assets/docquad/
+
+# Update model path in DocQuadDetector.java:
+#   DEFAULT_MODEL_ASSET_PATH = "docquad/docquadnet256_trained_opset17.ort";
+```
+
+> **Note**: The app's `DocQuadOrtRunner` must use `SessionOptions` compatible with ORT format loading. ORT format models are loaded the same way as ONNX models via `OrtSession` — no code changes are needed beyond the asset path.
+
+---
+
+## 18) Notes
 
 ### Few Own Images
 

@@ -61,14 +61,18 @@ public final class DocQuadOrtRunner implements AutoCloseable {
         try (OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
             opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
             opts.setIntraOpNumThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
-            // Try NNAPI (optional, fall back to CPU).
-            // XNNPACK is intentionally not used: it produces incorrect results
-            // with FP16-quantized models on ONNX Runtime 1.24.1.
+            // Try NNAPI, then XNNPACK (both optional, fall back to CPU)
             try {
                 opts.addNnapi();
                 Log.i(TAG, "NNAPI EP enabled");
             } catch (Throwable t) {
                 Log.i(TAG, "NNAPI not available: " + t.getMessage());
+            }
+            try {
+                opts.addXnnpack(Collections.emptyMap());
+                Log.i(TAG, "XNNPACK EP enabled");
+            } catch (Throwable t) {
+                Log.i(TAG, "XNNPACK not available: " + t.getMessage());
             }
             this.session = env.createSession(modelFile.getAbsolutePath(), opts);
         }
