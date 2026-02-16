@@ -42,6 +42,12 @@ jobs:
         with:
           cmake-version: '3.31.6'
 
+      - name: Install Python deps for ONNX Runtime minimal build
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install flatbuffers
+          python3 -c "import flatbuffers; print('flatbuffers OK:', flatbuffers.__file__)"
+
       # Use the installed CMake on PATH to align with FDroid
       - name: Export ANDROID_*, CMake and Python paths
         run: |
