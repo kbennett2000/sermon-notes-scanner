@@ -2,7 +2,7 @@
 """
 Evaluation script for DocQuadNet models.
 
-Compares one or more trained ONNX models on a fixed real-world test set.
+Compares one or more trained ONNX or ORT models on a fixed real-world test set.
 Produces a JSON report with per-model metrics and pairwise comparisons.
 
 Supports two evaluation modes:
@@ -1032,7 +1032,7 @@ class ModelWrapper:
     input_shape: tuple[int, ...]  # (N, C, H, W)
 
     @classmethod
-    def load(cls, name: str, onnx_path: Path, device: str = "cpu") -> "ModelWrapper":
+    def load(cls, name: str, model_path: Path, device: str = "cpu") -> "ModelWrapper":
         if ort is None:
             raise SystemExit("FATAL: onnxruntime not installed. Install with: pip install onnxruntime")
 
@@ -1040,7 +1040,19 @@ class ModelWrapper:
         if device == "cuda":
             providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
 
-        session = ort.InferenceSession(str(onnx_path), providers=providers)
+        is_ort = model_path.suffix.lower() == ".ort"
+        sess_options = None
+        if is_ort:
+            sess_options = ort.SessionOptions()
+            try:
+                sess_options.add_session_config_entry("session.load_model_format", "ORT")
+            except Exception as exc:
+                raise SystemExit(
+                    "FATAL: ORT format not supported by this onnxruntime build. "
+                    "Install a build with ORT format support or use .onnx."
+                ) from exc
+
+        session = ort.InferenceSession(str(model_path), providers=providers, sess_options=sess_options)
         input_info = session.get_inputs()[0]
         input_name = input_info.name
         input_shape = tuple(input_info.shape)
@@ -1591,11 +1603,15 @@ def generate_report(
 def parse_model_arg(arg: str) -> tuple[str, Path]:
     """Parse --model name=path argument."""
     if "=" not in arg:
-        raise argparse.ArgumentTypeError(f"Invalid model format: {arg}. Expected: name=path.onnx")
+        raise argparse.ArgumentTypeError(f"Invalid model format: {arg}. Expected: name=path.onnx or name=path.ort")
     name, path_str = arg.split("=", 1)
     path = Path(path_str)
     if not path.exists():
         raise argparse.ArgumentTypeError(f"Model file not found: {path}")
+    if path.suffix.lower() not in {".onnx", ".ort"}:
+        raise argparse.ArgumentTypeError(
+            f"Unsupported model extension: {path.suffix}. Expected .onnx or .ort"
+        )
     return name, path
 
 
@@ -1615,17 +1631,17 @@ Evaluation Modes:
 
 Examples:
   # RAW mode: Compare model quality (default)
-  python evaluate_docquad_models.py \\
-    --test_dir training/data/docquad_real_eval \\
-    --model uvdoc=training/runs/docquad_uvdoc_pretrain/checkpoints/best.onnx \\
-    --model mix=training/runs/docquad_mix_finetune/checkpoints/best.onnx \\
+  python evaluate_docquad_models.py \
+    --test_dir training/data/docquad_real_eval \
+    --model uvdoc=training/runs/docquad_uvdoc_pretrain/checkpoints/best.onnx \
+    --model mix=training/runs/docquad_mix_finetune/checkpoints/best.onnx \
     --out reports/eval_raw.json
 
   # PRODUCT mode: Measure real-world UX impact
-  python evaluate_docquad_models.py \\
-    --mode product \\
-    --test_dir training/data/docquad_real_eval \\
-    --model candidate=path/to/model.onnx \\
+  python evaluate_docquad_models.py \
+    --mode product \
+    --test_dir training/data/docquad_real_eval \
+    --model candidate=path/to/model.ort \
     --out reports/eval_product.json
 
   # Compare both modes for the same model
@@ -1650,7 +1666,7 @@ Examples:
         required=True,
         dest="models",
         metavar="NAME=PATH",
-        help="Named ONNX model to evaluate (repeatable). Format: name=path.onnx",
+        help="Named ONNX/ORT model to evaluate (repeatable). Format: name=path.onnx or name=path.ort",
     )
     parser.add_argument(
         "--out",
