@@ -58,15 +58,33 @@ public final class DocQuadOrtRunner implements AutoCloseable {
         // Optimized model loading: copy to cache and use file path for mmap support.
         File modelFile = copyAssetToCache(context, modelAssetPath);
 
+        this.session = createSessionWithFallback(env, modelFile.getAbsolutePath());
+        Log.d(TAG, "Model loaded from " + modelFile.getAbsolutePath());
+    }
+
+    /**
+     * Creates an ORT session with tiered EP fallback to avoid native crashes.
+     * <p>
+     * NNAPI on API 29 (and some other devices) can cause a native SIGABRT during
+     * graph partitioning that cannot be caught by Java. To work around this, NNAPI
+     * is only enabled on API 30+ where the implementation is more stable.
+     * If session creation with accelerated EPs fails, falls back to CPU-only.
+     */
+    private static OrtSession createSessionWithFallback(OrtEnvironment env, String modelPath) throws Exception {
+        // First attempt: XNNPACK + optionally NNAPI (API 30+)
         try (OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
             opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
             opts.setIntraOpNumThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
-            // Try NNAPI, then XNNPACK (both optional, fall back to CPU)
-            try {
-                opts.addNnapi();
-                Log.i(TAG, "NNAPI EP enabled");
-            } catch (Throwable t) {
-                Log.i(TAG, "NNAPI not available: " + t.getMessage());
+            // NNAPI is unstable on API 29 (native SIGABRT in graph partitioning)
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                try {
+                    opts.addNnapi();
+                    Log.i(TAG, "NNAPI EP enabled");
+                } catch (Throwable t) {
+                    Log.i(TAG, "NNAPI not available: " + t.getMessage());
+                }
+            } else {
+                Log.i(TAG, "NNAPI EP skipped (API " + android.os.Build.VERSION.SDK_INT + " < 30)");
             }
             try {
                 opts.addXnnpack(Collections.emptyMap());
@@ -74,11 +92,17 @@ public final class DocQuadOrtRunner implements AutoCloseable {
             } catch (Throwable t) {
                 Log.i(TAG, "XNNPACK not available: " + t.getMessage());
             }
-            this.session = env.createSession(modelFile.getAbsolutePath(), opts);
+            return env.createSession(modelPath, opts);
+        } catch (Exception e) {
+            Log.w(TAG, "Session creation with accelerated EPs failed, falling back to CPU: " + e.getMessage());
+            // Fallback: CPU only
+            try (OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
+                opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
+                opts.setIntraOpNumThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
+                return env.createSession(modelPath, opts);
+            }
         }
-        Log.d(TAG, "Model loaded from " + modelFile.getAbsolutePath());
     }
-
 
     /**
      * Returns a singleton instance of {@code DocQuadOrtRunner}, creating it if necessary.
