@@ -16,8 +16,8 @@ android {
         applicationId "de.schliweb.makeacopy"
         minSdk = 29
         targetSdk = 36
-        versionCode 30200
-        versionName "3.2.0"
+        versionCode 30201
+        versionName "3.2.1"
 
         // Use default AndroidX test runner
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -168,7 +168,12 @@ dependencies {
     implementation libs.tesseract
 
     // Onnx-Runtime dependency
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    if(!isLight) {
+        implementation fileTree(dir: 'libs', include: ['*.jar'])
+    }
+    else {
+        implementation fileTree(dir: 'libs', include: ['*.aar'])
+    }
 
     // PdfBox-Android dependency
     implementation libs.pdfbox.android
