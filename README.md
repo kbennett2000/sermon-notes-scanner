@@ -22,7 +22,7 @@ MakeACopy is available in two editions:
 | Edition | OCR Languages | Fonts | APK Size (arm64-v8a) |
 |---------|--------------|-------|---------------------|
 | **Full** | 21 languages (incl. CJK, Arabic, Thai) | 4 fonts (incl. CJK) | ~99 MB |
-| **Light** | English + German | 1 font (NotoSans) | ~60 MB |
+| **Light** | English + German | 1 font (NotoSans) | ~58 MB |
 
 Both editions include the same ML-based document detection (ONNX model), OpenCV image processing, and full offline functionality. The Light edition simply ships fewer OCR language models, fonts, and dictionaries.
 
