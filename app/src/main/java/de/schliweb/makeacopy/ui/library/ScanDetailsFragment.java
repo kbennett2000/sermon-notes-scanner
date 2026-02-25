@@ -64,7 +64,6 @@ public class ScanDetailsFragment extends Fragment {
   private android.widget.ImageButton buttonPrevPage;
   private android.widget.ImageButton buttonNextPage;
   private android.widget.TextView pageIndicatorView;
-  private android.net.Uri previewPrimaryUri;
   private android.graphics.pdf.PdfRenderer pdfRenderer;
   private android.os.ParcelFileDescriptor pdfPfd;
   private int currentPageIndex = 0;
@@ -117,6 +116,7 @@ public class ScanDetailsFragment extends Fragment {
                         android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
                             | android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
               } catch (Throwable ignore) {
+                // Best-effort; failure is non-critical
               }
               // Prepare DB updates: primary export URI JSON and (analog) adopt picked file name as
               // title
@@ -125,6 +125,7 @@ public class ScanDetailsFragment extends Fragment {
               try {
                 pickedName = FileUtils.getDisplayNameFromUri(requireContext(), uri);
               } catch (Throwable ignore) {
+                // Best-effort; failure is non-critical
               }
               final String finalPickedBase;
               if (pickedName != null && !pickedName.trim().isEmpty()) {
@@ -147,6 +148,7 @@ public class ScanDetailsFragment extends Fragment {
                             repo.updateTitle(requireContext(), scanId, finalPickedBase);
                           }
                         } catch (Throwable ignore) {
+                          // Best-effort; failure is non-critical
                         }
                         if (!isAdded()) return;
                         requireActivity().runOnUiThread(this::loadAsync);
@@ -348,6 +350,8 @@ public class ScanDetailsFragment extends Fragment {
                                                                                                 .LENGTH_SHORT));
                                                                     }
                                                                   } catch (Throwable ignore) {
+                                                                    // Best-effort; failure is
+                                                                    // non-critical
                                                                   }
                                                                 })
                                                             .start();
@@ -361,6 +365,7 @@ public class ScanDetailsFragment extends Fragment {
                                                       .improveAlertDialogButtonContrastForNight(
                                                           createDialog, requireContext());
                                                 } catch (Throwable ignore) {
+                                                  // Best-effort; failure is non-critical
                                                 }
                                               });
                                           createDialog.show();
@@ -392,6 +397,7 @@ public class ScanDetailsFragment extends Fragment {
                                                                         android.widget.Toast
                                                                             .LENGTH_SHORT));
                                                     } catch (Throwable ignore) {
+                                                      // Best-effort; failure is non-critical
                                                     }
                                                   })
                                               .start();
@@ -406,10 +412,12 @@ public class ScanDetailsFragment extends Fragment {
                                       .improveAlertDialogButtonContrastForNight(
                                           pickerDialog, requireContext());
                                 } catch (Throwable ignore) {
+                                  // Best-effort; failure is non-critical
                                 }
                               });
                           pickerDialog.show();
                         } catch (Throwable ignore) {
+                          // Best-effort; failure is non-critical
                         }
                       });
             })
@@ -445,6 +453,7 @@ public class ScanDetailsFragment extends Fragment {
     }
     String title = (e.title != null && !e.title.isEmpty()) ? e.title : e.id;
     titleView.setText(title);
+    @SuppressWarnings("JavaUtilDate") // DateFormat requires Date
     String dateStr =
         DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
             .format(new Date(e.createdAt));
@@ -470,11 +479,13 @@ public class ScanDetailsFragment extends Fragment {
         try {
           fileName = FileUtils.getDisplayNameFromUri(requireContext(), exportUri);
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
         if (fileName == null || fileName.trim().isEmpty()) {
           try {
             fileName = exportUri.getLastPathSegment();
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
         }
       }
@@ -482,6 +493,7 @@ public class ScanDetailsFragment extends Fragment {
         subtitle.append(" • ").append("File: ").append(fileName);
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     if (!canOpen) {
       subtitle.append(" • ").append(getString(R.string.missing_file));
@@ -551,6 +563,7 @@ public class ScanDetailsFragment extends Fragment {
                   && ("application/pdf".equalsIgnoreCase(mime)
                       || mime.toLowerCase(java.util.Locale.ROOT).contains("pdf")));
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
       if (looksPdf && canOpen) {
@@ -599,6 +612,7 @@ public class ScanDetailsFragment extends Fragment {
                   try {
                     mime = cr.getType(uri);
                   } catch (Throwable ignore) {
+                    // Best-effort; failure is non-critical
                   }
                   boolean isPdf =
                       (mime != null
@@ -620,6 +634,7 @@ public class ScanDetailsFragment extends Fragment {
                   }
                 }
               } catch (Throwable ignore) {
+                // Best-effort; failure is non-critical
               }
               final android.graphics.Bitmap finalBmp = bmp;
               if (!isAdded()) return;
@@ -679,6 +694,7 @@ public class ScanDetailsFragment extends Fragment {
         try {
           page.close();
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
     } catch (Throwable ignore) {
@@ -687,10 +703,12 @@ public class ScanDetailsFragment extends Fragment {
       try {
         if (renderer != null) renderer.close();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
       try {
         if (pfd != null) pfd.close();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
     }
   }
@@ -718,17 +736,20 @@ public class ScanDetailsFragment extends Fragment {
       String mime = requireContext().getContentResolver().getType(uri);
       if (mime != null && !mime.trim().isEmpty()) return mime;
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     // Derive from file name or path segment
     String name = null;
     try {
       name = FileUtils.getDisplayNameFromUri(requireContext(), uri);
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     if (name == null) {
       try {
         name = uri.getLastPathSegment();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
     }
     if (name != null) {
@@ -744,6 +765,7 @@ public class ScanDetailsFragment extends Fragment {
   }
 
   // Best-effort physical file rename via SAF DocumentsContract. Preserves the original extension.
+  @SuppressWarnings("UnusedMethod") // kept for future use in scan rename flow
   private void renamePrimaryExportFile(@NonNull String newBaseName) {
     try {
       android.net.Uri uri = getPrimaryExportUri();
@@ -762,6 +784,7 @@ public class ScanDetailsFragment extends Fragment {
               android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
                   | android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
         String json = makeSingleUriArrayJson(newUri);
         try {
@@ -769,6 +792,7 @@ public class ScanDetailsFragment extends Fragment {
                   requireContext())
               .updateExportPathsJson(requireContext(), scanId, json);
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
     } catch (Throwable t) {
@@ -817,11 +841,13 @@ public class ScanDetailsFragment extends Fragment {
           }
         }
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       } finally {
         if (c != null)
           try {
             c.close();
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
       }
 
@@ -845,6 +871,7 @@ public class ScanDetailsFragment extends Fragment {
           }
         }
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
 
       // Fallback: reconstruct from path segments (sans last segment)
@@ -896,6 +923,7 @@ public class ScanDetailsFragment extends Fragment {
                               LibraryServiceLocator.getScansRepository(requireContext())
                                   .updateTitle(requireContext(), scanId, name);
                             } catch (Throwable ignore) {
+                              // Best-effort; failure is non-critical
                             }
                             // Note: Only update the title in the index. Do not rename the physical
                             // file on disk.
@@ -912,6 +940,7 @@ public class ScanDetailsFragment extends Fragment {
             de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(
                 dialog, requireContext());
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
         });
     dialog.show();
@@ -932,6 +961,7 @@ public class ScanDetailsFragment extends Fragment {
             de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(
                 dialog, requireContext());
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
         });
     dialog.show();
@@ -944,6 +974,7 @@ public class ScanDetailsFragment extends Fragment {
                 LibraryServiceLocator.getScansRepository(requireContext())
                     .deleteScan(requireContext(), scanId);
               } catch (Throwable ignore) {
+                // Best-effort; failure is non-critical
               }
               if (!isAdded()) return;
               requireActivity()
@@ -1006,7 +1037,6 @@ public class ScanDetailsFragment extends Fragment {
   // --- PDF paging helpers (multi-page preview) ---
   private void setupPdfPreview(@NonNull android.net.Uri uri) {
     closePdfRenderer();
-    previewPrimaryUri = uri;
     if (previewNavRow != null) previewNavRow.setVisibility(View.GONE);
     new Thread(
             () -> {
@@ -1035,10 +1065,12 @@ public class ScanDetailsFragment extends Fragment {
                 try {
                   if (rendererLocal != null) rendererLocal.close();
                 } catch (Throwable ignore) {
+                  // Best-effort; failure is non-critical
                 }
                 try {
                   if (pfdLocal != null) pfdLocal.close();
                 } catch (Throwable ignore) {
+                  // Best-effort; failure is non-critical
                 }
                 pdfRenderer = null;
                 pdfPfd = null;
@@ -1079,6 +1111,7 @@ public class ScanDetailsFragment extends Fragment {
         buttonNextPage.setOnClickListener(v -> goToPage(currentPageIndex + 1));
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
   }
 
@@ -1129,6 +1162,7 @@ public class ScanDetailsFragment extends Fragment {
         try {
           page.close();
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
     } catch (Throwable t) {
@@ -1140,16 +1174,17 @@ public class ScanDetailsFragment extends Fragment {
     try {
       if (pdfRenderer != null) pdfRenderer.close();
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     try {
       if (pdfPfd != null) pdfPfd.close();
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     pdfRenderer = null;
     pdfPfd = null;
     totalPages = 0;
     currentPageIndex = 0;
-    previewPrimaryUri = null;
   }
 
   @Override
