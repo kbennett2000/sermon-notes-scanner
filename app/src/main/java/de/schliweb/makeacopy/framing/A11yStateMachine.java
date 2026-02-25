@@ -213,7 +213,7 @@ public class A11yStateMachine {
     }
 
     // 3. Update frame history for stability (Signal C)
-    frameHistory.add(new FrameData(plausibleDoc, quality, rawHint, quad));
+    frameHistory.add(new FrameData(quality, rawHint));
 
     // 4. Compute stability
     boolean stableForGuidance = frameHistory.isHintStable(MIN_STABLE_FRAMES_HINT);
@@ -234,8 +234,7 @@ public class A11yStateMachine {
     updateState(plausibleDoc, stableForGuidance, stableForReady, quality);
 
     // 7. Determine event to emit (prioritized)
-    Event event =
-        determineEvent(previousState, plausibleDoc, stableForGuidance, rawHint, quality, nowMs);
+    Event event = determineEvent(previousState, plausibleDoc, rawHint, nowMs);
 
     // 8. Emit event if allowed by rate limit
     if (event != null && listener != null) {
@@ -339,12 +338,7 @@ public class A11yStateMachine {
   // --- Event determination with priority ---
 
   private Event determineEvent(
-      State previousState,
-      boolean plausibleDoc,
-      boolean stableForGuidance,
-      GuidanceHint rawHint,
-      float quality,
-      long nowMs) {
+      State previousState, boolean plausibleDoc, GuidanceHint rawHint, long nowMs) {
 
     // Priority 2: READY_ENTER (only on state transition)
     if (currentState == State.READY && previousState != State.READY) {
@@ -472,16 +466,12 @@ public class A11yStateMachine {
   // --- Frame history for stability tracking ---
 
   private static class FrameData {
-    final boolean plausibleDoc;
     final float quality;
     final GuidanceHint hint;
-    final PointF[] quad;
 
-    FrameData(boolean plausibleDoc, float quality, GuidanceHint hint, PointF[] quad) {
-      this.plausibleDoc = plausibleDoc;
+    FrameData(float quality, GuidanceHint hint) {
       this.quality = quality;
       this.hint = hint;
-      this.quad = quad;
     }
   }
 
@@ -535,20 +525,6 @@ public class A11yStateMachine {
         int idx = (head - 1 - i + buffer.length) % buffer.length;
         FrameData frame = buffer[idx];
         if (frame == null || frame.quality < threshold) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    /** Check if plausibleDoc has been true for at least n frames. */
-    boolean isPlausibleStable(int n) {
-      if (count < n) return false;
-
-      for (int i = 0; i < n; i++) {
-        int idx = (head - 1 - i + buffer.length) % buffer.length;
-        FrameData frame = buffer[idx];
-        if (frame == null || !frame.plausibleDoc) {
           return false;
         }
       }
