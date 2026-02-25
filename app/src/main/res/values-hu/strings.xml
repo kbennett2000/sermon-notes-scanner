@@ -16,7 +16,6 @@
     <string name="btn_scan">Szkennelés</string>
     <string name="btn_crop">Kivágás</string>
     <string name="btn_process">Feldolgozás</string>
-    <string name="btn_export">Exportálás</string>
     <string name="btn_share">Megosztás</string>
     <string name="next">Tovább</string>
     <string name="back">Vissza</string>
@@ -24,28 +23,18 @@
     <!-- Messages -->
     <string name="msg_camera_permission_required">A dokumentumok szkenneléséhez kameraengedély szükséges</string>
     <string name="confirm">Megerősítés</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Ellenőrizze a szkennelt képet. Nyomja
-        meg a Tovább gombot a folytatáshoz vagy a Vissza gombot az újrapróbálkozáshoz.
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">A kamera készen áll. Nyomja meg a gombot a dokumentum
         szkenneléséhez.
     </string>
     <string name="captured_image">Rögzített kép</string>
-    <string name="retake">Újra</string>
     <string name="image_to_crop">Kép kivágáshoz</string>
     <string name="cropped_image">Kivágott kép</string>
-    <string name="recrop">Újrakivágás</string>
     <string name="document_preview">Dokumentum előnézete</string>
     <string name="include_ocr_text">OCR szöveg beillesztése</string>
-    <string name="language">Nyelv:</string>
     <string name="ocr_results_will_appear_here">Az OCR eredményei itt jelennek meg</string>
     <string name="ocr_no_text_detected">Nem észlelhető szöveg</string>
-    <string name="no_image_loaded_capture_an_image_first">Nincs kép betöltve. Először készítsen egy képet.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Állítsa be a trapéz
         sarkait a kivágandó terület kijelöléséhez, majd nyomja meg a Kivágás gombot.
-    </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Ellenőrizze a kivágott képet.
-        Nyomja meg a Tovább gombot a folytatáshoz vagy a Vissza gombot az újrakivágáshoz.
     </string>
     <string name="no_document_ready_process_ocr_first">Nincs dokumentum készen. Először futtassa az OCR-t.</string>
     <string name="document_ready_for_export">A dokumentum exportálásra kész</string>
@@ -84,7 +73,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">Átalakítás szürkeárnyalatossá</string>
-    <string name="convert_to_blackwhite_pdf">Átalakítás fekete-fehérré</string>
     <string name="export_as_jpeg">Exportálás JPEG-ként</string>
     <string name="export_as_pdf">Exportálás PDF-ként (alapértelmezett)</string>
 
@@ -98,7 +86,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">EV %1$s</string>
     <string name="exposure_compensation_cd">Expozíció-kompenzáció csúszka</string>
-    <string name="exposure_reset_cd">Expozíció visszaállítása nullára</string>
     <string name="exposure_compensation_option">Expozíció-kompenzáció</string>
 
     <!-- JPEG mode labels -->
@@ -117,10 +104,7 @@
     <string name="preview_corner_detection">Sarokérzékelés előnézete</string>
     <string name="btn_pick_image">Betöltés</string>
     <string name="pick_image_cd">Meglévő kép betöltése</string>
-    <string name="error_selected_file_is_not_an_image">A kiválasztott fájl nem kép</string>
-
     <!-- Multipage Export -->
-    <string name="pages_header">Oldalak (%1$d)</string>
     <string name="add_another_page">Oldal hozzáadása</string>
     <string name="clear_all_pages">Összes törlése</string>
     <string name="remove_this_page">Oldal eltávolítása</string>
@@ -154,11 +138,7 @@
 
     <string name="added_pages_from_registry">%1$d oldal hozzáadva a listából</string>
 
-    <!-- Add page options -->
-    <string name="add_page_option_choose_completed">Válasszon a befejezett szkennelések közül</string>
-    <string name="add_page_option_capture_new">Új oldal rögzítése</string>
-
-    <!-- Picker states -->
+    <!-- Add page options -->    <!-- Picker states -->
     <string name="missing_file">Hiányzó fájl</string>
 
     <!-- Inline OCR -->
@@ -186,7 +166,6 @@
 
     <string name="btn_review">Ellenőrzés</string>
     <string name="edit_word_title">Szó szerkesztése</string>
-    <string name="review_summary_format">Szavak: %1$d • Alacsony bizalom: %2$d</string>
     <string name="cm_edit">Szerkesztés…</string>
     <string name="cm_merge_next">Egyesítés a következővel</string>
     <string name="cm_split">Felosztás</string>
@@ -197,8 +176,6 @@
     <string name="case_lower">kisbetűk</string>
     <string name="case_title">Kezdőbetű nagy</string>
     <string name="dialog_language_title">Nyelvkód beállítása</string>
-    <string name="dialog_language_hint">pl. eng, deu, fra, ita, spa…</string>
-
 
     <!-- Rotation -->
     <string name="rotate_left_cd">Oldal elforgatása 90°-kal balra</string>
@@ -267,20 +244,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">Bezárás</string>
-    <string name="cd_fab_edit">Szöveg szerkesztése</string>
-    <string name="cd_zoom_chip_format">Nagyítás %1$d%%. Koppintson a visszaállításhoz 100%%-ra.</string>
-    <string name="cd_zoom_chip_tap_reset">Nagyításvezérlés. Koppintson a visszaállításhoz 100%-ra.</string>
     <string name="cd_zoom_chip_open_menu">Nagyítási menü megnyitása</string>
-    <string name="cd_minimap">Dokumentum áttekintés, koppintson az ugráshoz</string>
-    <string name="cd_undo">Utolsó módosítás visszavonása</string>
-    <string name="cd_redo">Utolsó módosítás megismétlése</string>
-    <string name="cd_export">Exportálás</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">Keresés</string>
-    <string name="cd_action_export">Dokumentum exportálása</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">Dokumentum áttekintés, koppintson az ugráshoz
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">Kérjük, adjon meg egy értéket</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -296,23 +262,14 @@
     <string name="ok">OK</string>
     <string name="no_scans_yet">Még nincsenek beolvasások</string>
     <string name="rename_collection_title">Gyűjtemény átnevezése</string>
-    <string name="new_name">Új név</string>
-    <string name="scan_saved">Beolvasás elmentve</string>
     <string name="action_add_to_collection">Hozzáadás a gyűjteményhez…</string>
     <string name="place_in_collection_title">Hozzáadás a gyűjteményhez</string>
     <string name="create_new_collection">Új gyűjtemény létrehozása…</string>
     <string name="scan_added_to_collection">Beolvasás hozzáadva a(z) „%1$s” gyűjteményhez</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Könyvtári műveletek</string>
-    <string name="library_actions_title">Könyvtár</string>
-    <string name="open_library">Könyvtár megnyitása</string>
-    <string name="add_current_scan_to_library">Aktuális beolvasás hozzáadása a könyvtárhoz</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">Könyvtári műveletek</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">Ebben: %1$s</string>
-    <string name="in_collections_count">%1$d gyűjteményben</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">A fájl törölve lesz az eszközről. Ez a művelet nem vonható vissza.
     </string>
@@ -383,15 +340,8 @@
     </string>
     <string name="a11y_capture_failed">A rögzítés sikertelen.</string>
     <string name="a11y_volume_shutter_hint">Tipp: Kisegítő módban a hangerőgombokkal is készíthet felvételt.</string>
-    <string name="a11y_capture_success">Kép rögzítve.</string>
-    <string name="a11y_verbose_logs_label">Részletes kisegítő naplók</string>
-    <string name="a11y_option_auto_capture">Automatikus rögzítés stabil felismerésnél (Kisegítő mód)</string>
-    <string name="a11y_option_auto_torch">Vaku automatikus bekapcsolása gyenge fényben (Kisegítő mód)</string>
-    <string name="a11y_capturing_now">Rögzítés…</string>
-    <string name="a11y_score_now">Érzékelési minőség: %1$d%%.</string>
-    <string name="a11y_scan_with_score">Szkennelés. Érzékelési minőség: %1$d%%.</string>
-
-    <!-- Akadálymentesítés: listaelem leírása és értesítések -->
+    <string name="a11y_capture_success">Kép rögzítve.
+    </string>    <!-- Akadálymentesítés: listaelem leírása és értesítések -->
     <string name="page_n_of_m">%1$d. oldal / %2$d</string>
     <string name="pages_count_announcement">Oldalak száma: %1$d</string>
     <string name="export_started">Export elindítva</string>
@@ -403,20 +353,9 @@
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">OCR utófeldolgozás (gyakori hibák javítása)</string>
     <string name="opt_layout_analysis">Elrendezés-elemzés (oszlopok, táblázatok)</string>
-    <string name="opt_layout_analysis_hint">Javítja az OCR-t többoszlopos dokumentumokhoz és táblázatokhoz</string>
-
     <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">Fekvő tájolású súgótérkép kényszerítése (kísérleti)</string>
-
     <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">Nyers forrásfájlok megjelenítése a Könyvtárban (fejlesztő)</string>
-
-    <!-- Library / Collections -->
-    <string name="unfiled_collection_title">Rendezetlen</string>
-    <string name="open_unfiled">Rendezetlen megnyitása</string>
-    <string name="a11y_unfiled_summary">Rendezetlen: %1$d elem</string>
-
-    <!-- PDF Import -->
+    <!-- Library / Collections -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">Ismeretlen fájltípus</string>
     <string name="error_unsupported_file_type">Ez a fájltípus nem támogatott</string>
     <string name="error_cannot_open_pdf">Nem lehet megnyitni a PDF-et</string>
@@ -428,27 +367,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">OCR-nyelvek kiválasztása</string>
-    <string name="ocr_max_languages_hint">Legfeljebb 2 nyelv választható</string>
     <string name="ocr_max_languages_warning">Legfeljebb 2 nyelv engedélyezett</string>
     <string name="ocr_no_language_selected">Kérjük, válasszon ki legalább egy nyelvet</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">Elveted a módosításokat?</string>
     <string name="msg_discard_changes">Vannak nem mentett módosításaid. Szeretnéd elvetni őket?</string>
     <string name="btn_discard">Elvetés</string>
 
     <string name="btn_reocr">OCR újrafuttatása</string>
-    <string name="reocr_confirm_title">Újrafuttatod az OCR-t?</string>
-    <string name="reocr_confirm_message">Szeretnéd újrafuttatni az OCR-t erre a szóra a(z) „%1$s” nyelvvel?</string>
     <string name="reocr_processing">OCR újrafuttatása folyamatban…</string>
     <string name="reocr_success">A szó frissítve: %1$s</string>
     <string name="reocr_failed">Az OCR újrafuttatása sikertelen</string>
     <string name="reocr_no_language">Először válassz nyelvet</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">Nagyítás</string>
-    <string name="zoom_out">Kicsinyítés</string>
     <string name="zoom_100">100 %</string>
     <string name="zoom_200">200 %</string>
     <string name="zoom_300">300 %</string>
@@ -467,4 +399,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>

@@ -16,7 +16,6 @@
     <string name="btn_scan">Skenovať</string>
     <string name="btn_crop">Orezať</string>
     <string name="btn_process">Spracovať</string>
-    <string name="btn_export">Exportovať</string>
     <string name="btn_share">Zdieľať</string>
     <string name="next">Ďalej</string>
     <string name="back">Späť</string>
@@ -26,29 +25,18 @@
         fotoaparátu
     </string>
     <string name="confirm">Potvrdiť</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Skontrolujte svoju snímku. Klepnite na
-        „Ďalej“ pre pokračovanie alebo na „Späť“ pre opakovanie.
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">Fotoaparát je pripravený. Klepnite na tlačidlo pre
         skenovanie dokumentu.
     </string>
     <string name="captured_image">Zachytený obrázok</string>
-    <string name="retake">Znova</string>
     <string name="image_to_crop">Obrázok na orezanie</string>
     <string name="cropped_image">Orezaný obrázok</string>
-    <string name="recrop">Orezať znova</string>
     <string name="document_preview">Náhľad dokumentu</string>
     <string name="include_ocr_text">Zahrnúť text OCR</string>
-    <string name="language">Jazyk:</string>
     <string name="ocr_results_will_appear_here">Výsledky OCR sa zobrazia tu</string>
     <string name="ocr_no_text_detected">Text nebol rozpoznaný</string>
-    <string name="no_image_loaded_capture_an_image_first">Nie je načítaný žiadny obrázok. Najprv zachyťte obrázok.
-    </string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Upravte rohy
         lichobežníka pre výber oblasti orezania, potom klepnite na tlačidlo Orezať.
-    </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Skontrolujte orezaný obrázok.
-        Klepnite na „Ďalej“ pre pokračovanie alebo na „Späť“ pre opakovanie.
     </string>
     <string name="no_document_ready_process_ocr_first">Žiadny dokument nie je pripravený. Najprv spustite OCR.</string>
     <string name="document_ready_for_export">Dokument pripravený na export</string>
@@ -88,7 +76,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">Previesť na odtiene sivej</string>
-    <string name="convert_to_blackwhite_pdf">Previesť na čiernobiely</string>
     <string name="export_as_jpeg">Exportovať ako JPEG</string>
     <string name="export_as_pdf">Exportovať ako PDF (predvolené)</string>
 
@@ -102,7 +89,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">EV %1$s</string>
     <string name="exposure_compensation_cd">Posuvník kompenzácie expozície</string>
-    <string name="exposure_reset_cd">Obnoviť expozíciu na nulu</string>
     <string name="exposure_compensation_option">Kompenzácia expozície</string>
 
     <!-- JPEG mode labels -->
@@ -121,10 +107,7 @@
     <string name="preview_corner_detection">Náhľad detekcie rohov</string>
     <string name="btn_pick_image">Načítať</string>
     <string name="pick_image_cd">Načítať existujúci obrázok</string>
-    <string name="error_selected_file_is_not_an_image">Vybraný súbor nie je obrázok</string>
-
     <!-- Multipage Export -->
-    <string name="pages_header">Stránky (%1$d)</string>
     <string name="add_another_page">Pridať stránku</string>
 
     <string name="clear_all_pages">Vymazať všetko</string>
@@ -161,11 +144,7 @@
 
     <string name="added_pages_from_registry">Pridané %1$d stránok z registra</string>
 
-    <!-- Add page options -->
-    <string name="add_page_option_choose_completed">Vybrať z dokončených skenov</string>
-    <string name="add_page_option_capture_new">Zachytiť novú stránku</string>
-
-    <!-- Picker states -->
+    <!-- Add page options -->    <!-- Picker states -->
     <string name="missing_file">Chýbajúci súbor</string>
 
     <!-- Inline OCR -->
@@ -192,7 +171,6 @@
     <string name="btn_new">Nové skenovanie</string>
     <string name="btn_review">Kontrola</string>
     <string name="edit_word_title">Upraviť slovo</string>
-    <string name="review_summary_format">Slová: %1$d • Nízka spoľahlivosť: %2$d</string>
     <string name="cm_edit">Upraviť…</string>
     <string name="cm_merge_next">Zlúčiť s nasledujúcim</string>
     <string name="cm_split">Rozdeliť</string>
@@ -203,8 +181,6 @@
     <string name="case_lower">malé písmená</string>
     <string name="case_title">Veľké začiatočné písmená</string>
     <string name="dialog_language_title">Nastaviť kód jazyka</string>
-    <string name="dialog_language_hint">napr. eng, deu, fra, ita, spa…</string>
-
 
     <!-- Rotation -->
     <string name="rotate_left_cd">Otočiť stránku o 90° doľava</string>
@@ -273,20 +249,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">Zavrieť</string>
-    <string name="cd_fab_edit">Upraviť text</string>
-    <string name="cd_zoom_chip_format">Zväčšenie %1$d%%. Klepnite pre obnovenie na 100%%.</string>
-    <string name="cd_zoom_chip_tap_reset">Ovládanie priblíženia. Klepnite pre obnovenie na 100%.</string>
     <string name="cd_zoom_chip_open_menu">Otvoriť ponuku priblíženia</string>
-    <string name="cd_minimap">Prehľad dokumentu, klepnite pre preskočenie</string>
-    <string name="cd_undo">Vrátiť poslednú zmenu</string>
-    <string name="cd_redo">Zopakovať poslednú zmenu</string>
-    <string name="cd_export">Exportovať</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">Hľadať</string>
-    <string name="cd_action_export">Exportovať dokument</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">Prehľad dokumentu, klepnite pre preskočenie
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">Zadajte prosím hodnotu</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -302,23 +267,14 @@
     <string name="ok">OK</string>
     <string name="no_scans_yet">Zatiaľ žiadne skeny</string>
     <string name="rename_collection_title">Premenovať kolekciu</string>
-    <string name="new_name">Nový názov</string>
-    <string name="scan_saved">Sken uložený</string>
     <string name="action_add_to_collection">Pridať do kolekcie…</string>
     <string name="place_in_collection_title">Pridať do kolekcie</string>
     <string name="create_new_collection">Vytvoriť novú kolekciu…</string>
     <string name="scan_added_to_collection">Sken pridaný do „%1$s“</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Akcie knižnice</string>
-    <string name="library_actions_title">Knižnica</string>
-    <string name="open_library">Otvoriť knižnicu</string>
-    <string name="add_current_scan_to_library">Pridať aktuálny sken do knižnice</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">Akcie knižnice</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">V: %1$s</string>
-    <string name="in_collections_count">V %1$d kolekciách</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">Súbor bude odstránený zo zariadenia. Túto akciu nie je možné vrátiť
         späť.
@@ -388,15 +344,8 @@
     </string>
     <string name="a11y_capture_failed">Zachytenie zlyhalo.</string>
     <string name="a11y_volume_shutter_hint">Tip: V režime prístupnosti môžete snímať aj tlačidlami hlasitosti.</string>
-    <string name="a11y_capture_success">Obrázok zachytený.</string>
-    <string name="a11y_verbose_logs_label">Podrobné logy prístupnosti</string>
-    <string name="a11y_option_auto_capture">Automatické zachytenie pri stabilnom zistení (Režim prístupnosti)</string>
-    <string name="a11y_option_auto_torch">Automatické zapnutie blesku pri slabom svetle (Režim prístupnosti)</string>
-    <string name="a11y_capturing_now">Prebieha zachytávanie…</string>
-    <string name="a11y_score_now">Kvalita detekcie: %1$d%%.</string>
-    <string name="a11y_scan_with_score">Skenovať. Kvalita detekcie: %1$d%%.</string>
-
-    <!-- Prístupnosť: popis položiek zoznamu a oznámenia -->
+    <string name="a11y_capture_success">Obrázok zachytený.
+    </string>    <!-- Prístupnosť: popis položiek zoznamu a oznámenia -->
     <string name="page_n_of_m">Strana %1$d z %2$d</string>
     <string name="pages_count_announcement">Počet strán: %1$d</string>
     <string name="export_started">Export spustený</string>
@@ -407,20 +356,10 @@
     <string name="opt_ocr_auto_rotate_apply_export">Automatické otočenie OCR (použiť aj pri exporte)</string>
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">OCR následné spracovanie (opraviť bežné chyby)</string>
-    <string name="opt_layout_analysis">Analýza rozloženia (stĺpce, tabuľky)</string>
-    <string name="opt_layout_analysis_hint">Zlepšuje OCR pre viacstĺpcové dokumenty a tabuľky</string>
-    <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">Vynútiť mapovanie pokynov pre režim na šírku (experimentálne)</string>
-
+    <string name="opt_layout_analysis">Analýza rozloženia (stĺpce, tabuľky)
+    </string>    <!-- Options: Experimental directional mapping fallback -->
     <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">Zobraziť nespracované zdrojové súbory v Knižnici (vývojár)</string>
-
-    <!-- Library / Collections -->
-    <string name="unfiled_collection_title">Nezaradené</string>
-    <string name="open_unfiled">Otvoriť Nezaradené</string>
-    <string name="a11y_unfiled_summary">Nezaradené: %1$d položiek</string>
-
-    <!-- PDF Import -->
+    <!-- Library / Collections -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">Neznámy typ súboru</string>
     <string name="error_unsupported_file_type">Tento typ súboru nie je podporovaný</string>
     <string name="error_cannot_open_pdf">Nie je možné otvoriť PDF</string>
@@ -432,27 +371,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">Vyberte jazyky OCR</string>
-    <string name="ocr_max_languages_hint">Je možné vybrať najviac 2 jazyky</string>
     <string name="ocr_max_languages_warning">Povolené sú najviac 2 jazyky</string>
     <string name="ocr_no_language_selected">Vyberte aspoň jeden jazyk</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">Zahodiť zmeny?</string>
     <string name="msg_discard_changes">Máš neuložené zmeny. Chceš ich zahodiť?</string>
     <string name="btn_discard">Zahodiť</string>
 
     <string name="btn_reocr">Znova spustiť OCR</string>
-    <string name="reocr_confirm_title">Znova spustiť OCR?</string>
-    <string name="reocr_confirm_message">Chceš znova spustiť OCR pre toto slovo s jazykom „%1$s“?</string>
     <string name="reocr_processing">Prebieha opätovné spustenie OCR…</string>
     <string name="reocr_success">Slovo aktualizované: %1$s</string>
     <string name="reocr_failed">Opätovné spustenie OCR zlyhalo</string>
     <string name="reocr_no_language">Najprv vyber jazyk</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">Priblížiť</string>
-    <string name="zoom_out">Oddialiť</string>
     <string name="zoom_100">100 %</string>
     <string name="zoom_200">200 %</string>
     <string name="zoom_300">300 %</string>
@@ -471,4 +403,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>

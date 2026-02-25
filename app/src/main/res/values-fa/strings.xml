@@ -17,7 +17,6 @@
     <string name="btn_scan">اسکن</string>
     <string name="btn_crop">برش</string>
     <string name="btn_process">پردازش</string>
-    <string name="btn_export">خروجی</string>
     <string name="btn_share">اشتراک‌گذاری</string>
     <string name="next">بعدی</string>
     <string name="back">بازگشت</string>
@@ -25,31 +24,21 @@
     <!-- Messages -->
     <string name="msg_camera_permission_required">برای اسکن اسناد، مجوز دوربین لازم است</string>
     <string name="confirm">تأیید</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">اسکن خود را بررسی کنید. برای ادامه
-        «بعدی» را بزنید یا برای تلاش دوباره «بازگشت» را انتخاب کنید.
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">دوربین آماده است. برای اسکن یک سند، دکمه را بزنید.
     </string>
     <string name="captured_image">تصویر ثبت‌شده</string>
-    <string name="retake">گرفتن دوباره</string>
     <string name="image_to_crop">تصویر برای برش</string>
     <string name="cropped_image">تصویر برش‌خورده</string>
-    <string name="recrop">برش دوباره</string>
     <string name="document_preview">پیش‌نمایش سند</string>
     <string name="include_ocr_text">شامل‌کردن متن OCR</string>
-    <string name="language">زبان:</string>
     <string name="ocr_results_will_appear_here">نتایج OCR اینجا نمایش داده می‌شود</string>
     <string name="ocr_no_text_detected">هیچ متنی شناسایی نشد</string>
-    <string name="no_image_loaded_capture_an_image_first">هیچ تصویری بارگذاری نشده است. ابتدا یک تصویر بگیرید.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">گوشه‌های ذوزنقه را
         تنظیم کنید تا ناحیهٔ برش انتخاب شود، سپس دکمهٔ «برش» را بزنید.
     </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">تصویر برش‌خورده را بررسی
-        کنید. برای ادامه «بعدی» را بزنید یا برای تلاش دوباره «بازگشت» را انتخاب کنید.
-    </string>
     <string name="no_document_ready_process_ocr_first">هیچ سندی آماده نیست. ابتدا OCR را پردازش کنید.</string>
     <string name="document_ready_for_export">سند برای خروجی‌گرفتن آماده است</string>
-    <string name="processing_image">در حال پردازش تصویر...</string>
+    <string name="processing_image">در حال پردازش تصویر…</string>
     <string name="no_image_processed_crop_an_image_first">هیچ تصویری پردازش نشده است. ابتدا یک تصویر را برش دهید.
     </string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">پردازش OCR کامل شد. برای رفتن به خروجی،
@@ -84,7 +73,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">تبدیل به خاکستری</string>
-    <string name="convert_to_blackwhite_pdf">تبدیل به سیاه‌وسفید</string>
     <string name="export_as_jpeg">خروجی به صورت JPEG</string>
     <string name="export_as_pdf">خروجی به صورت PDF (پیش‌فرض)</string>
 
@@ -98,7 +86,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">جبران نوردهی %1$s</string>
     <string name="exposure_compensation_cd">لغزنده جبران نوردهی</string>
-    <string name="exposure_reset_cd">بازنشانی نوردهی به صفر</string>
     <string name="exposure_compensation_option">جبران نوردهی</string>
     <!-- JPEG mode labels -->
     <string name="jpeg_mode_none">بدون بهبود (JPEG)</string>
@@ -114,10 +101,7 @@
     <string name="skip_cropping">رد کردن برش</string>
     <string name="btn_pick_image">بارگذاری</string>
     <string name="pick_image_cd">بارگذاری تصویر موجود</string>
-    <string name="error_selected_file_is_not_an_image">فایل انتخاب‌شده تصویر نیست</string>
-
     <!-- Multipage Export (v1 increment) -->
-    <string name="pages_header">صفحات (%1$d)</string>
     <string name="add_another_page">افزودن صفحه</string>
     <string name="clear_all_pages">پاک کردن همه</string>
     <string name="remove_this_page">حذف این صفحه</string>
@@ -153,11 +137,7 @@
 
     <string name="added_pages_from_registry">تعداد %1$d صفحه از رجیستری اضافه شد</string>
 
-    <!-- Add page options dialog -->
-    <string name="add_page_option_choose_completed">انتخاب از اسکن‌های تکمیل‌شده</string>
-    <string name="add_page_option_capture_new">ثبت صفحهٔ جدید</string>
-
-    <!-- Picker states -->
+    <!-- Add page options dialog -->    <!-- Picker states -->
     <string name="missing_file">فایل موجود نیست</string>
 
     <!-- Inline OCR cues -->
@@ -183,7 +163,6 @@
     <string name="btn_new">اسکن جدید</string>
     <string name="btn_review">بازبینی</string>
     <string name="edit_word_title">ویرایش کلمه</string>
-    <string name="review_summary_format">کلمات: %1$d • اطمینان پایین: %2$d</string>
     <string name="cm_edit">ویرایش…</string>
     <string name="cm_merge_next">ادغام با بعدی</string>
     <string name="cm_split">تقسیم</string>
@@ -194,8 +173,6 @@
     <string name="case_lower">حروف کوچک</string>
     <string name="case_title">حروف عنوانی</string>
     <string name="dialog_language_title">تنظیم کد زبان</string>
-    <string name="dialog_language_hint">مثلاً: eng، deu، fra، ita، spa…</string>
-
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">چرخاندن صفحه ۹۰ درجه خلاف جهت عقربه‌های ساعت</string>
     <string name="rotate_right_cd">چرخاندن صفحه ۹۰ درجه در جهت عقربه‌های ساعت</string>
@@ -263,20 +240,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">بستن</string>
-    <string name="cd_fab_edit">ویرایش متن</string>
-    <string name="cd_zoom_chip_format">بزرگ‌نمایی %1$d%%. برای بازنشانی به 100%% ضربه بزنید.</string>
-    <string name="cd_zoom_chip_tap_reset">کنترل بزرگ‌نمایی. برای بازنشانی به 100% ضربه بزنید.</string>
     <string name="cd_zoom_chip_open_menu">باز کردن منوی بزرگ‌نمایی</string>
-    <string name="cd_minimap">نمای کلی سند، برای رفتن ضربه بزنید</string>
-    <string name="cd_undo">واگرد آخرین تغییر</string>
-    <string name="cd_redo">بازگردانی آخرین تغییر</string>
-    <string name="cd_export">خروجی</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">جستجو</string>
-    <string name="cd_action_export">خروجی گرفتن از سند</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">نمای کلی سند، برای رفتن ضربه بزنید
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">لطفاً یک مقدار وارد کنید</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -292,23 +258,14 @@
     <string name="ok">باشه</string>
     <string name="no_scans_yet">هنوز اسکن‌ای وجود ندارد</string>
     <string name="rename_collection_title">تغییر نام مجموعه</string>
-    <string name="new_name">نام جدید</string>
-    <string name="scan_saved">اسکن ذخیره شد</string>
     <string name="action_add_to_collection">افزودن به مجموعه…</string>
     <string name="place_in_collection_title">افزودن به مجموعه</string>
     <string name="create_new_collection">ایجاد مجموعهٔ جدید…</string>
     <string name="scan_added_to_collection">اسکن به \"%1$s\" اضافه شد</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">اقدامات کتابخانه</string>
-    <string name="library_actions_title">کتابخانه</string>
-    <string name="open_library">باز کردن کتابخانه</string>
-    <string name="add_current_scan_to_library">افزودن اسکن فعلی به کتابخانه</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">اقدامات کتابخانه</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">در: %1$s</string>
-    <string name="in_collections_count">در %1$d مجموعه</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">فایل از دستگاه حذف خواهد شد. این عمل قابل بازگشت نیست.</string>
 
@@ -377,15 +334,8 @@
     </string>
     <string name="a11y_capture_failed">ثبت تصویر ناموفق بود.</string>
     <string name="a11y_volume_shutter_hint">نکته: در حالت دسترس‌پذیری، برای ثبت از کلیدهای صدا استفاده کنید.</string>
-    <string name="a11y_capture_success">تصویر ثبت شد.</string>
-    <string name="a11y_verbose_logs_label">لاگ‌های دسترس‌پذیریِ مفصل</string>
-    <string name="a11y_option_auto_capture">ثبت خودکار هنگام پایداری تشخیص (حالت دسترس‌پذیری)</string>
-    <string name="a11y_option_auto_torch">روشن‌کردن خودکار چراغ‌قوه در نور کم (حالت دسترس‌پذیری)</string>
-    <string name="a11y_capturing_now">در حال ثبت…</string>
-    <string name="a11y_score_now">کیفیت تشخیص: %1$d%%.</string>
-    <string name="a11y_scan_with_score">اسکن. کیفیت تشخیص: %1$d%%.</string>
-
-    <!-- Accessibility: Recycler item description and announcements -->
+    <string name="a11y_capture_success">تصویر ثبت شد.
+    </string>    <!-- Accessibility: Recycler item description and announcements -->
     <string name="page_n_of_m">صفحهٔ %1$d از %2$d</string>
     <string name="pages_count_announcement">صفحات: %1$d</string>
     <string name="export_started">خروجی شروع شد</string>
@@ -397,18 +347,8 @@
     <string name="opt_ocr_auto_rotate_apply_export">چرخش خودکار OCR (همچنین اعمال در خروجی)</string>
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">پس‌پردازش OCR (اصلاح خطاهای رایج)</string>
-    <string name="opt_layout_analysis">تحلیل چیدمان (ستون‌ها، جداول)</string>
-    <string name="opt_layout_analysis_hint">OCR را برای اسناد چند ستونی و جداول بهبود می‌بخشد</string>
-    <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">اجبار نگاشت راهنمای حالت افقی (آزمایشی)</string>
-    <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">نمایش فایل‌های منبع خام در کتابخانه (توسعه‌دهنده)</string>
-    <!-- Library / Collections (developer strings kept non-translatable for now) -->
-    <string name="unfiled_collection_title">بدون دسته‌بندی</string>
-    <string name="open_unfiled">باز کردن بدون دسته‌بندی</string>
-    <string name="a11y_unfiled_summary">بدون دسته‌بندی: %1$d مورد</string>
-
-    <!-- PDF Import -->
+    <string name="opt_layout_analysis">تحلیل چیدمان (ستون‌ها، جداول)
+    </string>    <!-- Options: Experimental directional mapping fallback -->    <!-- Developer / Debug options -->    <!-- Library / Collections (developer strings kept non-translatable for now) -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">نوع فایل ناشناخته است</string>
     <string name="error_unsupported_file_type">این نوع فایل پشتیبانی نمی‌شود</string>
     <string name="error_cannot_open_pdf">امکان باز کردن فایل PDF وجود ندارد</string>
@@ -420,27 +360,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">انتخاب زبان‌های OCR</string>
-    <string name="ocr_max_languages_hint">حداکثر می‌توانید ۲ زبان انتخاب کنید</string>
     <string name="ocr_max_languages_warning">حداکثر ۲ زبان مجاز است</string>
     <string name="ocr_no_language_selected">لطفاً حداقل یک زبان انتخاب کنید</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">تغییرات حذف شوند؟</string>
     <string name="msg_discard_changes">تغییرات ذخیره‌نشده‌ای داری. آیا می‌خواهی آن‌ها را حذف کنی؟</string>
     <string name="btn_discard">حذف</string>
 
     <string name="btn_reocr">اجرای مجدد OCR</string>
-    <string name="reocr_confirm_title">اجرای مجدد OCR؟</string>
-    <string name="reocr_confirm_message">آیا می‌خواهی OCR را برای این واژه با زبان «%1$s» دوباره اجرا کنی؟</string>
     <string name="reocr_processing">در حال اجرای مجدد OCR…</string>
     <string name="reocr_success">واژه به‌روزرسانی شد: %1$s</string>
     <string name="reocr_failed">اجرای مجدد OCR ناموفق بود</string>
     <string name="reocr_no_language">لطفاً ابتدا یک زبان انتخاب کن</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">بزرگ‌نمایی</string>
-    <string name="zoom_out">کوچک‌نمایی</string>
     <string name="zoom_100">۱۰۰٪</string>
     <string name="zoom_200">۲۰۰٪</string>
     <string name="zoom_300">۳۰۰٪</string>
@@ -460,4 +393,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>

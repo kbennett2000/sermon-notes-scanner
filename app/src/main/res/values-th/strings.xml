@@ -16,7 +16,6 @@
     <string name="btn_scan">สแกน</string>
     <string name="btn_crop">ครอบตัด</string>
     <string name="btn_process">ประมวลผล</string>
-    <string name="btn_export">ส่งออก</string>
     <string name="btn_share">แชร์</string>
     <string name="next">ถัดไป</string>
     <string name="back">ย้อนกลับ</string>
@@ -24,26 +23,16 @@
     <!-- Messages -->
     <string name="msg_camera_permission_required">ต้องการสิทธิ์กล้องเพื่อสแกนเอกสาร</string>
     <string name="confirm">ยืนยัน</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">ตรวจสอบการสแกนของคุณ แตะ “ถัดไป”
-        เพื่อดำเนินการต่อ หรือ “ย้อนกลับ” เพื่อลองใหม่
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">กล้องพร้อมแล้ว แตะปุ่มเพื่อสแกนเอกสาร</string>
     <string name="captured_image">รูปที่ถ่าย</string>
-    <string name="retake">ถ่ายใหม่</string>
     <string name="image_to_crop">รูปภาพสำหรับครอบตัด</string>
     <string name="cropped_image">รูปที่ครอบตัดแล้ว</string>
-    <string name="recrop">ครอบตัดใหม่</string>
     <string name="document_preview">ตัวอย่างเอกสาร</string>
     <string name="include_ocr_text">รวมข้อความ OCR</string>
-    <string name="language">ภาษา:</string>
     <string name="ocr_results_will_appear_here">ผลลัพธ์ OCR จะแสดงที่นี่</string>
     <string name="ocr_no_text_detected">ไม่พบข้อความ</string>
-    <string name="no_image_loaded_capture_an_image_first">ยังไม่มีรูปภาพ โหลดรูปภาพก่อน</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">
         ปรับมุมสี่เหลี่ยมคางหมูเพื่อเลือกพื้นที่ที่ต้องการครอบตัด แล้วแตะปุ่มครอบตัด
-    </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">ตรวจสอบรูปที่ครอบตัด แตะ
-        “ถัดไป” เพื่อดำเนินการต่อ หรือ “ย้อนกลับ” เพื่อลองใหม่
     </string>
     <string name="no_document_ready_process_ocr_first">ยังไม่มีเอกสารพร้อม ประมวลผล OCR ก่อน</string>
     <string name="document_ready_for_export">เอกสารพร้อมสำหรับการส่งออก</string>
@@ -81,7 +70,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">แปลงเป็นระดับเทา</string>
-    <string name="convert_to_blackwhite_pdf">แปลงเป็นขาวดำ</string>
     <string name="export_as_jpeg">ส่งออกเป็น JPEG</string>
     <string name="export_as_pdf">ส่งออกเป็น PDF (ค่าเริ่มต้น)</string>
 
@@ -95,7 +83,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">EV %1$s</string>
     <string name="exposure_compensation_cd">แถบเลื่อนชดเชยแสง</string>
-    <string name="exposure_reset_cd">รีเซ็ตการชดเชยแสงเป็นศูนย์</string>
     <string name="exposure_compensation_option">การชดเชยแสง</string>
 
     <!-- JPEG mode labels -->
@@ -114,10 +101,7 @@
     <string name="preview_corner_detection">แสดงตัวอย่างการตรวจจับมุม</string>
     <string name="btn_pick_image">โหลด</string>
     <string name="pick_image_cd">โหลดรูปที่มีอยู่</string>
-    <string name="error_selected_file_is_not_an_image">ไฟล์ที่เลือกไม่ใช่รูปภาพ</string>
-
     <!-- Multipage Export (v1 increment) -->
-    <string name="pages_header">หน้า (%1$d)</string>
     <string name="add_another_page">เพิ่มหน้า</string>
 
     <string name="clear_all_pages">ล้างทั้งหมด</string>
@@ -152,11 +136,7 @@
 
     <string name="added_pages_from_registry">เพิ่ม %1$d หน้า จาก registry</string>
 
-    <!-- Add page options dialog -->
-    <string name="add_page_option_choose_completed">เลือกจากการสแกนที่เสร็จแล้ว</string>
-    <string name="add_page_option_capture_new">ถ่ายหน้าใหม่</string>
-
-    <!-- Picker states -->
+    <!-- Add page options dialog -->    <!-- Picker states -->
     <string name="missing_file">ไฟล์หายไป</string>
 
     <!-- Inline OCR cues -->
@@ -184,7 +164,6 @@
 
     <string name="btn_review">ตรวจทาน</string>
     <string name="edit_word_title">แก้ไขคำ</string>
-    <string name="review_summary_format">คำ: %1$d • ความมั่นใจต่ำ: %2$d</string>
     <string name="cm_edit">แก้ไข…</string>
     <string name="cm_merge_next">รวมกับคำถัดไป</string>
     <string name="cm_split">แยก</string>
@@ -195,8 +174,6 @@
     <string name="case_lower">ตัวพิมพ์เล็ก</string>
     <string name="case_title">ตัวอักษรแรกเป็นตัวพิมพ์ใหญ่</string>
     <string name="dialog_language_title">ตั้งรหัสภาษา</string>
-    <string name="dialog_language_hint">เช่น eng, deu, fra, ita, spa…</string>
-
 
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">หมุนหน้า 90° ทวนเข็มนาฬิกา</string>
@@ -265,20 +242,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">ปิด</string>
-    <string name="cd_fab_edit">แก้ไขข้อความ</string>
-    <string name="cd_zoom_chip_format">ซูม %1$d%% แตะเพื่อรีเซ็ตเป็น 100%%</string>
-    <string name="cd_zoom_chip_tap_reset">การควบคุมการซูม แตะเพื่อรีเซ็ตเป็น 100%</string>
     <string name="cd_zoom_chip_open_menu">เปิดเมนูการซูม</string>
-    <string name="cd_minimap">ภาพรวมของเอกสาร แตะเพื่อไปยังตำแหน่ง</string>
-    <string name="cd_undo">ยกเลิกการเปลี่ยนแปลงล่าสุด</string>
-    <string name="cd_redo">ทำซ้ำการเปลี่ยนแปลงล่าสุด</string>
-    <string name="cd_export">ส่งออก</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">ค้นหา</string>
-    <string name="cd_action_export">ส่งออกเอกสาร</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">ภาพรวมของเอกสาร แตะเพื่อไปยังตำแหน่ง
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">กรุณากรอกค่า</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -294,23 +260,14 @@
     <string name="ok">ตกลง</string>
     <string name="no_scans_yet">ยังไม่มีการสแกน</string>
     <string name="rename_collection_title">เปลี่ยนชื่อคอลเลกชัน</string>
-    <string name="new_name">ชื่อใหม่</string>
-    <string name="scan_saved">บันทึกการสแกนแล้ว</string>
     <string name="action_add_to_collection">เพิ่มไปยังคอลเลกชัน…</string>
     <string name="place_in_collection_title">เพิ่มไปยังคอลเลกชัน</string>
     <string name="create_new_collection">สร้างคอลเลกชันใหม่…</string>
     <string name="scan_added_to_collection">เพิ่มการสแกนไปยัง “%1$s” แล้ว</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">การทำงานของไลบรารี</string>
-    <string name="library_actions_title">ไลบรารี</string>
-    <string name="open_library">เปิดไลบรารี</string>
-    <string name="add_current_scan_to_library">เพิ่มการสแกนปัจจุบันไปยังไลบรารี</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">การทำงานของไลบรารี</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">อยู่ใน: %1$s</string>
-    <string name="in_collections_count">อยู่ใน %1$d คอลเลกชัน</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">ไฟล์จะถูกลบออกจากอุปกรณ์ การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
 
@@ -377,15 +334,8 @@
     <string name="a11y_low_light_toggle_flash">ตรวจพบแสงน้อย แตะสองครั้งที่ “แฟลช” เพื่อเปิดใช้งาน</string>
     <string name="a11y_capture_failed">ถ่ายภาพไม่สำเร็จ</string>
     <string name="a11y_volume_shutter_hint">เคล็ดลับ: ในโหมดการเข้าถึง คุณสามารถถ่ายภาพด้วยปุ่มเพิ่ม/ลดเสียงได้</string>
-    <string name="a11y_capture_success">ถ่ายภาพเรียบร้อยแล้ว</string>
-    <string name="a11y_verbose_logs_label">บันทึกการเข้าถึงแบบละเอียด</string>
-    <string name="a11y_option_auto_capture">ถ่ายภาพอัตโนมัติเมื่อการตรวจจับเสถียร (โหมดการเข้าถึง)</string>
-    <string name="a11y_option_auto_torch">เปิดแฟลชอัตโนมัติเมื่อแสงน้อย (โหมดการเข้าถึง)</string>
-    <string name="a11y_capturing_now">กำลังถ่ายภาพ…</string>
-    <string name="a11y_score_now">คุณภาพการตรวจจับ: %1$d%%</string>
-    <string name="a11y_scan_with_score">สแกน คุณภาพการตรวจจับ: %1$d%%</string>
-
-    <!-- การช่วยการเข้าถึง: คำอธิบายรายการและการประกาศ -->
+    <string name="a11y_capture_success">ถ่ายภาพเรียบร้อยแล้ว
+    </string>    <!-- การช่วยการเข้าถึง: คำอธิบายรายการและการประกาศ -->
     <string name="page_n_of_m">หน้า %1$d จาก %2$d</string>
     <string name="pages_count_announcement">จำนวนหน้า: %1$d</string>
     <string name="export_started">เริ่มการส่งออกแล้ว</string>
@@ -396,20 +346,10 @@
     <string name="opt_ocr_auto_rotate_apply_export">หมุน OCR อัตโนมัติ (ใช้กับการส่งออกด้วย)</string>
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">การประมวลผล OCR ภายหลัง (แก้ไขข้อผิดพลาดทั่วไป)</string>
-    <string name="opt_layout_analysis">การวิเคราะห์เค้าโครง (คอลัมน์, ตาราง)</string>
-    <string name="opt_layout_analysis_hint">ปรับปรุง OCR สำหรับเอกสารหลายคอลัมน์และตาราง</string>
-    <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">บังคับการจับคู่คำแนะนำสำหรับโหมดแนวนอน (ทดลอง)</string>
-
+    <string name="opt_layout_analysis">การวิเคราะห์เค้าโครง (คอลัมน์, ตาราง)
+    </string>    <!-- Options: Experimental directional mapping fallback -->
     <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">แสดงไฟล์ต้นฉบับดิบในไลบรารี (นักพัฒนา)</string>
-
-    <!-- Library / Collections -->
-    <string name="unfiled_collection_title">ยังไม่จัดหมวดหมู่</string>
-    <string name="open_unfiled">เปิดรายการที่ยังไม่จัดหมวดหมู่</string>
-    <string name="a11y_unfiled_summary">ยังไม่จัดหมวดหมู่: %1$d รายการ</string>
-
-    <!-- PDF Import -->
+    <!-- Library / Collections -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">ไม่ทราบประเภทไฟล์</string>
     <string name="error_unsupported_file_type">ไม่รองรับไฟล์ประเภทนี้</string>
     <string name="error_cannot_open_pdf">ไม่สามารถเปิดไฟล์ PDF ได้</string>
@@ -421,27 +361,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">เลือกภาษา OCR</string>
-    <string name="ocr_max_languages_hint">สามารถเลือกได้สูงสุด 2 ภาษา</string>
     <string name="ocr_max_languages_warning">อนุญาตให้เลือกได้สูงสุด 2 ภาษา</string>
     <string name="ocr_no_language_selected">โปรดเลือกอย่างน้อยหนึ่งภาษา</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">ยกเลิกการเปลี่ยนแปลง?</string>
     <string name="msg_discard_changes">คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการยกเลิกหรือไม่?</string>
     <string name="btn_discard">ยกเลิก</string>
 
     <string name="btn_reocr">รัน OCR อีกครั้ง</string>
-    <string name="reocr_confirm_title">รัน OCR อีกครั้ง?</string>
-    <string name="reocr_confirm_message">ต้องการรัน OCR สำหรับคำนี้อีกครั้งด้วยภาษา “%1$s” หรือไม่?</string>
     <string name="reocr_processing">กำลังรัน OCR อีกครั้ง…</string>
     <string name="reocr_success">อัปเดตคำแล้ว: %1$s</string>
     <string name="reocr_failed">การรัน OCR ล้มเหลว</string>
     <string name="reocr_no_language">โปรดเลือกภาษาก่อน</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">ซูมเข้า</string>
-    <string name="zoom_out">ซูมออก</string>
     <string name="zoom_100">100%</string>
     <string name="zoom_200">200%</string>
     <string name="zoom_300">300%</string>
@@ -460,4 +393,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>

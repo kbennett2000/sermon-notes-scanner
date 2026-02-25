@@ -16,7 +16,6 @@
     <string name="btn_scan">Scannen</string>
     <string name="btn_crop">Bijsnijden</string>
     <string name="btn_process">Verwerken</string>
-    <string name="btn_export">Exporteren</string>
     <string name="btn_share">Delen</string>
     <string name="next">Verder</string>
     <string name="back">Terug</string>
@@ -24,32 +23,22 @@
     <!-- Messages -->
     <string name="msg_camera_permission_required">Cameratoestemming is vereist om documenten te scannen</string>
     <string name="confirm">Bevestigen</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Controleer je scan. Tik op Verder om
-        door te gaan of op Terug om opnieuw te proberen.
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">Camera klaar. Tik op de knop om een document te
         scannen.
     </string>
     <string name="captured_image">Vastgelegde afbeelding</string>
-    <string name="retake">Opnieuw nemen</string>
     <string name="image_to_crop">Afbeelding om bij te snijden</string>
     <string name="cropped_image">Bijsneden afbeelding</string>
-    <string name="recrop">Opnieuw bijsnijden</string>
     <string name="document_preview">Documentvoorbeeld</string>
     <string name="include_ocr_text">OCR‑tekst opnemen</string>
-    <string name="language">Taal:</string>
     <string name="ocr_results_will_appear_here">OCR‑resultaten verschijnen hier</string>
     <string name="ocr_no_text_detected">Geen tekst gedetecteerd</string>
-    <string name="no_image_loaded_capture_an_image_first">Geen afbeelding geladen. Maak eerst een foto.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Pas de hoeken van
         het trapezium aan om het gebied te selecteren en tik daarna op Bijsnijden.
     </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Controleer je bijgesneden
-        afbeelding. Tik op Verder om door te gaan of op Terug om opnieuw te proberen.
-    </string>
     <string name="no_document_ready_process_ocr_first">Geen document gereed. Voer eerst OCR uit.</string>
     <string name="document_ready_for_export">Document klaar om te exporteren</string>
-    <string name="processing_image">Afbeelding verwerken...</string>
+    <string name="processing_image">Afbeelding verwerken…</string>
     <string name="no_image_processed_crop_an_image_first">Geen afbeelding verwerkt. Snijd eerst een afbeelding bij.
     </string>
     <string name="ocr_processing_complete_tap_the_button_to_proceed_to_export">OCR voltooid. Tik op de knop om door te
@@ -85,7 +74,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">Omzetten naar grijstinten</string>
-    <string name="convert_to_blackwhite_pdf">Omzetten naar Z/W</string>
     <string name="export_as_jpeg">Exporteren als JPEG</string>
     <string name="export_as_pdf">Exporteren als PDF (standaard)</string>
 
@@ -99,7 +87,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">EV %1$s</string>
     <string name="exposure_compensation_cd">Schuifregelaar belichtingscompensatie</string>
-    <string name="exposure_reset_cd">Belichting terugzetten naar nul</string>
     <string name="exposure_compensation_option">Belichtingscompensatie</string>
 
     <!-- JPEG mode labels -->
@@ -118,10 +105,7 @@
     <string name="preview_corner_detection">Voorbeeld van hoekdetectie</string>
     <string name="btn_pick_image">Laden</string>
     <string name="pick_image_cd">Bestaande afbeelding laden</string>
-    <string name="error_selected_file_is_not_an_image">Het geselecteerde bestand is geen afbeelding</string>
-
     <!-- Multipage Export (v1 increment) -->
-    <string name="pages_header">Pagina\'s (%1$d)</string>
     <string name="add_another_page">Pagina toevoegen</string>
     <string name="clear_all_pages">Alles wissen</string>
     <string name="remove_this_page">Deze pagina verwijderen</string>
@@ -157,11 +141,7 @@
 
     <string name="added_pages_from_registry">%1$d pagina(\'s) toegevoegd uit register</string>
 
-    <!-- Add page options dialog -->
-    <string name="add_page_option_choose_completed">Kiezen uit voltooide scans</string>
-    <string name="add_page_option_capture_new">Nieuwe pagina vastleggen</string>
-
-    <!-- Picker states -->
+    <!-- Add page options dialog -->    <!-- Picker states -->
     <string name="missing_file">Bestand ontbreekt</string>
 
     <!-- Inline OCR cues -->
@@ -188,7 +168,6 @@
     <string name="btn_new">Nieuwe scan</string>
     <string name="btn_review">Beoordelen</string>
     <string name="edit_word_title">Woord bewerken</string>
-    <string name="review_summary_format">Woorden: %1$d • Lage betrouwbaarheid: %2$d</string>
     <string name="cm_edit">Bewerken…</string>
     <string name="cm_merge_next">Samenvoegen met volgende</string>
     <string name="cm_split">Splitsen</string>
@@ -199,8 +178,6 @@
     <string name="case_lower">kleine letters</string>
     <string name="case_title">Hoofdletters aan het begin</string>
     <string name="dialog_language_title">Taalcode instellen</string>
-    <string name="dialog_language_hint">bijv. eng, deu, fra, ita, spa…</string>
-
     <!-- Rotation (post-crop) -->
     <string name="rotate_left_cd">Pagina 90 graden tegen de klok in draaien</string>
     <string name="rotate_right_cd">Pagina 90 graden met de klok mee draaien</string>
@@ -268,20 +245,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">Sluiten</string>
-    <string name="cd_fab_edit">Tekst bewerken</string>
-    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tik om terug te zetten naar 100%%.</string>
-    <string name="cd_zoom_chip_tap_reset">Zoomregeling. Tik om terug te zetten naar 100%.</string>
     <string name="cd_zoom_chip_open_menu">Zoommenu openen</string>
-    <string name="cd_minimap">Documentoverzicht, tik om te springen</string>
-    <string name="cd_undo">Laatste wijziging ongedaan maken</string>
-    <string name="cd_redo">Laatste wijziging opnieuw uitvoeren</string>
-    <string name="cd_export">Exporteren</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">Zoeken</string>
-    <string name="cd_action_export">Document exporteren</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">Documentoverzicht, tik om te springen
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">Voer een waarde in</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -297,23 +263,14 @@
     <string name="ok">OK</string>
     <string name="no_scans_yet">Nog geen scans</string>
     <string name="rename_collection_title">Verzameling hernoemen</string>
-    <string name="new_name">Nieuwe naam</string>
-    <string name="scan_saved">Scan opgeslagen</string>
     <string name="action_add_to_collection">Toevoegen aan verzameling…</string>
     <string name="place_in_collection_title">Toevoegen aan verzameling</string>
     <string name="create_new_collection">Nieuwe verzameling aanmaken…</string>
     <string name="scan_added_to_collection">Scan toegevoegd aan “%1$s”</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Bibliotheekacties</string>
-    <string name="library_actions_title">Bibliotheek</string>
-    <string name="open_library">Bibliotheek openen</string>
-    <string name="add_current_scan_to_library">Huidige scan toevoegen aan bibliotheek</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">Bibliotheekacties</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">In: %1$s</string>
-    <string name="in_collections_count">In %1$d verzamelingen</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">Het bestand wordt van het apparaat verwijderd. Deze actie kan niet
         ongedaan worden gemaakt.
@@ -385,17 +342,8 @@
     <string name="a11y_volume_shutter_hint">Tip: In de toegankelijkheidsmodus kunt u ook met de volumetoetsen
         vastleggen.
     </string>
-    <string name="a11y_capture_success">Afbeelding vastgelegd.</string>
-    <string name="a11y_verbose_logs_label">Uitgebreide toegankelijkheidslogboeken</string>
-    <string name="a11y_option_auto_capture">Automatisch vastleggen bij stabiele detectie (Toegankelijkheidsmodus)
-    </string>
-    <string name="a11y_option_auto_torch">Flits automatisch inschakelen bij weinig licht (Toegankelijkheidsmodus)
-    </string>
-    <string name="a11y_capturing_now">Bezig met vastleggen…</string>
-    <string name="a11y_score_now">Detectiekwaliteit: %1$d%%.</string>
-    <string name="a11y_scan_with_score">Scannen. Detectiekwaliteit: %1$d%%.</string>
-
-    <!-- Toegankelijkheid: beschrijving van lijstitems en aankondigingen -->
+    <string name="a11y_capture_success">Afbeelding vastgelegd.
+    </string>    <!-- Toegankelijkheid: beschrijving van lijstitems en aankondigingen -->
     <string name="page_n_of_m">Pagina %1$d van %2$d</string>
     <string name="pages_count_announcement">Pagina’s: %1$d</string>
     <string name="export_started">Export gestart</string>
@@ -406,20 +354,9 @@
     <string name="opt_ocr_auto_rotate_apply_export">OCR automatisch roteren (ook toepassen bij exporteren)</string>
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">OCR-nabewerking (veelvoorkomende fouten corrigeren)</string>
-    <string name="opt_layout_analysis">Lay-outanalyse (kolommen, tabellen)</string>
-    <string name="opt_layout_analysis_hint">Verbetert OCR voor documenten met meerdere kolommen en tabellen</string>
-    <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">Forceer toewijzing van hints voor liggend formaat (experimenteel)
-    </string>
-
-    <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">Ruwe bronbestanden in de Bibliotheek tonen (ontwikkelaar)</string>
-    <!-- Library / Collections -->
-    <string name="unfiled_collection_title">Niet ingedeeld</string>
-    <string name="open_unfiled">Open Niet ingedeeld</string>
-    <string name="a11y_unfiled_summary">Niet ingedeeld: %1$d item(s)</string>
-
-    <!-- PDF Import -->
+    <string name="opt_layout_analysis">Lay-outanalyse (kolommen, tabellen)
+    </string>    <!-- Options: Experimental directional mapping fallback -->
+    <!-- Developer / Debug options -->    <!-- Library / Collections -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">Onbekend bestandstype</string>
     <string name="error_unsupported_file_type">Dit bestandstype wordt niet ondersteund</string>
     <string name="error_cannot_open_pdf">Kan PDF niet openen</string>
@@ -431,27 +368,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">OCR-talen selecteren</string>
-    <string name="ocr_max_languages_hint">U kunt maximaal 2 talen selecteren</string>
     <string name="ocr_max_languages_warning">Maximaal 2 talen toegestaan</string>
     <string name="ocr_no_language_selected">Selecteer ten minste één taal</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">Wijzigingen verwerpen?</string>
     <string name="msg_discard_changes">Je hebt niet-opgeslagen wijzigingen. Wil je deze verwerpen?</string>
     <string name="btn_discard">Verwerpen</string>
 
     <string name="btn_reocr">OCR opnieuw uitvoeren</string>
-    <string name="reocr_confirm_title">OCR opnieuw uitvoeren?</string>
-    <string name="reocr_confirm_message">Wil je OCR opnieuw uitvoeren voor dit woord met de taal “%1$s”?</string>
     <string name="reocr_processing">OCR opnieuw uitvoeren…</string>
     <string name="reocr_success">Woord bijgewerkt: %1$s</string>
     <string name="reocr_failed">OCR opnieuw uitvoeren mislukt</string>
     <string name="reocr_no_language">Selecteer eerst een taal</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">Inzoomen</string>
-    <string name="zoom_out">Uitzoomen</string>
     <string name="zoom_100">100 %</string>
     <string name="zoom_200">200 %</string>
     <string name="zoom_300">300 %</string>
@@ -471,4 +401,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>

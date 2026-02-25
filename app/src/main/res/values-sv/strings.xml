@@ -16,7 +16,6 @@
     <string name="btn_scan">Skanna</string>
     <string name="btn_crop">Beskär</string>
     <string name="btn_process">Bearbeta</string>
-    <string name="btn_export">Exportera</string>
     <string name="btn_share">Dela</string>
     <string name="next">Nästa</string>
     <string name="back">Tillbaka</string>
@@ -24,28 +23,18 @@
     <!-- Messages -->
     <string name="msg_camera_permission_required">Kamerabehörighet krävs för att skanna dokument</string>
     <string name="confirm">Bekräfta</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Granska din skanning. Tryck på Nästa
-        för att fortsätta eller Tillbaka för att försöka igen.
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">Kameran är klar. Tryck på knappen för att skanna ett
         dokument.
     </string>
     <string name="captured_image">Fångad bild</string>
-    <string name="retake">Ta om</string>
     <string name="image_to_crop">Bild att beskära</string>
     <string name="cropped_image">Beskuren bild</string>
-    <string name="recrop">Beskär igen</string>
     <string name="document_preview">Förhandsgranskning av dokument</string>
     <string name="include_ocr_text">Inkludera OCR-text</string>
-    <string name="language">Språk:</string>
     <string name="ocr_results_will_appear_here">OCR-resultaten visas här</string>
     <string name="ocr_no_text_detected">Ingen text upptäcktes</string>
-    <string name="no_image_loaded_capture_an_image_first">Ingen bild inläst. Ta först en bild.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Justera
         trapetskanten för att välja området att beskära och tryck sedan på Beskär.
-    </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Granska din beskurna bild.
-        Tryck på Nästa för att fortsätta eller Tillbaka för att försöka igen.
     </string>
     <string name="no_document_ready_process_ocr_first">Inget dokument redo. Kör OCR först.</string>
     <string name="document_ready_for_export">Dokument redo för export</string>
@@ -83,7 +72,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">Konvertera till gråskala</string>
-    <string name="convert_to_blackwhite_pdf">Konvertera till svartvitt</string>
     <string name="export_as_jpeg">Exportera som JPEG</string>
     <string name="export_as_pdf">Exportera som PDF (standard)</string>
 
@@ -97,7 +85,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">EV %1$s</string>
     <string name="exposure_compensation_cd">Reglage för exponeringskompensation</string>
-    <string name="exposure_reset_cd">Återställ exponering till noll</string>
     <string name="exposure_compensation_option">Exponeringskompensation</string>
 
     <!-- JPEG mode labels -->
@@ -116,10 +103,7 @@
     <string name="preview_corner_detection">Förhandsvisning av hörndetektering</string>
     <string name="btn_pick_image">Ladda</string>
     <string name="pick_image_cd">Ladda befintlig bild</string>
-    <string name="error_selected_file_is_not_an_image">Den valda filen är inte en bild</string>
-
     <!-- Multipage Export -->
-    <string name="pages_header">Sidor (%1$d)</string>
     <string name="add_another_page">Pridať stránku</string>
 
     <string name="clear_all_pages">Rensa alla</string>
@@ -155,11 +139,7 @@
 
     <string name="added_pages_from_registry">Lade till %1$d sida/or från registret</string>
 
-    <!-- Add page options -->
-    <string name="add_page_option_choose_completed">Välj från slutförda skanningar</string>
-    <string name="add_page_option_capture_new">Fånga ny sida</string>
-
-    <!-- Picker states -->
+    <!-- Add page options -->    <!-- Picker states -->
     <string name="missing_file">Saknad fil</string>
 
     <!-- Inline OCR -->
@@ -187,7 +167,6 @@
 
     <string name="btn_review">Granska</string>
     <string name="edit_word_title">Redigera ord</string>
-    <string name="review_summary_format">Ord: %1$d • Låg tillförlitlighet: %2$d</string>
     <string name="cm_edit">Redigera…</string>
     <string name="cm_merge_next">Slå ihop med nästa</string>
     <string name="cm_split">Dela</string>
@@ -198,8 +177,6 @@
     <string name="case_lower">gemener</string>
     <string name="case_title">Inledande versaler</string>
     <string name="dialog_language_title">Ange språkkod</string>
-    <string name="dialog_language_hint">t.ex. eng, deu, fra, ita, spa…</string>
-
     <!-- Rotation -->
     <string name="rotate_left_cd">Rotera sidan 90 grader moturs</string>
     <string name="rotate_right_cd">Rotera sidan 90 grader medurs</string>
@@ -266,20 +243,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">Stäng</string>
-    <string name="cd_fab_edit">Redigera text</string>
-    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tryck för att återställa till 100%%.</string>
-    <string name="cd_zoom_chip_tap_reset">Zoomkontroll. Tryck för att återställa till 100%.</string>
     <string name="cd_zoom_chip_open_menu">Öppna zoommeny</string>
-    <string name="cd_minimap">Dokumentöversikt, tryck för att hoppa</string>
-    <string name="cd_undo">Ångra senaste ändring</string>
-    <string name="cd_redo">Gör om senaste ändring</string>
-    <string name="cd_export">Exportera</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">Sök</string>
-    <string name="cd_action_export">Exportera dokument</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">Dokumentöversikt, tryck för att hoppa
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">Ange ett värde</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -295,23 +261,14 @@
     <string name="ok">OK</string>
     <string name="no_scans_yet">Inga skanningar ännu</string>
     <string name="rename_collection_title">Byt namn på samling</string>
-    <string name="new_name">Nytt namn</string>
-    <string name="scan_saved">Skanning sparad</string>
     <string name="action_add_to_collection">Lägg till i samling…</string>
     <string name="place_in_collection_title">Lägg till i samling</string>
     <string name="create_new_collection">Skapa ny samling…</string>
     <string name="scan_added_to_collection">Skanning tillagd i ”%1$s”</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Biblioteksåtgärder</string>
-    <string name="library_actions_title">Bibliotek</string>
-    <string name="open_library">Öppna bibliotek</string>
-    <string name="add_current_scan_to_library">Lägg till aktuell skanning i biblioteket</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">Biblioteksåtgärder</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">I: %1$s</string>
-    <string name="in_collections_count">I %1$d samlingar</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">Filen kommer att tas bort från enheten. Denna åtgärd kan inte ångras.
     </string>
@@ -379,15 +336,8 @@
     <string name="a11y_low_light_toggle_flash">Svagt ljus upptäckt. Dubbeltryck på Blixt för att aktivera.</string>
     <string name="a11y_capture_failed">Fångning misslyckades.</string>
     <string name="a11y_volume_shutter_hint">Tips: I tillgänglighetsläget kan du ta bilden med volymknapparna.</string>
-    <string name="a11y_capture_success">Bild tagen.</string>
-    <string name="a11y_verbose_logs_label">Detaljerade tillgänglighetsloggar</string>
-    <string name="a11y_option_auto_capture">Automatisk fångning vid stabil detektering (Tillgänglighetsläge)</string>
-    <string name="a11y_option_auto_torch">Aktivera blixt automatiskt vid svagt ljus (Tillgänglighetsläge)</string>
-    <string name="a11y_capturing_now">Fångar…</string>
-    <string name="a11y_score_now">Detekteringskvalitet: %1$d%%.</string>
-    <string name="a11y_scan_with_score">Skanna. Detekteringskvalitet: %1$d%%.</string>
-
-    <!-- Tillgänglighet: beskrivning av listelement och meddelanden -->
+    <string name="a11y_capture_success">Bild tagen.
+    </string>    <!-- Tillgänglighet: beskrivning av listelement och meddelanden -->
     <string name="page_n_of_m">Sida %1$d av %2$d</string>
     <string name="pages_count_announcement">Sidor: %1$d</string>
     <string name="export_started">Export startad</string>
@@ -399,20 +349,9 @@
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">OCR-efterbehandling (korrigera vanliga fel)</string>
     <string name="opt_layout_analysis">Layoutanalys (kolumner, tabeller)</string>
-    <string name="opt_layout_analysis_hint">Förbättrar OCR för dokument med flera kolumner och tabeller</string>
-
     <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">Tvinga hint-mappning för liggande läge (experimentellt)</string>
-
     <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">Visa råa källfiler i biblioteket (utvecklare)</string>
-
-    <!-- Library / Collections -->
-    <string name="unfiled_collection_title">Osorterat</string>
-    <string name="open_unfiled">Öppna Osorterat</string>
-    <string name="a11y_unfiled_summary">Osorterat: %1$d objekt</string>
-
-    <!-- PDF Import -->
+    <!-- Library / Collections -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">Okänd filtyp</string>
     <string name="error_unsupported_file_type">Den här filtypen stöds inte</string>
     <string name="error_cannot_open_pdf">Kunde inte öppna PDF</string>
@@ -424,27 +363,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">Välj OCR-språk</string>
-    <string name="ocr_max_languages_hint">Du kan välja upp till 2 språk</string>
     <string name="ocr_max_languages_warning">Högst 2 språk är tillåtna</string>
     <string name="ocr_no_language_selected">Välj minst ett språk</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">Kasta ändringar?</string>
     <string name="msg_discard_changes">Du har osparade ändringar. Vill du kasta dem?</string>
     <string name="btn_discard">Kasta</string>
 
     <string name="btn_reocr">Kör OCR igen</string>
-    <string name="reocr_confirm_title">Köra OCR igen?</string>
-    <string name="reocr_confirm_message">Vill du köra OCR igen för detta ord med språket ”%1$s”?</string>
     <string name="reocr_processing">Kör OCR igen…</string>
     <string name="reocr_success">Ordet uppdaterades: %1$s</string>
     <string name="reocr_failed">OCR misslyckades</string>
     <string name="reocr_no_language">Välj först ett språk</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">Zooma in</string>
-    <string name="zoom_out">Zooma ut</string>
     <string name="zoom_100">100 %</string>
     <string name="zoom_200">200 %</string>
     <string name="zoom_300">300 %</string>
@@ -463,4 +395,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>

@@ -16,7 +16,6 @@
     <string name="btn_scan">Scansiona</string>
     <string name="btn_crop">Ritaglia</string>
     <string name="btn_process">Elabora</string>
-    <string name="btn_export">Esporta</string>
     <string name="btn_share">Condividi</string>
     <string name="next">Avanti</string>
     <string name="back">Indietro</string>
@@ -26,29 +25,18 @@
         documenti
     </string>
     <string name="confirm">Conferma</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Controlla la scansione. Tocca Avanti
-        per procedere o Indietro per riprovare.
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">Fotocamera pronta. Tocca il pulsante per scansionare
         un documento.
     </string>
     <string name="captured_image">Immagine acquisita</string>
-    <string name="retake">Rifai</string>
     <string name="image_to_crop">Immagine da ritagliare</string>
     <string name="cropped_image">Immagine ritagliata</string>
-    <string name="recrop">Ritaglia di nuovo</string>
     <string name="document_preview">Anteprima documento</string>
     <string name="include_ocr_text">Includi testo OCR</string>
-    <string name="language">Lingua:</string>
     <string name="ocr_results_will_appear_here">I risultati OCR verranno visualizzati qui</string>
     <string name="ocr_no_text_detected">Nessun testo rilevato</string>
-    <string name="no_image_loaded_capture_an_image_first">Nessuna immagine caricata. Acquisisci prima un’immagine.
-    </string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Regola gli angoli
         del trapezio per selezionare l’area da ritagliare, quindi tocca il pulsante Ritaglia.
-    </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Controlla l’immagine
-        ritagliata. Tocca Avanti per procedere o Indietro per riprovare.
     </string>
     <string name="no_document_ready_process_ocr_first">Nessun documento pronto. Esegui prima l’OCR.</string>
     <string name="document_ready_for_export">Documento pronto per l’esportazione</string>
@@ -88,7 +76,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">Converti in scala di grigi</string>
-    <string name="convert_to_blackwhite_pdf">Converti in B/N</string>
     <string name="export_as_jpeg">Esporta come JPEG</string>
     <string name="export_as_pdf">Esporta come PDF (predefinito)</string>
 
@@ -102,7 +89,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">EV %1$s</string>
     <string name="exposure_compensation_cd">Cursore compensazione esposizione</string>
-    <string name="exposure_reset_cd">Reimposta esposizione a zero</string>
     <string name="exposure_compensation_option">Compensazione esposizione</string>
 
     <!-- JPEG mode labels -->
@@ -121,10 +107,7 @@
     <string name="preview_corner_detection">Anteprima del rilevamento degli angoli</string>
     <string name="btn_pick_image">Carica</string>
     <string name="pick_image_cd">Carica immagine esistente</string>
-    <string name="error_selected_file_is_not_an_image">Il file selezionato non è un\'immagine</string>
-
     <!-- Multipage Export (v1 increment) -->
-    <string name="pages_header">Pagine (%1$d)</string>
     <string name="add_another_page">Aggiungi pagina</string>
     <string name="clear_all_pages">Cancella tutto</string>
     <string name="remove_this_page">Rimuovi questa pagina</string>
@@ -160,11 +143,7 @@
 
     <string name="added_pages_from_registry">Aggiunte %1$d pagina/e dal registro</string>
 
-    <!-- Add page options dialog -->
-    <string name="add_page_option_choose_completed">Scegli dalle scansioni completate</string>
-    <string name="add_page_option_capture_new">Acquisisci nuova pagina</string>
-
-    <!-- Picker states -->
+    <!-- Add page options dialog -->    <!-- Picker states -->
     <string name="missing_file">File mancante</string>
 
     <!-- Inline OCR cues -->
@@ -190,7 +169,6 @@
     <string name="btn_new">Nuova scansione</string>
     <string name="btn_review">Verifica</string>
     <string name="edit_word_title">Modifica parola</string>
-    <string name="review_summary_format">Parole: %1$d • Bassa affidabilità: %2$d</string>
     <string name="cm_edit">Modifica…</string>
     <string name="cm_merge_next">Unisci con la successiva</string>
     <string name="cm_split">Dividi</string>
@@ -201,8 +179,6 @@
     <string name="case_lower">minuscolo</string>
     <string name="case_title">Iniziali maiuscole</string>
     <string name="dialog_language_title">Imposta codice lingua</string>
-    <string name="dialog_language_hint">es. eng, deu, fra, ita, spa…</string>
-
 
     <!-- Rotazione (post-crop) -->
     <string name="rotate_left_cd">Ruota la pagina di 90 gradi in senso antiorario</string>
@@ -271,20 +247,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">Chiudi</string>
-    <string name="cd_fab_edit">Modifica testo</string>
-    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tocca per reimpostare al 100%%.</string>
-    <string name="cd_zoom_chip_tap_reset">Controllo zoom. Tocca per reimpostare al 100%.</string>
     <string name="cd_zoom_chip_open_menu">Apri menu zoom</string>
-    <string name="cd_minimap">Anteprima documento, tocca per spostarti</string>
-    <string name="cd_undo">Annulla ultima modifica</string>
-    <string name="cd_redo">Ripeti ultima modifica</string>
-    <string name="cd_export">Esporta</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">Cerca</string>
-    <string name="cd_action_export">Esporta documento</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">Anteprima documento, tocca per spostarti
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">Inserisci un valore</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -300,23 +265,14 @@
     <string name="ok">OK</string>
     <string name="no_scans_yet">Nessuna scansione ancora</string>
     <string name="rename_collection_title">Rinomina raccolta</string>
-    <string name="new_name">Nuovo nome</string>
-    <string name="scan_saved">Scansione salvata</string>
     <string name="action_add_to_collection">Aggiungi alla raccolta…</string>
     <string name="place_in_collection_title">Aggiungi alla raccolta</string>
     <string name="create_new_collection">Crea nuova raccolta…</string>
     <string name="scan_added_to_collection">Scansione aggiunta a “%1$s”</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Azioni libreria</string>
-    <string name="library_actions_title">Libreria</string>
-    <string name="open_library">Apri libreria</string>
-    <string name="add_current_scan_to_library">Aggiungi la scansione corrente alla libreria</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">Azioni libreria</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">In: %1$s</string>
-    <string name="in_collections_count">In %1$d raccolte</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">Il file verrà eliminato dal dispositivo. Questa azione non può essere
         annullata.
@@ -390,17 +346,8 @@
     <string name="a11y_volume_shutter_hint">Suggerimento: in modalità accessibilità puoi catturare anche con i tasti del
         volume.
     </string>
-    <string name="a11y_capture_success">Immagine catturata.</string>
-    <string name="a11y_verbose_logs_label">Log dettagliati di accessibilità</string>
-    <string name="a11y_option_auto_capture">Cattura automatica con rilevamento stabile (Modalità accessibilità)</string>
-    <string name="a11y_option_auto_torch">Attiva automaticamente il flash in condizioni di scarsa luce (Modalità
-        accessibilità)
-    </string>
-    <string name="a11y_capturing_now">Cattura in corso…</string>
-    <string name="a11y_score_now">Qualità del rilevamento: %1$d%%.</string>
-    <string name="a11y_scan_with_score">Scansiona. Qualità del rilevamento: %1$d%%.</string>
-
-    <!-- Accessibilità: descrizione degli elementi della lista e annunci -->
+    <string name="a11y_capture_success">Immagine catturata.
+    </string>    <!-- Accessibilità: descrizione degli elementi della lista e annunci -->
     <string name="page_n_of_m">Pagina %1$d di %2$d</string>
     <string name="pages_count_announcement">Pagine: %1$d</string>
     <string name="export_started">Esportazione avviata</string>
@@ -412,20 +359,9 @@
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">Post-elaborazione OCR (correggi errori comuni)</string>
     <string name="opt_layout_analysis">Analisi del layout (colonne, tabelle)</string>
-    <string name="opt_layout_analysis_hint">Migliora l\'OCR per documenti a più colonne e tabelle</string>
-
     <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">Forza la mappatura degli avvisi in orizzontale (sperimentale)</string>
-
     <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">Mostra i file sorgente grezzi nella Libreria (sviluppatore)</string>
-
-    <!-- Library / Collections -->
-    <string name="unfiled_collection_title">Non classificato</string>
-    <string name="open_unfiled">Apri Non classificato</string>
-    <string name="a11y_unfiled_summary">Non classificato: %1$d elemento/i</string>
-
-    <!-- PDF Import -->
+    <!-- Library / Collections -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">Tipo di file sconosciuto</string>
     <string name="error_unsupported_file_type">Questo tipo di file non è supportato</string>
     <string name="error_cannot_open_pdf">Impossibile aprire il PDF</string>
@@ -437,27 +373,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">Seleziona le lingue OCR</string>
-    <string name="ocr_max_languages_hint">Puoi selezionare fino a 2 lingue</string>
     <string name="ocr_max_languages_warning">Sono consentite al massimo 2 lingue</string>
     <string name="ocr_no_language_selected">Seleziona almeno una lingua</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">Scartare le modifiche?</string>
     <string name="msg_discard_changes">Hai modifiche non salvate. Vuoi scartarle?</string>
     <string name="btn_discard">Scarta</string>
 
     <string name="btn_reocr">Esegui di nuovo l’OCR</string>
-    <string name="reocr_confirm_title">Eseguire di nuovo l’OCR?</string>
-    <string name="reocr_confirm_message">Vuoi eseguire di nuovo l’OCR per questa parola con la lingua «%1$s»?</string>
     <string name="reocr_processing">Esecuzione di nuovo dell’OCR…</string>
     <string name="reocr_success">Parola aggiornata: %1$s</string>
     <string name="reocr_failed">Errore nell’esecuzione dell’OCR</string>
     <string name="reocr_no_language">Seleziona prima una lingua</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">Ingrandisci</string>
-    <string name="zoom_out">Riduci</string>
     <string name="zoom_100">100 %</string>
     <string name="zoom_200">200 %</string>
     <string name="zoom_300">300 %</string>
@@ -476,4 +405,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>

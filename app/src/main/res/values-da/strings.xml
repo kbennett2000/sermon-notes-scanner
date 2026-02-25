@@ -16,7 +16,6 @@
     <string name="btn_scan">Scan</string>
     <string name="btn_crop">Beskær</string>
     <string name="btn_process">Behandl</string>
-    <string name="btn_export">Eksporter</string>
     <string name="btn_share">Del</string>
     <string name="next">Næste</string>
     <string name="back">Tilbage</string>
@@ -24,28 +23,18 @@
     <!-- Messages -->
     <string name="msg_camera_permission_required">Kameratilladelse er påkrævet for at scanne dokumenter</string>
     <string name="confirm">Bekræft</string>
-    <string name="review_your_scan_tap_confirm_to_proceed_or_retake_to_try_again">Gennemse din scanning. Tryk på Næste
-        for at fortsætte eller Tilbage for at prøve igen.
-    </string>
     <string name="camera_ready_tap_the_button_to_scan_a_document">Kameraet er klar. Tryk på knappen for at scanne et
         dokument.
     </string>
     <string name="captured_image">Optaget billede</string>
-    <string name="retake">Tag igen</string>
     <string name="image_to_crop">Billede til beskæring</string>
     <string name="cropped_image">Beskåret billede</string>
-    <string name="recrop">Beskær igen</string>
     <string name="document_preview">Dokumentforhåndsvisning</string>
     <string name="include_ocr_text">Medtag OCR-tekst</string>
-    <string name="language">Sprog:</string>
     <string name="ocr_results_will_appear_here">OCR-resultater vises her</string>
     <string name="ocr_no_text_detected">Ingen tekst fundet</string>
-    <string name="no_image_loaded_capture_an_image_first">Intet billede indlæst. Tag først et billede.</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Juster
         trapezhjørnerne for at vælge området, der skal beskæres, og tryk derefter på Beskær-knappen.
-    </string>
-    <string name="review_your_cropped_image_tap_confirm_to_proceed_or_recrop_to_try_again">Gennemse dit beskårne
-        billede. Tryk på Næste for at fortsætte eller Tilbage for at prøve igen.
     </string>
     <string name="no_document_ready_process_ocr_first">Intet dokument klar. Kør først OCR.</string>
     <string name="document_ready_for_export">Dokument klar til eksport</string>
@@ -83,7 +72,6 @@
 
     <!-- Export options -->
     <string name="convert_to_grayscale">Konverter til gråtoner</string>
-    <string name="convert_to_blackwhite_pdf">Konverter til sort/hvid</string>
     <string name="export_as_jpeg">Eksporter som JPEG</string>
     <string name="export_as_pdf">Eksporter som PDF (standard)</string>
 
@@ -97,7 +85,6 @@
     <!-- Exposure compensation -->
     <string name="exposure_compensation_label">EV %1$s</string>
     <string name="exposure_compensation_cd">Skyder til eksponeringskompensation</string>
-    <string name="exposure_reset_cd">Nulstil eksponering</string>
     <string name="exposure_compensation_option">Eksponeringskompensation</string>
 
     <!-- JPEG mode labels -->
@@ -116,10 +103,7 @@
     <string name="preview_corner_detection">Forhåndsvisning af hjørnedetektion</string>
     <string name="btn_pick_image">Indlæs</string>
     <string name="pick_image_cd">Indlæs eksisterende billede</string>
-    <string name="error_selected_file_is_not_an_image">Den valgte fil er ikke et billede</string>
-
     <!-- Multipage Export -->
-    <string name="pages_header">Sider (%1$d)</string>
     <string name="add_another_page">Tilføj side</string>
     <string name="clear_all_pages">Ryd alt</string>
     <string name="remove_this_page">Fjern denne side</string>
@@ -154,11 +138,7 @@
 
     <string name="added_pages_from_registry">Tilføjede %1$d side(r) fra registreret</string>
 
-    <!-- Add page options -->
-    <string name="add_page_option_choose_completed">Vælg fra fuldførte scanninger</string>
-    <string name="add_page_option_capture_new">Tag ny side</string>
-
-    <!-- Picker states -->
+    <!-- Add page options -->    <!-- Picker states -->
     <string name="missing_file">Manglende fil</string>
 
     <!-- Inline OCR -->
@@ -185,7 +165,6 @@
     <string name="btn_new">Ny scanning</string>
     <string name="btn_review">Gennemse</string>
     <string name="edit_word_title">Rediger ord</string>
-    <string name="review_summary_format">Ord: %1$d • Lav selvsikkerhed: %2$d</string>
     <string name="cm_edit">Rediger…</string>
     <string name="cm_merge_next">Flet med næste</string>
     <string name="cm_split">Opdel</string>
@@ -196,8 +175,6 @@
     <string name="case_lower">små bogstaver</string>
     <string name="case_title">Store begyndelsesbogstaver</string>
     <string name="dialog_language_title">Angiv sprogkode</string>
-    <string name="dialog_language_hint">f.eks. eng, deu, fra, ita, spa…</string>
-
 
     <!-- Rotation -->
     <string name="rotate_left_cd">Drej siden 90 grader mod uret</string>
@@ -265,20 +242,9 @@
 
     <!-- Accessibility content descriptions -->
     <string name="cd_close">Luk</string>
-    <string name="cd_fab_edit">Rediger tekst</string>
-    <string name="cd_zoom_chip_format">Zoom %1$d%%. Tryk for at nulstille til 100%%.</string>
-    <string name="cd_zoom_chip_tap_reset">Zoomkontrol. Tryk for at nulstille til 100%.</string>
     <string name="cd_zoom_chip_open_menu">Åbn zoommenu</string>
-    <string name="cd_minimap">Dokumentoversigt, tryk for at hoppe</string>
-    <string name="cd_undo">Fortryd sidste ændring</string>
-    <string name="cd_redo">Gentag sidste ændring</string>
-    <string name="cd_export">Eksportér</string>
-
-    <!-- A11y content descriptions for menu items -->
-    <string name="cd_action_search">Søg</string>
-    <string name="cd_action_export">Eksportér dokument</string>
-
-    <!-- Inline edit bottom sheet validation -->
+    <string name="cd_minimap">Dokumentoversigt, tryk for at hoppe
+    </string>    <!-- A11y content descriptions for menu items -->    <!-- Inline edit bottom sheet validation -->
     <string name="error_empty_input">Indtast venligst en værdi</string>
 
     <!-- Collections / Library (feature-flagged) -->
@@ -294,23 +260,14 @@
     <string name="ok">OK</string>
     <string name="no_scans_yet">Ingen scanninger endnu</string>
     <string name="rename_collection_title">Omdøb samling</string>
-    <string name="new_name">Nyt navn</string>
-    <string name="scan_saved">Scanning gemt</string>
     <string name="action_add_to_collection">Føj til samling…</string>
     <string name="place_in_collection_title">Føj til samling</string>
     <string name="create_new_collection">Opret ny samling…</string>
     <string name="scan_added_to_collection">Scanning tilføjet til "%1$s"</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Bibliotekshandlinger</string>
-    <string name="library_actions_title">Bibliotek</string>
-    <string name="open_library">Åbn bibliotek</string>
-    <string name="add_current_scan_to_library">Føj aktuel scanning til bibliotek</string>
-
-    <!-- Library list: collections membership -->
+    <string name="library_actions">Bibliotekshandlinger</string>    <!-- Library list: collections membership -->
     <string name="in_collections_prefix">I: %1$s</string>
-    <string name="in_collections_count">I %1$d samlinger</string>
-
     <!-- Delete confirmation (ScanDetails) -->
     <string name="delete_warning_irreversible">Filen vil blive slettet fra enheden. Denne handling kan ikke fortrydes.
     </string>
@@ -379,16 +336,8 @@
     <string name="a11y_low_light_toggle_flash">Lavt lys. Dobbelttryk på Flash for at aktivere.</string>
     <string name="a11y_capture_failed">Optagelse mislykkedes.</string>
     <string name="a11y_volume_shutter_hint">Tip: I tilgængelighedstilstand kan du optage med lydstyrketasterne.</string>
-    <string name="a11y_capture_success">Billede optaget.</string>
-    <string name="a11y_verbose_logs_label">Uddybede tilgængelighedslogfiler</string>
-    <string name="a11y_option_auto_capture">Automatisk optagelse ved stabil registrering (tilgængelighedstilstand)
-    </string>
-    <string name="a11y_option_auto_torch">Automatisk tænding af lygte i svagt lys (tilgængelighedstilstand)</string>
-    <string name="a11y_capturing_now">Optager…</string>
-    <string name="a11y_score_now">Registreringskvalitet: %1$d%%.</string>
-    <string name="a11y_scan_with_score">Scan. Registreringskvalitet: %1$d%%.</string>
-
-    <!-- Tilgængelighed: beskrivelse af listeelement og meddelelser -->
+    <string name="a11y_capture_success">Billede optaget.
+    </string>    <!-- Tilgængelighed: beskrivelse af listeelement og meddelelser -->
     <string name="page_n_of_m">Side %1$d af %2$d</string>
     <string name="pages_count_announcement">Antal sider: %1$d</string>
     <string name="export_started">Eksport startet</string>
@@ -399,20 +348,10 @@
     <string name="opt_ocr_auto_rotate_apply_export">OCR auto-rotation (anvend også ved eksport)</string>
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">OCR-efterbehandling (ret almindelige fejl)</string>
-    <string name="opt_layout_analysis">Layoutanalyse (kolonner, tabeller)</string>
-    <string name="opt_layout_analysis_hint">Forbedrer OCR for dokumenter med flere kolonner og tabeller</string>
-    <!-- Options: Experimental directional mapping fallback -->
-    <string name="opt_force_direction_mapping">Tving landskabs-tilordning af hints (eksperimentelt)</string>
-
+    <string name="opt_layout_analysis">Layoutanalyse (kolonner, tabeller)
+    </string>    <!-- Options: Experimental directional mapping fallback -->
     <!-- Developer / Debug options -->
-    <string name="opt_show_raw_source_files">Vis rå kildefiler i biblioteket (udvikler)</string>
-
-    <!-- Library / Collections -->
-    <string name="unfiled_collection_title">Ikke sorteret</string>
-    <string name="open_unfiled">Åbn ikke-sorteret</string>
-    <string name="a11y_unfiled_summary">Ikke sorteret: %1$d element(er)</string>
-
-    <!-- PDF Import -->
+    <!-- Library / Collections -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">Ukendt filtype</string>
     <string name="error_unsupported_file_type">Denne filtype understøttes ikke</string>
     <string name="error_cannot_open_pdf">Kunne ikke åbne PDF</string>
@@ -424,27 +363,20 @@
 
     <!-- Multi-language OCR selection -->
     <string name="select_ocr_languages">Vælg OCR-sprog</string>
-    <string name="ocr_max_languages_hint">Du kan vælge op til 2 sprog</string>
     <string name="ocr_max_languages_warning">Der må maksimalt vælges 2 sprog</string>
     <string name="ocr_no_language_selected">Vælg venligst mindst ét sprog</string>
-    <string name="ocr_languages_selected">%1$s</string>
-
     <!-- OCR Review: Discard changes dialog -->
     <string name="title_discard_changes">Kassér ændringer?</string>
     <string name="msg_discard_changes">Du har ændringer, der ikke er gemt. Vil du kassere dem?</string>
     <string name="btn_discard">Kassér</string>
 
     <string name="btn_reocr">Kør OCR igen</string>
-    <string name="reocr_confirm_title">Kør OCR igen?</string>
-    <string name="reocr_confirm_message">Vil du køre OCR igen for dette ord med sproget “%1$s”?</string>
     <string name="reocr_processing">Kører OCR igen…</string>
     <string name="reocr_success">Ordet er opdateret: %1$s</string>
     <string name="reocr_failed">OCR mislykkedes</string>
     <string name="reocr_no_language">Vælg venligst et sprog først</string>
 
     <!-- Zoom popover -->
-    <string name="zoom_in">Zoom ind</string>
-    <string name="zoom_out">Zoom ud</string>
     <string name="zoom_100">100 %</string>
     <string name="zoom_200">200 %</string>
     <string name="zoom_300">300 %</string>
@@ -463,4 +395,7 @@
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
 
+    <string name="restore_access">Restore access</string>
+    <string name="status">Status</string>
+    <string name="ocr_text_editor_hint">Edit OCR text</string>
 </resources>
