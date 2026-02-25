@@ -46,7 +46,6 @@ public class OCRPostProcessor {
   private static final Pattern MOSTLY_LETTERS =
       Pattern.compile(
           "^[a-zA-ZäöüÄÖÜßàâäçéèêëîïôöùûüÿœæÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆáéíóúüñÁÉÍÓÚÜÑàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚáàâãçéêíóôõúüÁÀÂÃÇÉÊÍÓÔÕÚÜ]+$");
-  private static final Pattern CONTAINS_DIGITS = Pattern.compile(".*[0-9].*");
   private static final Pattern CONTAINS_LETTERS = Pattern.compile(".*[a-zA-Z].*");
 
   /**
@@ -200,6 +199,7 @@ public class OCRPostProcessor {
    * Corrects a single word based on its confidence and context. Words with high confidence (>=
    * HIGH_CONFIDENCE_THRESHOLD) are trusted and not corrected.
    */
+  @SuppressWarnings("UnusedVariable") // language kept for future language-specific corrections
   private static String correctWord(String word, float confidence, String language) {
     if (word == null || word.isEmpty()) {
       return word;
@@ -327,15 +327,13 @@ public class OCRPostProcessor {
 
     int digitCount = 0;
     int letterCount = 0;
-    int separatorCount = 0;
 
-    for (char c : text.toCharArray()) {
+    for (int i = 0; i < text.length(); i++) {
+      char c = text.charAt(i);
       if (Character.isDigit(c)) {
         digitCount++;
       } else if (Character.isLetter(c)) {
         letterCount++;
-      } else if (c == '.' || c == ',' || c == '-' || c == '/' || c == ':' || c == ' ') {
-        separatorCount++;
       }
     }
 
@@ -466,7 +464,7 @@ public class OCRPostProcessor {
       String cleanWord = extractCleanWord(correctedText);
       if (!cleanWord.isEmpty()
           && cleanWord.length() >= 2
-          && !dictionary.contains(cleanWord.toLowerCase())) {
+          && !dictionary.contains(cleanWord.toLowerCase(java.util.Locale.ROOT))) {
 
         String dictCorrected = findDictionaryCorrection(correctedText, dictionary);
         if (dictCorrected != null && !dictCorrected.equals(correctedText)) {
@@ -566,7 +564,7 @@ public class OCRPostProcessor {
           chars[i] = replacement;
           String candidate = new String(chars);
 
-          if (dictionary.contains(candidate.toLowerCase())) {
+          if (dictionary.contains(candidate.toLowerCase(java.util.Locale.ROOT))) {
             // Preserve original case pattern
             return preserveCasePattern(originalWord, cleanWord, candidate);
           }
@@ -595,7 +593,7 @@ public class OCRPostProcessor {
       // Try contraction (rn -> m)
       if (cleanWord.contains(expanded)) {
         String candidate = cleanWord.replace(expanded, contracted);
-        if (dictionary.contains(candidate.toLowerCase())) {
+        if (dictionary.contains(candidate.toLowerCase(java.util.Locale.ROOT))) {
           return preserveCasePattern(originalWord, cleanWord, candidate);
         }
       }
@@ -603,7 +601,7 @@ public class OCRPostProcessor {
       // Try expansion (m -> rn)
       if (cleanWord.contains(contracted)) {
         String candidate = cleanWord.replace(contracted, expanded);
-        if (dictionary.contains(candidate.toLowerCase())) {
+        if (dictionary.contains(candidate.toLowerCase(java.util.Locale.ROOT))) {
           return preserveCasePattern(originalWord, cleanWord, candidate);
         }
       }
@@ -650,22 +648,22 @@ public class OCRPostProcessor {
     }
 
     // Check if all uppercase
-    if (source.equals(source.toUpperCase())) {
-      return target.toUpperCase();
+    if (source.equals(source.toUpperCase(java.util.Locale.ROOT))) {
+      return target.toUpperCase(java.util.Locale.ROOT);
     }
 
     // Check if all lowercase
-    if (source.equals(source.toLowerCase())) {
-      return target.toLowerCase();
+    if (source.equals(source.toLowerCase(java.util.Locale.ROOT))) {
+      return target.toLowerCase(java.util.Locale.ROOT);
     }
 
     // Check if title case (first letter uppercase)
     if (Character.isUpperCase(source.charAt(0))) {
       return Character.toUpperCase(target.charAt(0))
-          + (target.length() > 1 ? target.substring(1).toLowerCase() : "");
+          + (target.length() > 1 ? target.substring(1).toLowerCase(java.util.Locale.ROOT) : "");
     }
 
-    return target.toLowerCase();
+    return target.toLowerCase(java.util.Locale.ROOT);
   }
 
   /**
@@ -915,15 +913,15 @@ public class OCRPostProcessor {
     public String toString() {
       return "OcrQualityStats{"
           + "meanConf="
-          + String.format("%.1f", meanConfidence)
+          + String.format(Locale.ROOT, "%.1f", meanConfidence)
           + ", medianConf="
-          + String.format("%.1f", medianConfidence)
+          + String.format(Locale.ROOT, "%.1f", medianConfidence)
           + ", lowConfWords="
           + lowConfidenceWordCount
           + "/"
           + totalWordCount
           + " ("
-          + String.format("%.1f", getLowConfidenceRatio() * 100)
+          + String.format(Locale.ROOT, "%.1f", getLowConfidenceRatio() * 100)
           + "%)"
           + '}';
     }
