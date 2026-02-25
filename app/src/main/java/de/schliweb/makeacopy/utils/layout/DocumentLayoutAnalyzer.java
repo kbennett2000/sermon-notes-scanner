@@ -501,8 +501,6 @@ public class DocumentLayoutAnalyzer {
 
     // Strategy 1: Look for rows where content spans the full page width
     // (content exists both in left margin area AND right margin area, or spans the gap)
-    int margin = (int) (width * 0.05); // 5% margin on each side
-
     for (int y = bodyBottom - 1; y >= scanStart; y--) {
       if (y < 0 || y >= binary.rows()) continue;
 
@@ -656,8 +654,6 @@ public class DocumentLayoutAnalyzer {
     // Scan the bottom 10% of the page
     int scanHeight = (int) (height * 0.10);
     int scanStart = Math.max(0, bodyBottom - scanHeight);
-    int leftMargin = (int) (width * 0.05); // 5% margin
-
     byte[] rowData = new byte[width];
     int footerTop = -1;
     int consecutiveFooterRows = 0;
@@ -988,6 +984,8 @@ public class DocumentLayoutAnalyzer {
           break;
         case FOOTER:
           hasFooter = true;
+          break;
+        default:
           break;
       }
     }
