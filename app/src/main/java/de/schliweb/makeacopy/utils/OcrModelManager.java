@@ -16,7 +16,6 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -105,7 +104,7 @@ public final class OcrModelManager {
       return pkgs;
     } catch (Throwable t) {
       Log.e(TAG, "discoverAddonPackages failed", t);
-      return Collections.emptyList();
+      return new ArrayList<>();
     }
   }
 
@@ -135,7 +134,7 @@ public final class OcrModelManager {
       return out;
     } catch (Throwable t) {
       Log.e(TAG, "listTrainedDataInPackage failed for " + packageName, t);
-      return Collections.emptyList();
+      return new ArrayList<>();
     }
   }
 
@@ -210,6 +209,7 @@ public final class OcrModelManager {
         if (s >= 0) sizeHint = s;
       }
     } catch (IOException ignored) {
+      // Best-effort; failure is non-critical
     }
 
     try (InputStream in = cr.openInputStream(uri)) {
@@ -283,6 +283,7 @@ public final class OcrModelManager {
         try {
           ((FileOutputStream) out).getFD().sync();
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
 
@@ -320,6 +321,7 @@ public final class OcrModelManager {
           try {
             ((FileOutputStream) rout).getFD().sync();
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
         }
         //noinspection ResultOfMethodCallIgnored
@@ -367,6 +369,7 @@ public final class OcrModelManager {
           try (FileOutputStream fos = new FileOutputStream(target, false)) {
             fos.getFD().sync();
           } catch (Throwable ignored) {
+            // Best-effort; failure is non-critical
           }
           ok = target.delete();
         }
@@ -462,6 +465,7 @@ public final class OcrModelManager {
           }
         }
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
 
       Log.w(TAG, "Rejected package (no matching signature): " + packageName);
@@ -504,7 +508,7 @@ public final class OcrModelManager {
    */
   private static String normalizeHex(String s) {
     if (s == null) return "";
-    return s.replace(":", "").replace(" ", "").toLowerCase();
+    return s.replace(":", "").replace(" ", "").toLowerCase(java.util.Locale.ROOT);
   }
 
   /**
