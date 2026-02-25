@@ -84,6 +84,7 @@ public class CameraCornersOverlay extends View {
     try {
       playSoundEffect(SoundEffectConstants.CLICK);
     } catch (Throwable ignored) {
+      // Sound effect is optional; ignore failures silently
     }
     return true;
   }
@@ -178,7 +179,7 @@ public class CameraCornersOverlay extends View {
     if (debugText != null && debugText.length() > 0) {
       float pad = dp(8);
       float y = pad + textPaint.getTextSize() * 2f; // one line below score
-      for (String line : debugText.toString().split("\n")) {
+      for (String line : debugText.toString().split("\n", -1)) {
         canvas.drawText(line, pad, y, textPaint);
         y += textPaint.getTextSize() * 1.2f;
       }
