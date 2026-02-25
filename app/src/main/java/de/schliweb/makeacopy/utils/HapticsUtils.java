@@ -23,7 +23,7 @@ public final class HapticsUtils {
   public static void setTestListener(TestListener l) {
     sTestListener = l;
   }
-
+  
   /**
    * Triggers a single haptic vibration of the specified duration on devices running Android O (API
    * 26) and above. On Android S (API 31) and later, the vibration is handled using VibratorManager.
