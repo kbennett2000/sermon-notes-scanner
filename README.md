@@ -24,7 +24,7 @@ MakeACopy is available in two editions:
 | **Full** | 21 languages (incl. CJK, Arabic, Thai) | 4 fonts (incl. CJK) | ~99 MB |
 | **Light** | English + German | 1 font (NotoSans) | ~58 MB |
 
-Both editions include the same ML-based document detection (ONNX model), OpenCV image processing, and full offline functionality. The Light edition simply ships fewer OCR language models, fonts, and dictionaries.
+Both editions include the same ML-based document detection (ONNX model), OpenCV image processing, and full offline functionality. Both editions use an operator-stripped ONNX Runtime build that includes only the operators required for document detection. The Light edition additionally ships fewer OCR language models, fonts, and dictionaries, and uses a minimal ONNX Runtime AAR without XNNPACK and NNAPI to further reduce APK size.
 
 The Full edition is available on F-Droid and Google Play. The Light edition is available exclusively via [GitHub Releases](https://github.com/egdels/makeacopy/releases).
 
@@ -162,7 +162,7 @@ How to trigger a release build:
 
 Notes:
 - All native components are built from source to stay F-Droid compatible; no prebuilt binaries are stored in the repo.
-- The Light edition reuses the native libraries built by the Full build job (downloaded as CI artifacts), so it skips the time-consuming OpenCV and ONNX Runtime source builds entirely.
+- Both editions use an operator-stripped ONNX Runtime build. The Full edition includes XNNPACK and NNAPI support and is built via `scripts/build_onnxruntime_android.sh`. The Light edition reuses the OpenCV native libraries from the Full build and builds a minimal ONNX Runtime AAR (without XNNPACK/NNAPI) from source via `scripts/build_minimal_onnxruntime.sh`, further reducing APK size.
 - The edition is controlled via the Gradle property `edition` (default: `full`). F-Droid builds use the default and require no special configuration.
 - A look at .github/workflows/build-release.yml shows you how the build process works and how you can reproduce it in your own development environment.
 
