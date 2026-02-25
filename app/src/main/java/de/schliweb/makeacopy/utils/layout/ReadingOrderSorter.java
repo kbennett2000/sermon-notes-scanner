@@ -373,7 +373,7 @@ public class ReadingOrderSorter {
       return TextDirection.LTR;
     }
 
-    String lang = languageCode.toLowerCase();
+    String lang = languageCode.toLowerCase(java.util.Locale.ROOT);
 
     // RTL languages
     if (lang.equals("ar")
