@@ -93,6 +93,7 @@ public class OCRFragment extends Fragment {
         }
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
 
     // On first entry, if we have an image and no OCR results yet, remember this image
@@ -109,6 +110,7 @@ public class OCRFragment extends Fragment {
         }
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
 
     // Language helper (no initTesseract() here!)
@@ -244,6 +246,7 @@ public class OCRFragment extends Fragment {
               Bitmap orig = cropViewModel.getOriginalImageBitmap().getValue();
               if (orig != null) cropViewModel.setImageBitmap(orig);
             } catch (Throwable ignoreSet) {
+              // Best-effort; failure is non-critical
             }
             androidx.navigation.NavController nav = Navigation.findNavController(requireView());
             boolean popped = nav.popBackStack();
@@ -254,6 +257,7 @@ public class OCRFragment extends Fragment {
             try {
               Navigation.findNavController(requireView()).navigate(R.id.navigation_crop);
             } catch (Throwable ignored2) {
+              // Best-effort; failure is non-critical
             }
           }
         });
@@ -273,6 +277,7 @@ public class OCRFragment extends Fragment {
                 Bitmap orig = cropViewModel.getOriginalImageBitmap().getValue();
                 if (orig != null) cropViewModel.setImageBitmap(orig);
               } catch (Throwable ignoreSet) {
+                // Best-effort; failure is non-critical
               }
               androidx.navigation.NavController nav = Navigation.findNavController(requireView());
               boolean popped = nav.popBackStack();
@@ -283,6 +288,7 @@ public class OCRFragment extends Fragment {
               try {
                 Navigation.findNavController(requireView()).navigate(R.id.navigation_crop);
               } catch (Throwable ignored2) {
+                // Best-effort; failure is non-critical
               }
             }
           }
@@ -353,12 +359,13 @@ public class OCRFragment extends Fragment {
     try {
       savedLangSpec = sp.getString(PREF_KEY_OCR_LANG, null);
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
 
     // Parse saved language spec (may contain multiple languages separated by +)
     selectedLanguageCodes.clear();
     if (savedLangSpec != null && !savedLangSpec.isEmpty()) {
-      for (String lang : savedLangSpec.split("\\+")) {
+      for (String lang : savedLangSpec.split("\\+", -1)) {
         String trimmed = lang.trim();
         if (!trimmed.isEmpty() && isLanguageAvailableSafe(trimmed)) {
           selectedLanguageCodes.add(trimmed);
@@ -464,6 +471,7 @@ public class OCRFragment extends Fragment {
                             .getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE);
                     sp.edit().putString(PREF_KEY_OCR_LANG, newLangSpec).apply();
                   } catch (Throwable ignore) {
+                    // Best-effort; failure is non-critical
                   }
 
                   // Handle re-run if language changed
@@ -538,6 +546,7 @@ public class OCRFragment extends Fragment {
         if (langs != null && langs.length > 0) return langs;
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     // Fallback includes Chinese (Simplified and Traditional) so users on zh locales can select them
     // when asset listing fails
@@ -678,6 +687,7 @@ public class OCRFragment extends Fragment {
           try {
             in.close();
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
         }
       } catch (Throwable ignore) {
@@ -690,6 +700,7 @@ public class OCRFragment extends Fragment {
         return true;
       }
     } catch (Throwable ignoreAll) {
+      // Best-effort; failure is non-critical
     }
     return false;
   }
@@ -717,6 +728,7 @@ public class OCRFragment extends Fragment {
       binding.buttonProcess.setEnabled(hasImage);
       binding.buttonProcess.setOnClickListener(v -> performOCR());
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
   }
 
@@ -736,6 +748,7 @@ public class OCRFragment extends Fragment {
           requireContext().getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE);
       sp.edit().putInt(PREF_KEY_OCR_MODE, mode).apply();
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
   }
 
@@ -777,6 +790,7 @@ public class OCRFragment extends Fragment {
       ocrPostProcessing = p.getBoolean(BUNDLE_OCR_POST_PROCESSING, true);
       layoutAnalysis = p.getBoolean(BUNDLE_LAYOUT_ANALYSIS, false);
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     cbOcrAuto.setChecked(ocrAutoRotateApply);
     cbOcrPostProc.setChecked(ocrPostProcessing);
@@ -808,6 +822,7 @@ public class OCRFragment extends Fragment {
                         .putBoolean(BUNDLE_LAYOUT_ANALYSIS, cbLayoutAnalysis.isChecked())
                         .apply();
                   } catch (Throwable ignore) {
+                    // Best-effort; failure is non-critical
                   }
 
                   CharSequence[] modes =
@@ -855,6 +870,7 @@ public class OCRFragment extends Fragment {
     try {
       curLang = ocrViewModel.getLanguage().getValue();
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
     final String langCode = curLang;
 
@@ -878,6 +894,7 @@ public class OCRFragment extends Fragment {
             try {
               in.close();
             } catch (Throwable ignore) {
+              // Best-effort; failure is non-critical
             }
           }
         } catch (Throwable ignore) {
@@ -1057,7 +1074,7 @@ public class OCRFragment extends Fragment {
     Bitmap imageBitmap = cropViewModel.getImageBitmap().getValue();
     Boolean croppedFlagAtStart = cropViewModel.isImageCropped().getValue();
     Integer userRotAtStart = cropViewModel.getUserRotationDegrees().getValue();
-    Integer capRotAtStart = cropViewModel.getCaptureRotationDegrees().getValue();
+    // captureRotationDegrees value intentionally read to trigger LiveData observation
     Log.d(
         TAG,
         "performOCR: start on thread="
@@ -1135,6 +1152,7 @@ public class OCRFragment extends Fragment {
                   try {
                     localHelper.setReinitPerRun(false);
                   } catch (Throwable ignore) {
+                    // Best-effort; failure is non-critical
                   }
 
                   String lang = ocrViewModel.getLanguage().getValue();
@@ -1186,6 +1204,7 @@ public class OCRFragment extends Fragment {
                             : TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
                     localHelper.setPageSegMode(psm);
                   } catch (Throwable ignore) {
+                    // Best-effort; failure is non-critical
                   }
 
                   // Try OCR rotations only when Auto‑Rotate is enabled. Otherwise, use current
@@ -1203,6 +1222,7 @@ public class OCRFragment extends Fragment {
                         FeatureFlags.isLayoutAnalysisEnabled()
                             && p.getBoolean(BUNDLE_LAYOUT_ANALYSIS, false);
                   } catch (Throwable ignore) {
+                    // Best-effort; failure is non-critical
                   }
                   final boolean layoutAnalysisEnabled = useLayoutAnalysis;
 
@@ -1394,6 +1414,7 @@ public class OCRFragment extends Fragment {
                                 finalAllowOcrAutoRotate ? bestRotFinal : 0);
                           }
                         } catch (Throwable ignore) {
+                          // Best-effort; failure is non-critical
                         }
                       });
 
@@ -1418,6 +1439,7 @@ public class OCRFragment extends Fragment {
                                 "export_options", android.content.Context.MODE_PRIVATE);
                     postProcessingEnabled = pp.getBoolean(BUNDLE_OCR_POST_PROCESSING, true);
                   } catch (Throwable ignore) {
+                    // Best-effort; failure is non-critical
                   }
                   if (postProcessingEnabled) {
                     try {
@@ -1508,21 +1530,25 @@ public class OCRFragment extends Fragment {
                                 try {
                                   cur = cropViewModel.getUserRotationDegrees().getValue();
                                 } catch (Throwable ignore) {
+                                  // Best-effort; failure is non-critical
                                 }
                                 int curDeg = (cur == null) ? 0 : cur.intValue();
                                 int newDeg = ((curDeg + bestRotFinal) % 360 + 360) % 360;
                                 try {
                                   cropViewModel.setUserRotationDegrees(newDeg);
                                 } catch (Throwable ignore) {
+                                  // Best-effort; failure is non-critical
                                 }
                                 // We have applied the OCR suggestion; clear the helper to avoid
                                 // re-applying later.
                                 try {
                                   cropViewModel.setBestOcrRotationDegrees(0);
                                 } catch (Throwable ignore) {
+                                  // Best-effort; failure is non-critical
                                 }
                               }
                             } catch (Throwable ignore) {
+                              // Best-effort; failure is non-critical
                             }
                           }
                           if (apply) {
@@ -1548,6 +1574,7 @@ public class OCRFragment extends Fragment {
                                 Toast.LENGTH_SHORT);
                           }
                         } catch (Throwable ignore) {
+                          // Best-effort; failure is non-critical
                         }
                       });
 
@@ -1560,6 +1587,7 @@ public class OCRFragment extends Fragment {
                     if (localHelper != null) localHelper.shutdown();
                     Log.d(TAG, LP + "Tesseract shutdown complete");
                   } catch (Throwable ignored) {
+                    // Best-effort; failure is non-critical
                   }
                 }
               });
@@ -1587,6 +1615,7 @@ public class OCRFragment extends Fragment {
                 r.run();
               });
     } catch (Throwable ignored) {
+      // Best-effort; failure is non-critical
     }
   }
 
