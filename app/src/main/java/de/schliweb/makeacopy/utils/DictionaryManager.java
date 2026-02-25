@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -23,6 +24,7 @@ public class DictionaryManager {
   private static final String DICT_DIR = "dictionaries";
   private static final String DICT_EXTENSION_GZ = ".txt.gz";
   private static final String DICT_EXTENSION_TXT = ".txt";
+  private static final Pattern PLUS_SPLITTER = Pattern.compile("\\+");
   // Languages that don't use word-based dictionaries (CJK, Thai)
   private static final Set<String> NON_WORD_BASED_LANGUAGES = new HashSet<>();
   private static DictionaryManager instance;
@@ -66,7 +68,7 @@ public class DictionaryManager {
       return false;
     }
     // Check all languages in spec - if ANY is word-based, return true
-    for (String lang : language.split("\\+")) {
+    for (String lang : PLUS_SPLITTER.split(language, -1)) {
       String trimmed = lang.trim();
       if (!trimmed.isEmpty() && !NON_WORD_BASED_LANGUAGES.contains(trimmed)) {
         return true;
@@ -97,7 +99,7 @@ public class DictionaryManager {
       return true; // No dictionary available, assume valid
     }
 
-    return dictionary.contains(word.toLowerCase());
+    return dictionary.contains(word.toLowerCase(Locale.ROOT));
   }
 
   /**
@@ -117,7 +119,7 @@ public class DictionaryManager {
       // Create combined dictionary from all languages
       Set<String> combined = new HashSet<>();
       int totalWords = 0;
-      for (String lang : language.split("\\+")) {
+      for (String lang : PLUS_SPLITTER.split(language, -1)) {
         String trimmed = lang.trim();
         if (!trimmed.isEmpty()) {
           Set<String> langDict = getDictionarySingle(trimmed);
@@ -175,7 +177,7 @@ public class DictionaryManager {
 
       String line;
       while ((line = br.readLine()) != null) {
-        String word = line.trim().toLowerCase();
+        String word = line.trim().toLowerCase(Locale.ROOT);
         if (!word.isEmpty() && !word.startsWith("#")) {
           words.add(word);
         }
@@ -199,7 +201,7 @@ public class DictionaryManager {
 
       String line;
       while ((line = br.readLine()) != null) {
-        String word = line.trim().toLowerCase();
+        String word = line.trim().toLowerCase(Locale.ROOT);
         if (!word.isEmpty() && !word.startsWith("#")) {
           words.add(word);
         }
@@ -236,7 +238,7 @@ public class DictionaryManager {
       Set<String> fileSet = new HashSet<>(Arrays.asList(files));
 
       // Check all languages in spec
-      for (String lang : language.split("\\+")) {
+      for (String lang : PLUS_SPLITTER.split(language, -1)) {
         String trimmed = lang.trim();
         if (!trimmed.isEmpty()) {
           String targetFileTxt = trimmed + DICT_EXTENSION_TXT;
