@@ -66,7 +66,6 @@ public class OpenCVUtils {
   public static final int DETECTION_MAX_EDGE = 720;
 
   // ---- thresholds (tuned) ----
-  private static final double SIDE_FRAC_MIN = 0.010; // 1% of the short image side instead of 2%
   private static final double CONF_MIN_AREA_FRAC = 0.008; // same lower bound for the confidence
   // Corner-angle sanity bounds: reject quads with too acute or too obtuse internal angles
   private static final double MIN_CORNER_ANGLE_DEG = 28.0; // threshold
@@ -131,12 +130,12 @@ public class OpenCVUtils {
    * <p>The method logs the safe mode and adaptive threshold configurations for debugging purposes.
    */
   private static void configureSafeMode() {
-    String manufacturer = Build.MANUFACTURER.toLowerCase();
-    String model = Build.MODEL.toLowerCase();
-    String device = Build.DEVICE.toLowerCase();
-    String fingerprint = Build.FINGERPRINT.toLowerCase();
-    String hardware = Build.HARDWARE.toLowerCase();
-    String product = Build.PRODUCT.toLowerCase();
+    String manufacturer = Build.MANUFACTURER.toLowerCase(java.util.Locale.ROOT);
+    String model = Build.MODEL.toLowerCase(java.util.Locale.ROOT);
+    String device = Build.DEVICE.toLowerCase(java.util.Locale.ROOT);
+    String fingerprint = Build.FINGERPRINT.toLowerCase(java.util.Locale.ROOT);
+    String hardware = Build.HARDWARE.toLowerCase(java.util.Locale.ROOT);
+    String product = Build.PRODUCT.toLowerCase(java.util.Locale.ROOT);
     int sdk = Build.VERSION.SDK_INT;
 
     boolean isHighEnd =
@@ -180,6 +179,7 @@ public class OpenCVUtils {
         org.opencv.core.Core.setNumThreads(1);
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
   }
 
@@ -578,6 +578,7 @@ public class OpenCVUtils {
         try {
           clahe.collectGarbage();
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
     }
@@ -1030,6 +1031,7 @@ public class OpenCVUtils {
           try {
             c.release();
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
         }
       }
@@ -1268,6 +1270,7 @@ public class OpenCVUtils {
           score = quadConfidence(corners, bitmap.getWidth(), bitmap.getHeight());
         }
       } catch (Throwable ignored) {
+        // Best-effort; failure is non-critical
       }
     }
     return new DetectionResult(corners, score);
@@ -1490,6 +1493,7 @@ public class OpenCVUtils {
         try {
           m.release();
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
     }
@@ -1532,18 +1536,22 @@ public class OpenCVUtils {
       try {
         lab.release();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
       try {
         l.release();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
       try {
         a.release();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
       try {
         bb.release();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
     }
   }
@@ -1640,6 +1648,7 @@ public class OpenCVUtils {
         tmp.copyTo(gray);
         tmp.release();
       } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
       }
 
       Mat f = new Mat();
@@ -1758,6 +1767,7 @@ public class OpenCVUtils {
         try {
           deskewInPlace(work); // rotates in-place and resizes 'work' as needed
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
 
         // 5b) Retinex-like normalization to flatten illumination
@@ -1767,6 +1777,7 @@ public class OpenCVUtils {
           retinexNormalize(
               work, /*sigma*/ Math.max(15, Math.min(work.width(), work.height()) / 20));
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
         // }
 
@@ -1788,13 +1799,14 @@ public class OpenCVUtils {
             double sigmaSpace = (longSide >= 2200 ? 65 : 55);
             Imgproc.bilateralFilter(work, work, d, sigmaColor, sigmaSpace);
           } catch (Throwable ignore2) {
+            // Best-effort; failure is non-critical
           }
         }
 
         // 5d) High-quality binarization: build multiple candidates and pick the best by quality
         // score
         List<Mat> candidates = new ArrayList<>();
-        List<String> candNames = new ArrayList<>();
+
         try {
           // Candidate A/B/C: Sauvola with varying k and window sizes (real devices only)
           if (!isSafeMode()) {
@@ -1810,8 +1822,8 @@ public class OpenCVUtils {
                   Mat m = new Mat();
                   sauvolaThreshold(work, m, wv, kv, 128.0);
                   candidates.add(m);
-                  candNames.add("Sauvola w=" + wv + " k=" + kv);
                 } catch (Throwable ignore) {
+                  // Best-effort; failure is non-critical
                 }
               }
             }
@@ -1821,8 +1833,8 @@ public class OpenCVUtils {
             Mat m = new Mat();
             Imgproc.threshold(work, m, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
             candidates.add(m);
-            candNames.add("Otsu");
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
           // Candidate E: Adaptive mean (device only)
           if (!isSafeMode()) {
@@ -1836,8 +1848,8 @@ public class OpenCVUtils {
               Imgproc.adaptiveThreshold(
                   work, m, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, bs, adaptC);
               candidates.add(m);
-              candNames.add("AdaptiveMean");
             } catch (Throwable ignore) {
+              // Best-effort; failure is non-critical
             }
           }
           // Candidate F: Wolf binarization (better for uneven illumination, device only)
@@ -1851,8 +1863,8 @@ public class OpenCVUtils {
                 Mat m = new Mat();
                 wolfThreshold(work, m, wolfWin, kv);
                 candidates.add(m);
-                candNames.add("Wolf w=" + wolfWin + " k=" + kv);
               } catch (Throwable ignore) {
+                // Best-effort; failure is non-critical
               }
             }
           }
@@ -1867,8 +1879,8 @@ public class OpenCVUtils {
                 Mat m = new Mat();
                 nickThreshold(work, m, nickWin, kv);
                 candidates.add(m);
-                candNames.add("NICK w=" + nickWin + " k=" + kv);
               } catch (Throwable ignore) {
+                // Best-effort; failure is non-critical
               }
             }
           }
@@ -1895,6 +1907,7 @@ public class OpenCVUtils {
             try {
               m.release();
             } catch (Throwable ignore) {
+              // Best-effort; failure is non-critical
             }
           }
         }
@@ -1908,12 +1921,14 @@ public class OpenCVUtils {
           try {
             despeckleFast(bw, 0); // Use default DPI (300) for OCR preparation
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
           try {
             Mat kClose = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2, 2));
             Imgproc.morphologyEx(bw, bw, Imgproc.MORPH_CLOSE, kClose);
             kClose.release();
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
           try {
             int area = bw.rows() * bw.cols();
@@ -1921,6 +1936,7 @@ public class OpenCVUtils {
             int minHeight = Math.max(3, Math.min(10, Math.max(bw.rows(), bw.cols()) / 170));
             removeSmallComponents(bw, minArea, minHeight);
           } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
           }
         }
 
@@ -1937,6 +1953,7 @@ public class OpenCVUtils {
             }
           }
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
 
         // 7) Resize back to original input dimensions to keep API contract with callers/tests
@@ -1960,6 +1977,7 @@ public class OpenCVUtils {
           Core.addWeighted(work, 1.5, blurred, -0.5, 0, work);
           blurred.release();
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
 
         ensureMinTextScale(work, /*minLongSide*/ 1800, /*scaleMax*/ 2.0);
@@ -2068,6 +2086,7 @@ public class OpenCVUtils {
           clahe.apply(gray, gray);
           clahe.collectGarbage();
         } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
         }
       }
 
@@ -2310,6 +2329,7 @@ public class OpenCVUtils {
         }
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     } finally {
       inv.release();
       labels.release();
@@ -2414,6 +2434,7 @@ public class OpenCVUtils {
         rotated.release();
       }
     } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
     }
   }
 
@@ -2544,9 +2565,6 @@ public class OpenCVUtils {
       double R = Math.max(1.0, mmr.maxVal); // avoid division by zero
 
       // Also compute global minimum pixel value for Wolf's full formula
-      Core.MinMaxLocResult mmrSrc = Core.minMaxLoc(f);
-      double minVal = mmrSrc.minVal;
-
       // Wolf formula: T = (1 - k) * mean + k * minVal + k * (stddev / R) * (mean - minVal)
       // Simplified variant closer to Sauvola: T = mean * (1 + k * ((stddev / R) - 1))
       Mat stdDivR = new Mat();
