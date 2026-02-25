@@ -30,7 +30,6 @@ import de.schliweb.makeacopy.utils.jpeg.JpegExportOptions;
 import de.schliweb.makeacopy.utils.jpeg.JpegExporter;
 import java.io.File;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -127,7 +126,6 @@ public class ExportFragment extends Fragment {
   private Uri lastExportedDocumentUri;
   private String lastExportedPdfName;
   // Library assignment helper: remember last indexed scan id (only when feature flag is on)
-  private String lastIndexedScanIdForAssign;
   private boolean ocrReceiverRegistered = false;
 
   private static String readAllUtf8(java.io.File file) throws java.io.IOException {
@@ -202,17 +200,11 @@ public class ExportFragment extends Fragment {
     boolean includeOcr = prefs.getBoolean("include_ocr", false);
     // For PDF, grayscale is now selected via pdf_bw_mode == GRAYSCALE
     String initPdfMode = prefs.getString("pdf_bw_mode", null);
-    boolean convertToGrayscale = ("GRAYSCALE".equalsIgnoreCase(initPdfMode));
+    boolean convertToGrayscale = "GRAYSCALE".equalsIgnoreCase(initPdfMode);
     boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
 
     // Initialize JPEG mode checkboxes from saved preference (default AUTO)
-    String savedModeName = prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name());
-    JpegExportOptions.Mode savedMode;
-    try {
-      savedMode = JpegExportOptions.Mode.valueOf(savedModeName);
-    } catch (IllegalArgumentException ex) {
-      savedMode = JpegExportOptions.Mode.AUTO;
-    }
+    // jpeg_mode preference is read later when building export options
 
     // ViewModel
     exportViewModel = new ViewModelProvider(this).get(ExportViewModel.class);
@@ -511,6 +503,7 @@ public class ExportFragment extends Fragment {
             Navigation.findNavController(requireView())
                 .navigate(R.id.navigation_completed_scans_picker, args);
           } catch (IllegalArgumentException | IllegalStateException ignored) {
+            // Best-effort; failure is non-critical
           }
         });
     binding.buttonClearPages.setOnClickListener(
@@ -746,7 +739,7 @@ public class ExportFragment extends Fragment {
           boolean includeOcrSel = p.getBoolean("include_ocr", false);
           boolean exportAsJpegSel = p.getBoolean("export_as_jpeg", false);
           String pdfMode = p.getString("pdf_bw_mode", null);
-          boolean graySel = ("GRAYSCALE".equalsIgnoreCase(pdfMode));
+          boolean graySel = "GRAYSCALE".equalsIgnoreCase(pdfMode);
 
           // Update ViewModel to reflect the options used for this export
           exportViewModel.setIncludeOcr(includeOcrSel);
@@ -778,7 +771,7 @@ public class ExportFragment extends Fragment {
                     String pdfMode = bundle.getString("pdf_bw_mode", null);
                     exportViewModel.setIncludeOcr(includeOcrSel);
                     // Derive grayscale flag for ViewModel from pdf_bw_mode (GRAYSCALE selected)
-                    boolean graySel = ("GRAYSCALE".equalsIgnoreCase(pdfMode));
+                    boolean graySel = "GRAYSCALE".equalsIgnoreCase(pdfMode);
                     exportViewModel.setConvertToGrayscale(graySel);
                     exportViewModel.setExportFormat(exportAsJpegSel ? "JPEG" : "PDF");
                     // Re-render preview to reflect grayscale/BW selections immediately
@@ -1006,7 +999,7 @@ public class ExportFragment extends Fragment {
               try {
                 // Determine PDF quality preset from SharedPreferences (set by dialog)
                 de.schliweb.makeacopy.utils.PdfQualityPreset preset;
-                boolean convertBwEffectiveLocal = false;
+                boolean convertBwEffectiveLocal;
                 Context prefsCtx = getContext();
                 String presetSaved = null;
                 String bwModeSaved = null;
@@ -1086,6 +1079,7 @@ public class ExportFragment extends Fragment {
                   final ArrayList<Bitmap> bitmaps = new ArrayList<>();
                   final ArrayList<List<RecognizedWord>> perPage = new ArrayList<>();
                   final Bitmap current = documentBitmap;
+                  @SuppressWarnings("ModifiedButNotUsed") // tracked for future recycle cleanup
                   final HashSet<Bitmap> toRecycle = new HashSet<>();
 
                   for (de.schliweb.makeacopy.ui.export.session.CompletedScan s : pages) {
@@ -1330,7 +1324,8 @@ public class ExportFragment extends Fragment {
   // Centralized default base-name derivation used for PDF/JPEG/ZIP/TXT
   private String buildDefaultBaseName() {
     String timeStamp =
-        new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        java.time.LocalDateTime.now(java.time.ZoneId.systemDefault())
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
     return "DOC_" + timeStamp;
   }
 
@@ -1703,6 +1698,7 @@ public class ExportFragment extends Fragment {
                   try {
                     zos.close();
                   } catch (Exception ignore) {
+                    // Best-effort; failure is non-critical
                   }
                 }
                 postToUiSafe(
@@ -1776,7 +1772,6 @@ public class ExportFragment extends Fragment {
 
     // Multi-page: concatenate per-page OCR from registry
     StringBuilder sb = new StringBuilder();
-    android.content.Context ctx = requireContext().getApplicationContext();
     // Current preview bitmap to detect which page matches in-memory OCR state
     Bitmap curPreview = exportViewModel.getDocumentBitmap().getValue();
     for (int i = 0; i < pages.size(); i++) {
@@ -1863,7 +1858,6 @@ public class ExportFragment extends Fragment {
   private void persistCompletedScanAsync(de.schliweb.makeacopy.ui.export.session.CompletedScan s) {
     if (s == null || s.id() == null || s.inMemoryBitmap() == null) return;
     final android.content.Context appContext = requireContext().getApplicationContext();
-    final android.graphics.Bitmap bmp = s.inMemoryBitmap();
     final String id = s.id();
     // Respect user preference: Skip OCR (export only)
     android.content.SharedPreferences prefs =
@@ -2103,7 +2097,6 @@ public class ExportFragment extends Fragment {
     final android.content.Context ctx = requireContext().getApplicationContext();
     // Pre-generate a stable ID so we can offer optional assignment to a collection
     final String generatedId = java.util.UUID.randomUUID().toString();
-    lastIndexedScanIdForAssign = generatedId;
     // Persist the primary export URI (as JSON array) so details screen can share/open it later
     final String exportJson = (exportUri != null) ? ("[\"" + exportUri + "\"]") : null;
     new Thread(
@@ -2162,6 +2155,7 @@ public class ExportFragment extends Fragment {
                             try {
                               bmp.recycle();
                             } catch (Exception ignored) {
+                              // Best-effort; failure is non-critical
                             }
                           }
                         }
@@ -2217,12 +2211,14 @@ public class ExportFragment extends Fragment {
                                 try {
                                   bmp.recycle();
                                 } catch (Exception ignored) {
+                                  // Best-effort; failure is non-critical
                                 }
                               }
                             } finally {
                               try {
                                 page.close();
                               } catch (Exception ignored) {
+                                // Best-effort; failure is non-critical
                               }
                             }
                           }
