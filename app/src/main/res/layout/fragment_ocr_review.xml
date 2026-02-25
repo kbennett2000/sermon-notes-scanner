@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -163,7 +164,7 @@
                 android:minHeight="48dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:text="100%"
+                tools:text="100%"
                 android:contentDescription="@string/cd_zoom_chip_open_menu"
                 app:chipIcon="@drawable/ic_zoom_24"
                 app:chipIconVisible="true"
@@ -200,6 +201,7 @@
                 android:textSize="16sp"
                 android:background="@android:color/transparent"
                 android:inputType="textMultiLine|textCapSentences"
+                android:hint="@string/ocr_text_editor_hint"
                 android:gravity="top|start"
                 android:overScrollMode="always"
                 android:scrollbars="vertical"
@@ -247,7 +249,7 @@
                 android:minHeight="48dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:text="100%"
+                tools:text="100%"
                 android:contentDescription="@string/cd_zoom_chip_open_menu"
                 app:chipIcon="@drawable/ic_zoom_24"
                 app:chipIconVisible="true"

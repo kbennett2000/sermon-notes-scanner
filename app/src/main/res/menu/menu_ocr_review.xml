@@ -5,7 +5,7 @@
     <!-- Status chips as a custom action view -->
     <item
         android:id="@+id/action_status_chips"
-        android:title="Status"
+        android:title="@string/status"
         app:showAsAction="always"
         app:actionLayout="@layout/menu_action_status_chips" />
 

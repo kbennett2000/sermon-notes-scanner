@@ -3,8 +3,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:colorBackground">
+        android:layout_height="match_parent">
 
     <!-- Status / Titel -->
     <TextView
@@ -247,23 +246,5 @@
 
 
     </LinearLayout>
-
-    <!-- Dummy-Elemente für zukünftige Mehrseitigkeit (unsichtbar)
-    <TextView
-            android:id="@+id/page_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/document_preview"
-            app:layout_constraintStart_toStartOf="parent" />
-
-    <LinearLayout
-            android:id="@+id/page_navigation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/document_preview"
-            app:layout_constraintEnd_toEndOf="parent" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -38,7 +38,7 @@
             android:paddingRight="6dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:background="#88000000"
             android:textColor="#FFFFFF" />

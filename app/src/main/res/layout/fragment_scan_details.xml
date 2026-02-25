@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -31,20 +32,20 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:text="Title"/>
+            tools:text="Title"/>
 
         <TextView
             android:id="@+id/subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="meta"/>
+            tools:text="meta"/>
 
         <Button
             android:id="@+id/buttonRestoreAccess"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Restore access"
+            android:text="@string/restore_access"
             android:background="@drawable/rounded_bg_light"
             android:visibility="gone"/>
 
@@ -98,7 +99,7 @@
             android:id="@+id/textPageIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1/1"/>
+            tools:text="1/1"/>
 
         <ImageButton
             android:id="@+id/buttonNextPage"
@@ -181,7 +182,7 @@
         android:id="@+id/button_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:background="@color/button_container_background"
         android:padding="12dp"
         android:elevation="8dp"
@@ -191,12 +192,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Row: Back / Add to collection -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/button_back"
@@ -222,8 +217,6 @@
                 android:text="@string/action_add_to_collection"
                 android:maxLines="1"
                 android:ellipsize="end"/>
-        </LinearLayout>
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
