@@ -120,7 +120,7 @@ public class ExportViewModel extends ViewModel {
   }
 
   public void setExportFormat(String format) {
-    String fmt = (format == null) ? "PDF" : format.trim().toUpperCase();
+    String fmt = (format == null) ? "PDF" : format.trim().toUpperCase(java.util.Locale.ROOT);
     if (!"PDF".equals(fmt) && !"JPEG".equals(fmt)) {
       fmt = "PDF";
     }
