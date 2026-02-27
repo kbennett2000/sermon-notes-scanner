@@ -15,10 +15,10 @@ public class PageFormatTest {
   public void allValuesPresent() {
     PageFormat[] values = PageFormat.values();
     assertEquals(4, values.length);
-    assertNotNull(PageFormat.valueOf("FIT_TO_IMAGE"));
-    assertNotNull(PageFormat.valueOf("A4"));
-    assertNotNull(PageFormat.valueOf("US_LETTER"));
-    assertNotNull(PageFormat.valueOf("LEGAL"));
+    assertEquals(PageFormat.FIT_TO_IMAGE, PageFormat.valueOf("FIT_TO_IMAGE"));
+    assertEquals(PageFormat.A4, PageFormat.valueOf("A4"));
+    assertEquals(PageFormat.US_LETTER, PageFormat.valueOf("US_LETTER"));
+    assertEquals(PageFormat.LEGAL, PageFormat.valueOf("LEGAL"));
   }
 
   @Test
