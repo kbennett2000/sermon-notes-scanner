@@ -120,6 +120,27 @@ public class OCRWhitelist {
    * @return A string containing the combined whitelist of allowed characters for the specified
    *     language specification, or the default whitelist if the input is null or empty.
    */
+  /**
+   * Filters the given text, removing any characters that are not in the provided whitelist.
+   * Whitespace characters (spaces, tabs, newlines) are always preserved.
+   *
+   * @param text the text to filter
+   * @param whitelist the allowed characters; if null or empty, the text is returned unchanged
+   * @return the filtered text containing only whitelisted characters and whitespace
+   */
+  public static String filterByWhitelist(String text, String whitelist) {
+    if (text == null || text.isEmpty()) return text;
+    if (whitelist == null || whitelist.isEmpty()) return text;
+    StringBuilder sb = new StringBuilder(text.length());
+    for (int i = 0; i < text.length(); i++) {
+      char c = text.charAt(i);
+      if (Character.isWhitespace(c) || whitelist.indexOf(c) >= 0) {
+        sb.append(c);
+      }
+    }
+    return sb.toString();
+  }
+
   public static String getWhitelistForLangSpec(String langSpec) {
     if (langSpec == null || langSpec.trim().isEmpty()) return DEFAULT;
     StringBuilder sb = new StringBuilder();
