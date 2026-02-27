@@ -74,11 +74,11 @@ public class JpegExportOptionsTest {
   public void modeEnum_allValues() {
     JpegExportOptions.Mode[] modes = JpegExportOptions.Mode.values();
     assertEquals(5, modes.length);
-    assertNotNull(JpegExportOptions.Mode.valueOf("NONE"));
-    assertNotNull(JpegExportOptions.Mode.valueOf("AUTO"));
-    assertNotNull(JpegExportOptions.Mode.valueOf("BW_TEXT"));
-    assertNotNull(JpegExportOptions.Mode.valueOf("BW_ROBUST"));
-    assertNotNull(JpegExportOptions.Mode.valueOf("OCR_ROBUST"));
+    assertEquals(JpegExportOptions.Mode.NONE, JpegExportOptions.Mode.valueOf("NONE"));
+    assertEquals(JpegExportOptions.Mode.AUTO, JpegExportOptions.Mode.valueOf("AUTO"));
+    assertEquals(JpegExportOptions.Mode.BW_TEXT, JpegExportOptions.Mode.valueOf("BW_TEXT"));
+    assertEquals(JpegExportOptions.Mode.BW_ROBUST, JpegExportOptions.Mode.valueOf("BW_ROBUST"));
+    assertEquals(JpegExportOptions.Mode.OCR_ROBUST, JpegExportOptions.Mode.valueOf("OCR_ROBUST"));
   }
 
   @Test
