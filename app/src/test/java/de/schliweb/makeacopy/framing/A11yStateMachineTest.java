@@ -35,13 +35,14 @@ public class A11yStateMachineTest {
 
   @Test
   public void event_containsKeyValues() {
-    assertNotNull(A11yStateMachine.Event.valueOf("CAMERA_READY"));
-    assertNotNull(A11yStateMachine.Event.valueOf("READY_ENTER"));
-    assertNotNull(A11yStateMachine.Event.valueOf("HOLD_STILL"));
-    assertNotNull(A11yStateMachine.Event.valueOf("MOVE_LEFT"));
-    assertNotNull(A11yStateMachine.Event.valueOf("MOVE_CLOSER"));
-    assertNotNull(A11yStateMachine.Event.valueOf("TOO_FAR"));
-    assertNotNull(A11yStateMachine.Event.valueOf("OK"));
+    assertEquals(
+        A11yStateMachine.Event.CAMERA_READY, A11yStateMachine.Event.valueOf("CAMERA_READY"));
+    assertEquals(A11yStateMachine.Event.READY_ENTER, A11yStateMachine.Event.valueOf("READY_ENTER"));
+    assertEquals(A11yStateMachine.Event.HOLD_STILL, A11yStateMachine.Event.valueOf("HOLD_STILL"));
+    assertEquals(A11yStateMachine.Event.MOVE_LEFT, A11yStateMachine.Event.valueOf("MOVE_LEFT"));
+    assertEquals(A11yStateMachine.Event.MOVE_CLOSER, A11yStateMachine.Event.valueOf("MOVE_CLOSER"));
+    assertEquals(A11yStateMachine.Event.TOO_FAR, A11yStateMachine.Event.valueOf("TOO_FAR"));
+    assertEquals(A11yStateMachine.Event.OK, A11yStateMachine.Event.valueOf("OK"));
   }
 
   // ── Constants ─────────────────────────────────────────────────────────────
