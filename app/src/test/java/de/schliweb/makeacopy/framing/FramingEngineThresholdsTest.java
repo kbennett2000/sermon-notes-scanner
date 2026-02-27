@@ -118,13 +118,12 @@ public class FramingEngineThresholdsTest {
 
   @Test
   public void testTiltLeftWhenLeftEdgeLonger() {
-    FramingEngine engine = new FramingEngine();
-
     // Construct trapezoid where left edge is significantly longer than right edge.
     // TL(300,200), TR(700,220), BR(680,520), BL(300,600)
     PointF[] q = new PointF[] {pt(300, 200), pt(700, 220), pt(680, 520), pt(300, 600)};
 
-    FramingResult r = new FramingEngine().evaluate(makeInput(q));
+    FramingEngine engine = new FramingEngine();
+    FramingResult r = engine.evaluate(makeInput(q));
     Assert.assertEquals(GuidanceHint.TILT_LEFT, r.hint);
     Assert.assertTrue(r.tiltHorizontal > 0.10f);
     Assert.assertTrue(r.hasDocument);
@@ -132,13 +131,12 @@ public class FramingEngineThresholdsTest {
 
   @Test
   public void testTiltForwardWhenTopEdgeLonger() {
-    FramingEngine engine = new FramingEngine();
-
     // Top edge much longer than bottom edge → TILT_FORWARD according to engine logic
     // TL(300,200), TR(700,200)  -> top length 400
     // BR(520,600), BL(480,600)  -> bottom length 40
     PointF[] q = new PointF[] {pt(300, 200), pt(700, 200), pt(520, 600), pt(480, 600)};
 
+    FramingEngine engine = new FramingEngine();
     FramingResult r = engine.evaluate(makeInput(q));
     Assert.assertEquals(GuidanceHint.TILT_FORWARD, r.hint);
     Assert.assertTrue(r.tiltVertical > 0.10f);
