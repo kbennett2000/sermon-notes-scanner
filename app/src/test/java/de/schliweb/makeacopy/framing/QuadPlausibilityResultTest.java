@@ -44,9 +44,9 @@ public class QuadPlausibilityResultTest {
   @Test
   public void constants_haveExpectedValues() {
     assertEquals(0.06f, QuadPlausibility.MIN_AREA_RATIO, 1e-6f);
-    assertEquals(24f, QuadPlausibility.MIN_EDGE_PX, 1e-6f);
+    assertEquals(24f, QuadPlausibility.MIN_EDGE_PX, 0);
     assertEquals(8f, QuadPlausibility.OOB_TOL_PX, 1e-6f);
-    assertEquals(40f, QuadPlausibility.OOB_SUM_MAX, 1e-6f);
+    assertEquals(40f, QuadPlausibility.OOB_SUM_MAX, 0);
     assertEquals(6.0f, QuadPlausibility.ASPECT_LIKE_MAX, 1e-6f);
   }
 }
