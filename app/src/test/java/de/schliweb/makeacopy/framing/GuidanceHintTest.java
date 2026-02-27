@@ -15,35 +15,37 @@ public class GuidanceHintTest {
 
   @Test
   public void valueOf_directional() {
-    assertNotNull(GuidanceHint.valueOf("MOVE_LEFT"));
-    assertNotNull(GuidanceHint.valueOf("MOVE_RIGHT"));
-    assertNotNull(GuidanceHint.valueOf("MOVE_UP"));
-    assertNotNull(GuidanceHint.valueOf("MOVE_DOWN"));
-    assertNotNull(GuidanceHint.valueOf("MOVE_CLOSER"));
-    assertNotNull(GuidanceHint.valueOf("MOVE_BACK"));
+    assertEquals(GuidanceHint.MOVE_LEFT, GuidanceHint.valueOf("MOVE_LEFT"));
+    assertEquals(GuidanceHint.MOVE_RIGHT, GuidanceHint.valueOf("MOVE_RIGHT"));
+    assertEquals(GuidanceHint.MOVE_UP, GuidanceHint.valueOf("MOVE_UP"));
+    assertEquals(GuidanceHint.MOVE_DOWN, GuidanceHint.valueOf("MOVE_DOWN"));
+    assertEquals(GuidanceHint.MOVE_CLOSER, GuidanceHint.valueOf("MOVE_CLOSER"));
+    assertEquals(GuidanceHint.MOVE_BACK, GuidanceHint.valueOf("MOVE_BACK"));
   }
 
   @Test
   public void valueOf_tilt() {
-    assertNotNull(GuidanceHint.valueOf("TILT_LEFT"));
-    assertNotNull(GuidanceHint.valueOf("TILT_RIGHT"));
-    assertNotNull(GuidanceHint.valueOf("TILT_FORWARD"));
-    assertNotNull(GuidanceHint.valueOf("TILT_BACK"));
+    assertEquals(GuidanceHint.TILT_LEFT, GuidanceHint.valueOf("TILT_LEFT"));
+    assertEquals(GuidanceHint.TILT_RIGHT, GuidanceHint.valueOf("TILT_RIGHT"));
+    assertEquals(GuidanceHint.TILT_FORWARD, GuidanceHint.valueOf("TILT_FORWARD"));
+    assertEquals(GuidanceHint.TILT_BACK, GuidanceHint.valueOf("TILT_BACK"));
   }
 
   @Test
   public void valueOf_status() {
-    assertNotNull(GuidanceHint.valueOf("OK"));
-    assertNotNull(GuidanceHint.valueOf("NO_DOCUMENT_DETECTED"));
-    assertNotNull(GuidanceHint.valueOf("HOLD_STILL"));
-    assertNotNull(GuidanceHint.valueOf("READY_ENTER"));
-    assertNotNull(GuidanceHint.valueOf("TOO_FAR"));
+    assertEquals(GuidanceHint.OK, GuidanceHint.valueOf("OK"));
+    assertEquals(GuidanceHint.NO_DOCUMENT_DETECTED, GuidanceHint.valueOf("NO_DOCUMENT_DETECTED"));
+    assertEquals(GuidanceHint.HOLD_STILL, GuidanceHint.valueOf("HOLD_STILL"));
+    assertEquals(GuidanceHint.READY_ENTER, GuidanceHint.valueOf("READY_ENTER"));
+    assertEquals(GuidanceHint.TOO_FAR, GuidanceHint.valueOf("TOO_FAR"));
   }
 
   @Test
   public void valueOf_orientation() {
-    assertNotNull(GuidanceHint.valueOf("ORIENTATION_PORTRAIT_TIP"));
-    assertNotNull(GuidanceHint.valueOf("ORIENTATION_LANDSCAPE_TIP"));
+    assertEquals(
+        GuidanceHint.ORIENTATION_PORTRAIT_TIP, GuidanceHint.valueOf("ORIENTATION_PORTRAIT_TIP"));
+    assertEquals(
+        GuidanceHint.ORIENTATION_LANDSCAPE_TIP, GuidanceHint.valueOf("ORIENTATION_LANDSCAPE_TIP"));
   }
 
   @Test(expected = IllegalArgumentException.class)
