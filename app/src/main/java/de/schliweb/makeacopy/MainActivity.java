@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
+import dagger.hilt.android.AndroidEntryPoint;
 import de.schliweb.makeacopy.databinding.ActivityMainBinding;
 import de.schliweb.makeacopy.services.CacheCleanupService;
 
@@ -21,6 +22,7 @@ import de.schliweb.makeacopy.services.CacheCleanupService;
  * <p>This class extends AppCompatActivity and overrides the onCreate method to set up the
  * activity's user interface.
  */
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
   private ActivityMainBinding binding;

@@ -74,9 +74,9 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
 ### Accessibility Mode
 - MakeACopy includes an Accessibility Mode that provides spoken and haptic feedback and lets you use the hardware volume keys as the shutter.
 - Guide:
-  - English: docs/accessibility_mode_guide_en.md
-  - Deutsch: docs/accessibility_mode_guide_de.md
-  - Français: docs/accessibility_mode_guide_fr.md
+  - English: [docs/accessibility_mode_guide_en.md](docs/accessibility_mode_guide_en.md)
+  - Deutsch: [docs/accessibility_mode_guide_de.md](docs/accessibility_mode_guide_de.md)
+  - Français: [docs/accessibility_mode_guide_fr.md](docs/accessibility_mode_guide_fr.md)
 
 ### OCR Languages
 
@@ -121,7 +121,7 @@ You can download the latest APK from the [Releases](https://github.com/egdels/ma
 
 All automated builds are handled by a single GitHub Actions workflow:
 
-- Workflow: .github/workflows/build-release.yml
+- Workflow: [.github/workflows/build-release.yml](.github/workflows/build-release.yml)
 - Triggers: on push to main, pull_request to main, and tags starting with v*
 
 The workflow contains two parallel jobs:
@@ -164,7 +164,7 @@ Notes:
 - All native components are built from source to stay F-Droid compatible; no prebuilt binaries are stored in the repo.
 - Both editions use an operator-stripped ONNX Runtime build. The Full edition includes XNNPACK and NNAPI support and is built via `scripts/build_onnxruntime_android.sh`. The Light edition reuses the OpenCV native libraries from the Full build and builds a minimal ONNX Runtime AAR (without XNNPACK/NNAPI) from source via `scripts/build_minimal_onnxruntime.sh`, further reducing APK size.
 - The edition is controlled via the Gradle property `edition` (default: `full`). F-Droid builds use the default and require no special configuration.
-- A look at .github/workflows/build-release.yml shows you how the build process works and how you can reproduce it in your own development environment.
+- A look at [.github/workflows/build-release.yml](.github/workflows/build-release.yml) shows you how the build process works and how you can reproduce it in your own development environment.
 
 #### Building the Light Edition
 
@@ -304,7 +304,7 @@ strictly for **internal training and evaluation**. No dataset images, labels,
 derived images, or training checkpoints are redistributed as part of this
 project or the application.
 
-For details, see the `NOTICE` file.
+For details, see the [`NOTICE`](NOTICE) file.
 
 ## Privacy
 

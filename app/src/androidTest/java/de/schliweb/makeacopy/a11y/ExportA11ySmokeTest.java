@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 
 import android.graphics.Bitmap;
 import android.view.View;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.Espresso;
@@ -16,6 +15,7 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.testutil.LiveDataIdlingResource;
 import de.schliweb.makeacopy.testutil.RecyclerViewBindingIdlingResource;
 import de.schliweb.makeacopy.testutil.ViewDump;
@@ -29,10 +29,10 @@ public class ExportA11ySmokeTest {
 
   @Test
   public void recycler_items_haveContentDescription_pageNofM() {
-    FragmentScenario<ExportFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ExportFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ExportFragment.class,
-            /* fragmentArgs= */ null,
+            /* args= */ null,
             R.style.Theme_MakeACopy,
             Lifecycle.State.RESUMED);
 

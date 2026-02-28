@@ -307,8 +307,8 @@ public final class BitmapUtils {
             }
             Bitmap bw;
             if (classicBw) {
-              OpenCVUtils.BwOptions opt = new OpenCVUtils.BwOptions();
-              opt.mode = OpenCVUtils.BwOptions.Mode.OTSU_ONLY;
+              BinarizationUtils.BwOptions opt = new BinarizationUtils.BwOptions();
+              opt.mode = BinarizationUtils.BwOptions.Mode.OTSU_ONLY;
               opt.useClahe = false;
               opt.removeShadows = false;
               bw = OpenCVUtils.toBw(safe, opt);

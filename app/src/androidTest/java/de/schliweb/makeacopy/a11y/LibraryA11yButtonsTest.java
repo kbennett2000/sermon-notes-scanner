@@ -1,10 +1,10 @@
 package de.schliweb.makeacopy.a11y;
 
 import android.view.View;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.ui.library.ScansLibraryFragment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,8 +14,8 @@ public class LibraryA11yButtonsTest {
 
   @Test
   public void index_existing_icon_hasContentDescription_andMinTouchTarget_whenVisible() {
-    FragmentScenario<ScansLibraryFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ScansLibraryFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ScansLibraryFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     final boolean[] visible = {true};

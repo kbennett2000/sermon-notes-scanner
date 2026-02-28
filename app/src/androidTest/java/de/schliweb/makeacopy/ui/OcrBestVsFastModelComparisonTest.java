@@ -422,7 +422,10 @@ public class OcrBestVsFastModelComparisonTest {
   /** Normalizes text for comparison. */
   private String normalizeText(String text) {
     if (text == null) return "";
-    return text.toLowerCase().replaceAll("[\\r\\n]+", " ").replaceAll("\\s+", " ").trim();
+    return text.toLowerCase(java.util.Locale.ROOT)
+        .replaceAll("[\\r\\n]+", " ")
+        .replaceAll("\\s+", " ")
+        .trim();
   }
 
   /** Calculates the similarity between two strings using Levenshtein distance. */

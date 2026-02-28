@@ -8,6 +8,7 @@ import de.schliweb.makeacopy.utils.OCRPostProcessor;
 import de.schliweb.makeacopy.utils.RecognizedWord;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,6 +24,7 @@ import org.junit.runner.RunWith;
  * <p>These tests require android.graphics.RectF and must run as instrumented tests.
  */
 @RunWith(AndroidJUnit4.class)
+@SuppressWarnings("StringSplitter")
 public class WordsToTextRtlSortingTest {
 
   /** Helper method to create a RecognizedWord with text and bounding box coordinates. */
@@ -65,7 +67,7 @@ public class WordsToTextRtlSortingTest {
     assertTrue("Persian text should end with 'است' (leftmost word)", result.trim().endsWith("است"));
 
     // Verify word order is correct (right to left)
-    String[] outputWords = result.trim().split("\\s+");
+    String[] outputWords = Pattern.compile("\\s+").split(result.trim());
     assertEquals("Should have 6 words", 6, outputWords.length);
     assertEquals("First word should be 'این'", "این", outputWords[0]);
     assertEquals("Last word should be 'است'", "است", outputWords[5]);
@@ -100,7 +102,7 @@ public class WordsToTextRtlSortingTest {
         result.trim().endsWith("document"));
 
     // Verify word order is correct (left to right)
-    String[] outputWords = result.trim().split("\\s+");
+    String[] outputWords = Pattern.compile("\\s+").split(result.trim());
     assertEquals("Should have 5 words", 5, outputWords.length);
     assertEquals("First word should be 'This'", "This", outputWords[0]);
     assertEquals("Last word should be 'document'", "document", outputWords[4]);
@@ -123,7 +125,7 @@ public class WordsToTextRtlSortingTest {
     words.add(createWordWithBounds("جهان", 30, 50, 80, 70)); // "World" - leftmost
 
     String result = OCRPostProcessor.wordsToText(words);
-    String[] lines = result.split("\n");
+    String[] lines = Pattern.compile("\n").split(result);
 
     System.out.println("[DEBUG_LOG] Mixed content result: " + result);
 
@@ -184,7 +186,7 @@ public class WordsToTextRtlSortingTest {
     words.add(createWordWithBounds("است", 150, 90, 200, 110));
 
     String result = OCRPostProcessor.wordsToText(words);
-    String[] lines = result.split("\n");
+    String[] lines = Pattern.compile("\n").split(result);
 
     System.out.println("[DEBUG_LOG] Multi-line Persian result: " + result);
 
@@ -233,7 +235,7 @@ public class WordsToTextRtlSortingTest {
     words.add(createWordWithBounds("سلام", 10, 50, 60, 70));
 
     String result = OCRPostProcessor.wordsToText(words);
-    String[] lines = result.split("\n");
+    String[] lines = Pattern.compile("\n").split(result);
 
     System.out.println("[DEBUG_LOG] Single word lines result: " + result);
 

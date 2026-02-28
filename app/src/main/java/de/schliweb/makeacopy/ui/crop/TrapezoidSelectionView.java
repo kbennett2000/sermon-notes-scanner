@@ -105,6 +105,9 @@ public class TrapezoidSelectionView extends View {
   private int magnifierSizePx = 0;
   private boolean isDraggingWithMagnifier = false;
 
+  // Injected DocQuadOrtRunner (set by hosting Fragment via setter)
+  @Setter @Nullable private de.schliweb.makeacopy.ml.docquad.DocQuadOrtRunner docQuadOrtRunner;
+
   // === Debug/diagnostics ===
   @Setter private boolean debugLogsEnabled = false; // enable verbose logs
   private boolean debugOverlayEnabled = false; // draw overlay with rects
@@ -662,7 +665,8 @@ public class TrapezoidSelectionView extends View {
       org.opencv.core.Point[] imgCorners;
       if (!userHasEdited && !docQuadAutoInitConsumed) {
         de.schliweb.makeacopy.ml.corners.CornerDetector detector =
-            de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forCrop(getContext());
+            de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forCrop(
+                getContext(), docQuadOrtRunner);
 
         de.schliweb.makeacopy.ml.corners.DetectionResult r = detector.detect(work, getContext());
         if (r == null

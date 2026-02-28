@@ -6,13 +6,13 @@ import android.graphics.Bitmap;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.IdlingPolicies;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.testutil.LiveDataIdlingResource;
 import de.schliweb.makeacopy.testutil.ViewDump;
 import de.schliweb.makeacopy.ui.export.ExportFragment;
@@ -46,7 +46,7 @@ public class ExportA11yActionsTest {
 
   /** Seeds two pages in the ExportSessionViewModel and returns the RecyclerView + VM via refs. */
   private void seedTwoPages(
-      FragmentScenario<ExportFragment> scenario,
+      HiltFragmentScenario<ExportFragment> scenario,
       AtomicReference<RecyclerView> rvRef,
       AtomicReference<de.schliweb.makeacopy.ui.export.session.ExportSessionViewModel> vmRef,
       AtomicReference<androidx.lifecycle.LifecycleOwner> ownerRef) {
@@ -83,8 +83,8 @@ public class ExportA11yActionsTest {
 
   @Test
   public void custom_actions_present_on_items() {
-    FragmentScenario<ExportFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ExportFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ExportFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     AtomicReference<RecyclerView> rvRef = new AtomicReference<>();
@@ -124,8 +124,8 @@ public class ExportA11yActionsTest {
 
   @Test
   public void perform_delete_action_updates_count() {
-    FragmentScenario<ExportFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ExportFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ExportFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     AtomicReference<RecyclerView> rvRef = new AtomicReference<>();
@@ -180,8 +180,8 @@ public class ExportA11yActionsTest {
 
   @Test
   public void perform_move_right_then_left_reorders_items() {
-    FragmentScenario<ExportFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ExportFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ExportFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     AtomicReference<RecyclerView> rvRef = new AtomicReference<>();

@@ -241,7 +241,7 @@ public class ArabicPersianPdfExportTest {
             fonts.stream()
                 .anyMatch(
                     f -> {
-                      String name = f.getName().toLowerCase();
+                      String name = f.getName().toLowerCase(java.util.Locale.ROOT);
                       return name.contains("noto")
                           || name.contains("arabic")
                           || name.contains("naskh");

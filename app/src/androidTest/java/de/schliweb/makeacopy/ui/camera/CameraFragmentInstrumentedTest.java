@@ -5,11 +5,11 @@ import static org.junit.Assert.assertNotNull;
 
 import android.Manifest;
 import androidx.camera.core.ImageCapture;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.GrantPermissionRule;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.awaitility.Awaitility;
@@ -24,10 +24,10 @@ public class CameraFragmentInstrumentedTest {
 
   @Test
   public void imageCapture_isMaximizeQuality_afterBinding() {
-    FragmentScenario<CameraFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<CameraFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             CameraFragment.class,
-            /* fragmentArgs= */ null,
+            /* args= */ null,
             R.style.Theme_MakeACopy,
             Lifecycle.State.RESUMED);
 

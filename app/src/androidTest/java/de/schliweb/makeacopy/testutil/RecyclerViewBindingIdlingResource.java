@@ -114,10 +114,12 @@ public class RecyclerViewBindingIdlingResource implements IdlingResource {
           lastObservedAdapter.unregisterAdapterDataObserver(dataObserver);
         }
       } catch (Throwable ignored) {
+        // Safe to ignore: observer may not be registered
       }
       try {
         current.registerAdapterDataObserver(dataObserver);
       } catch (Throwable ignored) {
+        // Safe to ignore: observer may already be registered
       }
       lastObservedAdapter = current;
     }

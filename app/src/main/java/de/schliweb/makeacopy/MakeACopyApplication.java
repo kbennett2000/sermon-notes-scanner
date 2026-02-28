@@ -2,16 +2,21 @@ package de.schliweb.makeacopy;
 
 import android.app.Application;
 import android.util.Log;
-import de.schliweb.makeacopy.data.library.LibraryServiceLocator;
+import dagger.hilt.android.HiltAndroidApp;
+import de.schliweb.makeacopy.data.library.CollectionsRepository;
 import de.schliweb.makeacopy.services.CacheCleanupService;
 import de.schliweb.makeacopy.utils.FeatureFlags;
 import de.schliweb.makeacopy.utils.OpenCVUtils;
+import javax.inject.Inject;
 
 /**
  * Main Application class for MakeACopy. Handles global initialization including OpenCV and
  * background services.
  */
+@HiltAndroidApp
 public class MakeACopyApplication extends Application {
+
+  @Inject CollectionsRepository collectionsRepository;
 
   private static final String TAG = "MakeACopyApplication";
 
@@ -82,9 +87,7 @@ public class MakeACopyApplication extends Application {
       new Thread(
               () -> {
                 try {
-                  de.schliweb.makeacopy.data.library.CollectionsRepository cr =
-                      LibraryServiceLocator.getCollectionsRepository(appCtx);
-                  cr.getOrCreateDefaultCompletedCollection(appCtx);
+                  collectionsRepository.getOrCreateDefaultCompletedCollection(appCtx);
                 } catch (Throwable t) {
                   Log.d(TAG, "initializeDefaultCompletedScansCollection: suppressed", t);
                 }

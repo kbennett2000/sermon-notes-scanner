@@ -5,10 +5,10 @@ import static org.junit.Assert.*;
 import android.os.Build;
 import android.view.View;
 import android.widget.TextView;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.ui.camera.CameraFragment;
 import de.schliweb.makeacopy.ui.export.ExportFragment;
 import org.junit.Test;
@@ -19,8 +19,8 @@ public class HeadingsAndLiveRegionsTest {
 
   @Test
   public void camera_heading_and_liveRegion_and_preview_not_accessible() {
-    FragmentScenario<CameraFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<CameraFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             CameraFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     scenario.onFragment(
@@ -53,8 +53,8 @@ public class HeadingsAndLiveRegionsTest {
 
   @Test
   public void export_heading_and_liveRegion_present() {
-    FragmentScenario<ExportFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ExportFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ExportFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     scenario.onFragment(

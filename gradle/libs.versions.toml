@@ -34,6 +34,7 @@ accessibilityTestFramework = "4.1.1"
 spotless = "6.25.0"
 errorprone = "4.1.0"
 errorproneCore = "2.31.0"
+hilt = "2.56.2"
 
 [libraries]
 accessibility-test-framework = { module = "com.google.android.apps.common.testing.accessibility.framework:accessibility-test-framework", version.ref = "accessibilityTestFramework" }
@@ -83,8 +84,14 @@ awaitility = { group = "org.awaitility", name = "awaitility", version.ref = "awa
 # Error Prone
 errorprone-core = { group = "com.google.errorprone", name = "error_prone_core", version.ref = "errorproneCore" }
 
+# Hilt
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 

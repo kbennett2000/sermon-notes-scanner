@@ -25,7 +25,10 @@ import de.schliweb.makeacopy.utils.OpenCVUtils;
  * CameraViewModel. The fragment provides a cropping UI, handles user input for cropping or
  * resetting the image, and dynamically adjusts UI elements for system insets.
  */
+@dagger.hilt.android.AndroidEntryPoint
 public class CropFragment extends Fragment {
+
+  @javax.inject.Inject de.schliweb.makeacopy.ml.docquad.DocQuadOrtRunner docQuadOrtRunner;
   private static final String TAG = "CropFragment";
   private static final long CROP_A11Y_COOLDOWN_MS = 10000L;
   private FragmentCropBinding binding;
@@ -62,6 +65,9 @@ public class CropFragment extends Fragment {
     cameraViewModel = new ViewModelProvider(requireActivity()).get(CameraViewModel.class);
     binding = FragmentCropBinding.inflate(inflater, container, false);
     View root = binding.getRoot();
+
+    // Pass the Hilt-injected DocQuadOrtRunner to the TrapezoidSelectionView
+    binding.trapezoidSelection.setDocQuadOrtRunner(docQuadOrtRunner);
 
     // Wire the Magnifier source view: compute and pass image->overlay matrix once layout/bitmap
     // ready
@@ -292,7 +298,7 @@ public class CropFragment extends Fragment {
               try {
                 de.schliweb.makeacopy.ml.corners.CornerDetector detector =
                     de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forCrop(
-                        requireContext());
+                        requireContext(), docQuadOrtRunner);
                 de.schliweb.makeacopy.ml.corners.DetectionResult r =
                     detector.detect(bmp, requireContext());
                 if (r != null

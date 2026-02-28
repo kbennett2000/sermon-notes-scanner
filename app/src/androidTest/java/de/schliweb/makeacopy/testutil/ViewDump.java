@@ -41,6 +41,7 @@ public class ViewDump {
         idName = v.getResources().getResourceEntryName(v.getId());
       }
     } catch (Resources.NotFoundException ignore) {
+      // Safe to ignore: view may have a dynamically generated ID with no resource name
     }
     return v.getClass().getSimpleName()
         + "#"

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.espresso.Espresso;
 import androidx.test.espresso.NoMatchingViewException;
@@ -16,6 +15,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.a11y.util.A11yCapture;
 import de.schliweb.makeacopy.a11y.util.TestPrefs;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.After;
 import org.junit.Before;
@@ -44,8 +44,8 @@ public class CameraA11yTorchTest extends de.schliweb.makeacopy.a11y.util.A11yBas
   @Test
   public void toggling_flash_emits_accessibility_announcements_when_flash_available()
       throws Exception {
-    FragmentScenario<CameraFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<CameraFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             CameraFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     final AtomicBoolean hasFlashRef = new AtomicBoolean(false);

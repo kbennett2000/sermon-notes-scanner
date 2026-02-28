@@ -213,7 +213,10 @@ public class OcrExportFlowInstrumentedTest {
    */
   private String normalizeText(String text) {
     if (text == null) return "";
-    return text.toLowerCase().replaceAll("[\\r\\n]+", " ").replaceAll("\\s+", " ").trim();
+    return text.toLowerCase(java.util.Locale.ROOT)
+        .replaceAll("[\\r\\n]+", " ")
+        .replaceAll("\\s+", " ")
+        .trim();
   }
 
   /**

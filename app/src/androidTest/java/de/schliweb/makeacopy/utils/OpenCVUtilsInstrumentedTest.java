@@ -79,7 +79,7 @@ public class OpenCVUtilsInstrumentedTest {
   public void toBw_withPattern_returnsNonNull() {
     assumeOpenCvInitialized();
     Bitmap src = createTestPatternBitmap(480, 360);
-    OpenCVUtils.BwOptions opt = new OpenCVUtils.BwOptions();
+    BinarizationUtils.BwOptions opt = new BinarizationUtils.BwOptions();
     Bitmap bw = OpenCVUtils.toBw(src, opt);
     assertNotNull(bw);
     assertEquals(480, bw.getWidth());

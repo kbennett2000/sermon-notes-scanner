@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
+import de.schliweb.makeacopy.utils.BinarizationUtils;
 import de.schliweb.makeacopy.utils.OpenCVUtils;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -259,9 +260,9 @@ public final class JpegExporter {
       Bitmap tmpIn = Bitmap.createBitmap(rgba.cols(), rgba.rows(), Bitmap.Config.ARGB_8888);
       Utils.matToBitmap(rgba, tmpIn);
 
-      OpenCVUtils.BwOptions opt = new OpenCVUtils.BwOptions();
+      BinarizationUtils.BwOptions opt = new BinarizationUtils.BwOptions();
       opt.mode =
-          OpenCVUtils.BwOptions.Mode.OTSU_ONLY; // classic Otsu binarization per export option
+          BinarizationUtils.BwOptions.Mode.OTSU_ONLY; // classic Otsu binarization per export option
       // Keep mild CLAHE/shadow handling defaults from OpenCVUtils where applicable
 
       Bitmap bw = OpenCVUtils.toBw(tmpIn, opt);

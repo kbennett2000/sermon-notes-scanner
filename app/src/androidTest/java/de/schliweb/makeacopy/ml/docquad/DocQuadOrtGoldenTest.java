@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class DocQuadOrtGoldenTest extends DocQuadGoldenTestBase {
 
-  private static final String MODEL_ASSET = "docquad_m4/docquadnet256_zero_opset17.onnx";
+  private static final String MODEL_ASSET = "docquad_m4/docquadnet256_zero_opset17.ort";
   private static final String EXPECTED_JSON_ASSET = "docquad_m4/expected_stats_v1.json";
 
   @Test

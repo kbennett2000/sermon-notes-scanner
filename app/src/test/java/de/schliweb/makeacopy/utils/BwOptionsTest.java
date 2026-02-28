@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import de.schliweb.makeacopy.utils.OpenCVUtils.BwOptions;
+import de.schliweb.makeacopy.utils.BinarizationUtils.BwOptions;
 import org.junit.Test;
 
 public class BwOptionsTest {

@@ -4,11 +4,11 @@ import static org.junit.Assert.*;
 
 import android.Manifest;
 import android.view.View;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.GrantPermissionRule;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.ui.camera.CameraFragment;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,10 +21,10 @@ public class CameraA11ySmokeTest {
 
   @Test
   public void previewView_isNotFocusable_andNotImportantForA11y() {
-    FragmentScenario<CameraFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<CameraFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             CameraFragment.class,
-            /* fragmentArgs= */ null,
+            /* args= */ null,
             R.style.Theme_MakeACopy,
             Lifecycle.State.RESUMED);
 

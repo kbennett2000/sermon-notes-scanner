@@ -425,13 +425,13 @@ public class DocumentLayoutAnalyzerInstrumentedTest {
     String[] expectedKeywords = {"Table", "Sample", "Data", "Row", "Column"};
     int embeddedMatches = 0;
     int recognizedMatches = 0;
-    String embeddedLower = embeddedText.toLowerCase();
-    String recognizedLower = recognizedText.toLowerCase();
+    String embeddedLower = embeddedText.toLowerCase(java.util.Locale.ROOT);
+    String recognizedLower = recognizedText.toLowerCase(java.util.Locale.ROOT);
 
     System.out.println("[DEBUG_LOG] Keyword matches:");
     for (String keyword : expectedKeywords) {
-      boolean inEmbedded = embeddedLower.contains(keyword.toLowerCase());
-      boolean inRecognized = recognizedLower.contains(keyword.toLowerCase());
+      boolean inEmbedded = embeddedLower.contains(keyword.toLowerCase(java.util.Locale.ROOT));
+      boolean inRecognized = recognizedLower.contains(keyword.toLowerCase(java.util.Locale.ROOT));
       if (inEmbedded) embeddedMatches++;
       if (inRecognized) recognizedMatches++;
       System.out.println(
@@ -560,13 +560,13 @@ public class DocumentLayoutAnalyzerInstrumentedTest {
     String[] keywords = {"Table", "Sample", "Data", "Row", "Column", "Financial", "Policy"};
     int standardKeywords = 0;
     int layoutKeywords = 0;
-    String standardLower = standardText.toLowerCase();
-    String layoutLower = layoutText.toLowerCase();
+    String standardLower = standardText.toLowerCase(java.util.Locale.ROOT);
+    String layoutLower = layoutText.toLowerCase(java.util.Locale.ROOT);
 
     System.out.println("[DEBUG_LOG] Keyword comparison:");
     for (String keyword : keywords) {
-      boolean inStandard = standardLower.contains(keyword.toLowerCase());
-      boolean inLayout = layoutLower.contains(keyword.toLowerCase());
+      boolean inStandard = standardLower.contains(keyword.toLowerCase(java.util.Locale.ROOT));
+      boolean inLayout = layoutLower.contains(keyword.toLowerCase(java.util.Locale.ROOT));
       if (inStandard) standardKeywords++;
       if (inLayout) layoutKeywords++;
       System.out.println(
@@ -897,14 +897,17 @@ public class DocumentLayoutAnalyzerInstrumentedTest {
    * Calculates a simple text similarity based on common words. Returns a value between 0.0 (no
    * similarity) and 1.0 (identical).
    */
+  @SuppressWarnings("StringSplitter")
   private double calculateTextSimilarity(String text1, String text2) {
     if (text1 == null || text2 == null || text1.isEmpty() || text2.isEmpty()) {
       return 0.0;
     }
 
     // Normalize texts
-    String[] words1 = text1.toLowerCase().replaceAll("[^a-z0-9\\s]", " ").split("\\s+");
-    String[] words2 = text2.toLowerCase().replaceAll("[^a-z0-9\\s]", " ").split("\\s+");
+    String[] words1 =
+        text1.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9\\s]", " ").split("\\s+");
+    String[] words2 =
+        text2.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9\\s]", " ").split("\\s+");
 
     // Count common words
     java.util.Set<String> set1 = new java.util.HashSet<>();

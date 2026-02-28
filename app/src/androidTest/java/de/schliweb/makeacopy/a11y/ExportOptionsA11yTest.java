@@ -6,13 +6,13 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 import android.view.View;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.espresso.Espresso;
 import androidx.test.espresso.IdlingPolicies;
 import androidx.test.espresso.NoMatchingViewException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.ui.export.ExportFragment;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -32,10 +32,10 @@ public class ExportOptionsA11yTest {
     IdlingPolicies.setIdlingResourceTimeout(30, java.util.concurrent.TimeUnit.SECONDS);
     IdlingPolicies.setMasterPolicyTimeout(45, java.util.concurrent.TimeUnit.SECONDS);
 
-    FragmentScenario<ExportFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ExportFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ExportFragment.class,
-            /* fragmentArgs= */ null,
+            /* args= */ null,
             R.style.Theme_MakeACopy,
             Lifecycle.State.RESUMED);
 

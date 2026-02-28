@@ -8,14 +8,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import dagger.hilt.android.AndroidEntryPoint;
 import de.schliweb.makeacopy.R;
-import de.schliweb.makeacopy.data.library.LibraryServiceLocator;
+import de.schliweb.makeacopy.data.library.CollectionsRepository;
 import de.schliweb.makeacopy.data.library.ScanEntity;
+import de.schliweb.makeacopy.data.library.ScansRepository;
 import de.schliweb.makeacopy.utils.FeatureFlags;
 import de.schliweb.makeacopy.utils.FileUtils;
 import de.schliweb.makeacopy.utils.ImageDecodeUtils;
 import java.text.DateFormat;
 import java.util.Date;
+import javax.inject.Inject;
 
 /**
  * The ScanDetailsFragment class is a Fragment that displays the details of a specific scan and
@@ -45,7 +48,11 @@ import java.util.Date;
  * mechanism. - openInExport: Attempts to open the scan's export file in an appropriate external
  * application.
  */
+@AndroidEntryPoint
 public class ScanDetailsFragment extends Fragment {
+
+  @Inject ScansRepository scansRepository;
+  @Inject CollectionsRepository collectionsRepository;
 
   private View progress;
   private View content;
@@ -139,9 +146,7 @@ public class ScanDetailsFragment extends Fragment {
               new Thread(
                       () -> {
                         try {
-                          de.schliweb.makeacopy.data.library.ScansRepository repo =
-                              de.schliweb.makeacopy.data.library.LibraryServiceLocator
-                                  .getScansRepository(requireContext());
+                          de.schliweb.makeacopy.data.library.ScansRepository repo = scansRepository;
                           repo.updateExportPathsJson(requireContext(), scanId, json);
                           if (finalPickedBase != null && !finalPickedBase.isEmpty()) {
                             // Update title to match the picked file name (without extension)
@@ -251,10 +256,7 @@ public class ScanDetailsFragment extends Fragment {
             () -> {
               java.util.List<de.schliweb.makeacopy.data.library.CollectionEntity> cols;
               try {
-                cols =
-                    de.schliweb.makeacopy.data.library.LibraryServiceLocator
-                        .getCollectionsRepository(appCtx)
-                        .getAllCollections(appCtx);
+                cols = collectionsRepository.getAllCollections(appCtx);
               } catch (Throwable t) {
                 cols = java.util.Collections.emptyList();
               }
@@ -315,11 +317,7 @@ public class ScanDetailsFragment extends Fragment {
                                                                             .library
                                                                             .CollectionsRepository
                                                                         repo =
-                                                                            de.schliweb.makeacopy
-                                                                                .data.library
-                                                                                .LibraryServiceLocator
-                                                                                .getCollectionsRepository(
-                                                                                    appCtx);
+                                                                            collectionsRepository;
                                                                     de.schliweb.makeacopy.data
                                                                             .library
                                                                             .CollectionEntity
@@ -377,10 +375,7 @@ public class ScanDetailsFragment extends Fragment {
                                                     try {
                                                       de.schliweb.makeacopy.data.library
                                                               .CollectionsRepository
-                                                          repo =
-                                                              de.schliweb.makeacopy.data.library
-                                                                  .LibraryServiceLocator
-                                                                  .getCollectionsRepository(appCtx);
+                                                          repo = collectionsRepository;
                                                       repo.assignScanToCollection(
                                                           appCtx, scanId, sel.id);
                                                       if (isAdded())
@@ -430,9 +425,7 @@ public class ScanDetailsFragment extends Fragment {
             () -> {
               ScanEntity e;
               try {
-                e =
-                    LibraryServiceLocator.getScansRepository(requireContext())
-                        .getScanById(requireContext(), scanId);
+                e = scansRepository.getScanById(requireContext(), scanId);
               } catch (Throwable t) {
                 e = null;
               }
@@ -788,9 +781,7 @@ public class ScanDetailsFragment extends Fragment {
         }
         String json = makeSingleUriArrayJson(newUri);
         try {
-          de.schliweb.makeacopy.data.library.LibraryServiceLocator.getScansRepository(
-                  requireContext())
-              .updateExportPathsJson(requireContext(), scanId, json);
+          scansRepository.updateExportPathsJson(requireContext(), scanId, json);
         } catch (Throwable ignore) {
           // Best-effort; failure is non-critical
         }
@@ -920,8 +911,7 @@ public class ScanDetailsFragment extends Fragment {
                           () -> {
                             try {
                               // 1) Update title in index
-                              LibraryServiceLocator.getScansRepository(requireContext())
-                                  .updateTitle(requireContext(), scanId, name);
+                              scansRepository.updateTitle(requireContext(), scanId, name);
                             } catch (Throwable ignore) {
                               // Best-effort; failure is non-critical
                             }
@@ -971,8 +961,7 @@ public class ScanDetailsFragment extends Fragment {
     new Thread(
             () -> {
               try {
-                LibraryServiceLocator.getScansRepository(requireContext())
-                    .deleteScan(requireContext(), scanId);
+                scansRepository.deleteScan(requireContext(), scanId);
               } catch (Throwable ignore) {
                 // Best-effort; failure is non-critical
               }

@@ -11,19 +11,24 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
+import dagger.hilt.android.AndroidEntryPoint;
 import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.data.library.CollectionEntity;
-import de.schliweb.makeacopy.data.library.LibraryServiceLocator;
+import de.schliweb.makeacopy.data.library.CollectionsRepository;
 import de.schliweb.makeacopy.utils.FeatureFlags;
 import de.schliweb.makeacopy.utils.UIUtils;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 
 /**
  * A fragment that handles displaying and managing user collections. It utilizes a RecyclerView for
  * listing collections and includes options for creating, navigating, and deleting collections.
  */
+@AndroidEntryPoint
 public class CollectionsFragment extends Fragment {
+
+  @Inject CollectionsRepository collectionsRepository;
 
   private RecyclerView list;
   private View progress;
@@ -128,7 +133,7 @@ public class CollectionsFragment extends Fragment {
                       boolean isDefaultById = false;
                       try {
                         de.schliweb.makeacopy.data.library.CollectionsRepository cr =
-                            LibraryServiceLocator.getCollectionsRepository(requireContext());
+                            collectionsRepository;
                         de.schliweb.makeacopy.data.library.CollectionEntity def =
                             cr.getOrCreateDefaultCompletedCollection(requireContext());
                         isDefaultById = (def != null && def.id != null && def.id.equals(row.id));
@@ -175,9 +180,7 @@ public class CollectionsFragment extends Fragment {
                                                                 boolean ok;
                                                                 try {
                                                                   ok =
-                                                                      LibraryServiceLocator
-                                                                          .getCollectionsRepository(
-                                                                              requireContext())
+                                                                      collectionsRepository
                                                                           .renameCollection(
                                                                               requireContext(),
                                                                               row.id,
@@ -212,9 +215,7 @@ public class CollectionsFragment extends Fragment {
                                                       boolean deleted;
                                                       try {
                                                         deleted =
-                                                            LibraryServiceLocator
-                                                                .getCollectionsRepository(
-                                                                    requireContext())
+                                                            collectionsRepository
                                                                 .deleteCollectionIfEmpty(
                                                                     requireContext(), row.id);
                                                       } catch (Throwable t) {
@@ -271,8 +272,7 @@ public class CollectionsFragment extends Fragment {
                   new Thread(
                           () -> {
                             try {
-                              LibraryServiceLocator.getCollectionsRepository(requireContext())
-                                  .createCollection(requireContext(), name);
+                              collectionsRepository.createCollection(requireContext(), name);
                             } catch (Throwable ignore) {
                               // Best-effort; failure is non-critical
                             }
@@ -301,9 +301,7 @@ public class CollectionsFragment extends Fragment {
             () -> {
               List<CollectionEntity> cols;
               try {
-                cols =
-                    LibraryServiceLocator.getCollectionsRepository(requireContext())
-                        .getAllCollections(requireContext());
+                cols = collectionsRepository.getAllCollections(requireContext());
               } catch (Throwable t) {
                 cols = java.util.Collections.emptyList();
               }
@@ -311,9 +309,7 @@ public class CollectionsFragment extends Fragment {
               for (CollectionEntity c : cols) {
                 int count;
                 try {
-                  count =
-                      LibraryServiceLocator.getCollectionsRepository(requireContext())
-                          .countItems(requireContext(), c.id);
+                  count = collectionsRepository.countItems(requireContext(), c.id);
                 } catch (Throwable t) {
                   count = 0;
                 }

@@ -87,7 +87,10 @@ import java.util.concurrent.TimeUnit;
  * application scenarios.
  */
 @SuppressWarnings("FutureReturnValueIgnored") // camera control futures are fire-and-forget
+@dagger.hilt.android.AndroidEntryPoint
 public class CameraFragment extends Fragment implements SensorEventListener {
+
+  @javax.inject.Inject de.schliweb.makeacopy.ml.docquad.DocQuadOrtRunner docQuadOrtRunner;
 
   private static final String TAG = "CameraFragment";
   private static final String PREF_EXPOSURE_INDEX = "exposure_compensation_index";
@@ -283,11 +286,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     // Init UI visibility
     showCameraMode();
 
-    // Proactive ML loading: start loading DocQuad runner in background.
-    // This makes the first analysis frame much faster by ensuring model is in memory/cache early.
-    de.schliweb.makeacopy.ml.docquad.DocQuadOrtRunner.getInstanceAsync(
-        requireContext().getApplicationContext(),
-        de.schliweb.makeacopy.ml.corners.DocQuadDetector.DEFAULT_MODEL_ASSET_PATH);
+    // DocQuad runner is now injected via Hilt (docQuadOrtRunner field).
+    // No proactive loading needed — the singleton is created eagerly by the DI container.
 
     final TextView textView = binding.textCamera;
     cameraViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
@@ -1980,7 +1980,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
       de.schliweb.makeacopy.ml.corners.CornerDetector liveDetector = cachedLiveCornerDetector;
       if (liveDetector == null || !cachedLiveCornerDetectorFlag) {
         liveDetector =
-            de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forLive(requireContext());
+            de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forLive(
+                requireContext(), docQuadOrtRunner);
         cachedLiveCornerDetector = liveDetector;
         cachedLiveCornerDetectorFlag = true;
       }
@@ -2620,316 +2621,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     }
   }
 
-  /** Handles PDF import - renders PDF page(s) as bitmap and feeds into workflow. */
+  /** Delegates PDF import to {@link PdfImportHelper}. */
   private void handlePdfImport(Uri pdfUri) {
-    new Thread(
-            () -> {
-              ParcelFileDescriptor pfd = null;
-              android.graphics.pdf.PdfRenderer renderer = null;
-              try {
-                Context ctx = getContext();
-                if (ctx == null || !isAdded()) return;
-
-                pfd = ctx.getContentResolver().openFileDescriptor(pdfUri, "r");
-                if (pfd == null) {
-                  runOnUiThreadSafe(
-                      () ->
-                          UIUtils.showToast(
-                              requireContext(),
-                              R.string.error_cannot_open_pdf,
-                              Toast.LENGTH_SHORT));
-                  return;
-                }
-
-                renderer = new android.graphics.pdf.PdfRenderer(pfd);
-                int pageCount = renderer.getPageCount();
-
-                if (pageCount == 0) {
-                  runOnUiThreadSafe(
-                      () ->
-                          UIUtils.showToast(
-                              requireContext(), R.string.error_pdf_empty, Toast.LENGTH_SHORT));
-                  return;
-                }
-
-                if (pageCount == 1) {
-                  // Single page: render directly
-                  Bitmap bitmap = renderPdfPage(renderer, 0);
-                  runOnUiThreadSafe(() -> processPdfBitmap(bitmap));
-                } else {
-                  // Multiple pages: show selection dialog
-                  runOnUiThreadSafe(() -> showPageSelectionDialog(pdfUri, pageCount));
-                }
-              } catch (java.io.IOException | SecurityException e) {
-                Log.e(TAG, "PDF import error", e);
-                runOnUiThreadSafe(
-                    () ->
-                        UIUtils.showToast(
-                            requireContext(),
-                            R.string.error_pdf_import_failed,
-                            Toast.LENGTH_SHORT));
-              } finally {
-                try {
-                  if (renderer != null) renderer.close();
-                  if (pfd != null) pfd.close();
-                } catch (java.io.IOException ignored) {
-                  // Best-effort; failure is non-critical
-                }
-              }
-            })
-        .start();
-  }
-
-  /** Renders a single PDF page as a high-resolution bitmap suitable for OCR. */
-  private Bitmap renderPdfPage(android.graphics.pdf.PdfRenderer renderer, int pageIndex) {
-    android.graphics.pdf.PdfRenderer.Page page = renderer.openPage(pageIndex);
-
-    // Target DPI for OCR quality (300 DPI recommended)
-    final int TARGET_DPI = 300;
-    final float PDF_DPI = 72f; // Standard PDF resolution
-    float scale = TARGET_DPI / PDF_DPI;
-
-    int width = (int) (page.getWidth() * scale);
-    int height = (int) (page.getHeight() * scale);
-
-    // Memory limit: max 4096x4096 pixels
-    final int MAX_DIMENSION = 4096;
-    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-      float downScale = Math.min((float) MAX_DIMENSION / width, (float) MAX_DIMENSION / height);
-      width = (int) (width * downScale);
-      height = (int) (height * downScale);
-      scale *= downScale;
-    }
-
-    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-    bitmap.eraseColor(android.graphics.Color.WHITE); // White background for transparent PDFs
-
-    android.graphics.Matrix matrix = new android.graphics.Matrix();
-    matrix.setScale(scale, scale);
-
-    page.render(
-        bitmap, null, matrix, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-    page.close();
-
-    return bitmap;
-  }
-
-  /** Shows a dialog for selecting a page from a multi-page PDF with thumbnail previews. */
-  private void showPageSelectionDialog(Uri pdfUri, int pageCount) {
-    if (!isAdded()) return;
-
-    // Inflate custom dialog layout
-    View dialogView =
-        LayoutInflater.from(requireContext()).inflate(R.layout.dialog_pdf_page_selection, null);
-    androidx.recyclerview.widget.RecyclerView recyclerView =
-        dialogView.findViewById(R.id.recycler_pages);
-    View progressBar = dialogView.findViewById(R.id.progress_loading);
-
-    // Set up RecyclerView with GridLayoutManager (3 columns)
-    recyclerView.setLayoutManager(
-        new androidx.recyclerview.widget.GridLayoutManager(requireContext(), 3));
-
-    AlertDialog dialog =
-        new AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create();
-
-    // Improve button contrast for dark mode
-    dialog.setOnShowListener(
-        dlg ->
-            de.schliweb.makeacopy.utils.DialogUtils.improveAlertDialogButtonContrastForNight(
-                dialog, requireContext()));
-
-    // Create adapter with page selection callback
-    PdfPageThumbnailAdapter adapter =
-        new PdfPageThumbnailAdapter(
-            pageCount,
-            pdfUri,
-            selectedPage -> {
-              dialog.dismiss();
-              // Render selected page in full resolution in background
-              new Thread(
-                      () -> {
-                        ParcelFileDescriptor pfd = null;
-                        android.graphics.pdf.PdfRenderer renderer = null;
-                        try {
-                          Context ctx = getContext();
-                          if (ctx == null || !isAdded()) return;
-
-                          pfd = ctx.getContentResolver().openFileDescriptor(pdfUri, "r");
-                          if (pfd == null) return;
-
-                          renderer = new android.graphics.pdf.PdfRenderer(pfd);
-                          Bitmap bitmap = renderPdfPage(renderer, selectedPage);
-
-                          runOnUiThreadSafe(() -> processPdfBitmap(bitmap));
-                        } catch (java.io.IOException e) {
-                          Log.e(TAG, "PDF page render error", e);
-                          runOnUiThreadSafe(
-                              () ->
-                                  UIUtils.showToast(
-                                      requireContext(),
-                                      R.string.error_pdf_page_render_failed,
-                                      Toast.LENGTH_SHORT));
-                        } finally {
-                          try {
-                            if (renderer != null) renderer.close();
-                            if (pfd != null) pfd.close();
-                          } catch (java.io.IOException ignored) {
-                            // Best-effort; failure is non-critical
-                          }
-                        }
-                      })
-                  .start();
-            });
-
-    recyclerView.setAdapter(adapter);
-
-    // Load thumbnails in background
-    new Thread(
-            () -> {
-              ParcelFileDescriptor pfd = null;
-              android.graphics.pdf.PdfRenderer renderer = null;
-              try {
-                Context ctx = getContext();
-                if (ctx == null || !isAdded()) return;
-
-                pfd = ctx.getContentResolver().openFileDescriptor(pdfUri, "r");
-                if (pfd == null) return;
-
-                renderer = new android.graphics.pdf.PdfRenderer(pfd);
-
-                for (int i = 0; i < pageCount; i++) {
-                  if (!isAdded()) break;
-                  final int pageIndex = i;
-                  Bitmap thumbnail = renderPdfPageThumbnail(renderer, pageIndex);
-                  runOnUiThreadSafe(() -> adapter.setThumbnail(pageIndex, thumbnail));
-                }
-
-                // Hide progress bar and show RecyclerView
-                runOnUiThreadSafe(
-                    () -> {
-                      if (progressBar != null) progressBar.setVisibility(View.GONE);
-                      recyclerView.setVisibility(View.VISIBLE);
-                    });
-              } catch (java.io.IOException e) {
-                Log.e(TAG, "PDF thumbnail loading error", e);
-              } finally {
-                try {
-                  if (renderer != null) renderer.close();
-                  if (pfd != null) pfd.close();
-                } catch (java.io.IOException ignored) {
-                  // Best-effort; failure is non-critical
-                }
-              }
-            })
-        .start();
-
-    dialog.show();
-  }
-
-  /** Renders a PDF page as a small thumbnail for preview. */
-  private Bitmap renderPdfPageThumbnail(android.graphics.pdf.PdfRenderer renderer, int pageIndex) {
-    android.graphics.pdf.PdfRenderer.Page page = renderer.openPage(pageIndex);
-
-    // Thumbnail size: max 200px on longest side
-    final int THUMBNAIL_SIZE = 200;
-    int pageWidth = page.getWidth();
-    int pageHeight = page.getHeight();
-
-    float scale = Math.min((float) THUMBNAIL_SIZE / pageWidth, (float) THUMBNAIL_SIZE / pageHeight);
-    int width = (int) (pageWidth * scale);
-    int height = (int) (pageHeight * scale);
-
-    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-    bitmap.eraseColor(android.graphics.Color.WHITE);
-
-    android.graphics.Matrix matrix = new android.graphics.Matrix();
-    matrix.setScale(scale, scale);
-
-    page.render(
-        bitmap, null, matrix, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-    page.close();
-
-    return bitmap;
-  }
-
-  /** Adapter for displaying PDF page thumbnails in a RecyclerView. */
-  private class PdfPageThumbnailAdapter
-      extends androidx.recyclerview.widget.RecyclerView.Adapter<
-          PdfPageThumbnailAdapter.ViewHolder> {
-    private final int pageCount;
-    private final Bitmap[] thumbnails;
-    private final OnPageSelectedListener listener;
-
-    interface OnPageSelectedListener {
-      void onPageSelected(int pageIndex);
-    }
-
-    @SuppressWarnings("UnusedVariable") // pdfUri kept for future thumbnail loading from PDF
-    PdfPageThumbnailAdapter(int pageCount, Uri pdfUri, OnPageSelectedListener listener) {
-      this.pageCount = pageCount;
-      this.thumbnails = new Bitmap[pageCount];
-      this.listener = listener;
-    }
-
-    void setThumbnail(int pageIndex, Bitmap thumbnail) {
-      if (pageIndex >= 0 && pageIndex < thumbnails.length) {
-        thumbnails[pageIndex] = thumbnail;
-        notifyItemChanged(pageIndex);
-      }
-    }
-
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-      View view =
-          LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.item_pdf_page_thumbnail, parent, false);
-      return new ViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-      holder.pageLabel.setText(getString(R.string.pdf_page_number, position + 1));
-      holder.pageNumberBadge.setText(String.valueOf(position + 1));
-
-      if (thumbnails[position] != null) {
-        holder.thumbnail.setImageBitmap(thumbnails[position]);
-        holder.loadingIndicator.setVisibility(View.GONE);
-      } else {
-        holder.thumbnail.setImageBitmap(null);
-        holder.loadingIndicator.setVisibility(View.VISIBLE);
-      }
-
-      holder.itemView.setOnClickListener(
-          v -> {
-            if (listener != null) {
-              listener.onPageSelected(position);
-            }
-          });
-    }
-
-    @Override
-    public int getItemCount() {
-      return pageCount;
-    }
-
-    static class ViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
-      final android.widget.ImageView thumbnail;
-      final TextView pageLabel;
-      final TextView pageNumberBadge;
-      final View loadingIndicator;
-
-      ViewHolder(@NonNull View itemView) {
-        super(itemView);
-        thumbnail = itemView.findViewById(R.id.page_thumbnail);
-        pageLabel = itemView.findViewById(R.id.page_label);
-        pageNumberBadge = itemView.findViewById(R.id.page_number_badge);
-        loadingIndicator = itemView.findViewById(R.id.thumbnail_loading);
-      }
-    }
+    PdfImportHelper.handlePdfImport(this, pdfUri, this::processPdfBitmap);
   }
 
   /** Processes a bitmap from PDF and feeds it into the normal workflow (Crop → OCR → Export). */

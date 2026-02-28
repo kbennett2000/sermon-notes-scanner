@@ -245,7 +245,7 @@ public class MultiLanguageOcrTest {
       assertTrue("OCR should recognize Latin text", hasLatinChars);
 
       // Check for specific words or characters
-      String lowerResult = ocrResult.toLowerCase();
+      String lowerResult = ocrResult.toLowerCase(java.util.Locale.ROOT);
       boolean hasGermanContent =
           lowerResult.contains("guten")
               || lowerResult.contains("tag")

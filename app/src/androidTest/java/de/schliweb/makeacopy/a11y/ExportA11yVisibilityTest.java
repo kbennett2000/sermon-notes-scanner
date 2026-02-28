@@ -4,11 +4,11 @@ import static org.junit.Assert.*;
 
 import android.graphics.Bitmap;
 import android.view.View;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.ui.export.ExportFragment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,8 +18,8 @@ public class ExportA11yVisibilityTest {
 
   @Test
   public void pages_container_gone_for_single_page_and_visible_for_two_pages() {
-    FragmentScenario<ExportFragment> scenario =
-        FragmentScenario.launchInContainer(
+    HiltFragmentScenario<ExportFragment> scenario =
+        HiltFragmentScenario.launchInHiltContainer(
             ExportFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     // Seed single page

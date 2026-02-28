@@ -37,6 +37,25 @@ final class ThrottledDocQuadLiveDetector implements CornerDetector {
     this(appCtx, SystemClock::uptimeMillis, null);
   }
 
+  /** Production ctor with a pre-loaded ORT runner (injected via DI). */
+  ThrottledDocQuadLiveDetector(@NonNull Context appCtx, @NonNull DocQuadOrtRunner injectedRunner) {
+    this.appCtx = appCtx;
+    this.timeSource = SystemClock::uptimeMillis;
+    this.runner = injectedRunner;
+    this.inference =
+        new Inference() {
+          @Override
+          public DetectionResult run(Bitmap src, Context ctx) throws Exception {
+            DocQuadDetector det = cachedDetector;
+            if (det == null) {
+              det = new DocQuadDetector(injectedRunner);
+              cachedDetector = det;
+            }
+            return det.detect(src, ctx);
+          }
+        };
+  }
+
   // Package-private ctor for tests.
   ThrottledDocQuadLiveDetector(
       @NonNull Context appCtx, @NonNull TimeSource timeSource, @NonNull Inference inference) {

@@ -10,12 +10,15 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
+import dagger.hilt.android.AndroidEntryPoint;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.data.library.CollectionsRepository;
 import de.schliweb.makeacopy.data.library.ExistingScansIndexer;
-import de.schliweb.makeacopy.data.library.LibraryServiceLocator;
 import de.schliweb.makeacopy.data.library.ScanEntity;
+import de.schliweb.makeacopy.data.library.ScansRepository;
 import de.schliweb.makeacopy.utils.FeatureFlags;
 import java.util.List;
+import javax.inject.Inject;
 
 /**
  * A Fragment that displays a library of scans. Provides functionality to manage and view scanned
@@ -42,7 +45,11 @@ import java.util.List;
  * library functionality. - Provides feedback to users via Toast messages when features are
  * unavailable or actions complete.
  */
+@AndroidEntryPoint
 public class ScansLibraryFragment extends Fragment {
+
+  @Inject ScansRepository scansRepository;
+  @Inject CollectionsRepository collectionsRepository;
 
   private RecyclerView list;
   private View progress;
@@ -183,10 +190,8 @@ public class ScansLibraryFragment extends Fragment {
                           new Thread(
                                   () -> {
                                     try {
-                                      LibraryServiceLocator.getCollectionsRepository(
-                                              requireContext())
-                                          .removeScanFromCollection(
-                                              requireContext(), item.id, collectionIdArg);
+                                      collectionsRepository.removeScanFromCollection(
+                                          requireContext(), item.id, collectionIdArg);
                                     } catch (Throwable ignore) {
                                       // Best-effort; failure is non-critical
                                     }
@@ -293,7 +298,7 @@ public class ScansLibraryFragment extends Fragment {
               List<ScanEntity> data;
               try {
                 if (collectionIdArg == null) {
-                  data = LibraryServiceLocator.getScansRepository(appCtx).getAllScans(appCtx);
+                  data = scansRepository.getAllScans(appCtx);
                   // On home screen: hide single-page CompletedScanEntry items from the registry.
                   // We detect these by a lightweight marker in sourceMetaJson:
                   // {"kind":"CompletedScanEntry"}
@@ -311,9 +316,7 @@ public class ScansLibraryFragment extends Fragment {
                     data = filtered;
                   }
                 } else {
-                  data =
-                      LibraryServiceLocator.getScansRepository(appCtx)
-                          .getScansForCollection(appCtx, collectionIdArg);
+                  data = scansRepository.getScansForCollection(appCtx, collectionIdArg);
                 }
               } catch (Throwable t) {
                 data = java.util.Collections.emptyList();
@@ -323,8 +326,7 @@ public class ScansLibraryFragment extends Fragment {
               final java.util.Map<String, java.util.List<String>> memberships =
                   new java.util.LinkedHashMap<>();
               try {
-                de.schliweb.makeacopy.data.library.CollectionsRepository cr =
-                    LibraryServiceLocator.getCollectionsRepository(appCtx);
+                de.schliweb.makeacopy.data.library.CollectionsRepository cr = collectionsRepository;
                 if (finalData != null) {
                   for (ScanEntity se : finalData) {
                     if (se == null) continue;

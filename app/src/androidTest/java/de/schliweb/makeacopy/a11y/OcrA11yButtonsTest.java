@@ -1,12 +1,12 @@
 package de.schliweb.makeacopy.a11y;
 
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.espresso.Espresso;
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.testutil.HiltFragmentScenario;
 import de.schliweb.makeacopy.testutil.ViewAssertionsEx;
 import de.schliweb.makeacopy.ui.ocr.OCRFragment;
 import org.junit.Test;
@@ -17,15 +17,15 @@ public class OcrA11yButtonsTest {
 
   @Test
   public void ocr_buttons_haveContentDescription_andMinTouchTarget() {
-    FragmentScenario.launchInContainer(
+    HiltFragmentScenario.launchInHiltContainer(
         OCRFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
 
     int[] ids = new int[] {R.id.button_ocr_options, R.id.button_ocr_review};
     for (int id : ids) {
       final boolean[] visible = {true};
       // Check visibility state on main without running Espresso there
-      FragmentScenario<OCRFragment> scenario =
-          FragmentScenario.launchInContainer(
+      HiltFragmentScenario<OCRFragment> scenario =
+          HiltFragmentScenario.launchInHiltContainer(
               OCRFragment.class, null, R.style.Theme_MakeACopy, Lifecycle.State.RESUMED);
       scenario.onFragment(
           fragment -> {

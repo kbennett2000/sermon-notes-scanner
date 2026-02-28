@@ -18,9 +18,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
+import dagger.hilt.android.AndroidEntryPoint;
 import de.schliweb.makeacopy.R;
-import de.schliweb.makeacopy.data.library.LibraryServiceLocator;
-import de.schliweb.makeacopy.data.library.ScanIndexMeta;
+import de.schliweb.makeacopy.data.library.ScansRepository;
 import de.schliweb.makeacopy.databinding.FragmentExportBinding;
 import de.schliweb.makeacopy.ui.camera.CameraViewModel;
 import de.schliweb.makeacopy.ui.crop.CropViewModel;
@@ -31,6 +31,7 @@ import de.schliweb.makeacopy.utils.jpeg.JpegExporter;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.*;
+import javax.inject.Inject;
 
 /**
  * ExportFragment is a UI component that extends Fragment and facilitates exporting scanned or
@@ -56,7 +57,10 @@ import java.util.*;
  * getOcrTextFromState: Retrieves the OCR text content from the application state. -
  * getOcrWordsFromState: Retrieves a list of recognized OCR words from the application state.
  */
+@AndroidEntryPoint
 public class ExportFragment extends Fragment {
+
+  @Inject ScansRepository scansRepository;
   private static final String TAG = "ExportFragment";
   // Main thread handler for safe UI updates
   private final android.os.Handler mainHandler =
@@ -128,11 +132,6 @@ public class ExportFragment extends Fragment {
   // Library assignment helper: remember last indexed scan id (only when feature flag is on)
   private boolean ocrReceiverRegistered = false;
 
-  private static String readAllUtf8(java.io.File file) throws java.io.IOException {
-    byte[] buf = java.nio.file.Files.readAllBytes(file.toPath());
-    return new String(buf, java.nio.charset.StandardCharsets.UTF_8);
-  }
-
   /**
    * Posts a runnable to the main thread only if the Fragment is still added and the view binding
    * exists. If called on the main thread, runs immediately; otherwise posts to main.
@@ -193,15 +192,11 @@ public class ExportFragment extends Fragment {
     View root = binding.getRoot();
 
     Context context = requireContext();
-    String prefsName = "export_options";
-    android.content.SharedPreferences prefs =
-        context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
+    ExportPrefsHelper.getPrefs(context);
 
-    boolean includeOcr = prefs.getBoolean("include_ocr", false);
-    // For PDF, grayscale is now selected via pdf_bw_mode == GRAYSCALE
-    String initPdfMode = prefs.getString("pdf_bw_mode", null);
-    boolean convertToGrayscale = "GRAYSCALE".equalsIgnoreCase(initPdfMode);
-    boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
+    boolean includeOcr = ExportPrefsHelper.isIncludeOcr(context);
+    boolean convertToGrayscale = ExportPrefsHelper.isGrayscaleFromPdfMode(context);
+    boolean exportAsJpeg = ExportPrefsHelper.isExportAsJpeg(context);
 
     // Initialize JPEG mode checkboxes from saved preference (default AUTO)
     // jpeg_mode preference is read later when building export options
@@ -402,7 +397,7 @@ public class ExportFragment extends Fragment {
         exportSessionViewModel.getPages().getValue();
     int curSize = (currentPages == null) ? 0 : currentPages.size();
 
-    boolean pendingAdd = prefs.getBoolean("pending_add_page", false);
+    boolean pendingAdd = ExportPrefsHelper.isPendingAddPage(context);
     if (curSize == 0) {
       // First time opening Export in this session: seed with current cropped bitmap if available
       if (initBmp != null) {
@@ -481,7 +476,7 @@ public class ExportFragment extends Fragment {
         }
       }
       // Clear the flag regardless to prevent re-adding on future opens
-      prefs.edit().putBoolean("pending_add_page", false).apply();
+      ExportPrefsHelper.clearPendingAddPage(context);
     }
     binding.buttonAddPage.setOnClickListener(
         v -> {
@@ -687,11 +682,7 @@ public class ExportFragment extends Fragment {
                                 cropViewModel.setImageLoaded(false);
                                 // Also clear pending add flag to avoid unintended re-adding on next
                                 // open
-                                android.content.SharedPreferences prefs2 =
-                                    requireContext()
-                                        .getSharedPreferences(
-                                            "export_options", Context.MODE_PRIVATE);
-                                prefs2.edit().putBoolean("pending_add_page", false).apply();
+                                ExportPrefsHelper.clearPendingAddPage(requireContext());
                                 NavOptions navOptions =
                                     new NavOptions.Builder()
                                         .setPopUpTo(R.id.navigation_camera, true)
@@ -734,12 +725,9 @@ public class ExportFragment extends Fragment {
         v -> {
           // Use last saved options directly to save a click
           Context ctx = requireContext();
-          android.content.SharedPreferences p =
-              ctx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-          boolean includeOcrSel = p.getBoolean("include_ocr", false);
-          boolean exportAsJpegSel = p.getBoolean("export_as_jpeg", false);
-          String pdfMode = p.getString("pdf_bw_mode", null);
-          boolean graySel = "GRAYSCALE".equalsIgnoreCase(pdfMode);
+          boolean includeOcrSel = ExportPrefsHelper.isIncludeOcr(ctx);
+          boolean exportAsJpegSel = ExportPrefsHelper.isExportAsJpeg(ctx);
+          boolean graySel = ExportPrefsHelper.isGrayscaleFromPdfMode(ctx);
 
           // Update ViewModel to reflect the options used for this export
           exportViewModel.setIncludeOcr(includeOcrSel);
@@ -786,9 +774,7 @@ public class ExportFragment extends Fragment {
         v -> {
           Context ctx3 = getContext();
           if (ctx3 != null) {
-            android.content.SharedPreferences p2 =
-                ctx3.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-            p2.edit().putBoolean("pending_add_page", true).apply();
+            ExportPrefsHelper.setPendingAddPage(ctx3);
           }
           cameraViewModel.setImageUri(null);
           cropViewModel.setImageCropped(false);
@@ -997,80 +983,23 @@ public class ExportFragment extends Fragment {
     new Thread(
             () -> {
               try {
-                // Determine PDF quality preset from SharedPreferences (set by dialog)
-                de.schliweb.makeacopy.utils.PdfQualityPreset preset;
-                boolean convertBwEffectiveLocal;
-                Context prefsCtx = getContext();
-                String presetSaved = null;
-                String bwModeSaved = null;
-                if (prefsCtx != null) {
-                  android.content.SharedPreferences p =
-                      prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                  presetSaved = p.getString("pdf_preset", null);
-                  bwModeSaved = p.getString("pdf_bw_mode", null);
-                }
-                convertBwEffectiveLocal =
-                    ("ROBUST".equalsIgnoreCase(bwModeSaved)
-                        || "CLASSIC".equalsIgnoreCase(bwModeSaved));
+                // Resolve export settings from SharedPreferences via helper
                 List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pgsForPreset =
                     exportSessionViewModel != null
                         ? exportSessionViewModel.getPages().getValue()
                         : null;
                 int pageCount = (pgsForPreset == null) ? 0 : pgsForPreset.size();
-                de.schliweb.makeacopy.utils.PdfQualityPreset def =
-                    (pageCount > 1)
-                        ? de.schliweb.makeacopy.utils.PdfQualityPreset.STANDARD
-                        : de.schliweb.makeacopy.utils.PdfQualityPreset.HIGH;
-                preset = de.schliweb.makeacopy.utils.PdfQualityPreset.fromName(presetSaved, def);
-                // Determine exclusivity from pdf_bw_mode: GRAYSCALE vs BW
-                boolean convertGrayEffectiveLocal = preset.forceGrayscale || convertToGrayscale;
-                String pdfModeSel = null;
-                if (prefsCtx != null) {
-                  android.content.SharedPreferences p =
-                      prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                  pdfModeSel = p.getString("pdf_bw_mode", null);
-                }
-                if ("GRAYSCALE".equalsIgnoreCase(pdfModeSel)) {
-                  convertGrayEffectiveLocal = true;
-                  convertBwEffectiveLocal = false;
-                } else if ("CLASSIC".equalsIgnoreCase(pdfModeSel)
-                    || "ROBUST".equalsIgnoreCase(pdfModeSel)) {
-                  convertGrayEffectiveLocal = false;
-                  convertBwEffectiveLocal = true;
-                } else if ("OCR_ROBUST".equalsIgnoreCase(pdfModeSel)) {
-                  // OCR robust preprocessing is grayscale-like but handled in PdfCreator via BwMode
-                  convertGrayEffectiveLocal = false;
-                  convertBwEffectiveLocal = false;
-                }
-                final boolean convertBwEffective = convertBwEffectiveLocal;
+                de.schliweb.makeacopy.utils.PdfQualityPreset preset =
+                    ExportPrefsHelper.resolvePreset(appContext, pageCount);
+                boolean[] grayBw =
+                    ExportPrefsHelper.resolveGrayAndBwFlags(
+                        appContext, preset.forceGrayscale, convertToGrayscale);
+                final boolean convertGrayEffective = grayBw[0];
+                final boolean convertBwEffective = grayBw[1];
                 final int jpegQuality = preset.jpegQuality;
-                final boolean convertGrayEffective = convertGrayEffectiveLocal;
-                // Determine PDF BW mode (ROBUST/CLASSIC) if BW is enabled
-                de.schliweb.makeacopy.utils.PdfCreator.BwMode tmpBwMode;
-                String bw = null;
-                if (prefsCtx != null) {
-                  android.content.SharedPreferences p =
-                      prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                  bw = p.getString("pdf_bw_mode", null);
-                }
-                if ("CLASSIC".equalsIgnoreCase(bw))
-                  tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.CLASSIC;
-                else if ("ROBUST".equalsIgnoreCase(bw))
-                  tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.ROBUST;
-                else if ("OCR_ROBUST".equalsIgnoreCase(bw))
-                  tmpBwMode = de.schliweb.makeacopy.utils.PdfCreator.BwMode.OCR_ROBUST;
-                else tmpBwMode = null;
-                final de.schliweb.makeacopy.utils.PdfCreator.BwMode bwMode = tmpBwMode;
-
-                // Determine page format from SharedPreferences
-                String pageFormatSaved = null;
-                if (prefsCtx != null) {
-                  android.content.SharedPreferences pf =
-                      prefsCtx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-                  pageFormatSaved = pf.getString("page_format", null);
-                }
-                final PageFormat pageFormat =
-                    PageFormat.fromName(pageFormatSaved, PageFormat.FIT_TO_IMAGE);
+                final de.schliweb.makeacopy.utils.PdfCreator.BwMode bwMode =
+                    ExportPrefsHelper.resolveBwMode(appContext);
+                final PageFormat pageFormat = ExportPrefsHelper.resolvePageFormat(appContext);
 
                 Uri exportUri;
                 if (isMulti) {
@@ -1376,19 +1305,7 @@ public class ExportFragment extends Fragment {
    * default options (quality=85, original size, no enhancement).
    */
   private void performJpegExport() {
-    // Determine JPEG mode from SharedPreferences (set by dialog)
-    Context context = requireContext();
-    android.content.SharedPreferences prefs =
-        context.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-    JpegExportOptions.Mode mode;
-    try {
-      mode =
-          JpegExportOptions.Mode.valueOf(
-              prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name()));
-    } catch (Exception ignored) {
-      mode = JpegExportOptions.Mode.AUTO;
-    }
-    performJpegExport(mode);
+    performJpegExport(ExportPrefsHelper.resolveJpegMode(requireContext()));
   }
 
   /** Performs JPEG export using a chosen enhancement mode. */
@@ -1522,17 +1439,7 @@ public class ExportFragment extends Fragment {
 
   /** Performs a multi-image ZIP export for JPEG when there are multiple pages. */
   private void performJpegZipExport() {
-    // Determine mode from SharedPreferences (set by dialog)
-    Context context = requireContext();
-    android.content.SharedPreferences prefs =
-        context.getSharedPreferences("export_options", Context.MODE_PRIVATE);
-    String saved = prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name());
-    JpegExportOptions.Mode mode;
-    try {
-      mode = JpegExportOptions.Mode.valueOf(saved);
-    } catch (IllegalArgumentException ex) {
-      mode = JpegExportOptions.Mode.AUTO;
-    }
+    JpegExportOptions.Mode mode = ExportPrefsHelper.resolveJpegMode(requireContext());
 
     final Uri selectedLocation = exportViewModel.getSelectedFileLocation().getValue();
     if (selectedLocation == null) {
@@ -1746,112 +1653,14 @@ public class ExportFragment extends Fragment {
    *     will exit without performing any actions.
    */
   private void exportOcrTextToTxt(Uri txtUri) {
-    if (txtUri == null) return;
-
-    // Build concatenated OCR text in filmstrip order using per-page OCR from the registry when
-    // available.
-    // Fallbacks:
-    //  - If a page has no persisted OCR (ocrTextPath == null or missing file) and it is the
-    // currently
-    //    previewed page, use the in-memory OCR text from state.
-    //  - Otherwise, append empty for that page.
-    java.util.List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pages =
-        exportSessionViewModel != null ? exportSessionViewModel.getPages().getValue() : null;
-    boolean isMulti = pages != null && pages.size() > 1;
-
-    String currentText = getOcrTextFromState();
-    // Single-page: Just use current in-memory OCR text if present
-    if (!isMulti) {
-      if (currentText == null || currentText.isEmpty()) {
-        Log.d(TAG, "exportOcrTextToTxt: No OCR text available to export (single page)");
-        return;
-      }
-      writeTxtToUri(txtUri, currentText);
-      return;
-    }
-
-    // Multi-page: concatenate per-page OCR from registry
-    StringBuilder sb = new StringBuilder();
-    // Current preview bitmap to detect which page matches in-memory OCR state
-    Bitmap curPreview = exportViewModel.getDocumentBitmap().getValue();
-    for (int i = 0; i < pages.size(); i++) {
-      de.schliweb.makeacopy.ui.export.session.CompletedScan s = pages.get(i);
-      String pageText = null;
-      String p = (s != null) ? s.ocrTextPath() : null;
-      String fmt = (s != null) ? s.ocrFormat() : null;
-      boolean isPlain = (fmt == null) || "plain".equalsIgnoreCase(fmt);
-      if (p != null) {
-        if (isPlain) {
-          java.io.File f = new java.io.File(p);
-          if (f.exists() && f.isFile()) {
-            try {
-              pageText = readAllUtf8(f);
-            } catch (java.io.IOException e) {
-              Log.w(TAG, "Failed reading plain OCR text for page: " + p, e);
-            }
-          }
-        } else {
-          // Fallback: if not plain, try sibling text.txt next to words_json/hocr/alto
-          java.io.File f = new java.io.File(p);
-          java.io.File dir = f.getParentFile();
-          if (dir != null) {
-            java.io.File txtFile = new java.io.File(dir, "text.txt");
-            if (txtFile.exists() && txtFile.isFile()) {
-              try {
-                pageText = readAllUtf8(txtFile);
-              } catch (java.io.IOException e) {
-                Log.w(
-                    TAG,
-                    "Failed reading fallback text.txt for page: " + txtFile.getAbsolutePath(),
-                    e);
-              }
-            }
-          }
-        }
-      }
-      if ((pageText == null || pageText.isEmpty())
-          && s != null
-          && s.inMemoryBitmap() != null
-          && curPreview == s.inMemoryBitmap()) {
-        // Fallback: if this page is the currently previewed one, use in-memory OCR text
-        pageText = currentText;
-      }
-      if (pageText != null) sb.append(pageText);
-      if (i < pages.size() - 1) sb.append("\n\n");
-    }
-
-    writeTxtToUri(txtUri, sb.toString());
-  }
-
-  private void writeTxtToUri(Uri txtUri, String content) {
-    try (OutputStream os = requireContext().getContentResolver().openOutputStream(txtUri)) {
-      if (os == null) {
-        Log.e(TAG, "exportOcrTextToTxt: Failed to open output stream for TXT file");
-        return;
-      }
-      byte[] bytes =
-          (content != null ? content : "").getBytes(java.nio.charset.StandardCharsets.UTF_8);
-      os.write(bytes);
-      exportViewModel.setTxtExportUri(txtUri);
-      UIUtils.showToast(
-          requireContext(), getString(R.string.ocr_text_exported_as_txt), Toast.LENGTH_SHORT);
-
-      if (deferAssignUntilTxt) {
-        deferAssignUntilTxt = false;
-      }
-    } catch (java.io.FileNotFoundException | SecurityException e) {
-      Log.e(TAG, "exportOcrTextToTxt: Permission or file error during TXT export", e);
-      UIUtils.showToast(
-          requireContext(),
-          getString(R.string.error_exporting_ocr_text_with_reason, e.getMessage()),
-          Toast.LENGTH_SHORT);
-    } catch (java.io.IOException e) {
-      Log.e(TAG, "exportOcrTextToTxt: I/O error during TXT export", e);
-      UIUtils.showToast(
-          requireContext(),
-          getString(R.string.error_exporting_ocr_text_with_reason, e.getMessage()),
-          Toast.LENGTH_SHORT);
-    }
+    ExportTxtHelper.exportOcrTextToTxt(
+        requireContext(),
+        exportViewModel,
+        exportSessionViewModel,
+        txtUri,
+        getOcrTextFromState(),
+        exportViewModel.getDocumentBitmap().getValue(),
+        () -> deferAssignUntilTxt = false);
   }
 
   // Insert-Hook implementation: persist a newly added CompletedScan to app storage and registry
@@ -1860,10 +1669,7 @@ public class ExportFragment extends Fragment {
     final android.content.Context appContext = requireContext().getApplicationContext();
     final String id = s.id();
     // Respect user preference: Skip OCR (export only)
-    android.content.SharedPreferences prefs =
-        requireContext()
-            .getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
-    boolean skipOcrPref = prefs.getBoolean("skip_ocr", false);
+    boolean skipOcrPref = ExportPrefsHelper.isSkipOcr(requireContext());
     // Capture current in-memory OCR text/words at call time unless Skip OCR is enabled
     final String ocrTextAtCall = skipOcrPref ? null : getOcrTextFromState();
     final java.util.List<de.schliweb.makeacopy.utils.RecognizedWord> ocrWordsAtCall =
@@ -2091,160 +1897,12 @@ public class ExportFragment extends Fragment {
   }
 
   private void indexScanLibraryAsync(String title, int pageCount, Uri exportUri) {
-    if (title == null) title = buildDefaultBaseName();
-    final String titleFinal = title;
-    final int pages = Math.max(1, pageCount);
-    final android.content.Context ctx = requireContext().getApplicationContext();
-    // Pre-generate a stable ID so we can offer optional assignment to a collection
-    final String generatedId = java.util.UUID.randomUUID().toString();
-    // Persist the primary export URI (as JSON array) so details screen can share/open it later
-    final String exportJson = (exportUri != null) ? ("[\"" + exportUri + "\"]") : null;
-    new Thread(
-            () -> {
-              try {
-                // Best-effort cover generation for image/PDF exports
-                String coverPath = null;
-                if (exportUri != null) {
-                  android.content.ContentResolver cr = ctx.getContentResolver();
-                  String mime = null;
-                  try {
-                    mime = cr.getType(exportUri);
-                  } catch (SecurityException se) {
-                    Log.w(TAG, "indexScanLibraryAsync: cannot query MIME type", se);
-                  }
-                  boolean isImage = mime != null && mime.startsWith("image/");
-                  boolean isPdf =
-                      mime != null
-                          && ("application/pdf".equalsIgnoreCase(mime)
-                              || mime.toLowerCase(java.util.Locale.ROOT).contains("pdf"));
-                  if (!isImage && !isPdf) {
-                    String u = exportUri.toString();
-                    String lower = (u != null) ? u.toLowerCase(java.util.Locale.ROOT) : null;
-                    if (lower != null) {
-                      isImage =
-                          lower.endsWith(".jpg")
-                              || lower.endsWith(".jpeg")
-                              || lower.endsWith(".png")
-                              || lower.endsWith(".webp");
-                      if (!isImage) isPdf = lower.endsWith(".pdf");
-                    }
-                  }
-                  if (isImage) {
-                    try (java.io.InputStream is = cr.openInputStream(exportUri)) {
-                      if (is != null) {
-                        android.graphics.BitmapFactory.Options dec =
-                            new android.graphics.BitmapFactory.Options();
-                        dec.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
-                        dec.inSampleSize = 2; // simple downscale
-                        android.graphics.Bitmap bmp =
-                            android.graphics.BitmapFactory.decodeStream(is, null, dec);
-                        if (bmp != null) {
-                          try {
-                            java.io.File dir = new java.io.File(ctx.getFilesDir(), "scans_covers");
-                            //noinspection ResultOfMethodCallIgnored
-                            dir.mkdirs();
-                            java.io.File out = new java.io.File(dir, generatedId + ".jpg");
-                            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(out)) {
-                              bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 82, fos);
-                              fos.flush();
-                              coverPath = out.getAbsolutePath();
-                            }
-                          } catch (java.io.IOException ioe) {
-                            Log.w(TAG, "indexScanLibraryAsync: failed saving image cover", ioe);
-                          } finally {
-                            try {
-                              bmp.recycle();
-                            } catch (Exception ignored) {
-                              // Best-effort; failure is non-critical
-                            }
-                          }
-                        }
-                      }
-                    } catch (java.io.FileNotFoundException e) {
-                      Log.w(TAG, "indexScanLibraryAsync: image cover source not found", e);
-                    } catch (SecurityException | java.io.IOException e) {
-                      Log.w(TAG, "indexScanLibraryAsync: image cover io/security error", e);
-                    }
-                  } else if (isPdf) {
-                    try (android.os.ParcelFileDescriptor pfd =
-                        ctx.getContentResolver().openFileDescriptor(exportUri, "r")) {
-                      if (pfd != null) {
-                        try (android.graphics.pdf.PdfRenderer renderer =
-                            new android.graphics.pdf.PdfRenderer(pfd)) {
-                          if (renderer.getPageCount() > 0) {
-                            android.graphics.pdf.PdfRenderer.Page page = renderer.openPage(0);
-                            try {
-                              int pageW = page.getWidth();
-                              int pageH = page.getHeight();
-                              int targetW = 320;
-                              int targetH =
-                                  (pageW > 0)
-                                      ? Math.max(1, (int) (targetW * (pageH / (float) pageW)))
-                                      : 320;
-                              android.graphics.Bitmap bmp =
-                                  android.graphics.Bitmap.createBitmap(
-                                      targetW, targetH, android.graphics.Bitmap.Config.ARGB_8888);
-                              android.graphics.Canvas canvas = new android.graphics.Canvas(bmp);
-                              canvas.drawColor(android.graphics.Color.WHITE);
-                              android.graphics.Matrix m = new android.graphics.Matrix();
-                              float scaleX = targetW / (float) pageW;
-                              float scaleY = targetH / (float) pageH;
-                              m.setScale(scaleX, scaleY);
-                              page.render(
-                                  bmp,
-                                  null,
-                                  m,
-                                  android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                              java.io.File dir =
-                                  new java.io.File(ctx.getFilesDir(), "scans_covers");
-                              //noinspection ResultOfMethodCallIgnored
-                              dir.mkdirs();
-                              java.io.File out = new java.io.File(dir, generatedId + ".jpg");
-                              try (java.io.FileOutputStream fos =
-                                  new java.io.FileOutputStream(out)) {
-                                bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 82, fos);
-                                fos.flush();
-                                coverPath = out.getAbsolutePath();
-                              } catch (java.io.IOException ioe) {
-                                Log.w(TAG, "indexScanLibraryAsync: failed saving pdf cover", ioe);
-                              } finally {
-                                try {
-                                  bmp.recycle();
-                                } catch (Exception ignored) {
-                                  // Best-effort; failure is non-critical
-                                }
-                              }
-                            } finally {
-                              try {
-                                page.close();
-                              } catch (Exception ignored) {
-                                // Best-effort; failure is non-critical
-                              }
-                            }
-                          }
-                        }
-                      }
-                    } catch (java.io.FileNotFoundException e) {
-                      Log.w(TAG, "indexScanLibraryAsync: pdf not found for cover", e);
-                    } catch (SecurityException | java.io.IOException e) {
-                      Log.w(TAG, "indexScanLibraryAsync: pdf cover io/security error", e);
-                    }
-                  }
-                }
-                ScanIndexMeta meta =
-                    new ScanIndexMeta(
-                        generatedId,
-                        titleFinal,
-                        System.currentTimeMillis(),
-                        pages,
-                        coverPath,
-                        exportJson,
-                        null);
-                LibraryServiceLocator.getScansRepository(ctx).indexExportedScan(ctx, meta);
-              } catch (Exception e) {
-                Log.d(TAG, "indexScanLibraryAsync: suppressed", e);
-              }
-            })
-        .start();
+    ScanLibraryIndexer.indexAsync(
+        requireContext().getApplicationContext(),
+        scansRepository,
+        title,
+        pageCount,
+        exportUri,
+        buildDefaultBaseName());
   }
 }
