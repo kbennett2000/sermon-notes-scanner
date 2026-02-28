@@ -166,8 +166,8 @@ jobs:
             mv "$AAB_OUT/app-release.aab" "$AAB_OUT/MakeACopy-v${VERSION}-release.aab"
           fi
           shopt -s nullglob
-          for apk in "$APK_OUT"/app-*-release.apk; do
-            abi=$(basename "$apk" | sed -n 's/^app-\(.*\)-release\.apk$/\1/p')
+          for apk in "$APK_OUT"/app-*-release.apk "$APK_OUT"/app-*-release-unsigned.apk; do
+            abi=$(basename "$apk" | sed -n 's/^app-\(.*\)-release\(-unsigned\)\{0,1\}\.apk$/\1/p')
             [ -n "$abi" ] && mv "$apk" "$APK_OUT/MakeACopy-v${VERSION}-${abi}-release.apk"
           done
 
@@ -402,8 +402,8 @@ jobs:
           VERSION="${{ steps.extract_version.outputs.VERSION }}"
           APK_OUT="app/build/outputs/apk/release"
           shopt -s nullglob
-          for apk in "$APK_OUT"/app-*-release.apk; do
-            abi=$(basename "$apk" | sed -n 's/^app-\(.*\)-release\.apk$/\1/p')
+          for apk in "$APK_OUT"/app-*-release.apk "$APK_OUT"/app-*-release-unsigned.apk; do
+            abi=$(basename "$apk" | sed -n 's/^app-\(.*\)-release\(-unsigned\)\{0,1\}\.apk$/\1/p')
             [ -n "$abi" ] && mv "$apk" "$APK_OUT/MakeACopy-Light-v${VERSION}-${abi}-release.apk"
           done
 
