@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.system.Os;
 import android.util.Log;
 import androidx.core.content.ContextCompat;
 import com.googlecode.tesseract.android.TessBaseAPI;
@@ -196,14 +195,6 @@ public class OCRHelper {
   public boolean initTesseract() {
     if (isInitialized) return true;
     try {
-      // Workaround for OpenMP thread affinity crash on certain Android devices (e.g. Android 15).
-      // The crash occurs in KMPNativeAffinity::Mask::set_system_affinity when libtesseract's
-      // OpenMP runtime calls sched_setaffinity, which is restricted on some kernels.
-      try {
-        Os.setenv("OMP_PROC_BIND", "false", false);
-      } catch (Exception e) {
-        Log.w(TAG, "Could not set OMP_PROC_BIND", e);
-      }
       ensureLanguageDataPresent(language);
       tessBaseAPI = new TessBaseAPI();
       int oem = useBestModelSettings ? TessBaseAPI.OEM_LSTM_ONLY : TessBaseAPI.OEM_DEFAULT;
