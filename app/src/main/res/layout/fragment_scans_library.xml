@@ -38,7 +38,7 @@
         android:text="@string/no_scans_yet"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/titleCollection"
-        app:layout_constraintBottom_toTopOf="@id/buttonIndexExistingIcon"
+        app:layout_constraintBottom_toTopOf="@id/buttonCleanupSettings"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -50,7 +50,7 @@
         android:padding="16dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/titleCollection"
-        app:layout_constraintBottom_toTopOf="@id/buttonIndexExistingIcon"
+        app:layout_constraintBottom_toTopOf="@id/buttonCleanupSettings"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -70,8 +70,29 @@
         app:tooltipText="@string/index_existing_scans"
         app:layout_constraintBottom_toTopOf="@id/button_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonCleanupSettings"
+        app:layout_constraintHorizontal_chainStyle="packed"
         android:visibility="gone"/>
+
+    <!-- IC icon for scan cleanup settings -->
+    <ImageButton
+        android:id="@+id/buttonCleanupSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_build"
+        android:contentDescription="@string/scan_cleanup_settings"
+        app:tint="?attr/colorControlNormal"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:tooltipText="@string/scan_cleanup_settings"
+        app:layout_constraintBottom_toTopOf="@id/button_container"
+        app:layout_constraintStart_toEndOf="@id/buttonIndexExistingIcon"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="visible"/>
 
     <!-- Bottom button container: Back + Collections + (optional) Index Existing -->
     <LinearLayout

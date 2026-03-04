@@ -8,9 +8,17 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import androidx.annotation.Nullable;
+import de.schliweb.makeacopy.data.CompletedScansRegistry;
+import de.schliweb.makeacopy.data.RegistryCleaner;
+import de.schliweb.makeacopy.data.library.AppDatabase;
+import de.schliweb.makeacopy.data.library.DefaultCollectionsRepository;
+import de.schliweb.makeacopy.data.library.DefaultScansRepository;
+import de.schliweb.makeacopy.data.library.ExistingScansIndexer;
+import de.schliweb.makeacopy.ui.export.session.CompletedScan;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -357,6 +365,7 @@ public class CacheCleanupService extends Service {
       int debugFilesCleanup = cleanupDebugImages();
       int cameraFilesCleanup = cleanupOldCameraImages();
       int tempFilesCleanup = cleanupTempFiles();
+      int completedScansCleanup = cleanupCompletedScans();
 
       // Force garbage collection
       System.gc();
@@ -369,12 +378,148 @@ public class CacheCleanupService extends Service {
       Log.i(
           TAG,
           String.format(
-              "Cache cleanup completed in %dms. Files removed: debug=%d, camera=%d, temp=%d",
-              duration, debugFilesCleanup, cameraFilesCleanup, tempFilesCleanup));
+              "Cache cleanup completed in %dms. Files removed: debug=%d, camera=%d, temp=%d, completedScans=%d",
+              duration,
+              debugFilesCleanup,
+              cameraFilesCleanup,
+              tempFilesCleanup,
+              completedScansCleanup));
 
     } catch (Exception e) {
       Log.e(TAG, "Error during comprehensive cleanup", e);
     }
+  }
+
+  /**
+   * Cleans up completed scans according to the configured policy.
+   *
+   * @return number of scan entries removed
+   */
+  private int cleanupCompletedScans() {
+    try {
+      String policy = preferences.getString("completed_scans_cleanup_policy", "NONE");
+      if ("NONE".equals(policy)) return 0;
+
+      CompletedScansRegistry registry = CompletedScansRegistry.get(this);
+      long now = System.currentTimeMillis();
+      int totalRemoved = 0;
+
+      if ("MAX_AGE".equals(policy) || "COMBINED".equals(policy)) {
+        int maxAgeDays = preferences.getInt("completed_scans_max_age_days", 30);
+        List<String> ids =
+            CompletedScansCleanupPolicy.idsToRemoveByAge(
+                registry.listAllOrderedByDateDesc(), maxAgeDays, now);
+        for (String id : ids) {
+          RegistryCleaner.removeEntryAndFiles(this, id);
+          totalRemoved++;
+        }
+      }
+
+      if ("MAX_COUNT".equals(policy) || "COMBINED".equals(policy)) {
+        int maxCount = preferences.getInt("completed_scans_max_count", 100);
+        List<String> ids =
+            CompletedScansCleanupPolicy.idsToRemoveByCount(
+                registry.listAllOrderedByDateDesc(), maxCount);
+        for (String id : ids) {
+          RegistryCleaner.removeEntryAndFiles(this, id);
+          totalRemoved++;
+        }
+      }
+
+      if ("MAX_STORAGE".equals(policy) || "COMBINED".equals(policy)) {
+        int maxMb = preferences.getInt("completed_scans_max_storage_mb", 500);
+        long maxBytes = maxMb * 1024L * 1024L;
+        List<CompletedScan> scans = registry.listAllOrderedByDateDesc();
+        java.util.HashMap<String, Long> sizeById = new java.util.HashMap<>();
+        for (CompletedScan s : scans) {
+          sizeById.put(s.id(), calculateScanEntrySize(s));
+        }
+        List<String> ids =
+            CompletedScansCleanupPolicy.idsToRemoveByStorage(scans, sizeById, maxBytes);
+        for (String id : ids) {
+          RegistryCleaner.removeEntryAndFiles(this, id);
+          totalRemoved++;
+        }
+      }
+
+      if (totalRemoved > 0) {
+        Log.i(TAG, "Cleaned up " + totalRemoved + " completed scans (policy=" + policy + ")");
+        // Re-index to keep Room database in sync after deletions
+        reindexAfterCleanup();
+      }
+      return totalRemoved;
+
+    } catch (Exception e) {
+      Log.e(TAG, "Error cleaning up completed scans", e);
+      return 0;
+    }
+  }
+
+  /**
+   * Re-indexes the scan library database after cleanup to keep Room in sync. Removes Room entries
+   * whose IDs are no longer in the CompletedScansRegistry, then runs incremental indexing to repair
+   * any remaining metadata.
+   */
+  private void reindexAfterCleanup() {
+    try {
+      AppDatabase db = AppDatabase.getInstance(this);
+      DefaultScansRepository scansRepo =
+          new DefaultScansRepository(db.scansDao(), db.scanCollectionJoinDao());
+      DefaultCollectionsRepository collectionsRepo =
+          new DefaultCollectionsRepository(
+              db.collectionsDao(), db.scanCollectionJoinDao(), db.scansDao());
+
+      // Collect IDs still present in the registry
+      java.util.Set<String> registryIds = new java.util.HashSet<>();
+      for (CompletedScan s : CompletedScansRegistry.get(this).listAllOrderedByDateDesc()) {
+        if (s != null && s.id() != null) registryIds.add(s.id());
+      }
+
+      // Remove Room entries that are no longer in the registry
+      int removed = 0;
+      List<de.schliweb.makeacopy.data.library.ScanEntity> allScans = scansRepo.getAllScans(this);
+      if (allScans != null) {
+        for (de.schliweb.makeacopy.data.library.ScanEntity se : allScans) {
+          if (se == null || se.id == null) continue;
+          if (!registryIds.contains(se.id)) {
+            scansRepo.deleteScan(this, se.id);
+            removed++;
+          }
+        }
+      }
+
+      // Run incremental indexing to repair metadata for remaining entries
+      int indexed = ExistingScansIndexer.runIncremental(this, scansRepo, collectionsRepo);
+      Log.i(
+          TAG,
+          "Re-indexed scan library after cleanup: removed="
+              + removed
+              + " stale Room entries, indexed="
+              + indexed
+              + " items");
+    } catch (Exception e) {
+      Log.e(TAG, "Error re-indexing scan library after cleanup", e);
+    }
+  }
+
+  private long calculateScanEntrySize(CompletedScan s) {
+    long size = 0;
+    File dir = new File(getFilesDir(), "scans/" + s.id());
+    if (dir.isDirectory()) {
+      File[] files = dir.listFiles();
+      if (files != null) {
+        for (File f : files) {
+          size += f.length();
+        }
+      }
+    }
+    if (s.filePath() != null) {
+      File f = new File(s.filePath());
+      if (f.exists() && !f.getAbsolutePath().startsWith(dir.getAbsolutePath())) {
+        size += f.length();
+      }
+    }
+    return size;
   }
 
   /** Cleans up debug images */

@@ -61,6 +61,7 @@ public class ScansLibraryFragment extends Fragment {
   private View buttonContainer;
   private View backButton;
   private View buttonIndexExistingIcon;
+  private View buttonCleanupSettings;
   private android.widget.TextView titleCollection;
   private ScansAdapter adapter;
   private String collectionIdArg;
@@ -81,6 +82,7 @@ public class ScansLibraryFragment extends Fragment {
     backButton = root.findViewById(R.id.button_back);
     titleCollection = root.findViewById(R.id.titleCollection);
     buttonIndexExistingIcon = root.findViewById(R.id.buttonIndexExistingIcon);
+    buttonCleanupSettings = root.findViewById(R.id.buttonCleanupSettings);
 
     // Apply system insets: add status bar top inset to root padding and nav bar bottom inset to the
     // bottom button container
@@ -279,8 +281,16 @@ public class ScansLibraryFragment extends Fragment {
           });
     }
 
+    if (buttonCleanupSettings != null) {
+      buttonCleanupSettings.setOnClickListener(v -> showCleanupSettingsDialog());
+    }
+
     // loadDataAsync() already called above depending on collection presence
     return root;
+  }
+
+  private void showCleanupSettingsDialog() {
+    DialogUtils.showCleanupSettingsDialog(requireContext());
   }
 
   /**

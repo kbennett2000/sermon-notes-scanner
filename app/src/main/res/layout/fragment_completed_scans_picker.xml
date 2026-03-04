@@ -97,6 +97,19 @@
             android:minHeight="48dp"
             app:tooltipText="@string/select_all" />
 
+        <ImageButton
+            android:id="@+id/button_cleanup_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/scan_cleanup_settings"
+            app:tint="?android:textColorPrimary"
+            android:src="@drawable/ic_build"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:tooltipText="@string/scan_cleanup_settings" />
+
     </LinearLayout>
 
     <LinearLayout

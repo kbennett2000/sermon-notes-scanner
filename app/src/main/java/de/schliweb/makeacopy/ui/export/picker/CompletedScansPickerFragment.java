@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -48,6 +49,7 @@ public class CompletedScansPickerFragment extends Fragment
   private Button buttonDone;
   private android.widget.ImageButton buttonSelectAll;
   private android.widget.ImageButton buttonSelectNone;
+  private ImageButton buttonCleanupSettings;
 
   private final Set<String> selectedIds = new HashSet<>();
   private final Set<String> disabledIds = new HashSet<>();
@@ -69,6 +71,7 @@ public class CompletedScansPickerFragment extends Fragment
     buttonDone = root.findViewById(R.id.button_done);
     buttonSelectAll = root.findViewById(R.id.button_select_all);
     buttonSelectNone = root.findViewById(R.id.button_select_none);
+    buttonCleanupSettings = root.findViewById(R.id.button_cleanup_settings);
 
     // Edge-to-edge insets: pad title with status bar, pad bottom button container with nav bar
     final View titleView = root.findViewById(R.id.title);
@@ -130,6 +133,9 @@ public class CompletedScansPickerFragment extends Fragment
     if (buttonSelectAll != null) buttonSelectAll.setOnClickListener(v -> selectAllEligible(true));
     if (buttonSelectNone != null)
       buttonSelectNone.setOnClickListener(v -> selectAllEligible(false));
+    if (buttonCleanupSettings != null)
+      buttonCleanupSettings.setOnClickListener(
+          v -> DialogUtils.showCleanupSettingsDialog(requireContext()));
 
     loadItems();
     return root;
