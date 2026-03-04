@@ -78,13 +78,17 @@ public class OCRWhitelist {
   public static final String SV =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖabcdefghijklmnopqrstuvwxyzåäö" + COMMON_BASE;
 
+  // Turkish (includes İ/ı, ğ, ş, ç, ö, ü)
+  public static final String TR =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÇĞİÖŞÜçğıöşü" + COMMON_BASE;
+
   // Russian (Cyrillic incl. Ё/ё)
   public static final String RU =
       "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя" + COMMON_BASE;
 
   // Default: Superset
   public static final String DEFAULT =
-      (DE + EN + ES + FR + IT + PT + NL + PL + CS + SK + HU + RO + DA + NO + SV + RU);
+      (DE + EN + ES + FR + IT + PT + NL + PL + CS + SK + HU + RO + DA + NO + SV + TR + RU);
 
   /**
    * Returns a predefined whitelist of allowed characters for a given language code. The whitelist
@@ -113,6 +117,7 @@ public class OCRWhitelist {
       case "dan" -> DA;
       case "nor" -> NO;
       case "swe" -> SV;
+      case "tur" -> TR;
       case "rus" -> RU;
       default -> DEFAULT;
     };

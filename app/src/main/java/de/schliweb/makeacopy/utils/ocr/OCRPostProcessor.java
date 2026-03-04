@@ -44,7 +44,7 @@ public class OCRPostProcessor {
   private static final Pattern MOSTLY_DIGITS = Pattern.compile("^[0-9.,:\\-/]+$");
   private static final Pattern MOSTLY_LETTERS =
       Pattern.compile(
-          "^[a-zA-ZäöüÄÖÜßàâäçéèêëîïôöùûüÿœæÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆáéíóúüñÁÉÍÓÚÜÑàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚáàâãçéêíóôõúüÁÀÂÃÇÉÊÍÓÔÕÚÜ]+$");
+          "^[a-zA-ZäöüÄÖÜßàâäçéèêëîïôöùûüÿœæÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆáéíóúüñÁÉÍÓÚÜÑàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚáàâãçéêíóôõúüÁÀÂÃÇÉÊÍÓÔÕÚÜİıĞğŞş]+$");
   private static final Pattern CONTAINS_LETTERS = Pattern.compile(".*[a-zA-Z].*");
 
   /**
@@ -121,6 +121,11 @@ public class OCRPostProcessor {
     OCR_CONFUSIONS.put('ö', new char[] {'o'});
     OCR_CONFUSIONS.put('ü', new char[] {'u'});
     OCR_CONFUSIONS.put('ß', new char[] {'B', 's'});
+    // Turkish-specific confusions
+    OCR_CONFUSIONS.put('İ', new char[] {'I', 'i'});
+    OCR_CONFUSIONS.put('ı', new char[] {'i', 'l', '1', 'I'});
+    OCR_CONFUSIONS.put('ğ', new char[] {'g'});
+    OCR_CONFUSIONS.put('ş', new char[] {'s'});
   }
 
   private OCRPostProcessor() {

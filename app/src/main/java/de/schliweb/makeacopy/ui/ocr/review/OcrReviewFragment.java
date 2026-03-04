@@ -1531,6 +1531,9 @@ public class OcrReviewFragment extends Fragment {
       case "ara":
         two = "ar";
         break;
+      case "tur":
+        two = "tr";
+        break;
       case "chi_sim":
         return "Chinese (Simplified)";
       case "chi_tra":

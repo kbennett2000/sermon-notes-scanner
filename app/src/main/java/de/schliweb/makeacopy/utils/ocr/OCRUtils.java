@@ -81,6 +81,8 @@ public class OCRUtils {
         return "fas";
       } else if ("ar".equalsIgnoreCase(sys)) {
         return "ara";
+      } else if ("tr".equalsIgnoreCase(sys)) {
+        return "tur";
       } else {
         return "eng";
       }
@@ -119,6 +121,7 @@ public class OCRUtils {
       case "no", "nb", "nn" -> "nor";
       case "fa" -> "fas";
       case "ar" -> "ara";
+      case "tr" -> "tur";
       case "zh" -> {
         // Map Chinese to Simplified or Traditional based on region, default to Simplified
         try {
@@ -151,7 +154,7 @@ public class OCRUtils {
   public static String[] getLanguages() {
     return new String[] {
       "eng", "deu", "fra", "ita", "spa", "por", "nld", "pol", "ces", "slk", "hun", "ron", "dan",
-      "nor", "swe", "rus", "tha", "fas", "ara", "chi_sim", "chi_tra"
+      "nor", "swe", "rus", "tha", "fas", "ara", "tur", "chi_sim", "chi_tra"
     };
   }
 }

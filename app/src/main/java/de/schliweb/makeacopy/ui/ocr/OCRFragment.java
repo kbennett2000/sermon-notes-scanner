@@ -633,6 +633,9 @@ public class OCRFragment extends Fragment {
       case "ara":
         two = "ar";
         break;
+      case "tur":
+        two = "tr";
+        break;
       case "chi_sim":
         return appendVariantLabel("Chinese (Simplified)", code);
       case "chi_tra":
