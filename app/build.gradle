@@ -20,8 +20,8 @@ android {
         applicationId "de.schliweb.makeacopy"
         minSdk = 29
         targetSdk = 36
-        versionCode 30400
-        versionName "3.4.0"
+        versionCode 30500
+        versionName "3.5.0"
 
         // Use default AndroidX test runner
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,6 +34,7 @@ android {
         buildConfigField "boolean", "FEATURE_FRAMING_LOGGING", "false"
         buildConfigField "boolean", "FEATURE_A11Y_GUIDANCE", "true"
         buildConfigField "boolean", "FEATURE_LAYOUT_ANALYSIS", "false"
+        buildConfigField "boolean", "FEATURE_INBOX_MODE", "true"
         buildConfigField "boolean", "IS_LIGHT", isLight ? "true" : "false"
 
         if (isLight) {
@@ -185,6 +186,7 @@ dependencies {
     // PdfBox-Android dependency
     implementation libs.pdfbox.android
     implementation libs.exifinterface
+    implementation libs.documentfile
 
     // Room (for scan index)
     implementation libs.room.runtime

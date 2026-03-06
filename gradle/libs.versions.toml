@@ -22,6 +22,7 @@ lombok = "1.18.42"
 pdfbox = "2.0.27.0"
 activity = "1.12.4"
 exifinterface = "1.4.2"
+documentfile = "1.1.0"
 gson="2.13.2"
 # Android test libs (aligned set)
 androidxTestRules = "1.5.0"
@@ -73,6 +74,7 @@ pdfbox-android = { group = "com.tom-roush", name = "pdfbox-android", version.ref
 
 # ExifInterface
 exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 
 # Android test libraries
 test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
