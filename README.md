@@ -67,6 +67,7 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
 - **JPEG Export**: Export scans as high-quality JPEG images (configurable quality, color/BW)
 - **Multi-page Scanning**: Combine multiple pages into one document; reorder and manage pages before export
 - **Last Scans**: Quickly access and reuse your most recent scans
+- **Inbox Mode**: Automatically save scans to a predefined folder — ideal for paperless-ngx, Nextcloud, or Syncthing workflows
 - **Share & Save**: Export locally or share with other apps
 - **Dark Mode**: Material 3 theme with day/night support
 - **Privacy-Focused**: 100% offline functionality, no internet connection required
@@ -77,6 +78,13 @@ apksigner verify --print-certs MakeACopy-vX.Y.Z.apk
   - English: [docs/accessibility_mode_guide_en.md](docs/accessibility_mode_guide_en.md)
   - Deutsch: [docs/accessibility_mode_guide_de.md](docs/accessibility_mode_guide_de.md)
   - Français: [docs/accessibility_mode_guide_fr.md](docs/accessibility_mode_guide_fr.md)
+
+### Inbox Mode
+- MakeACopy includes an Inbox Mode that automatically saves scans to a predefined folder — ideal for integration with paperless-ngx, Nextcloud, or Syncthing workflows.
+- Guide:
+  - English: [docs/inbox_mode_guide_en.md](docs/inbox_mode_guide_en.md)
+  - Deutsch: [docs/inbox_mode_guide_de.md](docs/inbox_mode_guide_de.md)
+  - Français: [docs/inbox_mode_guide_fr.md](docs/inbox_mode_guide_fr.md)
 
 ### OCR Languages
 

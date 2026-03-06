@@ -308,6 +308,7 @@ The app uses `BuildConfig` booleans to gate features:
 | `FEATURE_FRAMING_LOGGING` | `false` | Debug logging for framing engine |
 | `FEATURE_A11Y_GUIDANCE` | `true` | Accessibility guidance mode |
 | `FEATURE_LAYOUT_ANALYSIS` | `false` | Layout analysis feature |
+| `FEATURE_INBOX_MODE` | `true` | Inbox Mode – automatic export to a default directory |
 
 When adding new features, prefer **default-off** for risky or experimental changes.
 
