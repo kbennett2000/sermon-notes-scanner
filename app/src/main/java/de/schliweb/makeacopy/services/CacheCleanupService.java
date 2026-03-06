@@ -274,33 +274,22 @@ public class CacheCleanupService extends Service {
     startScheduledCleanup();
   }
 
-  /** Performs scheduled cleanup check */
+  /**
+   * Performs scheduled cleanup. The executor already fires at the configured interval, so this
+   * method always runs the comprehensive cleanup without an additional time-gate. Memory pressure
+   * is logged for diagnostics but does not prevent the cleanup from running.
+   */
   private void performScheduledCleanup() {
-    Log.d(TAG, "Performing scheduled cleanup check");
+    Log.d(TAG, "Performing scheduled cleanup");
 
     try {
-      // Check if cleanup is needed based on time
-      long lastCleanup = preferences.getLong(PREF_LAST_CLEANUP, 0);
-      long currentTime = System.currentTimeMillis();
-      long timeSinceLastCleanup = currentTime - lastCleanup;
-      long cleanupIntervalMs = cleanupIntervalHours * 60 * 60 * 1000;
+      boolean highMemory = isMemoryUsageHigh();
+      Log.i(TAG, String.format("Scheduled cleanup running (highMemory=%b)", highMemory));
 
-      boolean shouldCleanupByTime = timeSinceLastCleanup >= cleanupIntervalMs;
-      boolean shouldCleanupByMemory = isMemoryUsageHigh();
+      performComprehensiveCleanup();
 
-      if (shouldCleanupByTime || shouldCleanupByMemory) {
-        Log.i(
-            TAG,
-            String.format(
-                "Cleanup triggered: byTime=%b, byMemory=%b",
-                shouldCleanupByTime, shouldCleanupByMemory));
-        performComprehensiveCleanup();
-
-        // Update last cleanup time
-        preferences.edit().putLong(PREF_LAST_CLEANUP, currentTime).apply();
-      } else {
-        Log.d(TAG, "No cleanup needed at this time");
-      }
+      // Update last cleanup time
+      preferences.edit().putLong(PREF_LAST_CLEANUP, System.currentTimeMillis()).apply();
 
     } catch (Exception e) {
       Log.e(TAG, "Error during scheduled cleanup", e);
