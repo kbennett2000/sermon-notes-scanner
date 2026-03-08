@@ -257,13 +257,20 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }
               }
 
+              // Derive a parent/folder URI for the picker's initial location hint.
+              // Using the raw file URI often fails on OEM pickers (Xiaomi, Samsung, etc.).
+              Uri folderHint =
+                  de.schliweb.makeacopy.utils.infra.DocumentUriUtils.deriveParentDocumentUri(uri);
+              // Save folder URI if derivable, otherwise fall back to the original URI.
+              // Even a file URI is better than nothing — some pickers still respect it.
+              ExportPrefsHelper.setLastImportUri(
+                  requireContext(), folderHint != null ? folderHint.toString() : uri.toString());
+
               if (mime.startsWith("image/")) {
                 // Handle image import (existing logic)
-                ExportPrefsHelper.setLastImportUri(requireContext(), uri.toString());
                 handleImageImport(uri);
               } else if (mime.equals("application/pdf")) {
                 // Handle PDF import
-                ExportPrefsHelper.setLastImportUri(requireContext(), uri.toString());
                 handlePdfImport(uri);
               } else {
                 UIUtils.showToast(
@@ -325,12 +332,16 @@ public class CameraFragment extends Fragment implements SensorEventListener {
           intent.addFlags(
               Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
 
-          // Restore last import location if available
+          // Restore last import folder location if available.
+          // EXTRA_INITIAL_URI is only a hint — OEM pickers may ignore it.
           String lastImportUri = ExportPrefsHelper.getLastImportUri(requireContext());
           if (lastImportUri != null) {
-            Uri initialUri = Uri.parse(lastImportUri);
-            // On Android 11+ (API 30+), EXTRA_INITIAL_URI works for ACTION_OPEN_DOCUMENT
-            intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri);
+            try {
+              Uri initialUri = Uri.parse(lastImportUri);
+              intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri);
+            } catch (Exception e) {
+              Log.w(TAG, "Ignoring invalid last import URI", e);
+            }
           }
 
           pickImageLauncher.launch(intent);

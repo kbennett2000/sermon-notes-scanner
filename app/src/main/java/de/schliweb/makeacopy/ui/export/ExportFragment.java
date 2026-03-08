@@ -146,10 +146,16 @@ public class ExportFragment extends Fragment {
     @Override
     public android.content.Intent createIntent(@NonNull Context context, @NonNull String input) {
       android.content.Intent intent = super.createIntent(context, input);
+      // Restore last export folder location if available.
+      // EXTRA_INITIAL_URI is only a hint — OEM pickers may ignore it.
       String lastExportUri = ExportPrefsHelper.getLastExportUri(context);
       if (lastExportUri != null) {
-        Uri initialUri = Uri.parse(lastExportUri);
-        intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri);
+        try {
+          Uri initialUri = Uri.parse(lastExportUri);
+          intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri);
+        } catch (Exception e) {
+          Log.w("ExportFragment", "Ignoring invalid last export URI", e);
+        }
       }
       return intent;
     }
@@ -577,7 +583,10 @@ public class ExportFragment extends Fragment {
             uri -> {
               Log.d(TAG, "createDocumentLauncher: Document creation result received");
               if (uri != null) {
-                ExportPrefsHelper.setLastExportUri(requireContext(), uri.toString());
+                Uri folderHint =
+                    de.schliweb.makeacopy.utils.infra.DocumentUriUtils.deriveParentDocumentUri(uri);
+                ExportPrefsHelper.setLastExportUri(
+                    requireContext(), folderHint != null ? folderHint.toString() : uri.toString());
                 String displayName = FileUtils.getDisplayNameFromUri(requireContext(), uri);
                 exportViewModel.setSelectedFileLocation(uri);
                 exportViewModel.setSelectedFileLocationName(displayName);
@@ -593,7 +602,10 @@ public class ExportFragment extends Fragment {
             new CreateDocumentWithInitialUri("text/plain"),
             uri -> {
               if (uri != null) {
-                ExportPrefsHelper.setLastExportUri(requireContext(), uri.toString());
+                Uri folderHint =
+                    de.schliweb.makeacopy.utils.infra.DocumentUriUtils.deriveParentDocumentUri(uri);
+                ExportPrefsHelper.setLastExportUri(
+                    requireContext(), folderHint != null ? folderHint.toString() : uri.toString());
                 String displayName = FileUtils.getDisplayNameFromUri(requireContext(), uri);
                 Log.d(TAG, "createTxtDocumentLauncher: Display name from URI: " + displayName);
                 exportOcrTextToTxt(uri);
@@ -608,7 +620,10 @@ public class ExportFragment extends Fragment {
             uri -> {
               Log.d(TAG, "createJpegDocumentLauncher: JPEG creation result received");
               if (uri != null) {
-                ExportPrefsHelper.setLastExportUri(requireContext(), uri.toString());
+                Uri folderHint =
+                    de.schliweb.makeacopy.utils.infra.DocumentUriUtils.deriveParentDocumentUri(uri);
+                ExportPrefsHelper.setLastExportUri(
+                    requireContext(), folderHint != null ? folderHint.toString() : uri.toString());
                 String displayName = FileUtils.getDisplayNameFromUri(requireContext(), uri);
                 exportViewModel.setSelectedFileLocation(uri);
                 exportViewModel.setSelectedFileLocationName(displayName);
@@ -623,7 +638,10 @@ public class ExportFragment extends Fragment {
             uri -> {
               Log.d(TAG, "createZipDocumentLauncher: ZIP creation result received");
               if (uri != null) {
-                ExportPrefsHelper.setLastExportUri(requireContext(), uri.toString());
+                Uri folderHint =
+                    de.schliweb.makeacopy.utils.infra.DocumentUriUtils.deriveParentDocumentUri(uri);
+                ExportPrefsHelper.setLastExportUri(
+                    requireContext(), folderHint != null ? folderHint.toString() : uri.toString());
                 String displayName = FileUtils.getDisplayNameFromUri(requireContext(), uri);
                 exportViewModel.setSelectedFileLocation(uri);
                 exportViewModel.setSelectedFileLocationName(displayName);

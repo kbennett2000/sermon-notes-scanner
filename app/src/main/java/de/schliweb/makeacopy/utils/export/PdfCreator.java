@@ -252,10 +252,24 @@ public class PdfCreator {
         float offsetY = (pageH - drawH) / 2f;
 
         float q = Math.max(0f, Math.min(1f, jpegQuality / 100f));
-        PDImageXObject pdImg =
-            (jpegQuality < 100)
-                ? JPEGFactory.createFromImage(document, prepared, q)
-                : LosslessFactory.createFromImage(document, prepared);
+        // Remove alpha channel before JPEG encoding to avoid OOM in
+        // JPEGFactory.createAlphaFromARGBImage which allocates a large ByteArrayOutputStream.
+        Bitmap opaqueForJpeg = (jpegQuality < 100) ? removeAlphaChannel(prepared) : null;
+        PDImageXObject pdImg;
+        try {
+          pdImg =
+              (jpegQuality < 100)
+                  ? JPEGFactory.createFromImage(document, opaqueForJpeg, q)
+                  : LosslessFactory.createFromImage(document, prepared);
+        } finally {
+          if (opaqueForJpeg != null && opaqueForJpeg != prepared) {
+            try {
+              opaqueForJpeg.recycle();
+            } catch (Throwable t) {
+              Log.w(TAG, "Failed to recycle opaque bitmap", t);
+            }
+          }
+        }
 
         // Load embedded fonts with fallbacks (file-based; subset-embedded by default)
         List<PDFont> fonts = loadFontsWithFallbacks(document, context);
@@ -600,8 +614,11 @@ public class PdfCreator {
       maxH = formatPx[1];
     } else {
       // FIT_TO_IMAGE: no fixed-format constraint, but cap at a sensible maximum
-      maxW = original.getWidth();
-      maxH = original.getHeight();
+      // to avoid OOM when very large images are passed through without downscaling.
+      int fitCap =
+          Math.round(effectiveDpi / 72f * 14400); // ~14400pt ≈ 200in at 72dpi → 60000px@300dpi
+      maxW = Math.min(original.getWidth(), fitCap);
+      maxH = Math.min(original.getHeight(), fitCap);
     }
 
     boolean preScaled =
@@ -689,6 +706,21 @@ public class PdfCreator {
    *     value
    * @return the median height of the bounding boxes; returns 0 if the list is empty
    */
+  /**
+   * Returns an opaque copy of the bitmap (no alpha channel) to prevent {@link
+   * JPEGFactory#createFromImage} from allocating a large alpha-extraction buffer that can cause
+   * {@link OutOfMemoryError}. If the bitmap already has no alpha, returns it as-is.
+   */
+  private static Bitmap removeAlphaChannel(Bitmap src) {
+    if (src == null) return null;
+    if (!src.hasAlpha()) return src;
+    Bitmap opaque = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Bitmap.Config.RGB_565);
+    android.graphics.Canvas canvas = new android.graphics.Canvas(opaque);
+    canvas.drawColor(android.graphics.Color.WHITE);
+    canvas.drawBitmap(src, 0f, 0f, null);
+    return opaque;
+  }
+
   private static float medianHeight(List<RecognizedWord> line) {
     List<Float> heights = new ArrayList<>();
     for (RecognizedWord w : line) heights.add(w.getBoundingBox().height());
@@ -993,10 +1025,24 @@ public class PdfCreator {
           float offsetY = (pageH - drawH) / 2f;
 
           float q = Math.max(0f, Math.min(1f, jpegQuality / 100f));
-          PDImageXObject pdImg =
-              (jpegQuality < 100)
-                  ? JPEGFactory.createFromImage(document, prepared, q)
-                  : LosslessFactory.createFromImage(document, prepared);
+          // Remove alpha channel before JPEG encoding to avoid OOM in
+          // JPEGFactory.createAlphaFromARGBImage.
+          Bitmap opaqueForJpeg = (jpegQuality < 100) ? removeAlphaChannel(prepared) : null;
+          PDImageXObject pdImg;
+          try {
+            pdImg =
+                (jpegQuality < 100)
+                    ? JPEGFactory.createFromImage(document, opaqueForJpeg, q)
+                    : LosslessFactory.createFromImage(document, prepared);
+          } finally {
+            if (opaqueForJpeg != null && opaqueForJpeg != prepared) {
+              try {
+                opaqueForJpeg.recycle();
+              } catch (Throwable t) {
+                Log.w(TAG, "Failed to recycle opaque bitmap", t);
+              }
+            }
+          }
 
           try (PDPageContentStream cs = new PDPageContentStream(document, page)) {
             cs.drawImage(pdImg, offsetX, offsetY, drawW, drawH);

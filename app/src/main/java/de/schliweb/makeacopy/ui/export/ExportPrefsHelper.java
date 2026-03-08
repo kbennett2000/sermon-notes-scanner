@@ -2,6 +2,7 @@ package de.schliweb.makeacopy.ui.export;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import de.schliweb.makeacopy.utils.export.PageFormat;
 import de.schliweb.makeacopy.utils.export.PdfCreator;
 import de.schliweb.makeacopy.utils.export.PdfQualityPreset;
@@ -117,18 +118,24 @@ public final class ExportPrefsHelper {
   }
 
   public static String getLastImportUri(Context context) {
-    return getPrefs(context).getString("last_import_uri", null);
+    String value = getPrefs(context).getString("last_import_uri", null);
+    Log.d("ExportPrefsHelper", "getLastImportUri: " + value);
+    return value;
   }
 
   public static void setLastImportUri(Context context, String uri) {
+    Log.d("ExportPrefsHelper", "setLastImportUri: " + uri);
     getPrefs(context).edit().putString("last_import_uri", uri).apply();
   }
 
   public static String getLastExportUri(Context context) {
-    return getPrefs(context).getString("last_export_uri", null);
+    String value = getPrefs(context).getString("last_export_uri", null);
+    Log.d("ExportPrefsHelper", "getLastExportUri: " + value);
+    return value;
   }
 
   public static void setLastExportUri(Context context, String uri) {
+    Log.d("ExportPrefsHelper", "setLastExportUri: " + uri);
     getPrefs(context).edit().putString("last_export_uri", uri).apply();
   }
 
