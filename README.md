@@ -65,6 +65,9 @@ height="80">](https://f-droid.org/packages/de.schliweb.makeacopy/)
 alt="Get it on Google Play"
 height="80">](https://play.google.com/store/apps/details?id=de.schliweb.makeacopy)
 
+[![Downloads last month](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Fkitswas%2Ffdroid-metrics-dashboard%2Fraw%2Frefs%2Fheads%2Fmain%2Fprocessed%2Fmonthly%2Fde.schliweb.makeacopy.json&query=%24.total_downloads&logo=fdroid&label=Downloads%20last%20month)](https://f-droid.org/packages/de.schliweb.makeacopy/)
+[![Downloads all time](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Fkitswas%2Ffdroid-metrics-dashboard%2Fraw%2Frefs%2Fheads%2Fmain%2Fprocessed%2Ftotal%2Fde.schliweb.makeacopy.json&query=%24.total_downloads&logo=fdroid&label=Downloads%20(all%20time))](https://f-droid.org/packages/de.schliweb.makeacopy/)
+
 Or download the latest APK from the [Releases Section](https://github.com/egdels/makeacopy/releases/latest).
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
