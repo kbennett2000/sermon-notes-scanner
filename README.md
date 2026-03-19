@@ -1,6 +1,6 @@
 # MakeACopy
 
-MakeACopy is an open-source **offline document scanner with OCR** for Android.
+MakeACopy is an open-source **offline document scanner with OCR** for Android, designed for privacy-friendly and self-hosted document workflows.
 
 It allows you to digitize paper documents into **searchable PDFs** while
 keeping the entire processing pipeline on your device. The app works
@@ -9,6 +9,21 @@ completely offline and avoids any cloud services, telemetry, or tracking.
 MakeACopy is designed to be a **reliable building block for privacy-friendly
 document workflows**, especially when combined with self-hosted storage
 systems.
+
+## Looking for a Microsoft Lens alternative?
+
+With the discontinuation of Microsoft Lens, many users are looking for a reliable way to scan documents on Android.
+
+MakeACopy offers the same core building blocks - document scanning, OCR, and searchable PDF export - while following a fundamentally different design:
+
+- **Fully offline** – no cloud services required
+- **No tracking or telemetry**
+- **Open source and auditable**
+- **Designed for long-term, self-hosted workflows**
+
+Instead of integrating into a cloud ecosystem, MakeACopy focuses on local processing and interoperability with tools like SambaLite, paperless-ngx, and Syncthing.
+
+This makes it especially suitable for users who prefer **control, privacy, and predictable behavior** over cloud-based convenience features.
 
 ## Mobile Document Pipeline
 
