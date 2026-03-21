@@ -129,15 +129,15 @@ fi
 info "NDK: $ANDROID_NDK_HOME"
 
 # ===============================
-# JDK 17/21 (Gradle/Java)
+# JDK 21 (preferred) / 17 (fallback)
 # ===============================
 HOST_OS="$(uname | tr '[:upper:]' '[:lower:]')"
 if [ "$HOST_OS" = "darwin" ]; then
   set +e
-  if /usr/libexec/java_home -v 17 >/dev/null 2>&1; then
-    export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
-  elif /usr/libexec/java_home -v 21 >/dev/null 2>&1; then
+  if /usr/libexec/java_home -v 21 >/dev/null 2>&1; then
     export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+  elif /usr/libexec/java_home -v 17 >/dev/null 2>&1; then
+    export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
   fi
   set -e
 fi
@@ -146,7 +146,7 @@ if [ -n "${JAVA_HOME:-}" ]; then
   export ORG_GRADLE_JAVA_HOME="$JAVA_HOME"
 fi
 info "JAVA_HOME: ${JAVA_HOME:-unset}"
-java -version >/dev/null 2>&1 || info "WARN: 'java' not found or wrong version (need >= 17)"
+java -version >/dev/null 2>&1 || info "WARN: 'java' not found or wrong version (need >= 21)"
 
 # ===============================
 # Strip tool (optional)
@@ -171,6 +171,35 @@ info "Copying ONNX sources to $ORT_DIR ..."
 rm -rf "$ORT_DIR"
 mkdir -p "$ORT_DIR"
 cp -a "$ORT_DIR_ORIG/." "$ORT_DIR"
+
+# Use pinned build-android.gradle and settings-android.gradle for reproducible Java/AAR builds
+PINNED_GRADLE="$REPO_DIR/external/onnxruntime_pinned/build-android.gradle"
+PINNED_SETTINGS="$REPO_DIR/external/onnxruntime_pinned/settings-android.gradle"
+if [ -f "$PINNED_GRADLE" ]; then
+  cp -f "$PINNED_GRADLE" "$ORT_DIR/java/build-android.gradle"
+  info "Pinned build-android.gradle applied."
+else
+  echo "ERROR: Pinned build-android.gradle not found at $PINNED_GRADLE" >&2
+  exit 1
+fi
+if [ -f "$PINNED_SETTINGS" ]; then
+  cp -f "$PINNED_SETTINGS" "$ORT_DIR/java/settings-android.gradle"
+  info "Pinned settings-android.gradle applied."
+else
+  echo "ERROR: Pinned settings-android.gradle not found at $PINNED_SETTINGS" >&2
+  exit 1
+fi
+
+# Use pinned gradle-wrapper.properties for reproducible Gradle version
+PINNED_WRAPPER="$REPO_DIR/external/onnxruntime_pinned/gradle-wrapper.properties"
+ORT_WRAPPER_PROPS="$ORT_DIR/java/gradle/wrapper/gradle-wrapper.properties"
+if [ -f "$PINNED_WRAPPER" ]; then
+  cp -f "$PINNED_WRAPPER" "$ORT_WRAPPER_PROPS"
+  info "Pinned gradle-wrapper.properties applied."
+else
+  echo "ERROR: Pinned gradle-wrapper.properties not found at $PINNED_WRAPPER" >&2
+  exit 1
+fi
 
 # ===============================
 # Pick a CMake >= 3.28 ONLY for ONNX Runtime
@@ -306,7 +335,7 @@ for ABI in $ABIS; do
     onnxruntime_DISABLE_EXCEPTIONS=ON
     onnxruntime_DISABLE_FLOAT8_TYPES=ON
     onnxruntime_BUILD_SHARED_LIB_TESTS=OFF
-
+    onnxruntime_BUILD_UNIT_TESTS=OFF
     # Optional footprint tweaks:
     # onnxruntime_DISABLE_SPARSE_TENSORS=ON
     # onnxruntime_DISABLE_OPTIONAL_TYPE=ON

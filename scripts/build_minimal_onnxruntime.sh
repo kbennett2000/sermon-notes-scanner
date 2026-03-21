@@ -83,6 +83,32 @@ rm -rf "$SRC_DIR"
 mkdir -p "$SRC_DIR"
 cp -a "$ORT_DIR_ORIG/." "$SRC_DIR"
 
+# Use pinned build-android.gradle and settings-android.gradle for reproducible Java/AAR builds
+PINNED_GRADLE="$REPO_DIR/external/onnxtuntime_pinned/build-android.gradle"
+PINNED_SETTINGS="$REPO_DIR/external/onnxtuntime_pinned/settings-android.gradle"
+if [ -f "$PINNED_GRADLE" ]; then
+  cp -f "$PINNED_GRADLE" "$SRC_DIR/java/build-android.gradle"
+  echo "Pinned build-android.gradle applied."
+else
+  die "Pinned build-android.gradle not found at $PINNED_GRADLE"
+fi
+if [ -f "$PINNED_SETTINGS" ]; then
+  cp -f "$PINNED_SETTINGS" "$SRC_DIR/java/settings-android.gradle"
+  echo "Pinned settings-android.gradle applied."
+else
+  die "Pinned settings-android.gradle not found at $PINNED_SETTINGS"
+fi
+
+# Use pinned gradle-wrapper.properties for reproducible Gradle version
+PINNED_WRAPPER="$REPO_DIR/external/onnxtuntime_pinned/gradle-wrapper.properties"
+ORT_WRAPPER_PROPS="$SRC_DIR/java/gradle/wrapper/gradle-wrapper.properties"
+if [ -f "$PINNED_WRAPPER" ]; then
+  cp -f "$PINNED_WRAPPER" "$ORT_WRAPPER_PROPS"
+  echo "Pinned gradle-wrapper.properties applied."
+else
+  die "Pinned gradle-wrapper.properties not found at $PINNED_WRAPPER"
+fi
+
 cd "$SRC_DIR"
 
 BASE_JSON="tools/ci_build/github/android/default_full_aar_build_settings.json"
