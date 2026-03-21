@@ -728,11 +728,13 @@ public class ExportFragment extends Fragment {
                                 // Also clear pending add flag to avoid unintended re-adding on next
                                 // open
                                 ExportPrefsHelper.clearPendingAddPage(requireContext());
+                                View fragmentView = getView();
+                                if (fragmentView == null) return;
                                 NavOptions navOptions =
                                     new NavOptions.Builder()
                                         .setPopUpTo(R.id.navigation_camera, true)
                                         .build();
-                                Navigation.findNavController(requireView())
+                                Navigation.findNavController(fragmentView)
                                     .navigate(R.id.navigation_camera, null, navOptions);
                               })
                           .setNegativeButton(
