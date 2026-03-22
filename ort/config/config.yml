@@ -1,8 +1,12 @@
 ort:
   analyzer:
+    skipExcluded: true
     disabledPackageManagers:
       - SBT
       - CocoaPods
+      - PIP
+      - NuGet
+      - Bazel
   packageConfigurationProviders:
     - type: Dir
       options:
