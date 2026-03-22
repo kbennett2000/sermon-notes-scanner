@@ -1,4 +1,7 @@
 ort:
+  analyzer:
+    disabledPackageManagers:
+      - SBT
   packageConfigurationProviders:
     - type: Dir
       options:

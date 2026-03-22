@@ -12,8 +12,7 @@ echo "==> Running ORT analyze"
 ort --config "${ROOT_DIR}/ort/config/config.yml" \
   analyze \
   -i "${ROOT_DIR}" \
-  -o "${OUT_DIR}/analyzer" \
-  --package-managers -SBT
+  -o "${OUT_DIR}/analyzer"
 
 echo "==> Running ORT scan"
 ort --config "${ROOT_DIR}/ort/config/config.yml" \
