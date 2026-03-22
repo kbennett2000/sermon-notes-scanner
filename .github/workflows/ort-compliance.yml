@@ -31,6 +31,11 @@ jobs:
           sudo mv ort-*/ /opt/ort
           sudo ln -s /opt/ort/bin/ort /usr/local/bin/ort
 
+      - name: Install ScanCode
+        run: |
+          pip install scancode-toolkit
+          scancode --version
+
       - name: Run ORT
         run: |
           chmod +x scripts/run-ort.sh
