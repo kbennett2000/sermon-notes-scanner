@@ -1,6 +1,6 @@
 ort:
   packageConfigurationProviders:
-    Dir:
+    - type: Dir
       options:
         path: ort/config/package-configurations
         mustExist: false
