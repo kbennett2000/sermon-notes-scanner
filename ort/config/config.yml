@@ -2,6 +2,7 @@ ort:
   analyzer:
     disabledPackageManagers:
       - SBT
+      - CocoaPods
   packageConfigurationProviders:
     - type: Dir
       options:
