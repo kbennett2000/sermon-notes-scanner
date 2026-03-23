@@ -19,13 +19,15 @@ ort --config "${ROOT_DIR}/ort/config/config.yml" \
   scan \
   -i "${OUT_DIR}/analyzer/analyzer-result.yml" \
   -o "${OUT_DIR}/scan" \
-  --skip-excluded
+  --skip-excluded \
+  --package-types=PROJECT
 
 echo "==> Running ORT report"
 ort --config "${ROOT_DIR}/ort/config/config.yml" \
   report \
-  -i "${OUT_DIR}/scan" \
-  -o "${OUT_DIR}/reports"
+  -i "${OUT_DIR}/scan/scan-result.yml" \
+  -o "${OUT_DIR}/reports" \
+  -f StaticHtml,WebApp,EvaluatedModel
 
 echo "==> ORT completed"
 echo "Analyzer: ${OUT_DIR}/analyzer"
