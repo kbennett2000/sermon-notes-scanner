@@ -45,6 +45,8 @@ jobs:
           # This would pull onnxruntime (~708MB+) and opencv (~211MB) submodules, causing timeouts.
           # By removing .gitmodules and amending the commit, ORT's fresh clone has no submodules.
           if [ -f .gitmodules ]; then
+            git config user.email "ci@github.com"
+            git config user.name "CI"
             git rm -f .gitmodules
             git commit --amend --no-edit
           fi
