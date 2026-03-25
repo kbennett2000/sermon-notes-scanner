@@ -39,6 +39,16 @@ jobs:
           pip install scancode-toolkit
           scancode --version
 
+      - name: Remove .gitmodules for ORT
+        run: |
+          # ORT clones the repo again into /tmp and runs 'git submodule update --init --recursive'.
+          # This would pull onnxruntime (~708MB+) and opencv (~211MB) submodules, causing timeouts.
+          # By removing .gitmodules and amending the commit, ORT's fresh clone has no submodules.
+          if [ -f .gitmodules ]; then
+            git rm -f .gitmodules
+            git commit --amend --no-edit
+          fi
+
       - name: Run ORT
         run: |
           chmod +x scripts/run-ort.sh

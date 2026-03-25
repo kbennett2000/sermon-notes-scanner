@@ -12,7 +12,7 @@ ort:
     config:
       ScanCode:
         options:
-          commandLine: "--copyright, --license, --info, --strip-root, --timeout, 60, --license-references"
+          commandLine: "--copyright, --license, --info, --strip-root, --timeout, 60"
           commandLineNonConfig: "--processes, 4, --verbose"
     ignorePatterns:
       # ORT defaults (must be re-listed when overriding)
