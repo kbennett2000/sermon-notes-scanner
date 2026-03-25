@@ -12,7 +12,7 @@ ort:
     config:
       ScanCode:
         options:
-          commandLine: "--copyright --license --info --strip-root --timeout 300 --processes 4"
+          commandLineNonConfig: "--processes, 4"
   packageConfigurationProviders:
     - type: Dir
       options:
