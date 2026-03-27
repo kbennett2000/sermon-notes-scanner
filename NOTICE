@@ -113,15 +113,23 @@ includes third-party components under their respective licenses as noted below.
       layers. Distributed under the OFL without modification. The OFL notice
       is included at third_party_licenses/OFL.txt.
 
-8) FrequencyWords (OCR dictionaries)
+8) Noto Sans Devanagari (fonts; NotoSansDevanagari-Regular.ttf)
+    - Project: https://github.com/notofonts/devanagari
+    - Version: 2.006
+    - License: SIL Open Font License 1.1
+    - Notes: Used for Hindi (Devanagari) script rendering in PDF text layers.
+      Distributed under the OFL without modification. The OFL notice is
+      included at third_party_licenses/OFL.txt.
+
+9) FrequencyWords (OCR dictionaries)
     - Project: https://github.com/hermitdave/FrequencyWords
     - License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     - Notes: Word frequency dictionaries derived from Wikipedia are used for OCR
-      post-processing to improve text recognition accuracy. Dictionaries for 22
+      post-processing to improve text recognition accuracy. Dictionaries for 23
       languages are included. The license notice is included at
       app/src/main/assets/dictionaries/LICENSE.txt.
 
-9) Training Datasets (not redistributed)
+10) Training Datasets (not redistributed)
 
 This project uses ideas and publicly available datasets for training and
 evaluation purposes only. No datasets, images, labels, or training
@@ -129,14 +137,14 @@ checkpoints/weights are included or redistributed in this repository.
 
 The following datasets were used:
 
-9.1) UVDoc Dataset
+10.1) UVDoc Dataset
      - Project: https://github.com/tanguymagne/UVDoc-Dataset
      - License: MIT License
      - Reference: Floor Verhoeven et al., "Neural Grid-based Document Unwarping"
        (SIGGRAPH Asia 2023)
      - Usage: Pretraining of document geometry and perspective.
 
-9.2) SmartDoc Dataset
+10.2) SmartDoc Dataset
      - Reference: Jean-Christophe Burie et al.,
        "ICDAR 2015 Competition on Smartphone Document Capture and OCR (SmartDoc)"
      - License: Creative Commons Attribution 4.0 International (CC BY 4.0)
@@ -145,7 +153,7 @@ The following datasets were used:
      - Notes: Original images remain the property of their respective authors.
        Attribution is provided here as required by the CC BY 4.0 license.
 
-9.3) Describable Textures Dataset (DTD)
+10.3) Describable Textures Dataset (DTD)
 
      - Project: https://www.robots.ox.ac.uk/~vgg/data/dtd/
      - Reference: M. Cimpoi et al., "Describing Textures in the Wild"
@@ -158,7 +166,7 @@ The following datasets were used:
        or redistributed as part of this repository or application.
        This project does not ship any DTD images or derivatives.
 
-9.4) CORD Dataset (Consolidated Receipt Dataset)
+10.4) CORD Dataset (Consolidated Receipt Dataset)
      - Project: https://github.com/clovaai/cord
      - Reference: Jaewook Kim et al.,
        "CORD: A Consolidated Receipt Dataset for Post-OCR Parsing"
