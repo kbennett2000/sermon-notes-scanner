@@ -65,7 +65,7 @@ MakeACopy is available in two editions:
 
 | Edition | OCR Languages | Fonts | APK Size (arm64-v8a) |
 |---------|--------------|-------|---------------------|
-| **Full** | 22 languages (incl. CJK, Arabic, Thai, Turkish) | 4 fonts (incl. CJK) | ~99 MB |
+| **Full** | 23 languages (incl. CJK, Arabic, Hindi, Thai, Turkish) | 5 fonts (incl. CJK, Devanagari) | ~99 MB |
 | **Light** | English + German | 1 font (NotoSans) | ~58 MB |
 
 Both editions include the same ML-based document detection (ONNX model), OpenCV image processing, and full offline functionality. Both editions use an operator-stripped ONNX Runtime build that includes only the operators required for document detection. The Light edition additionally ships fewer OCR language models, fonts, and dictionaries, and uses a minimal ONNX Runtime AAR without XNNPACK and NNAPI to further reduce APK size.
@@ -141,11 +141,13 @@ Supported out of the box:
 - English (eng), German (deu), French (fra), Italian (ita), Spanish (spa), Portuguese (por), Dutch (nld), Polish (pol), Czech (ces), Slovak (slk), Hungarian (hun), Romanian (ron), Danish (dan), Norwegian (nor), Swedish (swe), Turkish (tur), Russian (rus), Thai (tha)
 - Chinese (Simplified) — chi_sim, Chinese (Traditional) — chi_tra
 - Arabic (ara), Persian/Farsi (fas)
+- Hindi (hin)
 
 Notes:
 - All OCR runs fully offline on-device.
 - For Chinese, MakeACopy includes appropriate CJK fonts for better PDF text embedding.
 - For Arabic and Persian, MakeACopy includes the Noto Naskh Arabic font for proper RTL (right-to-left) text rendering in PDF exports.
+- For Hindi, MakeACopy includes the Noto Sans Devanagari font for proper Devanagari text rendering in PDF exports.
 
 ## Screenshots
 
@@ -251,6 +253,7 @@ MakeACopy follows the Single-Activity + Multi-Fragment pattern with MVVM archite
 | Fonts (CJK) | [Noto Sans CJK](https://github.com/notofonts/noto-cjk) | OFL 1.1 |
 | Fonts (Latin) | [Noto Sans](https://github.com/notofonts/noto-fonts) | OFL 1.1 |
 | Fonts (Arabic) | [Noto Naskh Arabic](https://github.com/notofonts/arabic) | OFL 1.1 |
+| Fonts (Devanagari) | [Noto Sans Devanagari](https://github.com/notofonts/devanagari) | OFL 1.1 |
 | UI | Material Components | Apache 2.0 |
 | OCR Dictionaries | [FrequencyWords](https://github.com/hermitdave/FrequencyWords) | CC BY-SA 4.0 |
 
@@ -267,7 +270,7 @@ MakeACopy uses word frequency dictionaries for OCR post-processing to improve te
 
 The dictionaries are used to validate and correct OCR results by checking recognized words against known word lists. This helps reduce common OCR errors while maintaining fully offline operation.
 
-Included dictionaries cover 22 languages: Arabic (ara), Czech (ces), Danish (dan), German (deu), English (eng), Persian (fas), French (fra), Hungarian (hun), Italian (ita), Dutch (nld), Norwegian (nor), Polish (pol), Portuguese (por), Romanian (ron), Russian (rus), Slovak (slk), Spanish (spa), Swedish (swe), Thai (tha), Turkish (tur), Chinese Simplified (chi_sim), and Chinese Traditional (chi_tra).
+Included dictionaries cover 23 languages: Arabic (ara), Czech (ces), Danish (dan), German (deu), English (eng), Persian (fas), French (fra), Hindi (hin), Hungarian (hun), Italian (ita), Dutch (nld), Norwegian (nor), Polish (pol), Portuguese (por), Romanian (ron), Russian (rus), Slovak (slk), Spanish (spa), Swedish (swe), Thai (tha), Turkish (tur), Chinese Simplified (chi_sim), and Chinese Traditional (chi_tra).
 
 ## Submodules
 
