@@ -106,13 +106,10 @@ public class CompletedScansPickerFragment extends Fragment
             // Apply system bar inset as additional bottom MARGIN instead of padding to avoid
             // inflating the container's interior height. This keeps buttons visually centered.
             android.view.ViewGroup.LayoutParams lp = bottomContainer.getLayoutParams();
-            if (lp instanceof androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) {
-              androidx.constraintlayout.widget.ConstraintLayout.LayoutParams clp =
-                  (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) lp;
+            if (lp instanceof androidx.constraintlayout.widget.ConstraintLayout.LayoutParams clp) {
               clp.bottomMargin = bottomOrigBottom + sb.bottom;
               bottomContainer.setLayoutParams(clp);
-            } else if (lp instanceof ViewGroup.MarginLayoutParams) {
-              ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) lp;
+            } else if (lp instanceof ViewGroup.MarginLayoutParams mlp) {
               mlp.bottomMargin = bottomOrigBottom + sb.bottom;
               bottomContainer.setLayoutParams(mlp);
             }
