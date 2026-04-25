@@ -261,8 +261,12 @@ public final class OpenCVUtils {
     try {
       Utils.bitmapToMat(originalBitmap, mat);
       // Compute a tight target size based on the selection to preserve aspect ratio of the cropped
-      // area
-      Size targetSize = computeWarpTargetSize(corners);
+      // area. Uses projective aspect-ratio estimation (Zhang & He, 2006) when possible to better
+      // recover the true rectangle proportions; falls back to the pixel-distance heuristic if the
+      // projective estimate is degenerate (e.g., near-fronto-parallel quad). See
+      // docs/aspect_ratio_concept_v3.7.2.md.
+      Size targetSize =
+          computeWarpTargetSize(corners, originalBitmap.getWidth(), originalBitmap.getHeight());
       if (!isSafeMode()) {
         Log.d(TAG, "Using OpenCV warpPerspective");
         Mat warped = warpPerspectiveSafe(mat, corners, targetSize);
@@ -1195,6 +1199,9 @@ public final class OpenCVUtils {
    * Computes a tight target size (width/height) for the warp based on the lengths of the selected
    * quadrilateral edges. This preserves the aspect ratio of the selected area when mapping to a
    * rectangle.
+   *
+   * <p>Legacy heuristic: pixel-distance based. Used as a fallback when the projective estimate is
+   * not available.
    */
   private static Size computeWarpTargetSize(Point[] corners) {
     if (corners == null || corners.length != 4) {
@@ -1209,6 +1216,183 @@ public final class OpenCVUtils {
     int w = Math.max(1, (int) Math.round(Math.max(wTop, wBottom)) + 1);
     int h = Math.max(1, (int) Math.round(Math.max(hLeft, hRight)) + 1);
     return new Size(w, h);
+  }
+
+  /**
+   * Computes a tight target size (width/height) for the warp using a projective aspect-ratio
+   * estimation (Zhang & He, 2006, "Whiteboard Scanning and Image Enhancement"). The image's
+   * principal point is assumed to be at its centre and the focal length is estimated from the
+   * geometry of the four corners (with a fallback of {@code f ≈ max(srcWidth, srcHeight)} if the
+   * closed-form estimate is degenerate).
+   *
+   * <p>If the projective estimate is degenerate (e.g., near-fronto-parallel quad, parallel
+   * vanishing rays, or numerically unstable), the method falls back to the pixel-distance
+   * heuristic implemented by {@link #computeWarpTargetSize(Point[])}.
+   *
+   * <p>The returned pixel dimensions are anchored to the longest observed quad edge so that the
+   * output resolution stays close to the original capture and no upscaling occurs.
+   *
+   * @param corners four corner points in order TL, TR, BR, BL (image pixel coordinates)
+   * @param srcWidth width of the source bitmap (pixels)
+   * @param srcHeight height of the source bitmap (pixels)
+   * @return target {@link Size} for the warp
+   */
+  static Size computeWarpTargetSize(Point[] corners, int srcWidth, int srcHeight) {
+    if (corners == null || corners.length != 4) {
+      return new Size(1, 1);
+    }
+    double wTop = distance(corners[0], corners[1]);
+    double wBottom = distance(corners[2], corners[3]);
+    double hLeft = distance(corners[0], corners[3]);
+    double hRight = distance(corners[1], corners[2]);
+    double meanW = 0.5 * (wTop + wBottom);
+    double meanH = 0.5 * (hLeft + hRight);
+    double longPx = Math.max(Math.max(wTop, wBottom), Math.max(hLeft, hRight));
+    if (longPx < 1.0) {
+      return new Size(1, 1);
+    }
+
+    Double widthOverHeight = estimateProjectiveAspectRatio(corners, srcWidth, srcHeight);
+    if (widthOverHeight == null
+        || !Double.isFinite(widthOverHeight)
+        || widthOverHeight <= 0.0
+        || widthOverHeight > 100.0
+        || widthOverHeight < 0.01) {
+      Log.d(
+          TAG,
+          "computeWarpTargetSize: projective estimate unavailable, falling back to heuristic");
+      return computeWarpTargetSize(corners);
+    }
+
+    // Decide orientation from observed quad: which axis is longer in the image?
+    boolean landscapeQuad = meanW >= meanH;
+    int w;
+    int h;
+    if (landscapeQuad) {
+      // long side = width
+      w = (int) Math.round(longPx);
+      h = (int) Math.round(longPx / widthOverHeight);
+    } else {
+      // long side = height; the projective ratio is W/H from the corner ordering, which already
+      // reflects orientation, so use it directly
+      h = (int) Math.round(longPx);
+      w = (int) Math.round(longPx * widthOverHeight);
+    }
+    w = Math.max(1, w) + 1;
+    h = Math.max(1, h) + 1;
+    Log.d(
+        TAG,
+        "computeWarpTargetSize: projective W/H="
+            + String.format(java.util.Locale.US, "%.4f", widthOverHeight)
+            + ", target="
+            + w
+            + "x"
+            + h);
+    return new Size(w, h);
+  }
+
+  /**
+   * Estimates the true width/height aspect ratio of the rectangle whose perspective-projected
+   * image corners are given, using the closed-form solution from Zhang & He (2006). Returns {@code
+   * null} if the estimate is degenerate (near-fronto-parallel quad, division by zero, negative
+   * focal length squared, etc.).
+   *
+   * <p>Corner order is TL, TR, BR, BL.
+   *
+   * @param corners four image-space corners
+   * @param srcWidth width of the source image (pixels)
+   * @param srcHeight height of the source image (pixels)
+   * @return estimated W/H ratio, or {@code null} if not reliably computable
+   */
+  static Double estimateProjectiveAspectRatio(Point[] corners, int srcWidth, int srcHeight) {
+    if (corners == null || corners.length != 4 || srcWidth <= 0 || srcHeight <= 0) {
+      return null;
+    }
+    // Principal point assumed at image centre.
+    double cx = srcWidth * 0.5;
+    double cy = srcHeight * 0.5;
+
+    // Centred image coordinates of the four corners (TL, TR, BR, BL).
+    double[] p0 = {corners[0].x - cx, corners[0].y - cy};
+    double[] p1 = {corners[1].x - cx, corners[1].y - cy};
+    double[] p2 = {corners[2].x - cx, corners[2].y - cy};
+    double[] p3 = {corners[3].x - cx, corners[3].y - cy};
+
+    // Closed-form algorithm from "Whiteboard Scanning and Image Enhancement"
+    // (Zhang & He, 2006), simplified for principal point at image centre and zero skew.
+    //
+    // Map our corner order TL(0), TR(1), BR(2), BL(3) onto the paper's
+    //   m1 = TL = p0
+    //   m2 = TR = p1
+    //   m3 = BR = p2
+    //   m4 = BL = p3
+    //
+    // Build lifted homogeneous points m_i = (x_i, y_i, 1).
+    // Compute scalars k2, k3 so that:
+    //   k2 * m2 + m1 - m3 = lambda * (point on plane), etc.
+    // Following the standard derivation:
+    //   k2 = det([m1 m4 m3]) / det([m2 m4 m3])
+    //   k3 = det([m1 m2 m3]) / det([m4 m2 m3])
+    // where det([a b c]) of homogeneous 3-vectors (with z=1) reduces to a 3x3 determinant.
+    double k2num = det3(p0[0], p0[1], 1, p3[0], p3[1], 1, p2[0], p2[1], 1);
+    double k2den = det3(p1[0], p1[1], 1, p3[0], p3[1], 1, p2[0], p2[1], 1);
+    double k3num = det3(p0[0], p0[1], 1, p1[0], p1[1], 1, p2[0], p2[1], 1);
+    double k3den = det3(p3[0], p3[1], 1, p1[0], p1[1], 1, p2[0], p2[1], 1);
+    if (Math.abs(k2den) < 1e-9 || Math.abs(k3den) < 1e-9) {
+      return null;
+    }
+    double k2 = k2num / k2den;
+    double k3 = k3num / k3den;
+
+    // n2 = k2 * m2 - m1, n3 = k3 * m4 - m1   (in homogeneous space, z components: k2*1 - 1, etc.)
+    double n2x = k2 * p1[0] - p0[0];
+    double n2y = k2 * p1[1] - p0[1];
+    double n2z = k2 - 1.0;
+    double n3x = k3 * p3[0] - p0[0];
+    double n3y = k3 * p3[1] - p0[1];
+    double n3z = k3 - 1.0;
+
+    // If the quad is (almost) fronto-parallel, k2 and k3 collapse to 1 → n*z ≈ 0 →
+    // f² is undefined. Detect and bail out so the caller can use the heuristic fallback.
+    if (Math.abs(n2z) < 1e-6 || Math.abs(n3z) < 1e-6) {
+      return null;
+    }
+
+    // Closed-form focal length squared estimate:
+    //   f² = - (n2x*n3x + n2y*n3y) / (n2z * n3z)
+    double fSquared = -(n2x * n3x + n2y * n3y) / (n2z * n3z);
+    if (!Double.isFinite(fSquared) || fSquared <= 0.0) {
+      // Fallback: use a reasonable focal length assumption rather than failing immediately.
+      fSquared = (double) Math.max(srcWidth, srcHeight);
+      fSquared *= fSquared;
+    }
+
+    // Aspect ratio squared:
+    //   (W/H)² = (n2x² + n2y² + n2z² * f²) / (n3x² + n3y² + n3z² * f²)
+    double num = n2x * n2x + n2y * n2y + n2z * n2z * fSquared;
+    double den = n3x * n3x + n3y * n3y + n3z * n3z * fSquared;
+    if (den < 1e-12) {
+      return null;
+    }
+    double ratioSq = num / den;
+    if (!Double.isFinite(ratioSq) || ratioSq <= 0.0) {
+      return null;
+    }
+    return Math.sqrt(ratioSq);
+  }
+
+  /** 3x3 determinant of the matrix whose rows are (a1,a2,a3), (b1,b2,b3), (c1,c2,c3). */
+  private static double det3(
+      double a1,
+      double a2,
+      double a3,
+      double b1,
+      double b2,
+      double b3,
+      double c1,
+      double c2,
+      double c3) {
+    return a1 * (b2 * c3 - b3 * c2) - a2 * (b1 * c3 - b3 * c1) + a3 * (b1 * c2 - b2 * c1);
   }
 
   /**
