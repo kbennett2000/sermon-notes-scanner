@@ -1226,8 +1226,8 @@ public final class OpenCVUtils {
    * closed-form estimate is degenerate).
    *
    * <p>If the projective estimate is degenerate (e.g., near-fronto-parallel quad, parallel
-   * vanishing rays, or numerically unstable), the method falls back to the pixel-distance
-   * heuristic implemented by {@link #computeWarpTargetSize(Point[])}.
+   * vanishing rays, or numerically unstable), the method falls back to the pixel-distance heuristic
+   * implemented by {@link #computeWarpTargetSize(Point[])}.
    *
    * <p>The returned pixel dimensions are anchored to the longest observed quad edge so that the
    * output resolution stays close to the original capture and no upscaling occurs.
@@ -1259,8 +1259,7 @@ public final class OpenCVUtils {
         || widthOverHeight > 100.0
         || widthOverHeight < 0.01) {
       Log.d(
-          TAG,
-          "computeWarpTargetSize: projective estimate unavailable, falling back to heuristic");
+          TAG, "computeWarpTargetSize: projective estimate unavailable, falling back to heuristic");
       return computeWarpTargetSize(corners);
     }
 
@@ -1292,10 +1291,10 @@ public final class OpenCVUtils {
   }
 
   /**
-   * Estimates the true width/height aspect ratio of the rectangle whose perspective-projected
-   * image corners are given, using the closed-form solution from Zhang & He (2006). Returns {@code
-   * null} if the estimate is degenerate (near-fronto-parallel quad, division by zero, negative
-   * focal length squared, etc.).
+   * Estimates the true width/height aspect ratio of the rectangle whose perspective-projected image
+   * corners are given, using the closed-form solution from Zhang & He (2006). Returns {@code null}
+   * if the estimate is degenerate (near-fronto-parallel quad, division by zero, negative focal
+   * length squared, etc.).
    *
    * <p>Corner order is TL, TR, BR, BL.
    *
