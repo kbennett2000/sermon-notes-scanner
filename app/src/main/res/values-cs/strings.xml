@@ -98,6 +98,10 @@
     <string name="pdf_bw_mode_robust">Č/B (robustní)</string>
     <string name="pdf_bw_mode_classic">Č/B (klasický)</string>
     <string name="pdf_bw_mode_ocr_robust">Odolné předzpracování OCR (PDF)</string>
+    <string name="jpeg_mode_gray_clean">Vyčištěné stupně šedi (horní propust) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Vyčištěné barvy (horní propust) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Odstíny šedi – vyčištěné (high-pass)</string>
+    <string name="pdf_bw_mode_color_clean">Barvy – vyčištěné (high-pass)</string>
     <string name="skip_ocr_export_only">Přeskočit OCR (pouze export)</string>
     <string name="skip_cropping">Přeskočit oříznutí</string>
     <string name="preview_corner_detection">Náhled detekce rohů</string>
@@ -209,11 +213,9 @@
     <!-- OCR přípravné režimy – vysvětlení -->
     <string name="ocr_explain_prep_modes">Vysvětlit režimy rozpoznávání</string>
     <string name="ocr_prep_modes_title">Režimy rozpoznávání: jednoduché vysvětlení</string>
-    <string name="ocr_prep_modes_message">Existují tři způsoby, jak předat obrázky do OCR enginu:\n\n• Originál (bez
+    <string name="ocr_prep_modes_message">Existují dva způsoby, jak předat obrázky do OCR enginu:\n\n• Originál (bez
         předzpracování) — nejrychlejší. Fotografie se odešle tak, jak je. Vhodné pro již čisté snímky s vysokým
-        kontrastem. Může přehlédnout slabý nebo zašuměný text.\n\n• OpenCV Rychlé — rychlé vyčištění: převod do stupňů
-        šedi, lehké odstranění šumu, automatický převod na černobílý obraz a případné mírné zvětšení. Dobrá výchozí
-        volba pro většinu fotografií. Vyvážený poměr rychlosti a kvality.\n\n• OpenCV Robustní — přepracováno pro
+        kontrastem. Může přehlédnout slabý nebo zašuměný text.\n\n• OpenCV Robustní — přepracováno pro
         maximální přesnost u obtížných stránek. Provádí narovnání (deskew), normalizaci stínů a osvětlení, odstranění
         šumu se zachováním hran a inteligentní zvětšení. Důležité je, že Tesseractu předává vysoce kvalitní obraz ve
         stupních šedi (nikoli tvrdý černobílý), aby se zachovaly jemné detaily, jako jsou smyčky u písmene „o“ a malé
@@ -422,7 +424,6 @@
     <string name="inbox_saved">✓ Uloženo do Inboxu</string>
     <string name="inbox_permission_lost">Přístup ke složce Inbox ztracen. Vyberte prosím novou složku.</string>
     <string name="inbox_no_folder_selected">Nejprve prosím vyberte složku Inbox.</string>
-    <string name="inbox_export_failed">Uložení do složky Inbox selhalo</string>
     <string name="inbox_clear">Vymazat složku Inbox</string>
     <string name="inbox_filename_format">Formát názvu souboru</string>
     <string name="inbox_auto_new_scan">Po exportu automaticky zahájit nové skenování</string>
@@ -430,4 +431,24 @@
     <string name="inbox_filename_date_time_scan">Datum + čas + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Pouze datum (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Originál (bez filtru)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Odstranit stránku?</string>
+    <string name="confirm_remove_page_message">Chcete tuto stránku odstranit z filmového pásu?</string>
+    <string name="crop_aspect_label">Poměr stran</string>
+    <string name="crop_aspect_auto">Auto (doporučeno)</string>
+    <string name="crop_aspect_original">Zachovat originál (bez korekce poměru)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Vlastní…</string>
+    <string name="crop_aspect_custom_with_ratio">Vlastní (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Vlastní poměr stran</string>
+    <string name="crop_aspect_custom_width_hint">Šířka</string>
+    <string name="crop_aspect_custom_height_hint">Výška</string>
+    <string name="crop_aspect_custom_invalid">Zadejte kladná čísla v rozmezí 1:1 až 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Výstup: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Roh mimo obrázek — výstup může obsahovat černé okraje</string>
+    <string name="crop_edge_dragged">Hrana vybrána. Tažením přesuňte hranu.</string>
 </resources>

@@ -94,6 +94,10 @@
     <string name="pdf_bw_mode_robust">أ&amp;س (محسّن)</string>
     <string name="pdf_bw_mode_classic">أ&amp;س (كلاسيكي)</string>
     <string name="pdf_bw_mode_ocr_robust">معالجة OCR محسّنة (PDF)</string>
+    <string name="jpeg_mode_gray_clean">تدرج رمادي نظيف (مرشح تمرير عالي) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">ألوان نظيفة (مرشح تمرير عالي) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">تدرج رمادي مُنقّى (تمرير عالي)</string>
+    <string name="pdf_bw_mode_color_clean">ألوان مُنقّاة (تمرير عالي)</string>
     <string name="skip_ocr_export_only">تخطي OCR (تصدير فقط)</string>
     <string name="preview_corner_detection">معاينة اكتشاف الزوايا</string>
     <string name="skip_cropping">تخطي الاقتصاص</string>
@@ -201,10 +205,9 @@
     <!-- OCR prep modes explanation -->
     <string name="ocr_explain_prep_modes">شرح أوضاع التعرّف</string>
     <string name="ocr_prep_modes_title">أوضاع التعرّف: شرح مبسط</string>
-    <string name="ocr_prep_modes_message">هناك ثلاث طرق لإدخال الصور إلى محرّك التعرّف الضوئي على النص (OCR):\n\n•
+    <string name="ocr_prep_modes_message">هناك طريقتان لإدخال الصور إلى محرّك التعرّف الضوئي على النص (OCR):\n\n•
         الأصلي (بدون معالجة مسبقة) — الأسرع. يتم إرسال الصورة كما هي. مناسب للصور النظيفة وعالية التباين. قد يفوّت
-        النصوص الباهتة أو المشوَّشة.\n\n• OpenCV السريع — تنظيف سريع: تحويل إلى تدرّج الرمادي، تقليل ضوضاء خفيف، تحويل
-        تلقائي إلى أبيض وأسود، مع تكبير بسيط عند الحاجة. خيار افتراضي جيّد لمعظم الصور، بتوازن بين السرعة والجودة.\n\n•
+        النصوص الباهتة أو المشوَّشة.\n\n•
         OpenCV المتقدّم — مُعاد تصميمه لتحقيق أعلى دقّة مع الصفحات الصعبة. يقوم بتصحيح الميل، وتوحيد الظلال والإضاءة،
         وتطبيق تقليل ضوضاء يحافظ على الحواف، مع تكبير ذكي. والأهم أنه يزوّد Tesseract بصورة عالية الجودة بتدرّج رمادي
         (وليس أبيض وأسود صارم) للحفاظ على التفاصيل الدقيقة مثل حلقات حرف “o” والأرقام الصغيرة. يوفّر أفضل دقّة مع
@@ -410,7 +413,6 @@
     <string name="inbox_saved">✓ تم الحفظ في صندوق الوارد</string>
     <string name="inbox_permission_lost">فُقد الوصول إلى مجلد الوارد. يرجى اختيار مجلد جديد.</string>
     <string name="inbox_no_folder_selected">يرجى اختيار مجلد الوارد أولاً.</string>
-    <string name="inbox_export_failed">فشل الحفظ في مجلد الوارد</string>
     <string name="inbox_clear">مسح مجلد الوارد</string>
     <string name="inbox_filename_format">تنسيق اسم الملف</string>
     <string name="inbox_auto_new_scan">بدء مسح جديد تلقائيًا بعد التصدير</string>
@@ -418,4 +420,24 @@
     <string name="inbox_filename_date_time_scan">تاريخ + وقت + مسح (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">تاريخ فقط (2026-03-04)</string>
     <string name="pdf_bw_mode_none">أصلي (بدون فلتر)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">إزالة الصفحة؟</string>
+    <string name="confirm_remove_page_message">هل تريد إزالة هذه الصفحة من شريط الأفلام؟</string>
+    <string name="crop_aspect_label">نسبة العرض إلى الارتفاع</string>
+    <string name="crop_aspect_auto">تلقائي (موصى به)</string>
+    <string name="crop_aspect_original">الإبقاء على الأصل (بدون تصحيح النسبة)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">مخصص…</string>
+    <string name="crop_aspect_custom_with_ratio">مخصص (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">نسبة عرض مخصصة</string>
+    <string name="crop_aspect_custom_width_hint">العرض</string>
+    <string name="crop_aspect_custom_height_hint">الارتفاع</string>
+    <string name="crop_aspect_custom_invalid">يرجى إدخال أرقام موجبة بين 1:1 و1:20.</string>
+    <string name="crop_aspect_output_size_hint">الإخراج: %1$d × %2$d بكسل</string>
+    <string name="crop_hint_corner_off_image">الزاوية خارج الصورة — قد يحتوي الإخراج المعدّل على حدود سوداء</string>
+    <string name="crop_edge_dragged">تم تحديد الحافة. اسحب لتحريك الحافة.</string>
 </resources>

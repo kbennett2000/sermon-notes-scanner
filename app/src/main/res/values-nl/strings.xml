@@ -99,7 +99,10 @@
     <string name="pdf_bw_mode_robust">Z/W (robuust)</string>
     <string name="pdf_bw_mode_classic">Z/W (klassiek)</string>
     <string name="pdf_bw_mode_ocr_robust">Robuuste OCR-voorverwerking (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Opgeschoonde grijswaarden (hoogdoorlaatfilter) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Opgeschoonde kleuren (hoogdoorlaatfilter) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Grijswaarden – opgeschoond (hoogdoorlaat)</string>
+    <string name="pdf_bw_mode_color_clean">Kleur – opgeschoond (hoogdoorlaat)</string>
     <string name="skip_ocr_export_only">OCR overslaan (alleen exporteren)</string>
     <string name="skip_cropping">Bijsnijden overslaan</string>
     <string name="preview_corner_detection">Voorbeeld van hoekdetectie</string>
@@ -210,11 +213,9 @@
     <!-- OCR-herkenningsmodi – uitleg -->
     <string name="ocr_explain_prep_modes">Herkenningsmodi uitleggen</string>
     <string name="ocr_prep_modes_title">Herkenningsmodi: eenvoudige uitleg</string>
-    <string name="ocr_prep_modes_message">Er zijn drie manieren om afbeeldingen naar de OCR-engine te sturen:\n\n•
+    <string name="ocr_prep_modes_message">Er zijn twee manieren om afbeeldingen naar de OCR-engine te sturen:\n\n•
         Origineel (geen voorbewerking) — het snelst. De foto wordt ongewijzigd verzonden. Het meest geschikt voor al
-        schone scans met hoog contrast. Kan zwakke of ruisachtige tekst missen.\n\n• OpenCV Snel — snelle opschoning:
-        conversie naar grijstinten, lichte ruisonderdrukking, automatische zwart-witconversie en indien nodig een lichte
-        opschaling. Goede standaardkeuze voor de meeste foto’s. Evenwicht tussen snelheid en kwaliteit.\n\n• OpenCV
+        schone scans met hoog contrast. Kan zwakke of ruisachtige tekst missen.\n\n• OpenCV
         Robuust — opnieuw ontworpen voor maximale nauwkeurigheid bij moeilijke pagina’s. Corrigeert scheefstand,
         normaliseert schaduwen en belichting, past randbehoudende ruisonderdrukking en slimme opschaling toe. Belangrijk
         is dat Tesseract een grijswaardenafbeelding van hoge kwaliteit ontvangt (geen hard zwart-wit) om fijne details
@@ -426,7 +427,6 @@
     <string name="inbox_saved">✓ Opgeslagen in Inbox</string>
     <string name="inbox_permission_lost">Toegang tot Inbox-map verloren. Selecteer een nieuwe map.</string>
     <string name="inbox_no_folder_selected">Selecteer eerst een Inbox-map.</string>
-    <string name="inbox_export_failed">Opslaan in Inbox-map mislukt</string>
     <string name="inbox_clear">Inbox-map wissen</string>
     <string name="inbox_filename_format">Bestandsnaamformaat</string>
     <string name="inbox_auto_new_scan">Na export automatisch nieuwe scan starten</string>
@@ -434,4 +434,24 @@
     <string name="inbox_filename_date_time_scan">Datum + tijd + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Alleen datum (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Origineel (geen filter)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Pagina verwijderen?</string>
+    <string name="confirm_remove_page_message">Wil je deze pagina uit de filmstrip verwijderen?</string>
+    <string name="crop_aspect_label">Beeldverhouding</string>
+    <string name="crop_aspect_auto">Automatisch (aanbevolen)</string>
+    <string name="crop_aspect_original">Origineel behouden (geen correctie)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Aangepast…</string>
+    <string name="crop_aspect_custom_with_ratio">Aangepast (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Aangepaste beeldverhouding</string>
+    <string name="crop_aspect_custom_width_hint">Breedte</string>
+    <string name="crop_aspect_custom_height_hint">Hoogte</string>
+    <string name="crop_aspect_custom_invalid">Voer positieve getallen in tussen 1:1 en 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Uitvoer: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Hoek buiten afbeelding — uitvoer kan zwarte randen bevatten</string>
+    <string name="crop_edge_dragged">Rand geselecteerd. Sleep om de rand te verplaatsen.</string>
 </resources>

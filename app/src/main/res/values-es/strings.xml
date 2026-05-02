@@ -102,7 +102,10 @@
     <string name="pdf_bw_mode_robust">B/N (robusto)</string>
     <string name="pdf_bw_mode_classic">B/N (clásico)</string>
     <string name="pdf_bw_mode_ocr_robust">Preprocesamiento OCR robusto (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Escala de grises limpia (filtro de paso alto) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Color limpio (filtro de paso alto) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Escala de grises limpia (pasa altos)</string>
+    <string name="pdf_bw_mode_color_clean">Color limpio (pasa altos)</string>
     <string name="skip_ocr_export_only">Omitir OCR (solo exportar)</string>
     <string name="skip_cropping">Omitir recorte</string>
     <string name="preview_corner_detection">Vista previa de detección de esquinas</string>
@@ -214,11 +217,9 @@
     <!-- Modos de reconocimiento OCR – explicación -->
     <string name="ocr_explain_prep_modes">Explicar modos de reconocimiento</string>
     <string name="ocr_prep_modes_title">Modos de reconocimiento: explicación sencilla</string>
-    <string name="ocr_prep_modes_message">Hay tres formas de enviar imágenes al motor OCR:\n\n• Original (sin
+    <string name="ocr_prep_modes_message">Hay dos formas de enviar imágenes al motor OCR:\n\n• Original (sin
         preprocesamiento) — la más rápida. La foto se envía tal como está. Ideal para escaneos ya limpios y con alto
-        contraste. Puede pasar por alto texto tenue o con ruido.\n\n• OpenCV Rápido — limpieza rápida: conversión a
-        escala de grises, reducción ligera de ruido, conversión automática a blanco y negro y un ligero escalado si es
-        necesario. Buena opción predeterminada para la mayoría de las fotos. Equilibrio entre velocidad y calidad.\n\n•
+        contraste. Puede pasar por alto texto tenue o con ruido.\n\n•
         OpenCV Robusto — rediseñado para máxima precisión en páginas difíciles. Corrige la inclinación, normaliza
         sombras e iluminación, aplica reducción de ruido que preserva los bordes y escalado inteligente. Es importante
         que Tesseract reciba una imagen en escala de grises de alta calidad (no blanco y negro duro) para conservar
@@ -435,7 +436,6 @@
     <string name="inbox_saved">✓ Guardado en Inbox</string>
     <string name="inbox_permission_lost">Se perdió el acceso a la carpeta Inbox. Seleccione una nueva carpeta.</string>
     <string name="inbox_no_folder_selected">Seleccione primero una carpeta Inbox.</string>
-    <string name="inbox_export_failed">Error al guardar en la carpeta Inbox</string>
     <string name="inbox_clear">Borrar carpeta Inbox</string>
     <string name="inbox_filename_format">Formato de nombre de archivo</string>
     <string name="inbox_auto_new_scan">Iniciar nuevo escaneo automáticamente después de exportar</string>
@@ -443,4 +443,24 @@
     <string name="inbox_filename_date_time_scan">Fecha + hora + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Solo fecha (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Original (sin filtro)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">¿Quitar página?</string>
+    <string name="confirm_remove_page_message">¿Quieres quitar esta página de la tira?</string>
+    <string name="crop_aspect_label">Relación de aspecto</string>
+    <string name="crop_aspect_auto">Automático (recomendado)</string>
+    <string name="crop_aspect_original">Mantener original (sin corrección)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Personalizado…</string>
+    <string name="crop_aspect_custom_with_ratio">Personalizado (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Relación de aspecto personalizada</string>
+    <string name="crop_aspect_custom_width_hint">Ancho</string>
+    <string name="crop_aspect_custom_height_hint">Alto</string>
+    <string name="crop_aspect_custom_invalid">Introduce números positivos entre 1:1 y 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Salida: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Esquina fuera de la imagen — la salida puede tener bordes negros</string>
+    <string name="crop_edge_dragged">Borde seleccionado. Arrastra para moverlo.</string>
 </resources>

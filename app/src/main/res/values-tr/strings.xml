@@ -97,7 +97,10 @@
     <string name="pdf_bw_mode_robust">S&amp;B (güçlü)</string>
     <string name="pdf_bw_mode_classic">S&amp;B (klasik)</string>
     <string name="pdf_bw_mode_ocr_robust">OCR güçlü ön işleme (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Temizlenmiş gri tonlama (yüksek geçiren filtre) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Temizlenmiş renkler (yüksek geçiren filtre) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Gri tonlama – temizlenmiş (yüksek geçiren filtre)</string>
+    <string name="pdf_bw_mode_color_clean">Renk – temizlenmiş (yüksek geçiren filtre)</string>
     <string name="skip_ocr_export_only">OCR\'yi atla (yalnızca dışa aktar)</string>
     <string name="skip_cropping">Kırpmayı atla</string>
     <string name="preview_corner_detection">Köşe algılama önizlemesi</string>
@@ -208,11 +211,9 @@
     <!-- OCR tanıma modları açıklaması -->
     <string name="ocr_explain_prep_modes">Tanıma modlarını açıkla</string>
     <string name="ocr_prep_modes_title">Tanıma modları: basit açıklama</string>
-    <string name="ocr_prep_modes_message">Görüntüleri OCR motoruna göndermenin üç yolu vardır:\n\n• Orijinal (ön işleme
+    <string name="ocr_prep_modes_message">Görüntüleri OCR motoruna göndermenin iki yolu vardır:\n\n• Orijinal (ön işleme
         yok) — en hızlı. Fotoğraf olduğu gibi gönderilir. Zaten temiz, yüksek kontrastlı taramalar için en iyisi.
-        Soluk veya gürültülü metinleri kaçırabilir.\n\n• OpenCV Hızlı — hızlı temizleme: gri tonlamaya dönüştürme,
-        hafif gürültü azaltma, otomatik siyah beyaz dönüşüm ve gerekirse hafif büyütme. Çoğu fotoğraf için iyi bir
-        varsayılan. Hız ve kalite arasında dengeli.\n\n• OpenCV Güçlü — zor sayfalar için maksimum doğruluk amacıyla
+        Soluk veya gürültülü metinleri kaçırabilir.\n\n• OpenCV Güçlü — zor sayfalar için maksimum doğruluk amacıyla
         yeniden tasarlandı. Eğrilik düzeltme, gölge/aydınlatma normalleştirme, kenar koruyucu gürültü azaltma ve akıllı
         büyütme uygular. Önemli olarak, ince ayrıntıları (\"o\" harfindeki halkalar ve küçük rakamlar gibi) korumak için
         Tesseract\'a yüksek kaliteli gri tonlamalı görüntü (sert siyah beyaz değil) gönderir. Zor sayfalarda en iyi
@@ -421,7 +422,6 @@
     <string name="inbox_saved">✓ Inbox\'a kaydedildi</string>
     <string name="inbox_permission_lost">Inbox klasörüne erişim kaybedildi. Lütfen yeni bir klasör seçin.</string>
     <string name="inbox_no_folder_selected">Lütfen önce bir Inbox klasörü seçin.</string>
-    <string name="inbox_export_failed">Inbox klasörüne kaydetme başarısız</string>
     <string name="inbox_clear">Inbox klasörünü temizle</string>
     <string name="inbox_filename_format">Dosya adı biçimi</string>
     <string name="inbox_auto_new_scan">Dışa aktarma sonrası otomatik olarak yeni tarama başlat</string>
@@ -429,4 +429,24 @@
     <string name="inbox_filename_date_time_scan">Tarih + saat + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Yalnızca tarih (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Orijinal (filtre yok)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Sayfa kaldırılsın mı?</string>
+    <string name="confirm_remove_page_message">Bu sayfayı film şeridinden kaldırmak istiyor musun?</string>
+    <string name="crop_aspect_label">En boy oranı</string>
+    <string name="crop_aspect_auto">Otomatik (önerilen)</string>
+    <string name="crop_aspect_original">Orijinali koru (düzeltme yok)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Özel…</string>
+    <string name="crop_aspect_custom_with_ratio">Özel (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Özel en boy oranı</string>
+    <string name="crop_aspect_custom_width_hint">Genişlik</string>
+    <string name="crop_aspect_custom_height_hint">Yükseklik</string>
+    <string name="crop_aspect_custom_invalid">Lütfen 1:1 ile 1:20 arasında pozitif sayılar girin.</string>
+    <string name="crop_aspect_output_size_hint">Çıktı: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Köşe görüntü dışında — çıktıda siyah kenarlar olabilir</string>
+    <string name="crop_edge_dragged">Kenar seçildi. Kenarı taşımak için sürükleyin.</string>
 </resources>

@@ -97,7 +97,10 @@
     <string name="pdf_bw_mode_robust">S/H (robust)</string>
     <string name="pdf_bw_mode_classic">S/H (klassisk)</string>
     <string name="pdf_bw_mode_ocr_robust">Robust OCR-forbehandling (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Renset gråtoner (højpasfilter) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Rensede farver (højpasfilter) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Gråtoner – renset (high-pass)</string>
+    <string name="pdf_bw_mode_color_clean">Farver – renset (high-pass)</string>
     <string name="skip_ocr_export_only">Spring OCR over (kun eksport)</string>
     <string name="skip_cropping">Spring beskæring over</string>
     <string name="preview_corner_detection">Forhåndsvisning af hjørnedetektion</string>
@@ -208,11 +211,9 @@
     <!-- OCR forbehandlingsmetoder – forklaring -->
     <string name="ocr_explain_prep_modes">Forklar genkendelsestilstande</string>
     <string name="ocr_prep_modes_title">Genkendelsestilstande: enkel forklaring</string>
-    <string name="ocr_prep_modes_message">Der er tre måder at sende billeder til OCR-motoren:\n\n• Original (ingen
+    <string name="ocr_prep_modes_message">Der er to måder at sende billeder til OCR-motoren:\n\n• Original (ingen
         forbehandling) — hurtigst. Fotoet sendes, som det er. Bedst til allerede rene scanninger med høj kontrast. Kan
-        overse svag eller støjende tekst.\n\n• OpenCV Hurtig — hurtig oprydning: konvertering til gråtoner, let
-        støjreduktion, automatisk sort/hvid-konvertering og en smule opskalering efter behov. Et godt standardvalg til
-        de fleste fotos. Afbalancerer hastighed og kvalitet.\n\n• OpenCV Robust — ombygget for maksimal nøjagtighed på
+        overse svag eller støjende tekst.\n\n• OpenCV Robust — ombygget for maksimal nøjagtighed på
         vanskelige sider. Retter skævhed, normaliserer skygger og belysning, anvender kantbevarende støjreduktion og
         intelligent opskalering. Vigtigt er, at Tesseract får et gråtonebillede i høj kvalitet (ikke hård sort/hvid), så
         fine detaljer som løkker i “o” og små cifre bevares. Giver bedst nøjagtighed på svære sider, men er langsommere
@@ -420,7 +421,6 @@
     <string name="inbox_saved">✓ Gemt i Inbox</string>
     <string name="inbox_permission_lost">Adgang til Inbox-mappe mistet. Vælg venligst en ny mappe.</string>
     <string name="inbox_no_folder_selected">Vælg venligst en Inbox-mappe først.</string>
-    <string name="inbox_export_failed">Kunne ikke gemme i Inbox-mappe</string>
     <string name="inbox_clear">Ryd Inbox-mappe</string>
     <string name="inbox_filename_format">Filnavnformat</string>
     <string name="inbox_auto_new_scan">Start ny scanning automatisk efter eksport</string>
@@ -428,4 +428,24 @@
     <string name="inbox_filename_date_time_scan">Dato + tid + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Kun dato (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Original (ingen filter)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Fjern side?</string>
+    <string name="confirm_remove_page_message">Vil du fjerne denne side fra filmstrimlen?</string>
+    <string name="crop_aspect_label">Højde-bredde-forhold</string>
+    <string name="crop_aspect_auto">Auto (anbefalet)</string>
+    <string name="crop_aspect_original">Behold original (ingen korrektion)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Brugerdefineret…</string>
+    <string name="crop_aspect_custom_with_ratio">Brugerdefineret (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Brugerdefineret forhold</string>
+    <string name="crop_aspect_custom_width_hint">Bredde</string>
+    <string name="crop_aspect_custom_height_hint">Højde</string>
+    <string name="crop_aspect_custom_invalid">Indtast positive tal mellem 1:1 og 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Output: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Hjørne uden for billedet — output kan have sorte kanter</string>
+    <string name="crop_edge_dragged">Kant valgt. Træk for at flytte kanten.</string>
 </resources>

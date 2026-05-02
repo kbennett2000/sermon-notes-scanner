@@ -99,7 +99,10 @@
     <string name="pdf_bw_mode_robust">N&amp;B (robuste)</string>
     <string name="pdf_bw_mode_classic">N&amp;B (classique)</string>
     <string name="pdf_bw_mode_ocr_robust">Prétraitement OCR robuste (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Niveaux de gris nettoyés (filtre passe-haut) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Couleurs nettoyées (filtre passe-haut) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Niveaux de gris nettoyés (passe-haut)</string>
+    <string name="pdf_bw_mode_color_clean">Couleurs nettoyées (passe-haut)</string>
     <string name="skip_ocr_export_only">Ignorer l’OCR (export seulement)</string>
     <string name="skip_cropping">Ignorer le recadrage</string>
     <string name="preview_corner_detection">Aperçu de la détection des coins</string>
@@ -211,12 +214,9 @@
     <!-- Modes de reconnaissance OCR – explication -->
     <string name="ocr_explain_prep_modes">Expliquer les modes de reconnaissance</string>
     <string name="ocr_prep_modes_title">Modes de reconnaissance : explication simple</string>
-    <string name="ocr_prep_modes_message">Il existe trois façons d’envoyer des images au moteur OCR :\n\n• Original
+    <string name="ocr_prep_modes_message">Il existe deux façons d’envoyer des images au moteur OCR :\n\n• Original
         (sans prétraitement) — le plus rapide. La photo est envoyée telle quelle. Idéal pour des scans déjà propres et à
-        fort contraste. Peut manquer du texte pâle ou bruité.\n\n• OpenCV Rapide — nettoyage rapide : conversion en
-        niveaux de gris, légère réduction du bruit, conversion automatique en noir et blanc, avec un léger
-        agrandissement si nécessaire. Bon choix par défaut pour la plupart des photos. Bon équilibre entre vitesse et
-        qualité.\n\n• OpenCV Robuste — repensé pour une précision maximale sur les pages difficiles. Corrige
+        fort contraste. Peut manquer du texte pâle ou bruité.\n\n• OpenCV Robuste — repensé pour une précision maximale sur les pages difficiles. Corrige
         l’inclinaison, normalise les ombres et l’éclairage, applique une réduction du bruit préservant les contours et
         un agrandissement intelligent. Point important : Tesseract reçoit une image en niveaux de gris de haute qualité
         (et non un noir et blanc strict) afin de préserver les détails fins comme les boucles du « o » et les petits
@@ -427,7 +427,6 @@
     <string name="inbox_saved">✓ Enregistré dans Inbox</string>
     <string name="inbox_permission_lost">Accès au dossier Inbox perdu. Veuillez sélectionner un nouveau dossier.</string>
     <string name="inbox_no_folder_selected">Veuillez d\'abord sélectionner un dossier Inbox.</string>
-    <string name="inbox_export_failed">Échec de l\'enregistrement dans le dossier Inbox</string>
     <string name="inbox_clear">Effacer le dossier Inbox</string>
     <string name="inbox_filename_format">Format du nom de fichier</string>
     <string name="inbox_auto_new_scan">Démarrer automatiquement un nouveau scan après l\'exportation</string>
@@ -435,4 +434,24 @@
     <string name="inbox_filename_date_time_scan">Date + heure + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Date uniquement (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Original (sans filtre)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Supprimer la page ?</string>
+    <string name="confirm_remove_page_message">Voulez-vous supprimer cette page de la pellicule ?</string>
+    <string name="crop_aspect_label">Format d’image</string>
+    <string name="crop_aspect_auto">Auto (recommandé)</string>
+    <string name="crop_aspect_original">Conserver l’original (sans correction)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Personnalisé…</string>
+    <string name="crop_aspect_custom_with_ratio">Personnalisé (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Format personnalisé</string>
+    <string name="crop_aspect_custom_width_hint">Largeur</string>
+    <string name="crop_aspect_custom_height_hint">Hauteur</string>
+    <string name="crop_aspect_custom_invalid">Saisissez des nombres positifs entre 1:1 et 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Sortie : %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Coin hors de l’image — la sortie peut contenir des bords noirs</string>
+    <string name="crop_edge_dragged">Bord sélectionné. Faites glisser pour déplacer le bord.</string>
 </resources>

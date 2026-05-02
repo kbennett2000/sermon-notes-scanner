@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">MakeACopy</string>
 
     <!-- OCR Review: Text mode editor tooltip documenting current behavior -->
@@ -92,10 +92,14 @@
     <string name="jpeg_mode_bw_text">Black &amp; White (classic) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">Black &amp; White (robust) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">OCR robust preprocessing (JPEG)</string>
+    <string name="jpeg_mode_gray_clean">Grayscale clean (high-pass) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Color clean (high-pass) (JPEG)</string>
     <string name="pdf_bw_mode_none">Original (no filter)</string>
     <string name="pdf_bw_mode_robust">B&amp;W (robust)</string>
     <string name="pdf_bw_mode_classic">B&amp;W (classic)</string>
     <string name="pdf_bw_mode_ocr_robust">OCR robust preprocessing (PDF)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Grayscale clean (high-pass)</string>
+    <string name="pdf_bw_mode_color_clean">Color clean (high-pass)</string>
     <string name="skip_ocr_export_only">Skip OCR (export only)</string>
     <string name="preview_corner_detection">Preview corner detection</string>
     <string name="skip_cropping">Skip cropping</string>
@@ -122,6 +126,10 @@
     <!-- Clear-all confirmation for trash icon in multipage -->
     <string name="confirm_clear_pages_title">Clear all pages?</string>
     <string name="confirm_clear_pages_message">Do you want to remove all pages from the filmstrip?</string>
+
+    <!-- Confirmation for removing a single page from the filmstrip -->
+    <string name="confirm_remove_page_title">Remove page?</string>
+    <string name="confirm_remove_page_message">Do you want to remove this page from the filmstrip?</string>
 
     <!-- Registry Picker -->
     <string name="picker_title_completed_scans">Choose from completed scans</string>
@@ -215,16 +223,14 @@
     <!-- OCR prep modes explanation -->
     <string name="ocr_explain_prep_modes">Explain recognition modes</string>
     <string name="ocr_prep_modes_title">Recognition modes: simple explanation</string>
-    <string name="ocr_prep_modes_message">There are three ways to feed images into the OCR engine:\n\n• Original (no
+    <string name="ocr_prep_modes_message">There are two ways to feed images into the OCR engine:\n\n• Original (no
         preprocessing) — fastest. We send the photo as-is. Best for already clean, high-contrast scans. May miss faint
-        or noisy text.\n\n• OpenCV Quick — a fast cleanup: convert to grayscale, lightly denoise, make it black/white
-        automatically, and upscale a bit if needed. Good default for most photos. Balanced speed and quality.\n\n•
-        OpenCV Robust — rebuilt for maximum accuracy on difficult pages. It deskews, normalizes shadows/illumination,
-        applies edge‑preserving denoise and smart upscaling. Importantly, it feeds Tesseract a high‑quality grayscale
-        image (not hard black/white) to preserve fine details like loops in “o” and small digits. Best accuracy on tough
-        pages; slower and uses more memory.\n\nOCR Post-Processing: Corrects typical recognition errors like confusions
-        (0↔O, 1↔l↔I, rn↔m) and checks uncertain words against a dictionary. Enabled by default; disable for technical
-        codes or serial numbers.
+        or noisy text.\n\n• OpenCV Robust — rebuilt for maximum accuracy on difficult pages. It deskews, normalizes
+        shadows/illumination, applies edge‑preserving denoise and smart upscaling. Importantly, it feeds Tesseract a
+        high‑quality grayscale image (not hard black/white) to preserve fine details like loops in “o” and small
+        digits. Best accuracy on tough pages; slower and uses more memory. Recommended default for most photos.\n\nOCR
+        Post-Processing: Corrects typical recognition errors like confusions (0↔O, 1↔l↔I, rn↔m) and checks uncertain
+        words against a dictionary. Enabled by default; disable for technical codes or serial numbers.
     </string>
 
     <!-- OCR prep modes selection -->
@@ -418,11 +424,37 @@
     <string name="inbox_saved">✓ Saved to Inbox</string>
     <string name="inbox_permission_lost">Inbox folder access lost. Please select a new folder.</string>
     <string name="inbox_no_folder_selected">Please select an Inbox folder first.</string>
-    <string name="inbox_export_failed">Failed to save to Inbox folder</string>
     <string name="inbox_clear">Clear Inbox folder</string>
     <string name="inbox_filename_format">Filename format</string>
     <string name="inbox_auto_new_scan">Start new scan automatically after export</string>
     <string name="inbox_filename_date_scan">Date + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">Date + Time + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Date only (2026-03-04)</string>
+    <!-- Crop: Aspect ratio selector (v3.8.0) -->
+    <string name="crop_aspect_label">Aspect ratio</string>
+    <string name="crop_aspect_auto">Auto (recommended)</string>
+    <string name="crop_aspect_original">Keep original (no aspect correction)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Custom…</string>
+    <string name="crop_aspect_custom_with_ratio">Custom (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Custom aspect ratio</string>
+    <string name="crop_aspect_custom_width_hint">Width</string>
+    <string name="crop_aspect_custom_height_hint">Height</string>
+    <string name="crop_aspect_custom_invalid">Please enter positive numbers within 1:1 to 1:20.</string>
+    <string name="crop_aspect_output_size_hint" tools:ignore="UnusedResources">Output: %1$d × %2$d px</string>
+    <!-- Crop: Edge dragging & off-screen corners (see docs/edge_drag_pan_zoom_concept.md) -->
+    <string name="crop_hint_corner_off_image">Corner outside image — warped output may contain black borders</string>
+    <string name="crop_edge_dragged">Edge selected. Drag to move the edge.</string>
+    <!-- FR #72: Re-Edit shape from export preview -->
+    <string name="btn_edit_crop" tools:ignore="MissingTranslation">Adjust crop</string>
+    <string name="edit_crop_original_unavailable" tools:ignore="MissingTranslation">Original image no longer available — cannot re-edit crop.</string>
+    <!-- FR #72 companion: Snap-to-Right-Angle -->
+    <string name="crop_snap_engaged" tools:ignore="MissingTranslation">Edge snapped to right angle</string>
+    <string name="crop_snap_toggle_cd" tools:ignore="MissingTranslation">Toggle right-angle snap</string>
+    <string name="crop_snap_toggle_on" tools:ignore="MissingTranslation">Right-angle snap on</string>
+    <string name="crop_snap_toggle_off" tools:ignore="MissingTranslation">Right-angle snap off</string>
 </resources>

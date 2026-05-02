@@ -95,7 +95,10 @@
     <string name="pdf_bw_mode_robust">ขาวดำ (ทนทาน)</string>
     <string name="pdf_bw_mode_classic">ขาวดำ (คลาสสิก)</string>
     <string name="pdf_bw_mode_ocr_robust">การประมวลผลล่วงหน้า OCR แบบทนทาน (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">ขาวดำแบบปรับให้สะอาด (ฟิลเตอร์ความถี่สูง) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">สีแบบปรับให้สะอาด (ฟิลเตอร์ความถี่สูง) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">โทนสีเทาแบบปรับให้สะอาด (ฟิลเตอร์ผ่านความถี่สูง)</string>
+    <string name="pdf_bw_mode_color_clean">สีแบบปรับให้สะอาด (ฟิลเตอร์ผ่านความถี่สูง)</string>
     <string name="skip_ocr_export_only">ข้าม OCR (ส่งออกเท่านั้น)</string>
     <string name="skip_cropping">ข้ามการครอบตัด</string>
     <string name="preview_corner_detection">แสดงตัวอย่างการตรวจจับมุม</string>
@@ -208,11 +211,9 @@
     <!-- โหมดการรู้จำ OCR – คำอธิบาย -->
     <string name="ocr_explain_prep_modes">อธิบายโหมดการรู้จำ</string>
     <string name="ocr_prep_modes_title">โหมดการรู้จำ: คำอธิบายแบบง่าย</string>
-    <string name="ocr_prep_modes_message">มีสามวิธีในการส่งภาพไปยังเอนจิน OCR:\n\n• ต้นฉบับ (ไม่มีการประมวลผลล่วงหน้า) —
+    <string name="ocr_prep_modes_message">มีสองวิธีในการส่งภาพไปยังเอนจิน OCR:\n\n• ต้นฉบับ (ไม่มีการประมวลผลล่วงหน้า) —
         เร็วที่สุด ภาพจะถูกส่งตามสภาพเดิม เหมาะสำหรับการสแกนที่สะอาดและมีคอนทราสต์สูง
-        อาจพลาดข้อความที่จางหรือมีสัญญาณรบกวน\n\n• OpenCV เร็ว — การทำความสะอาดอย่างรวดเร็ว: แปลงเป็นระดับสีเทา
-        ลดสัญญาณรบกวนเล็กน้อย แปลงเป็นขาวดำโดยอัตโนมัติ และปรับขนาดขึ้นเล็กน้อยหากจำเป็น
-        เป็นตัวเลือกเริ่มต้นที่ดีสำหรับภาพถ่ายส่วนใหญ่ สมดุลระหว่างความเร็วและคุณภาพ\n\n• OpenCV ขั้นสูง —
+        อาจพลาดข้อความที่จางหรือมีสัญญาณรบกวน\n\n• OpenCV ขั้นสูง —
         ออกแบบใหม่เพื่อความแม่นยำสูงสุดสำหรับหน้าที่ยากต่อการประมวลผล แก้ไขความเอียง ปรับความสม่ำเสมอของเงาและแสง
         ใช้การลดสัญญาณรบกวนแบบรักษาขอบ และการปรับขนาดอัจฉริยะ สิ่งสำคัญคือ Tesseract จะได้รับภาพระดับสีเทาคุณภาพสูง
         (ไม่ใช่ขาวดำแบบแข็ง) เพื่อรักษารายละเอียดเล็ก ๆ เช่น ห่วงของตัวอักษร “o” และตัวเลขขนาดเล็ก
@@ -418,7 +419,6 @@
     <string name="inbox_saved">✓ บันทึกไปยัง Inbox แล้ว</string>
     <string name="inbox_permission_lost">สูญเสียการเข้าถึงโฟลเดอร์ Inbox กรุณาเลือกโฟลเดอร์ใหม่</string>
     <string name="inbox_no_folder_selected">กรุณาเลือกโฟลเดอร์ Inbox ก่อน</string>
-    <string name="inbox_export_failed">บันทึกไปยังโฟลเดอร์ Inbox ล้มเหลว</string>
     <string name="inbox_clear">ล้างโฟลเดอร์ Inbox</string>
     <string name="inbox_filename_format">รูปแบบชื่อไฟล์</string>
     <string name="inbox_auto_new_scan">เริ่มสแกนใหม่โดยอัตโนมัติหลังส่งออก</string>
@@ -426,4 +426,24 @@
     <string name="inbox_filename_date_time_scan">วันที่ + เวลา + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">วันที่เท่านั้น (2026-03-04)</string>
     <string name="pdf_bw_mode_none">ต้นฉบับ (ไม่มีฟิลเตอร์)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">ลบหน้านี้หรือไม่?</string>
+    <string name="confirm_remove_page_message">คุณต้องการลบหน้านี้ออกจากแถบฟิล์มหรือไม่?</string>
+    <string name="crop_aspect_label">อัตราส่วนภาพ</string>
+    <string name="crop_aspect_auto">อัตโนมัติ (แนะนำ)</string>
+    <string name="crop_aspect_original">คงต้นฉบับไว้ (ไม่ปรับอัตราส่วน)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">กำหนดเอง…</string>
+    <string name="crop_aspect_custom_with_ratio">กำหนดเอง (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">อัตราส่วนภาพแบบกำหนดเอง</string>
+    <string name="crop_aspect_custom_width_hint">ความกว้าง</string>
+    <string name="crop_aspect_custom_height_hint">ความสูง</string>
+    <string name="crop_aspect_custom_invalid">กรุณาใส่ตัวเลขบวกระหว่าง 1:1 ถึง 1:20</string>
+    <string name="crop_aspect_output_size_hint">ผลลัพธ์: %1$d × %2$d พิกเซล</string>
+    <string name="crop_hint_corner_off_image">มุมอยู่นอกภาพ — ผลลัพธ์อาจมีขอบสีดำ</string>
+    <string name="crop_edge_dragged">เลือกขอบแล้ว ลากเพื่อย้ายขอบ</string>
 </resources>

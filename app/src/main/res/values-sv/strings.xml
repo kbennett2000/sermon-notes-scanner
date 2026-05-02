@@ -97,7 +97,10 @@
     <string name="pdf_bw_mode_robust">S/V (robust)</string>
     <string name="pdf_bw_mode_classic">S/V (klassiskt)</string>
     <string name="pdf_bw_mode_ocr_robust">Robust förbehandling för OCR (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Rensad gråskala (högpassfilter) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Rensade färger (högpassfilter) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Gråskala – rensad (högpassfilter)</string>
+    <string name="pdf_bw_mode_color_clean">Färg – rensad (högpassfilter)</string>
     <string name="skip_ocr_export_only">Hoppa över OCR (endast export)</string>
     <string name="skip_cropping">Hoppa över beskärning</string>
     <string name="preview_corner_detection">Förhandsvisning av hörndetektering</string>
@@ -209,11 +212,9 @@
     <!-- OCR igenkänningslägen – förklaring -->
     <string name="ocr_explain_prep_modes">Förklara igenkänningslägen</string>
     <string name="ocr_prep_modes_title">Igenkänningslägen: enkel förklaring</string>
-    <string name="ocr_prep_modes_message">Det finns tre sätt att mata in bilder i OCR-motorn:\n\n• Original (ingen
+    <string name="ocr_prep_modes_message">Det finns två sätt att mata in bilder i OCR-motorn:\n\n• Original (ingen
         förbehandling) — snabbast. Fotot skickas som det är. Bäst för redan rena skanningar med hög kontrast. Kan missa
-        svag eller brusig text.\n\n• OpenCV Snabb — snabb upprensning: konvertering till gråskala, lätt brusreducering,
-        automatisk svartvit-konvertering och vid behov lätt uppskalning. Bra standardval för de flesta foton. Balans
-        mellan hastighet och kvalitet.\n\n• OpenCV Robust — omarbetad för maximal noggrannhet på svåra sidor. Rätar upp
+        svag eller brusig text.\n\n• OpenCV Robust — omarbetad för maximal noggrannhet på svåra sidor. Rätar upp
         skevhet, normaliserar skuggor och belysning, använder kantbevarande brusreducering och intelligent uppskalning.
         Viktigt är att Tesseract får en gråskalebild av hög kvalitet (inte hård svartvit) för att bevara fina detaljer
         som slingor i bokstaven ”o” och små siffror. Ger bästa noggrannhet på krävande sidor, men är långsammare och
@@ -420,7 +421,6 @@
     <string name="inbox_saved">✓ Sparat i Inbox</string>
     <string name="inbox_permission_lost">Åtkomst till Inbox-mapp förlorad. Välj en ny mapp.</string>
     <string name="inbox_no_folder_selected">Välj en Inbox-mapp först.</string>
-    <string name="inbox_export_failed">Kunde inte spara i Inbox-mapp</string>
     <string name="inbox_clear">Rensa Inbox-mapp</string>
     <string name="inbox_filename_format">Filnamnsformat</string>
     <string name="inbox_auto_new_scan">Starta ny skanning automatiskt efter export</string>
@@ -428,4 +428,24 @@
     <string name="inbox_filename_date_time_scan">Datum + tid + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Endast datum (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Original (inget filter)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Ta bort sida?</string>
+    <string name="confirm_remove_page_message">Vill du ta bort den här sidan från filmremsan?</string>
+    <string name="crop_aspect_label">Bildförhållande</string>
+    <string name="crop_aspect_auto">Auto (rekommenderas)</string>
+    <string name="crop_aspect_original">Behåll original (ingen korrigering)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Anpassat…</string>
+    <string name="crop_aspect_custom_with_ratio">Anpassat (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Anpassat bildförhållande</string>
+    <string name="crop_aspect_custom_width_hint">Bredd</string>
+    <string name="crop_aspect_custom_height_hint">Höjd</string>
+    <string name="crop_aspect_custom_invalid">Ange positiva tal mellan 1:1 och 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Utdata: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Hörn utanför bilden — utdata kan ha svarta kanter</string>
+    <string name="crop_edge_dragged">Kant vald. Dra för att flytta kanten.</string>
 </resources>

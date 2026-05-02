@@ -98,7 +98,10 @@
     <string name="pdf_bw_mode_robust">F/F (robosztus)</string>
     <string name="pdf_bw_mode_classic">F/F (klasszikus)</string>
     <string name="pdf_bw_mode_ocr_robust">Robusztus OCR-előfeldolgozás (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Tisztított szürkeárnyalatos (felüláteresztő szűrő) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Tisztított színes (felüláteresztő szűrő) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Szürkeárnyalatos – tisztított (high-pass)</string>
+    <string name="pdf_bw_mode_color_clean">Színes – tisztított (high-pass)</string>
     <string name="skip_ocr_export_only">OCR kihagyása (csak exportálás)</string>
     <string name="skip_cropping">Kivágás kihagyása</string>
     <string name="preview_corner_detection">Sarokérzékelés előnézete</string>
@@ -209,12 +212,9 @@
     <!-- OCR felismerési módok – magyarázat -->
     <string name="ocr_explain_prep_modes">Felismerési módok magyarázata</string>
     <string name="ocr_prep_modes_title">Felismerési módok: egyszerű magyarázat</string>
-    <string name="ocr_prep_modes_message">Három módja van annak, hogyan lehet a képeket az OCR-motorba továbbítani:\n\n•
+    <string name="ocr_prep_modes_message">Két módja van annak, hogyan lehet a képeket az OCR-motorba továbbítani:\n\n•
         Eredeti (előfeldolgozás nélkül) — a leggyorsabb. A fotó változtatás nélkül kerül feldolgozásra. Tiszta, nagy
-        kontrasztú beolvasásokhoz ideális. Előfordulhat, hogy a halvány vagy zajos szöveget nem ismeri fel.\n\n• OpenCV
-        Gyors — gyors tisztítás: szürkeárnyalatos átalakítás, enyhe zajcsökkentés, automatikus fekete-fehér átalakítás,
-        és szükség esetén enyhe felnagyítás. Jó alapértelmezett választás a legtöbb fényképhez. Kiegyensúlyozott
-        sebesség és minőség.\n\n• OpenCV Robusztus — újratervezve a maximális pontosság érdekében nehéz oldalaknál.
+        kontrasztú beolvasásokhoz ideális. Előfordulhat, hogy a halvány vagy zajos szöveget nem ismeri fel.\n\n• OpenCV Robusztus — újratervezve a maximális pontosság érdekében nehéz oldalaknál.
         Kijavítja a ferdeséget, normalizálja az árnyékokat és a megvilágítást, élmegőrző zajcsökkentést és intelligens
         felnagyítást alkalmaz. Fontos, hogy a Tesseract kiváló minőségű szürkeárnyalatos képet kap (nem kemény
         fekete-fehéret), így megmaradnak az apró részletek, például az „o” betű hurkai és a kis számjegyek. A legjobb
@@ -424,7 +424,6 @@
     <string name="inbox_saved">✓ Mentve az Inboxba</string>
     <string name="inbox_permission_lost">Az Inbox mappa hozzáférése elveszett. Kérjük, válasszon új mappát.</string>
     <string name="inbox_no_folder_selected">Kérjük, először válasszon Inbox mappát.</string>
-    <string name="inbox_export_failed">Nem sikerült menteni az Inbox mappába</string>
     <string name="inbox_clear">Inbox mappa törlése</string>
     <string name="inbox_filename_format">Fájlnév formátum</string>
     <string name="inbox_auto_new_scan">Exportálás után automatikusan új szkennelés indítása</string>
@@ -432,4 +431,24 @@
     <string name="inbox_filename_date_time_scan">Dátum + idő + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Csak dátum (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Eredeti (szűrő nélkül)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Oldal eltávolítása?</string>
+    <string name="confirm_remove_page_message">Eltávolítja ezt az oldalt a filmcsíkból?</string>
+    <string name="crop_aspect_label">Képarány</string>
+    <string name="crop_aspect_auto">Automatikus (ajánlott)</string>
+    <string name="crop_aspect_original">Eredeti megtartása (nincs korrekció)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Egyéni…</string>
+    <string name="crop_aspect_custom_with_ratio">Egyéni (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Egyéni képarány</string>
+    <string name="crop_aspect_custom_width_hint">Szélesség</string>
+    <string name="crop_aspect_custom_height_hint">Magasság</string>
+    <string name="crop_aspect_custom_invalid">Adjon meg pozitív számokat 1:1 és 1:20 között.</string>
+    <string name="crop_aspect_output_size_hint">Kimenet: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">A sarok a képen kívül — a kimenet fekete keretet tartalmazhat</string>
+    <string name="crop_edge_dragged">Él kiválasztva. Húzza az él mozgatásához.</string>
 </resources>

@@ -98,7 +98,10 @@
     <string name="pdf_bw_mode_robust">Cz.-b. (zaaw.)</string>
     <string name="pdf_bw_mode_classic">Cz.-b. (klas.)</string>
     <string name="pdf_bw_mode_ocr_robust">Solidne wstępne przetwarzanie OCR (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Oczyszczona skala szarości (filtr górnoprzepustowy) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Oczyszczone kolory (filtr górnoprzepustowy) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Skala szarości – oczyszczona (górnoprzepustowy)</string>
+    <string name="pdf_bw_mode_color_clean">Kolor – oczyszczony (górnoprzepustowy)</string>
     <string name="skip_ocr_export_only">Pomiń OCR (tylko eksport)</string>
     <string name="skip_cropping">Pomiń przycinanie</string>
     <string name="preview_corner_detection">Podgląd wykrywania narożników</string>
@@ -208,12 +211,9 @@
     <!-- Tryby rozpoznawania OCR – wyjaśnienie -->
     <string name="ocr_explain_prep_modes">Wyjaśnij tryby rozpoznawania</string>
     <string name="ocr_prep_modes_title">Tryby rozpoznawania: proste wyjaśnienie</string>
-    <string name="ocr_prep_modes_message">Istnieją trzy sposoby przekazywania obrazów do silnika OCR:\n\n• Oryginał (bez
+    <string name="ocr_prep_modes_message">Istnieją dwa sposoby przekazywania obrazów do silnika OCR:\n\n• Oryginał (bez
         wstępnego przetwarzania) — najszybszy. Zdjęcie jest przekazywane w niezmienionej formie. Najlepsze dla już
-        czystych skanów o wysokim kontraście. Może pominąć słaby lub zaszumiony tekst.\n\n• OpenCV Szybki — szybkie
-        czyszczenie: konwersja do skali szarości, lekkie odszumianie, automatyczna konwersja do czerni i bieli oraz w
-        razie potrzeby niewielkie skalowanie w górę. Dobry wybór domyślny dla większości zdjęć. Zrównoważony kompromis
-        między szybkością a jakością.\n\n• OpenCV Solidny — przeprojektowany z myślą o maksymalnej dokładności na
+        czystych skanów o wysokim kontraście. Może pominąć słaby lub zaszumiony tekst.\n\n• OpenCV Solidny — przeprojektowany z myślą o maksymalnej dokładności na
         trudnych stronach. Koryguje przekrzywienie, normalizuje cienie i oświetlenie, stosuje odszumianie z zachowaniem
         krawędzi oraz inteligentne skalowanie. Ważne jest to, że Tesseract otrzymuje obraz w skali szarości wysokiej
         jakości (a nie twardą czerń i biel), co pozwala zachować drobne detale, takie jak pętle w literze „o” czy małe
@@ -425,7 +425,6 @@
     <string name="inbox_saved">✓ Zapisano w Inbox</string>
     <string name="inbox_permission_lost">Utracono dostęp do folderu Inbox. Wybierz nowy folder.</string>
     <string name="inbox_no_folder_selected">Najpierw wybierz folder Inbox.</string>
-    <string name="inbox_export_failed">Nie udało się zapisać w folderze Inbox</string>
     <string name="inbox_clear">Wyczyść folder Inbox</string>
     <string name="inbox_filename_format">Format nazwy pliku</string>
     <string name="inbox_auto_new_scan">Automatycznie rozpocznij nowe skanowanie po eksporcie</string>
@@ -433,4 +432,24 @@
     <string name="inbox_filename_date_time_scan">Data + czas + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Tylko data (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Oryginał (bez filtra)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Usunąć stronę?</string>
+    <string name="confirm_remove_page_message">Czy chcesz usunąć tę stronę z paska filmowego?</string>
+    <string name="crop_aspect_label">Proporcje</string>
+    <string name="crop_aspect_auto">Auto (zalecane)</string>
+    <string name="crop_aspect_original">Zachowaj oryginał (bez korekcji)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Niestandardowe…</string>
+    <string name="crop_aspect_custom_with_ratio">Niestandardowe (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Niestandardowe proporcje</string>
+    <string name="crop_aspect_custom_width_hint">Szerokość</string>
+    <string name="crop_aspect_custom_height_hint">Wysokość</string>
+    <string name="crop_aspect_custom_invalid">Wprowadź liczby dodatnie z zakresu 1:1 do 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Wyjście: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Róg poza obrazem — wynik może mieć czarne obramowania</string>
+    <string name="crop_edge_dragged">Krawędź wybrana. Przeciągnij, aby przesunąć krawędź.</string>
 </resources>

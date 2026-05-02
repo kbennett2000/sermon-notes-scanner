@@ -91,7 +91,10 @@
     <string name="pdf_bw_mode_robust">黑白（稳健）</string>
     <string name="pdf_bw_mode_classic">黑白（经典）</string>
     <string name="pdf_bw_mode_ocr_robust">稳健的 OCR 预处理 (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">清理后的灰度（高通滤波）(JPEG)</string>
+    <string name="jpeg_mode_color_clean">清理后的颜色（高通滤波）(JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">灰度清理（高通滤波）</string>
+    <string name="pdf_bw_mode_color_clean">彩色清理（高通滤波）</string>
     <string name="skip_ocr_export_only">跳过 OCR（仅导出）</string>
     <string name="skip_cropping">跳过裁剪</string>
     <string name="preview_corner_detection">角点检测预览</string>
@@ -201,9 +204,8 @@
     <!-- OCR 识别模式 – 说明 -->
     <string name="ocr_explain_prep_modes">说明识别模式</string>
     <string name="ocr_prep_modes_title">识别模式：简单说明</string>
-    <string name="ocr_prep_modes_message">将图像送入 OCR 引擎有三种方式：\n\n• 原始（无预处理）—
-        速度最快。照片按原样发送。适合已经干净、对比度高的扫描件。可能会遗漏较淡或有噪点的文字。\n\n• OpenCV 快速 —
-        快速清理：转换为灰度、轻度去噪、自动转换为黑白，并在需要时进行轻微放大。适合作为大多数照片的默认选择，在速度与质量之间取得平衡。\n\n•
+    <string name="ocr_prep_modes_message">将图像送入 OCR 引擎有两种方式：\n\n• 原始（无预处理）—
+        速度最快。照片按原样发送。适合已经干净、对比度高的扫描件。可能会遗漏较淡或有噪点的文字。\n\n•
         OpenCV 强化 — 为在困难页面上获得最高准确率而重新设计。可校正倾斜、规范化阴影和光照，应用保边去噪和智能放大。重要的是，它会向
         Tesseract 提供高质量的灰度图像（而非硬性的黑白图像），以保留诸如字母“o”的环形细节和较小的数字。在复杂页面上提供最佳准确率，但速度较慢且占用更多内存。\n\nOCR
         后处理：纠正常见的识别错误，例如混淆（0↔O、1↔l↔I、rn↔m），并使用词典检查不确定的词语。默认启用；对于技术代码或序列号可将其关闭。
@@ -401,7 +403,6 @@
     <string name="inbox_saved">✓ 已保存到收件箱</string>
     <string name="inbox_permission_lost">收件箱文件夹访问权限丢失。请选择新文件夹。</string>
     <string name="inbox_no_folder_selected">请先选择收件箱文件夹。</string>
-    <string name="inbox_export_failed">保存到收件箱文件夹失败</string>
     <string name="inbox_clear">清除收件箱文件夹</string>
     <string name="inbox_filename_format">文件名格式</string>
     <string name="inbox_auto_new_scan">导出后自动开始新扫描</string>
@@ -409,4 +410,24 @@
     <string name="inbox_filename_date_time_scan">日期 + 时间 + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">仅日期 (2026-03-04)</string>
     <string name="pdf_bw_mode_none">原始（无滤镜）</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">移除页面？</string>
+    <string name="confirm_remove_page_message">要从胶片条中移除此页面吗？</string>
+    <string name="crop_aspect_label">宽高比</string>
+    <string name="crop_aspect_auto">自动（推荐）</string>
+    <string name="crop_aspect_original">保持原始（不校正比例）</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">自定义…</string>
+    <string name="crop_aspect_custom_with_ratio">自定义 (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">自定义宽高比</string>
+    <string name="crop_aspect_custom_width_hint">宽度</string>
+    <string name="crop_aspect_custom_height_hint">高度</string>
+    <string name="crop_aspect_custom_invalid">请输入 1:1 至 1:20 之间的正数。</string>
+    <string name="crop_aspect_output_size_hint">输出：%1$d × %2$d 像素</string>
+    <string name="crop_hint_corner_off_image">角点位于图像外 — 输出可能含有黑边</string>
+    <string name="crop_edge_dragged">已选择边。拖动以移动边。</string>
 </resources>

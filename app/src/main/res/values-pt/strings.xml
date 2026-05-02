@@ -101,6 +101,10 @@
     <string name="pdf_bw_mode_classic">P/B (clássico)</string>
     <string name="pdf_bw_mode_ocr_robust">Pré-processamento OCR robusto (PDF)</string>
 
+    <string name="jpeg_mode_gray_clean">Escala de cinza limpa (filtro passa-alta) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Cores limpas (filtro passa-alta) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Escala de cinza limpa (passa-alta)</string>
+    <string name="pdf_bw_mode_color_clean">Cor limpa (passa-alta)</string>
     <string name="skip_ocr_export_only">Pular OCR (apenas exportar)</string>
     <string name="skip_cropping">Pular corte</string>
     <string name="preview_corner_detection">Pré-visualização da deteção de cantos</string>
@@ -212,12 +216,9 @@
     <!-- Modos de reconhecimento OCR – explicação -->
     <string name="ocr_explain_prep_modes">Explicar modos de reconhecimento</string>
     <string name="ocr_prep_modes_title">Modos de reconhecimento: explicação simples</string>
-    <string name="ocr_prep_modes_message">Existem três formas de enviar imagens para o motor de OCR:\n\n• Original (sem
+    <string name="ocr_prep_modes_message">Existem duas formas de enviar imagens para o motor de OCR:\n\n• Original (sem
         pré-processamento) — a mais rápida. A foto é enviada tal como está. Ideal para digitalizações já limpas e com
-        alto contraste. Pode não detetar texto fraco ou com ruído.\n\n• OpenCV Rápido — limpeza rápida: conversão para
-        tons de cinzento, redução ligeira de ruído, conversão automática para preto e branco e, se necessário, um
-        ligeiro aumento de escala. Boa opção predefinida para a maioria das fotos. Equilíbrio entre velocidade e
-        qualidade.\n\n• OpenCV Robusto — redesenhado para máxima precisão em páginas difíceis. Corrige inclinações,
+        alto contraste. Pode não detetar texto fraco ou com ruído.\n\n• OpenCV Robusto — redesenhado para máxima precisão em páginas difíceis. Corrige inclinações,
         normaliza sombras e iluminação, aplica redução de ruído com preservação de contornos e escalonamento
         inteligente. É importante que o Tesseract receba uma imagem em tons de cinzento de alta qualidade (e não preto e
         branco rígido), preservando detalhes finos como os laços da letra “o” e dígitos pequenos. Oferece a melhor
@@ -426,7 +427,6 @@
     <string name="inbox_saved">✓ Salvo na Inbox</string>
     <string name="inbox_permission_lost">Acesso à pasta Inbox perdido. Selecione uma nova pasta.</string>
     <string name="inbox_no_folder_selected">Selecione primeiro uma pasta Inbox.</string>
-    <string name="inbox_export_failed">Falha ao salvar na pasta Inbox</string>
     <string name="inbox_clear">Limpar pasta Inbox</string>
     <string name="inbox_filename_format">Formato do nome do arquivo</string>
     <string name="inbox_auto_new_scan">Iniciar nova digitalização automaticamente após exportar</string>
@@ -434,4 +434,24 @@
     <string name="inbox_filename_date_time_scan">Data + hora + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Apenas data (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Original (sem filtro)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Remover página?</string>
+    <string name="confirm_remove_page_message">Deseja remover esta página da tira de filme?</string>
+    <string name="crop_aspect_label">Proporção</string>
+    <string name="crop_aspect_auto">Auto (recomendado)</string>
+    <string name="crop_aspect_original">Manter original (sem correção)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Personalizado…</string>
+    <string name="crop_aspect_custom_with_ratio">Personalizado (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Proporção personalizada</string>
+    <string name="crop_aspect_custom_width_hint">Largura</string>
+    <string name="crop_aspect_custom_height_hint">Altura</string>
+    <string name="crop_aspect_custom_invalid">Insira números positivos entre 1:1 e 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Saída: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Canto fora da imagem — a saída pode ter bordas pretas</string>
+    <string name="crop_edge_dragged">Borda selecionada. Arraste para mover a borda.</string>
 </resources>

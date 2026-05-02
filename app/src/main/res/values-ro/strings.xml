@@ -99,7 +99,10 @@
     <string name="pdf_bw_mode_robust">A/N (robust)</string>
     <string name="pdf_bw_mode_classic">A/N (clasic)</string>
     <string name="pdf_bw_mode_ocr_robust">Preprocesare OCR robustă (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">Nuanțe de gri curățate (filtru trece-sus) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Culori curățate (filtru trece-sus) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Tonuri de gri – curățate (trece-sus)</string>
+    <string name="pdf_bw_mode_color_clean">Culoare – curățată (trece-sus)</string>
     <string name="skip_ocr_export_only">Omite OCR (doar export)</string>
     <string name="skip_cropping">Omite decuparea</string>
     <string name="preview_corner_detection">Previzualizare detecție colțuri</string>
@@ -212,11 +215,9 @@
     <!-- Moduri de recunoaștere OCR – explicație -->
     <string name="ocr_explain_prep_modes">Explică modurile de recunoaștere</string>
     <string name="ocr_prep_modes_title">Moduri de recunoaștere: explicație simplă</string>
-    <string name="ocr_prep_modes_message">Există trei moduri de a trimite imaginile către motorul OCR:\n\n• Original
+    <string name="ocr_prep_modes_message">Există două moduri de a trimite imaginile către motorul OCR:\n\n• Original
         (fără preprocesare) — cel mai rapid. Fotografia este trimisă așa cum este. Ideal pentru scanări deja curate și
-        cu contrast ridicat. Poate omite textul slab sau cu zgomot.\n\n• OpenCV Rapid — curățare rapidă: conversie în
-        tonuri de gri, reducere ușoară a zgomotului, conversie automată în alb-negru și, dacă este necesar, o ușoară
-        mărire. O bună opțiune implicită pentru majoritatea fotografiilor. Echilibru între viteză și calitate.\n\n•
+        cu contrast ridicat. Poate omite textul slab sau cu zgomot.\n\n•
         OpenCV Robust — reproiectat pentru acuratețe maximă pe pagini dificile. Corectează înclinarea, normalizează
         umbrele și iluminarea, aplică reducere de zgomot cu păstrarea marginilor și mărire inteligentă. Este important
         ca Tesseract să primească o imagine în tonuri de gri de înaltă calitate (nu alb-negru dur), pentru a păstra
@@ -431,7 +432,6 @@
     <string name="inbox_saved">✓ Salvat în Inbox</string>
     <string name="inbox_permission_lost">Accesul la folderul Inbox a fost pierdut. Selectați un folder nou.</string>
     <string name="inbox_no_folder_selected">Selectați mai întâi un folder Inbox.</string>
-    <string name="inbox_export_failed">Salvarea în folderul Inbox a eșuat</string>
     <string name="inbox_clear">Șterge folderul Inbox</string>
     <string name="inbox_filename_format">Format nume fișier</string>
     <string name="inbox_auto_new_scan">Pornește automat o scanare nouă după export</string>
@@ -439,4 +439,24 @@
     <string name="inbox_filename_date_time_scan">Dată + oră + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Doar dată (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Original (fără filtru)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">Eliminați pagina?</string>
+    <string name="confirm_remove_page_message">Doriți să eliminați această pagină din peliculă?</string>
+    <string name="crop_aspect_label">Raport de aspect</string>
+    <string name="crop_aspect_auto">Auto (recomandat)</string>
+    <string name="crop_aspect_original">Păstrează originalul (fără corecție)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Personalizat…</string>
+    <string name="crop_aspect_custom_with_ratio">Personalizat (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Raport de aspect personalizat</string>
+    <string name="crop_aspect_custom_width_hint">Lățime</string>
+    <string name="crop_aspect_custom_height_hint">Înălțime</string>
+    <string name="crop_aspect_custom_invalid">Introduceți numere pozitive între 1:1 și 1:20.</string>
+    <string name="crop_aspect_output_size_hint">Ieșire: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">Colț în afara imaginii — ieșirea poate avea margini negre</string>
+    <string name="crop_edge_dragged">Margine selectată. Trageți pentru a muta marginea.</string>
 </resources>

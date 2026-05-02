@@ -94,10 +94,14 @@
     <string name="jpeg_mode_bw_text">S/W (klassisch) (JPEG)</string>
     <string name="jpeg_mode_bw_robust">S/W (robust) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">Robuste OCR-Vorverarbeitung (JPEG)</string>
+    <string name="jpeg_mode_gray_clean">Graustufen „clean“ (High-Pass) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">Farbe „clean“ (High-Pass) (JPEG)</string>
 
     <string name="pdf_bw_mode_robust">S/W (robust)</string>
     <string name="pdf_bw_mode_classic">S/W (klassisch)</string>
     <string name="pdf_bw_mode_ocr_robust">Robuste OCR-Vorverarbeitung (PDF)</string>
+    <string name="pdf_bw_mode_grayscale_clean">Graustufen „clean“ (High-Pass)</string>
+    <string name="pdf_bw_mode_color_clean">Farbe „clean“ (High-Pass)</string>
 
     <string name="skip_ocr_export_only">OCR überspringen (nur Export)</string>
     <string name="skip_cropping">Zuschneiden überspringen</string>
@@ -124,6 +128,10 @@
     <!-- Bestätigung beim Leeren per Papierkorb (Mehrseiten) -->
     <string name="confirm_clear_pages_title">Alle Seiten löschen?</string>
     <string name="confirm_clear_pages_message">Möchtest du alle Seiten aus dem Filmstreifen entfernen?</string>
+
+    <!-- Bestätigung beim Entfernen einer einzelnen Seite aus dem Filmstreifen -->
+    <string name="confirm_remove_page_title">Seite entfernen?</string>
+    <string name="confirm_remove_page_message">Möchtest du diese Seite aus dem Filmstreifen entfernen?</string>
 
     <!-- Registry Picker -->
     <string name="picker_title_completed_scans">Aus fertigen Scans wählen</string>
@@ -210,19 +218,16 @@
     <!-- Erklärung der Erkennungsmodi -->
     <string name="ocr_explain_prep_modes">Erkennungsmodi erklären</string>
     <string name="ocr_prep_modes_title">Erkennungsmodi – einfach erklärt</string>
-    <string name="ocr_prep_modes_message">Es gibt drei Möglichkeiten, Bilder an die OCR-Engine zu übergeben:\n\n•
+    <string name="ocr_prep_modes_message">Es gibt zwei Möglichkeiten, Bilder an die OCR-Engine zu übergeben:\n\n•
         Original (keine Vorverarbeitung) — am schnellsten. Das Foto wird unverändert übergeben. Am besten geeignet für
         bereits saubere, kontrastreiche Scans. Schwacher oder verrauschter Text kann übersehen werden.\n\n• OpenCV
-        Schnell — schnelle Aufbereitung: Umwandlung in Graustufen, leichte Rauschreduzierung, automatische
-        Schwarz-Weiß-Konvertierung und bei Bedarf eine leichte Hochskalierung. Gute Standardwahl für die meisten Fotos.
-        Ausgewogenes Verhältnis von Geschwindigkeit und Qualität.\n\n• OpenCV Robust — neu aufgebaut für maximale
-        Genauigkeit bei schwierigen Seiten. Richtet Schräglagen aus, normalisiert Schatten und Beleuchtung, wendet
-        kanten­erhaltende Rauschreduzierung und intelligente Hochskalierung an. Wichtig ist, dass Tesseract ein
-        hochwertiges Graustufenbild erhält (kein hartes Schwarz-Weiß), um feine Details wie Schleifen im „o“ oder kleine
-        Ziffern zu erhalten. Beste Genauigkeit bei anspruchsvollen Seiten, aber langsamer und
-        speicherintensiver.\n\nOCR-Nachverarbeitung: Korrigiert typische Erkennungsfehler wie Verwechslungen (0↔O,
-        1↔l↔I, rn↔m) und prüft unsichere Wörter mithilfe eines Wörterbuchs. Standardmäßig aktiviert; für technische
-        Codes oder Seriennummern deaktivieren.
+        Robust — für maximale Genauigkeit bei schwierigen Seiten. Richtet Schräglagen aus, normalisiert Schatten und
+        Beleuchtung, wendet kanten­erhaltende Rauschreduzierung und intelligente Hochskalierung an. Wichtig ist, dass
+        Tesseract ein hochwertiges Graustufenbild erhält (kein hartes Schwarz-Weiß), um feine Details wie Schleifen im
+        „o“ oder kleine Ziffern zu erhalten. Beste Genauigkeit bei anspruchsvollen Seiten, aber langsamer und
+        speicherintensiver. Empfohlene Standardwahl für die meisten Fotos.\n\nOCR-Nachverarbeitung: Korrigiert typische
+        Erkennungsfehler wie Verwechslungen (0↔O, 1↔l↔I, rn↔m) und prüft unsichere Wörter mithilfe eines Wörterbuchs.
+        Standardmäßig aktiviert; für technische Codes oder Seriennummern deaktivieren.
     </string>
 
     <!-- Auswahl des Erkennungsmodus -->
@@ -432,7 +437,6 @@
     <string name="inbox_saved">✓ In Inbox gespeichert</string>
     <string name="inbox_permission_lost">Zugriff auf Inbox-Ordner verloren. Bitte wählen Sie einen neuen Ordner.</string>
     <string name="inbox_no_folder_selected">Bitte wählen Sie zuerst einen Inbox-Ordner aus.</string>
-    <string name="inbox_export_failed">Speichern in Inbox-Ordner fehlgeschlagen</string>
     <string name="inbox_clear">Inbox-Ordner zurücksetzen</string>
     <string name="inbox_filename_format">Dateinamenformat</string>
     <string name="inbox_auto_new_scan">Nach Export automatisch neuen Scan starten</string>
@@ -440,4 +444,31 @@
     <string name="inbox_filename_date_time_scan">Datum + Uhrzeit + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Nur Datum (2026-03-04)</string>
     <string name="pdf_bw_mode_none">Original (kein Filter)</string>
+    <!-- Crop: Aspect-Ratio-Auswahl (v3.8.0) -->
+    <string name="crop_aspect_label">Seitenverhältnis</string>
+    <string name="crop_aspect_auto">Automatisch (empfohlen)</string>
+    <string name="crop_aspect_original">Original belassen (keine Korrektur)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">Benutzerdefiniert…</string>
+    <string name="crop_aspect_custom_with_ratio">Benutzerdefiniert (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">Benutzerdefiniertes Seitenverhältnis</string>
+    <string name="crop_aspect_custom_width_hint">Breite</string>
+    <string name="crop_aspect_custom_height_hint">Höhe</string>
+    <string name="crop_aspect_custom_invalid">Bitte positive Werte zwischen 1:1 und 1:20 eingeben.</string>
+    <string name="crop_aspect_output_size_hint">Ausgabe: %1$d × %2$d px</string>
+    <!-- Crop: Kantenbearbeitung & Off-Screen-Ecken (siehe docs/edge_drag_pan_zoom_concept.md) -->
+    <string name="crop_hint_corner_off_image">Ecke außerhalb des Bildes — das Crop-Ergebnis kann schwarze Ränder enthalten</string>
+    <string name="crop_edge_dragged">Kante ausgewählt. Ziehen, um die Kante zu verschieben.</string>
+    <!-- FR #72: Zuschnitt aus der Export-Vorschau erneut bearbeiten -->
+    <string name="btn_edit_crop">Zuschnitt anpassen</string>
+    <string name="edit_crop_original_unavailable">Originalbild nicht mehr verfügbar — Zuschnitt kann nicht erneut bearbeitet werden.</string>
+    <!-- FR #72 Begleit-Feature: Snap-to-Right-Angle -->
+    <string name="crop_snap_engaged">Kante eingerastet</string>
+    <string name="crop_snap_toggle_cd">Rechtwinkel-Einrasten umschalten</string>
+    <string name="crop_snap_toggle_on">Rechtwinkel-Einrasten an</string>
+    <string name="crop_snap_toggle_off">Rechtwinkel-Einrasten aus</string>
 </resources>

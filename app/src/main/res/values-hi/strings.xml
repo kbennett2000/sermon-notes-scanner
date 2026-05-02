@@ -90,7 +90,10 @@
     <string name="pdf_bw_mode_robust">श्वेत-श्याम (रोबस्ट)</string>
     <string name="pdf_bw_mode_classic">श्वेत-श्याम (क्लासिक)</string>
     <string name="pdf_bw_mode_ocr_robust">OCR रोबस्ट प्रीप्रोसेसिंग (PDF)</string>
-
+    <string name="jpeg_mode_gray_clean">साफ़ ग्रेस्केल (हाई-पास फ़िल्टर) (JPEG)</string>
+    <string name="jpeg_mode_color_clean">साफ़ रंग (हाई-पास फ़िल्टर) (JPEG)</string>
+    <string name="pdf_bw_mode_grayscale_clean">ग्रेस्केल साफ़ (हाई-पास)</string>
+    <string name="pdf_bw_mode_color_clean">रंग साफ़ (हाई-पास)</string>
     <string name="skip_ocr_export_only">OCR छोड़ें (केवल निर्यात)</string>
     <string name="skip_cropping">क्रॉपिंग छोड़ें</string>
     <string name="preview_corner_detection">कोना पहचान पूर्वावलोकन</string>
@@ -205,7 +208,7 @@
     <!-- OCR prep modes explanation -->
     <string name="ocr_explain_prep_modes">पहचान मोड समझाएँ</string>
     <string name="ocr_prep_modes_title">पहचान मोड: सरल व्याख्या</string>
-    <string name="ocr_prep_modes_message">OCR इंजन को चित्र देने के तीन तरीके हैं:\n\n• मूल (कोई प्रीप्रोसेसिंग नहीं) — सबसे तेज़। फ़ोटो जैसी है वैसी भेजी जाती है। पहले से साफ़, उच्च-कंट्रास्ट स्कैन के लिए सर्वोत्तम। धुंधला या शोरयुक्त टेक्स्ट छूट सकता है।\n\n• OpenCV क्विक — तेज़ सफ़ाई: ग्रेस्केल में बदलें, हल्का शोर कम करें, स्वचालित श्वेत-श्याम, और आवश्यकतानुसार थोड़ा बड़ा करें। अधिकांश फ़ोटो के लिए अच्छा डिफ़ॉल्ट।\n\n• OpenCV रोबस्ट — कठिन पृष्ठों पर अधिकतम सटीकता के लिए। तिरछापन ठीक करता है, छाया/रोशनी सामान्य करता है, किनारा-संरक्षित शोर कमी और स्मार्ट अपस्केलिंग लागू करता है। Tesseract को उच्च-गुणवत्ता ग्रेस्केल चित्र मिलता है। सर्वोत्तम सटीकता; धीमा।\n\nOCR पोस्ट-प्रोसेसिंग: सामान्य पहचान त्रुटियाँ (0↔O, 1↔l↔I, rn↔m) ठीक करता है और शब्दकोश से जाँचता है। डिफ़ॉल्ट रूप से सक्षम।
+    <string name="ocr_prep_modes_message">OCR इंजन को चित्र देने के दो तरीके हैं:\n\n• मूल (कोई प्रीप्रोसेसिंग नहीं) — सबसे तेज़। फ़ोटो जैसी है वैसी भेजी जाती है। पहले से साफ़, उच्च-कंट्रास्ट स्कैन के लिए सर्वोत्तम। धुंधला या शोरयुक्त टेक्स्ट छूट सकता है।\n\n• OpenCV रोबस्ट — कठिन पृष्ठों पर अधिकतम सटीकता के लिए। तिरछापन ठीक करता है, छाया/रोशनी सामान्य करता है, किनारा-संरक्षित शोर कमी और स्मार्ट अपस्केलिंग लागू करता है। Tesseract को उच्च-गुणवत्ता ग्रेस्केल चित्र मिलता है। सर्वोत्तम सटीकता; धीमा।\n\nOCR पोस्ट-प्रोसेसिंग: सामान्य पहचान त्रुटियाँ (0↔O, 1↔l↔I, rn↔m) ठीक करता है और शब्दकोश से जाँचता है। डिफ़ॉल्ट रूप से सक्षम।
     </string>
 
     <!-- OCR prep modes selection -->
@@ -398,11 +401,30 @@
     <string name="inbox_saved">✓ इनबॉक्स में सहेजा गया</string>
     <string name="inbox_permission_lost">इनबॉक्स फ़ोल्डर की पहुँच खो गई। कृपया नया फ़ोल्डर चुनें।</string>
     <string name="inbox_no_folder_selected">कृपया पहले एक इनबॉक्स फ़ोल्डर चुनें।</string>
-    <string name="inbox_export_failed">इनबॉक्स फ़ोल्डर में सहेजना विफल</string>
     <string name="inbox_clear">इनबॉक्स फ़ोल्डर साफ़ करें</string>
     <string name="inbox_filename_format">फ़ाइल नाम प्रारूप</string>
     <string name="inbox_auto_new_scan">निर्यात के बाद स्वचालित रूप से नया स्कैन शुरू करें</string>
     <string name="inbox_filename_date_scan">दिनांक + स्कैन (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">दिनांक + समय + स्कैन (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">केवल दिनांक (2026-03-04)</string>
+    <!-- Translations added for missing strings -->
+    <string name="confirm_remove_page_title">पेज हटाएँ?</string>
+    <string name="confirm_remove_page_message">क्या आप इस पेज को फिल्मस्ट्रिप से हटाना चाहते हैं?</string>
+    <string name="crop_aspect_label">आस्पेक्ट रेशियो</string>
+    <string name="crop_aspect_auto">ऑटो (अनुशंसित)</string>
+    <string name="crop_aspect_original">मूल रखें (बिना सुधार)</string>
+    <string name="crop_aspect_a3">A3</string>
+    <string name="crop_aspect_a4">A4</string>
+    <string name="crop_aspect_a5">A5</string>
+    <string name="crop_aspect_letter">US Letter</string>
+    <string name="crop_aspect_legal">Legal</string>
+    <string name="crop_aspect_custom">कस्टम…</string>
+    <string name="crop_aspect_custom_with_ratio">कस्टम (%1$s : %2$s)</string>
+    <string name="crop_aspect_custom_dialog_title">कस्टम आस्पेक्ट रेशियो</string>
+    <string name="crop_aspect_custom_width_hint">चौड़ाई</string>
+    <string name="crop_aspect_custom_height_hint">ऊँचाई</string>
+    <string name="crop_aspect_custom_invalid">1:1 से 1:20 के बीच धनात्मक संख्याएँ दर्ज करें.</string>
+    <string name="crop_aspect_output_size_hint">आउटपुट: %1$d × %2$d px</string>
+    <string name="crop_hint_corner_off_image">कोना छवि के बाहर — आउटपुट में काले बॉर्डर हो सकते हैं</string>
+    <string name="crop_edge_dragged">किनारा चयनित. किनारा हिलाने के लिए खींचें.</string>
 </resources>
