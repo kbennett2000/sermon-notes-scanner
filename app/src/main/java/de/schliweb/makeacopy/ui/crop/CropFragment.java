@@ -13,11 +13,17 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +37,7 @@ import de.schliweb.makeacopy.utils.image.ImageLoader;
 import de.schliweb.makeacopy.utils.image.OpenCVUtils;
 import de.schliweb.makeacopy.utils.infra.FeatureFlags;
 import de.schliweb.makeacopy.utils.ui.A11yUtils;
+import de.schliweb.makeacopy.utils.ui.DialogUtils;
 import de.schliweb.makeacopy.utils.ui.UIUtils;
 
 /**
@@ -56,6 +63,10 @@ public class CropFragment extends Fragment {
   // A11y: one-shot post-capture announcement
   private boolean cropA11yAnnounced = false;
   private long cropA11yLastAnnounceTs = 0L;
+  // Suppresses the Android system back gesture / back press while the user is actively
+  // dragging a corner or edge of the trapezoid. Without this, horizontal drags near the
+  // left/right screen edge can trigger Predictive Back and pop the navigation stack.
+  private OnBackPressedCallback dragBackBlockCallback;
 
   /**
    * Inflates the layout for this fragment and initializes all necessary components including
@@ -80,8 +91,137 @@ public class CropFragment extends Fragment {
     binding = FragmentCropBinding.inflate(inflater, container, false);
     View root = binding.getRoot();
 
+    // FR #72 — Re-Edit entry from Export:
+    // When the user re-enters CropFragment via the Export edit-overlay, the in-memory
+    // original image bitmap has typically been released by ExportFragment to save memory.
+    // Re-decode it from the on-disk capture (or shared URI) so performCrop has the same
+    // full-resolution source as in the first pass. The cropped flag must be cleared so the
+    // imageBitmap observer takes the crop-mode branch (instead of immediately navigating).
+    if (Boolean.TRUE.equals(cropViewModel.isCameFromExport().getValue())) {
+      try {
+        Bitmap original = cropViewModel.getOriginalImageBitmap().getValue();
+        if (original == null || original.isRecycled()) {
+          String path =
+              cameraViewModel != null && cameraViewModel.getImagePath() != null
+                  ? cameraViewModel.getImagePath().getValue()
+                  : null;
+          Uri u =
+              cameraViewModel != null && cameraViewModel.getImageUri() != null
+                  ? cameraViewModel.getImageUri().getValue()
+                  : null;
+          Bitmap reloaded = ImageLoader.decode(requireContext(), path, u);
+          if (reloaded != null) {
+            cropViewModel.setOriginalImageBitmap(reloaded);
+            // Reset cropped flag and write the original back as the working bitmap, so the
+            // observer below shows the crop UI and the trapezoid view receives the unrotated
+            // source. The user rotation will be re-applied via the existing rotation observer.
+            cropViewModel.setImageCropped(false);
+            cropViewModel.setImageBitmap(reloaded);
+          } else {
+            android.util.Log.w(
+                TAG, "[FR72] Re-Edit: failed to reload original from path=" + path + " uri=" + u);
+          }
+        } else {
+          // Original still in-memory: force the crop UI by clearing cropped + setting bitmap.
+          cropViewModel.setImageCropped(false);
+          cropViewModel.setImageBitmap(original);
+        }
+      } catch (Throwable t) {
+        android.util.Log.w(TAG, "[FR72] Re-Edit: reload failed: " + t.getMessage(), t);
+      }
+    }
+
     // Pass the Hilt-injected DocQuadOrtRunner to the TrapezoidSelectionView
     binding.trapezoidSelection.setDocQuadOrtRunner(docQuadOrtRunner);
+
+    // Hint binding: when at least one corner of the trapezoid leaves the original image
+    // rectangle (off-image), show a dedicated hint warning the user that the warped output
+    // may contain black borders. Otherwise restore the standard adjust-corners instruction.
+    // See docs/edge_drag_pan_zoom_concept.md §5.3.
+    binding.trapezoidSelection.setOnCornersChangedListener(
+        anyCornerOffImage -> {
+          if (binding == null) return;
+          if (anyCornerOffImage) {
+            binding.textCrop.setText(R.string.crop_hint_corner_off_image);
+          } else {
+            binding.textCrop.setText(
+                R.string
+                    .adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button);
+          }
+        });
+
+    // Block the system Back gesture / Back press while a corner or edge drag is in progress.
+    // The callback is registered up-front but disabled, then enabled only for the duration of
+    // an active drag, so normal back navigation continues to work outside drag operations.
+    dragBackBlockCallback =
+        new OnBackPressedCallback(false) {
+          @Override
+          public void handleOnBackPressed() {
+            // Intentionally swallow back while dragging.
+          }
+        };
+    requireActivity()
+        .getOnBackPressedDispatcher()
+        .addCallback(getViewLifecycleOwner(), dragBackBlockCallback);
+    binding.trapezoidSelection.setOnDragStateChangedListener(
+        isDragging -> {
+          if (dragBackBlockCallback != null) {
+            dragBackBlockCallback.setEnabled(isDragging);
+          }
+        });
+
+    // Pan/Zoom (Phase 2 step 2/4/5): keep the underlying image_to_crop ImageView's render
+    // matrix in sync with TrapezoidSelectionView.viewMatrix so that the bitmap and overlay
+    // pan/zoom together. The flag stays default-off in releases — when off, this listener
+    // still fires once on registration with identity transform (and we restore fitCenter),
+    // so existing behaviour is unaffected. See docs/edge_drag_pan_zoom_concept.md §4.1.
+    binding.trapezoidSelection.setOnViewTransformChangedListener(
+        (scale, tx, ty, viewMatrix) -> {
+          if (binding == null) return;
+          if (!de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_PAN_ZOOM
+              || (Math.abs(scale - 1f) < 1e-4f && Math.abs(tx) < 1e-4f && Math.abs(ty) < 1e-4f)) {
+            // Identity (or feature off): restore default fitCenter rendering. This avoids any
+            // residual matrix from a previous interaction polluting the next bitmap load.
+            if (binding.imageToCrop.getScaleType()
+                != android.widget.ImageView.ScaleType.FIT_CENTER) {
+              binding.imageToCrop.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+              binding.imageToCrop.setImageMatrix(new android.graphics.Matrix());
+            }
+            // Drop any clip set during a previous zoom session so the unzoomed view returns
+            // to its normal (unclipped) rendering.
+            binding.imageToCrop.setClipBounds(null);
+            return;
+          }
+          // Confine the scaled bitmap rendering to the ImageView bounds so the parent
+          // ConstraintLayout's clipChildren="false" does not let the zoomed bitmap overflow
+          // into adjacent layout regions.
+          int cw = binding.imageToCrop.getWidth();
+          int ch = binding.imageToCrop.getHeight();
+          if (cw > 0 && ch > 0) {
+            binding.imageToCrop.setClipBounds(new android.graphics.Rect(0, 0, cw, ch));
+          }
+          // Compute baseFitMatrix that reproduces fitCenter for the current bitmap+view, then
+          // pre-concatenate viewMatrix so the bitmap moves with the overlay.
+          android.graphics.drawable.Drawable d = binding.imageToCrop.getDrawable();
+          if (d == null) return;
+          int dw = d.getIntrinsicWidth();
+          int dh = d.getIntrinsicHeight();
+          int vw = binding.imageToCrop.getWidth();
+          int vh = binding.imageToCrop.getHeight();
+          if (dw <= 0 || dh <= 0 || vw <= 0 || vh <= 0) return;
+          android.graphics.Matrix base = new android.graphics.Matrix();
+          android.graphics.RectF src = new android.graphics.RectF(0, 0, dw, dh);
+          android.graphics.RectF dst = new android.graphics.RectF(0, 0, vw, vh);
+          base.setRectToRect(src, dst, android.graphics.Matrix.ScaleToFit.CENTER);
+          // Final = viewMatrix · base (viewMatrix operates on view coordinates, base maps
+          // bitmap → view).
+          android.graphics.Matrix combined = new android.graphics.Matrix(viewMatrix);
+          combined.preConcat(base);
+          if (binding.imageToCrop.getScaleType() != android.widget.ImageView.ScaleType.MATRIX) {
+            binding.imageToCrop.setScaleType(android.widget.ImageView.ScaleType.MATRIX);
+          }
+          binding.imageToCrop.setImageMatrix(combined);
+        });
 
     // Wire the Magnifier source view: compute and pass image->overlay matrix once layout/bitmap
     // ready
@@ -102,9 +242,25 @@ public class CropFragment extends Fragment {
     // Ensure hint text in overlay avoids bottom UI
     binding.getRoot().post(this::updateTrapezoidHintInset);
 
-    // Back button: return to Camera for a fresh scan
+    // Back button: return to Camera for a fresh scan — except for the FR #72 Re-Edit flow,
+    // where Back must return to Export without losing the captured image, OCR result, etc.
     binding.buttonBack.setOnClickListener(
         v -> {
+          if (Boolean.TRUE.equals(cropViewModel.isCameFromExport().getValue())) {
+            cropViewModel.setCameFromExport(false);
+            cropViewModel.setReEditPageIndex(-1);
+            try {
+              boolean popped =
+                  Navigation.findNavController(requireView())
+                      .popBackStack(R.id.navigation_export, false);
+              if (!popped) {
+                Navigation.findNavController(requireView()).navigate(R.id.navigation_export);
+              }
+            } catch (Throwable ignore) {
+              // Best-effort; failure is non-critical
+            }
+            return;
+          }
           try {
             // Reset state for a fresh scan
             cropViewModel.setImageCropped(false);
@@ -128,6 +284,13 @@ public class CropFragment extends Fragment {
     // Rotation buttons (now available pre-crop)
     binding.buttonRotateLeft.setOnClickListener(v -> cropViewModel.rotateLeft());
     binding.buttonRotateRight.setOnClickListener(v -> cropViewModel.rotateRight());
+
+    // Aspect-Ratio selector (stage B; see docs/aspect_ratio_concept_v3.8.0.md)
+    setupAspectButton();
+
+    // Snap-to-Right-Angle toggle (FR #72 companion; see docs/fr72_edit_shape_from_export_concept.md
+    // §5)
+    setupSnapToggleButton();
 
     // Bitmap-Change
     cropViewModel
@@ -154,7 +317,55 @@ public class CropFragment extends Fragment {
                   showCropMode();
                   Bitmap safe = BitmapUtils.ensureDisplaySafe(bitmap);
                   binding.imageToCrop.setImageBitmap(safe);
+                  // Gate the "already-cropped" fallback heuristic so it only runs for
+                  // imported/shared images (gallery, share intent, PDF page) and never for
+                  // live camera captures, where the heuristic must not interfere with
+                  // genuine document-corner detection on the captured frame.
+                  binding.trapezoidSelection.setPreCroppedHint(
+                      cameraViewModel != null && cameraViewModel.isImageSourceImported());
                   binding.trapezoidSelection.setImageBitmap(safe);
+                  // FR #72 — Re-Edit: pre-populate trapezoid corners from the previously
+                  // accepted crop and apply the previously accepted user rotation, so the
+                  // user re-enters the exact same shape they had on the first pass instead
+                  // of starting from auto-detection. The corners are stored in coordinates
+                  // of the rotated full-res source; we apply them directly because the
+                  // displayed bitmap has the same aspect ratio (the trapezoid view scales
+                  // image coords → view coords on its own).
+                  if (Boolean.TRUE.equals(cropViewModel.isCameFromExport().getValue())) {
+                    try {
+                      Integer lastRot = cropViewModel.getLastAcceptedUserRotationDeg().getValue();
+                      Integer curRot = cropViewModel.getUserRotationDegrees().getValue();
+                      int lr = lastRot == null ? 0 : lastRot;
+                      int cr = curRot == null ? 0 : curRot;
+                      if (lr != cr) {
+                        // Set rotation; the rotation observer rebuilds the working bitmap
+                        // and will keep userHasEdited via setCornersFromImageCoordinates
+                        // below (executed after layout via the view's post() fallback).
+                        cropViewModel.setUserRotationDegrees(lr);
+                      }
+                      android.graphics.PointF[] persisted =
+                          cropViewModel.getLastAcceptedCornersOriginal().getValue();
+                      if (persisted != null && persisted.length == 4) {
+                        org.opencv.core.Point[] pts = new org.opencv.core.Point[4];
+                        for (int i = 0; i < 4; i++) {
+                          if (persisted[i] == null) {
+                            pts = null;
+                            break;
+                          }
+                          pts[i] = new org.opencv.core.Point(persisted[i].x, persisted[i].y);
+                        }
+                        if (pts != null) {
+                          binding.trapezoidSelection.setCornersFromImageCoordinates(pts);
+                          android.util.Log.d(
+                              TAG,
+                              "[FR72] Re-Edit: pre-populated trapezoid from persisted corners");
+                        }
+                      }
+                    } catch (Throwable t) {
+                      android.util.Log.w(
+                          TAG, "[FR72] Re-Edit: corner pre-population failed: " + t.getMessage());
+                    }
+                  }
                   lastUserRotationDeg = 0; // reset rotation baseline for selection sync
                   // Disable rotation while edge detection likely runs, then re-enable shortly
                   setRotationButtonsEnabled(false);
@@ -522,7 +733,34 @@ public class CropFragment extends Fragment {
     }
 
     long t0 = android.os.SystemClock.uptimeMillis();
-    Bitmap croppedBitmap = OpenCVUtils.applyPerspectiveCorrection(fullResSource, cornersForSource);
+    Bitmap croppedBitmap;
+    {
+      CropAspectRatio sel = CropPrefsHelper.getLastAspect(requireContext());
+      if (sel == CropAspectRatio.ORIGINAL) {
+        android.util.Log.d(TAG, LP + "performCrop: aspect=ORIGINAL → legacy heuristic");
+        croppedBitmap =
+            OpenCVUtils.applyPerspectiveCorrectionLegacyHeuristic(fullResSource, cornersForSource);
+      } else {
+        Double ratio = CropPrefsHelper.resolveActiveRatio(requireContext());
+        if (ratio == null) {
+          android.util.Log.d(TAG, LP + "performCrop: aspect=" + sel + " → AUTO_PROJECTIVE");
+          croppedBitmap =
+              OpenCVUtils.applyPerspectiveCorrection(
+                  fullResSource, cornersForSource, OpenCVUtils.WarpMode.AUTO_PROJECTIVE, null);
+        } else {
+          android.util.Log.d(
+              TAG,
+              LP
+                  + "performCrop: aspect="
+                  + sel
+                  + " → FIXED_RATIO short/long="
+                  + String.format(java.util.Locale.US, "%.4f", ratio));
+          croppedBitmap =
+              OpenCVUtils.applyPerspectiveCorrection(
+                  fullResSource, cornersForSource, OpenCVUtils.WarpMode.FIXED_RATIO, ratio);
+        }
+      }
+    }
     long dt = android.os.SystemClock.uptimeMillis() - t0;
     if (croppedBitmap != null) {
       android.util.Log.d(
@@ -535,6 +773,28 @@ public class CropFragment extends Fragment {
               + ", took="
               + dt
               + "ms");
+      // Post-warp safety net: trim residual non-paper border (dark background remnants left
+      // when the crop trapezoid was slightly looser than the actual paper edges). This protects
+      // downstream OCR from artefacts caused by black borders along the page.
+      try {
+        Bitmap trimmed = OpenCVUtils.trimNonPaperBorder(croppedBitmap);
+        if (trimmed != null && trimmed != croppedBitmap) {
+          android.util.Log.d(
+              TAG,
+              LP
+                  + "performCrop: post-warp border trim "
+                  + croppedBitmap.getWidth()
+                  + "x"
+                  + croppedBitmap.getHeight()
+                  + " → "
+                  + trimmed.getWidth()
+                  + "x"
+                  + trimmed.getHeight());
+          croppedBitmap = trimmed;
+        }
+      } catch (Throwable t) {
+        android.util.Log.w(TAG, LP + "performCrop: trimNonPaperBorder failed: " + t.getMessage());
+      }
       // Hide/stop overlay to avoid further edge detection while we navigate away
       try {
         binding.trapezoidSelection.setVisibility(View.GONE);
@@ -544,6 +804,24 @@ public class CropFragment extends Fragment {
       }
       // Prevent the imageBitmap observer from re-initializing edge detection for this write-back
       skipNextBitmapObserver = true;
+      // Persist the accepted corners (in full-res source coords) and the user rotation that was
+      // baked into that source. This enables Re-Edit from the Export screen (FR #72): a later
+      // re-entry into CropFragment can restore exactly the same trapezoid by setting the same
+      // user rotation and applying these corners to the rebuilt full-res source.
+      try {
+        android.graphics.PointF[] accepted = new android.graphics.PointF[cornersForSource.length];
+        for (int i = 0; i < cornersForSource.length; i++) {
+          accepted[i] =
+              new android.graphics.PointF(
+                  (float) cornersForSource[i].x, (float) cornersForSource[i].y);
+        }
+        Integer urVal = cropViewModel.getUserRotationDegrees().getValue();
+        int urDeg = urVal == null ? 0 : urVal;
+        cropViewModel.setLastAcceptedCornersOriginal(accepted);
+        cropViewModel.setLastAcceptedUserRotationDeg(urDeg);
+      } catch (Throwable t) {
+        android.util.Log.w(TAG, LP + "performCrop: persisting accepted corners failed: " + t);
+      }
       // Write cropped bitmap first, then mark as cropped so isImageCropped observer can navigate
       // using the new bitmap
       cropViewModel.setImageBitmap(croppedBitmap);
@@ -574,6 +852,7 @@ public class CropFragment extends Fragment {
     binding.trapezoidSelection.setVisibility(View.VISIBLE);
     binding.cropButtonContainer.setVisibility(View.VISIBLE);
     binding.rotationButtonBar.setVisibility(View.VISIBLE);
+    binding.cropAspectButton.setVisibility(View.VISIBLE);
 
     // Ensure the trapezoid overlay always renders above the bottom button container while remaining
     // non-clickable
@@ -599,6 +878,137 @@ public class CropFragment extends Fragment {
   private void navigateAfterCrop() {
     if (!isAdded() || getView() == null) return;
     try {
+      // FR #72 — Re-Edit: when the crop was opened from the Export overlay, do not advance
+      // through OCR again; pop directly back to the Export screen. The OCR layer is
+      // invalidated below so the export preview can trigger a re-OCR if needed.
+      if (Boolean.TRUE.equals(cropViewModel.isCameFromExport().getValue())) {
+        cropViewModel.setCameFromExport(false);
+        // FR #72: capture and clear the re-edit index so subsequent crop flows are unaffected.
+        // The local copy is still used below to update the correct session page.
+        final int reEditIdx = cropViewModel.getReEditPageIndex();
+        cropViewModel.setReEditPageIndex(-1);
+        // Invalidate downstream OCR result so the new crop drives a fresh OCR pass when the
+        // user requests one (or via background re-OCR in a future iteration).
+        try {
+          androidx.lifecycle.ViewModelProvider vmp =
+              new androidx.lifecycle.ViewModelProvider(requireActivity());
+          de.schliweb.makeacopy.ui.ocr.OCRViewModel ocrVm =
+              vmp.get(de.schliweb.makeacopy.ui.ocr.OCRViewModel.class);
+          if (ocrVm != null) {
+            // Best-effort invalidation: clear the recognized words so the export pipeline
+            // does not embed stale OCR for the freshly recropped page. Re-OCR in a future
+            // iteration can run automatically; for now the user can trigger it from Export.
+            ocrVm.setWords(null);
+          }
+        } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
+        }
+        // FR #72 — Push the freshly cropped bitmap into ExportViewModel BEFORE popping back,
+        // so the existing ExportFragment instance (whose observer was attached in onCreateView)
+        // sees the new bitmap and re-renders the preview. Without this update the observer
+        // would still hold the previous documentBitmap reference and the preview would not
+        // refresh when popping back to Export.
+        try {
+          Bitmap newCropped = cropViewModel.getImageBitmap().getValue();
+          if (newCropped != null) {
+            int userDeg = 0;
+            Integer urv = cropViewModel.getUserRotationDegrees().getValue();
+            if (urv != null) userDeg = ((urv % 360) + 360) % 360;
+            Bitmap toSet = newCropped;
+            if (userDeg != 0) {
+              try {
+                android.graphics.Matrix m = new android.graphics.Matrix();
+                m.postRotate(userDeg);
+                Bitmap rotated =
+                    Bitmap.createBitmap(
+                        newCropped, 0, 0, newCropped.getWidth(), newCropped.getHeight(), m, true);
+                if (rotated != null) toSet = rotated;
+              } catch (Throwable ignore) {
+                // fall through with un-rotated bitmap
+              }
+            }
+            androidx.lifecycle.ViewModelProvider vmp2 =
+                new androidx.lifecycle.ViewModelProvider(requireActivity());
+            de.schliweb.makeacopy.ui.export.ExportViewModel exportVm =
+                vmp2.get(de.schliweb.makeacopy.ui.export.ExportViewModel.class);
+            if (exportVm != null) {
+              // FR #72 V1.3: mark this bitmap as the freshly re-edited page so the Edit
+              // overlay only re-appears for THIS page (not for older pages selected via
+              // the filmstrip).
+              try {
+                cropViewModel.setLastFreshPageBitmap(toSet);
+              } catch (Throwable ignore) {
+                // Best-effort; failure is non-critical
+              }
+              exportVm.setDocumentBitmap(toSet);
+              exportVm.setDocumentReady(true);
+            }
+            // FR #72 — Also update the ExportSessionViewModel page so the pages observer
+            // in ExportFragment does NOT overwrite our freshly pushed documentBitmap with
+            // the stale page bitmap. Without this, the observer logic
+            //   if (curPreview not in pages[i].inMemoryBitmap) → loadPreview(pages[0])
+            // restores the *old* cropped bitmap and the preview never refreshes.
+            // V1 hot-workflow: replace the first (and typically only) page with a new
+            // CompletedScan that carries the fresh bitmap. Multi-page Re-Edit per
+            // specific page is a follow-up issue.
+            try {
+              de.schliweb.makeacopy.ui.export.session.ExportSessionViewModel sessionVm =
+                  vmp2.get(de.schliweb.makeacopy.ui.export.session.ExportSessionViewModel.class);
+              if (sessionVm != null) {
+                java.util.List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pages =
+                    sessionVm.getPages().getValue();
+                if (pages != null && !pages.isEmpty()) {
+                  // FR #72 multi-page: use the index recorded by ExportFragment when the user
+                  // tapped the Edit overlay, so the correct session page is replaced (not
+                  // hardcoded index 0). Fall back to 0 only when the index is unknown
+                  // (single-page hot workflow without a session match).
+                  int idx = reEditIdx;
+                  if (idx < 0 || idx >= pages.size()) idx = 0;
+                  de.schliweb.makeacopy.ui.export.session.CompletedScan old = pages.get(idx);
+                  if (old != null) {
+                    de.schliweb.makeacopy.ui.export.session.CompletedScan replacement =
+                        new de.schliweb.makeacopy.ui.export.session.CompletedScan(
+                            old.id(),
+                            null,
+                            userDeg,
+                            null,
+                            null,
+                            null,
+                            old.createdAt(),
+                            toSet.getWidth(),
+                            toSet.getHeight(),
+                            toSet,
+                            old.schemaVersion(),
+                            old.orientationMode());
+                    sessionVm.updateAt(idx, replacement);
+                    android.util.Log.d(
+                        TAG,
+                        "[FR72] Re-Edit: replaced session page "
+                            + idx
+                            + " with fresh bitmap "
+                            + toSet.getWidth()
+                            + "x"
+                            + toSet.getHeight());
+                  }
+                }
+              }
+            } catch (Throwable t) {
+              android.util.Log.w(
+                  TAG, "[FR72] Re-Edit: updating ExportSessionViewModel failed: " + t);
+            }
+          }
+        } catch (Throwable t) {
+          android.util.Log.w(
+              TAG, "[FR72] Re-Edit: pushing new bitmap to ExportViewModel failed: " + t);
+        }
+        boolean popped =
+            Navigation.findNavController(requireView()).popBackStack(R.id.navigation_export, false);
+        if (!popped) {
+          // Fallback if Export is not on the back-stack: navigate forward.
+          Navigation.findNavController(requireView()).navigate(R.id.navigation_export);
+        }
+        return;
+      }
       android.content.SharedPreferences prefs =
           requireContext()
               .getSharedPreferences("export_options", android.content.Context.MODE_PRIVATE);
@@ -607,6 +1017,257 @@ public class CropFragment extends Fragment {
       Navigation.findNavController(requireView()).navigate(dest);
     } catch (Throwable ignored) {
       // Best-effort; failure is non-critical
+    }
+  }
+
+  /**
+   * Order of {@link CropAspectRatio} values that are shown in the chooser dialog. The order is
+   * deliberate (UX: most likely choices first) and decoupled from the enum's declaration order.
+   */
+  private static final CropAspectRatio[] ASPECT_SPINNER_ORDER =
+      new CropAspectRatio[] {
+        CropAspectRatio.AUTO,
+        CropAspectRatio.ORIGINAL,
+        CropAspectRatio.A4,
+        CropAspectRatio.A5,
+        CropAspectRatio.A3,
+        CropAspectRatio.US_LETTER,
+        CropAspectRatio.LEGAL,
+        CropAspectRatio.CUSTOM,
+      };
+
+  /**
+   * Wires up the aspect-ratio icon button on the crop screen. The button opens an {@link
+   * AlertDialog} with single-choice options (built from {@link #ASPECT_SPINNER_ORDER}); selecting
+   * {@link CropAspectRatio#CUSTOM} chains into the custom-ratio dialog. The currently persisted
+   * choice (via {@link CropPrefsHelper#getLastAspect(android.content.Context)}) is pre-selected.
+   */
+  private void setupAspectButton() {
+    binding.cropAspectButton.setOnClickListener(v -> showAspectChooserDialog());
+  }
+
+  /**
+   * Wires up the Snap-to-Right-Angle toggle button. The visible state mirrors {@link
+   * FeatureFlags#isCropSnapRightAngleEnabled()}; clicking flips the persisted preference via {@link
+   * CropPrefsHelper#setSnapRightAngleEnabled(android.content.Context, boolean)} and updates the
+   * in-memory cache via {@link FeatureFlags#setCropSnapRightAngleEnabled(boolean)}. The button uses
+   * {@link View#setSelected(boolean)} for visual feedback (tinted accent when active) and announces
+   * the new state for accessibility. The trapezoid view is invalidated so any active snap highlight
+   * disappears when the user turns the assist off mid-drag.
+   */
+  private void setupSnapToggleButton() {
+    if (binding == null) return;
+    // Hydrate the in-memory cache from persistent storage so the View can read it Context-free.
+    boolean persisted = CropPrefsHelper.getSnapRightAngleEnabled(requireContext());
+    FeatureFlags.setCropSnapRightAngleEnabled(persisted);
+    applySnapToggleVisuals(persisted);
+    binding.cropSnapToggleButton.setOnClickListener(
+        v -> {
+          boolean newState = !FeatureFlags.isCropSnapRightAngleEnabled();
+          FeatureFlags.setCropSnapRightAngleEnabled(newState);
+          CropPrefsHelper.setSnapRightAngleEnabled(requireContext(), newState);
+          applySnapToggleVisuals(newState);
+          try {
+            binding.trapezoidSelection.invalidate();
+          } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
+          }
+          String msg =
+              getString(newState ? R.string.crop_snap_toggle_on : R.string.crop_snap_toggle_off);
+          try {
+            android.widget.Toast.makeText(requireContext(), msg, android.widget.Toast.LENGTH_SHORT)
+                .show();
+          } catch (Throwable ignore) {
+            // Best-effort user-visible message
+          }
+          try {
+            de.schliweb.makeacopy.utils.ui.A11yUtils.announce(v, msg);
+          } catch (Throwable ignore) {
+            // Best-effort accessibility announcement
+          }
+        });
+  }
+
+  private void applySnapToggleVisuals(boolean active) {
+    if (binding == null) return;
+    binding.cropSnapToggleButton.setSelected(active);
+    int tint;
+    if (active) {
+      tint =
+          androidx.core.content.ContextCompat.getColor(
+              requireContext(), R.color.crop_toggle_active);
+    } else {
+      android.util.TypedValue tv = new android.util.TypedValue();
+      requireContext().getTheme().resolveAttribute(android.R.attr.colorControlNormal, tv, true);
+      tint =
+          tv.resourceId != 0
+              ? androidx.core.content.ContextCompat.getColor(requireContext(), tv.resourceId)
+              : tv.data;
+    }
+    androidx.core.widget.ImageViewCompat.setImageTintList(
+        binding.cropSnapToggleButton, android.content.res.ColorStateList.valueOf(tint));
+  }
+
+  private void showAspectChooserDialog() {
+    final CropAspectRatio prev = CropPrefsHelper.getLastAspect(requireContext());
+    final String[] labels = buildAspectLabels();
+    final int checked = indexOfAspect(prev);
+    final int[] selectedIdx = new int[] {checked};
+    AlertDialog dialog =
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.crop_aspect_label)
+            .setSingleChoiceItems(labels, checked, (d, which) -> selectedIdx[0] = which)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(
+                android.R.string.ok,
+                (d, w) -> {
+                  int pos = selectedIdx[0];
+                  if (pos < 0 || pos >= ASPECT_SPINNER_ORDER.length) return;
+                  CropAspectRatio chosen = ASPECT_SPINNER_ORDER[pos];
+                  if (chosen == CropAspectRatio.CUSTOM) {
+                    // Always open the custom dialog so values can be edited.
+                    showCustomAspectDialog();
+                    return;
+                  }
+                  if (chosen != prev) {
+                    CropPrefsHelper.setLastAspect(requireContext(), chosen);
+                    android.util.Log.d(TAG, "aspect chooser → " + chosen);
+                  }
+                })
+            .create();
+    dialog.setOnShowListener(
+        d -> DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext()));
+    dialog.show();
+  }
+
+  private String[] buildAspectLabels() {
+    String[] out = new String[ASPECT_SPINNER_ORDER.length];
+    for (int i = 0; i < ASPECT_SPINNER_ORDER.length; i++) {
+      out[i] = labelFor(ASPECT_SPINNER_ORDER[i]);
+    }
+    return out;
+  }
+
+  private String labelFor(CropAspectRatio a) {
+    switch (a) {
+      case AUTO:
+        return getString(R.string.crop_aspect_auto);
+      case ORIGINAL:
+        return getString(R.string.crop_aspect_original);
+      case A3:
+        return getString(R.string.crop_aspect_a3);
+      case A4:
+        return getString(R.string.crop_aspect_a4);
+      case A5:
+        return getString(R.string.crop_aspect_a5);
+      case US_LETTER:
+        return getString(R.string.crop_aspect_letter);
+      case LEGAL:
+        return getString(R.string.crop_aspect_legal);
+      case CUSTOM:
+        double[] wh = CropPrefsHelper.getCustomRatio(requireContext());
+        if (wh != null) {
+          return getString(
+              R.string.crop_aspect_custom_with_ratio,
+              formatRatioComponent(wh[0]),
+              formatRatioComponent(wh[1]));
+        }
+        return getString(R.string.crop_aspect_custom);
+      default:
+        return a.name();
+    }
+  }
+
+  private static String formatRatioComponent(double v) {
+    if (v == Math.rint(v) && !Double.isInfinite(v)) {
+      return Long.toString((long) v);
+    }
+    return String.format(java.util.Locale.US, "%.2f", v);
+  }
+
+  private static int indexOfAspect(CropAspectRatio a) {
+    for (int i = 0; i < ASPECT_SPINNER_ORDER.length; i++) {
+      if (ASPECT_SPINNER_ORDER[i] == a) return i;
+    }
+    return 0; // AUTO
+  }
+
+  /**
+   * Shows the custom (w:h) ratio dialog. If the user confirms with valid values, persists both the
+   * custom values and the {@link CropAspectRatio#CUSTOM} selection; otherwise the previously
+   * persisted aspect remains unchanged.
+   */
+  private void showCustomAspectDialog() {
+    View view =
+        LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_crop_aspect_custom, null, false);
+    EditText etW = view.findViewById(R.id.crop_aspect_custom_w);
+    EditText etH = view.findViewById(R.id.crop_aspect_custom_h);
+    TextView err = view.findViewById(R.id.crop_aspect_custom_error);
+
+    double[] existing = CropPrefsHelper.getCustomRatio(requireContext());
+    if (existing != null) {
+      etW.setText(formatRatioComponent(existing[0]));
+      etH.setText(formatRatioComponent(existing[1]));
+    }
+
+    AlertDialog dialog =
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.crop_aspect_custom_dialog_title)
+            .setView(view)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(
+                android.R.string.ok,
+                (d, w) -> {
+                  double[] parsed = parseCustom(etW, etH);
+                  if (parsed == null
+                      || !CropPrefsHelper.setCustomRatio(requireContext(), parsed[0], parsed[1])) {
+                    return;
+                  }
+                  CropPrefsHelper.setLastAspect(requireContext(), CropAspectRatio.CUSTOM);
+                })
+            .create();
+
+    TextWatcher watcher =
+        new TextWatcher() {
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+          @Override
+          public void afterTextChanged(Editable s) {
+            double[] parsed = parseCustom(etW, etH);
+            boolean ok = parsed != null && CropPrefsHelper.isValidCustom(parsed[0], parsed[1]);
+            err.setVisibility(ok ? View.GONE : View.VISIBLE);
+            android.widget.Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (positive != null) positive.setEnabled(ok);
+          }
+        };
+    etW.addTextChangedListener(watcher);
+    etH.addTextChangedListener(watcher);
+
+    dialog.setOnShowListener(
+        d -> {
+          // Improve button contrast in night mode (analog to other dialogs).
+          DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext());
+          // Trigger initial validation pass once the OK button exists.
+          watcher.afterTextChanged(etW.getText());
+        });
+    dialog.show();
+  }
+
+  private static double[] parseCustom(EditText etW, EditText etH) {
+    try {
+      String sw = etW.getText() == null ? "" : etW.getText().toString().trim().replace(',', '.');
+      String sh = etH.getText() == null ? "" : etH.getText().toString().trim().replace(',', '.');
+      if (sw.isEmpty() || sh.isEmpty()) return null;
+      double w = Double.parseDouble(sw);
+      double h = Double.parseDouble(sh);
+      return new double[] {w, h};
+    } catch (NumberFormatException e) {
+      return null;
     }
   }
 

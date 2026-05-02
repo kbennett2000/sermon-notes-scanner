@@ -14,11 +14,14 @@ import android.graphics.*;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Magnifier;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import de.schliweb.makeacopy.R;
 import de.schliweb.makeacopy.utils.image.CoordinateTransformUtils;
 import de.schliweb.makeacopy.utils.image.OpenCVUtils;
 import java.util.concurrent.ExecutorService;
@@ -42,11 +45,31 @@ public class TrapezoidSelectionView extends View {
   private static final int CORNER_RADIUS =
       35; // Increased radius of the corner handles for better visibility
   private static final int CORNER_TOUCH_RADIUS = 70; // Increased touch area for easier interaction
+  private static final int EDGE_HANDLE_RADIUS =
+      18; // Smaller midpoint handle, signalling that edges (lines) can be dragged too
   private static final long ANIMATION_DURATION = 300; // Animation duration in milliseconds
 
   // When true, the next setImageBitmap() call will skip re-initializing corners.
   // Used when we rotate the selection ourselves to keep it in sync with image rotation.
   private boolean suppressInitOnce = false;
+
+  /**
+   * Hint that the current image is likely already cropped (e.g. loaded via gallery import or shared
+   * from another app), so the {@link #looksAlreadyCropped} fallback heuristic should be applied.
+   * Default {@code false}: live camera captures must never trigger the heuristic.
+   *
+   * <p>Set by the host fragment via {@link #setPreCroppedHint(boolean)} <em>before</em> calling
+   * {@link #setImageBitmap(Bitmap)} for a newly loaded image.
+   */
+  private boolean preCroppedHint = false;
+
+  /**
+   * Enable or disable the "already-cropped" fallback heuristic for the next/current image. Must be
+   * {@code false} for live camera captures and {@code true} only for imported/shared images.
+   */
+  public void setPreCroppedHint(boolean enabled) {
+    this.preCroppedHint = enabled;
+  }
 
   private Paint trapezoidPaint; // Paint for the trapezoid lines
   private Paint cornerPaint; // Paint for the corner handles
@@ -54,6 +77,8 @@ public class TrapezoidSelectionView extends View {
   private Paint backgroundPaint; // Paint for the semi-transparent background
   private Paint hintPaint; // Paint for the hint text
   private Paint hintBackgroundPaint; // Paint for the hint text background
+  private Paint edgeHandlePaint; // Paint for the edge midpoint handles
+  private Paint activeEdgePaint; // Paint for highlighting the actively dragged edge
   private final Path drawPath = new Path(); // Preallocated path for onDraw
   private final Paint crosshairPaint =
       new Paint(Paint.ANTI_ALIAS_FLAG); // Preallocated crosshair paint
@@ -69,6 +94,279 @@ public class TrapezoidSelectionView extends View {
   private float[][]
       relativeCorners; // Corners as percentages of view dimensions [i][0]=x%, [i][1]=y%
   private int activeCornerIndex = -1; // Index of the currently active (touched) corner
+
+  // === Edge dragging (parallel translation; see docs/edge_drag_pan_zoom_concept.md) ===
+  private static final float EDGE_TOUCH_RADIUS_DP = 24f;
+
+  /** Index of the edge currently being dragged (0..3, TL→TR=0, TR→BR=1, BR→BL=2, BL→TL=3) or -1. */
+  private int activeEdgeIndex = -1;
+
+  /** Frozen midpoint of the active edge at ACTION_DOWN. */
+  private float edgeAnchorMidX, edgeAnchorMidY;
+
+  /** Frozen outward unit normal of the active edge at ACTION_DOWN. */
+  private float edgeAnchorNx, edgeAnchorNy;
+
+  /** Frozen corner positions at ACTION_DOWN (used to derive parallel-translated positions). */
+  private final float[] edgeAnchorXs = new float[4];
+
+  private final float[] edgeAnchorYs = new float[4];
+
+  // === Pan/Zoom view transform (Phase 2 step 1, see docs/edge_drag_pan_zoom_concept.md §4.1) ===
+  /**
+   * Pure-math representation of the canvas transform applied in {@link #onDraw(Canvas)}. Touch
+   * coordinates are routed through {@link #mapTouchToLocal(float, float, float[])} before any
+   * hit-test, so {@code corners} stay in the unscaled view frame.
+   *
+   * <p>While {@code isIdentity()} this is a strict no-op. The runtime canvas concat is realised
+   * through {@link #viewMatrix} (mirroring the same {@code scale, tx, ty}).
+   */
+  private final CropViewTransform viewTransform = new CropViewTransform();
+
+  /**
+   * Android {@link Matrix} mirror of {@link #viewTransform}, used by {@link Canvas#concat(Matrix)}
+   * in {@link #onDraw(Canvas)}. Kept in sync via {@link #syncViewMatrixFromTransform()}.
+   */
+  private final Matrix viewMatrix = new Matrix();
+
+  /** Pre-allocated scratch for {@link #mapTouchToLocal(float, float, float[])}. */
+  private final float[] touchLocalScratch = new float[2];
+
+  // === Pan/Zoom gesture detectors (Phase 2 step 2/4) ===
+  /** Snap‑back threshold: any scale below this collapses to identity on ACTION_UP. */
+  private static final float SCALE_SNAP_THRESHOLD = 1.05f;
+
+  /** Target zoom factor for double‑tap‑to‑zoom from identity. */
+  private static final float DOUBLE_TAP_ZOOM = 2.5f;
+
+  @Nullable private ScaleGestureDetector scaleDetector;
+  @Nullable private GestureDetector tapDetector;
+
+  /** True while a pinch is in progress (between {@code onScaleBegin} and {@code onScaleEnd}). */
+  private boolean inPinchGesture = false;
+
+  /**
+   * True while a single-finger pan of the zoomed view is in progress. Pan is only engaged when
+   * {@link CropViewTransform#getScale()} {@code > 1} and the initial DOWN did not hit a corner or
+   * edge handle. See {@code docs/edge_drag_pan_zoom_concept.md} §4.2.
+   */
+  private boolean isPanning = false;
+
+  /** Last raw view-coordinate X seen during an active pan; used to compute incremental deltas. */
+  private float lastPanRawX = Float.NaN;
+
+  /** Last raw view-coordinate Y seen during an active pan. */
+  private float lastPanRawY = Float.NaN;
+
+  /**
+   * Minimum fraction of the view that must remain covered by the (mapped) image while panning.
+   * Matches the soft-clamp from §4.2 of the concept document.
+   */
+  private static final float PAN_MIN_VIEW_OVERLAP = 0.10f;
+
+  /**
+   * Listener notified whenever {@link #viewTransform} changes (Pan/Zoom). The current Android
+   * {@link Matrix} is supplied so that the host fragment can keep an underlying {@code ImageView}
+   * in sync via {@link android.widget.ImageView#setImageMatrix(Matrix)}.
+   */
+  public interface OnViewTransformChangedListener {
+    /**
+     * Called on the UI thread after every Pan/Zoom mutation.
+     *
+     * @param scale current scale ≥ 1.0
+     * @param tx current translation in view pixels
+     * @param ty current translation in view pixels
+     * @param matrix mirrored Android matrix (do not retain; copy if needed)
+     */
+    void onViewTransformChanged(float scale, float tx, float ty, @NonNull Matrix matrix);
+  }
+
+  @Nullable private OnViewTransformChangedListener viewTransformChangedListener;
+
+  /**
+   * Listener notified whenever the trapezoid corners change in a way relevant to UI hints
+   * (specifically: whether at least one corner currently lies outside the original image rectangle
+   * in image coordinates). See docs/edge_drag_pan_zoom_concept.md §5.3.
+   */
+  public interface OnCornersChangedListener {
+    /**
+     * Called after a corner mutation. Always invoked on the UI thread.
+     *
+     * @param anyCornerOffImage true if at least one corner is outside the original image rectangle
+     *     (image coords [0,W] × [0,H]); false otherwise. Until a bitmap is known this is reported
+     *     as false.
+     */
+    void onCornersChanged(boolean anyCornerOffImage);
+  }
+
+  @Nullable private OnCornersChangedListener cornersChangedListener;
+
+  /** Last value reported to {@link #cornersChangedListener}; used to suppress duplicate fires. */
+  private Boolean lastReportedAnyOff = null;
+
+  /**
+   * Listener notified when the user starts or stops dragging a corner or edge of the quadrilateral.
+   * Hosting fragments use this to disable the system back gesture while a drag is in progress, so
+   * that horizontal drags near screen edges do not accidentally pop the navigation back stack.
+   */
+  public interface OnDragStateChangedListener {
+    /**
+     * Called on the UI thread whenever drag state transitions.
+     *
+     * @param isDragging true if a corner or edge drag is currently active; false otherwise.
+     */
+    void onDragStateChanged(boolean isDragging);
+  }
+
+  @Nullable private OnDragStateChangedListener dragStateChangedListener;
+
+  /** Last value reported to {@link #dragStateChangedListener}; suppresses duplicate fires. */
+  private boolean lastReportedDragging = false;
+
+  /**
+   * Registers a listener notified whenever a corner/edge drag starts or ends. Pass {@code null} to
+   * clear. The current state is reported synchronously on registration.
+   */
+  public void setOnDragStateChangedListener(@Nullable OnDragStateChangedListener listener) {
+    this.dragStateChangedListener = listener;
+    if (listener != null) {
+      try {
+        listener.onDragStateChanged(lastReportedDragging);
+      } catch (Throwable t) {
+        Log.w(TAG, "onDragStateChanged initial dispatch failed: " + t.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Map a raw view-coordinate touch point to the unscaled local coordinate frame in which {@code
+   * corners} are stored.
+   *
+   * <p>While the view transform is identity (Phase 2 step 1 default; the {@code
+   * FEATURE_CROP_PAN_ZOOM} flag has not yet been promoted to runtime gestures), this is a no-op
+   * write of {@code (xView, yView)} into {@code out}. Once Pinch/Pan are wired up, the same call
+   * returns {@code (xView - tx) / scale} so that hit-tests remain valid in local coordinates
+   * regardless of zoom/pan.
+   *
+   * @param xView raw {@link MotionEvent} X coordinate.
+   * @param yView raw {@link MotionEvent} Y coordinate.
+   * @param out 2-element scratch array; required.
+   */
+  private void mapTouchToLocal(float xView, float yView, float[] out) {
+    viewTransform.mapViewToLocal(xView, yView, out);
+  }
+
+  /**
+   * Re-derive the Android {@link #viewMatrix} from the pure-math {@link #viewTransform} so that
+   * {@link #onDraw(Canvas)} renders the same transformation as the touch mapping. Cheap; safe to
+   * call after every {@code postScale} / {@code postTranslate}.
+   *
+   * <p>Currently unused at runtime — promoted to a callable hook for the upcoming Pinch‑Zoom /
+   * implicit Pan integration in Phase 2 step 2.
+   */
+  private void syncViewMatrixFromTransform() {
+    float s = viewTransform.getScale();
+    float tx = viewTransform.getTx();
+    float ty = viewTransform.getTy();
+    viewMatrix.reset();
+    viewMatrix.setScale(s, s);
+    viewMatrix.postTranslate(tx, ty);
+  }
+
+  /**
+   * Snap the view transform back to identity if the current scale is close to 1.0. Avoids leaving a
+   * tiny residual zoom after a pinch‑in that nearly returns to the original size.
+   */
+  private void maybeSnapToIdentity() {
+    if (viewTransform.isIdentity()) return;
+    float s = viewTransform.getScale();
+    if (s < SCALE_SNAP_THRESHOLD) {
+      viewTransform.reset();
+      syncViewMatrixFromTransform();
+      notifyViewTransformChanged();
+      invalidate();
+    }
+  }
+
+  /**
+   * Toggle between identity and {@code DOUBLE_TAP_ZOOM} centred on the supplied focal point. Called
+   * by the double‑tap detector. No-op while {@code FEATURE_CROP_PAN_ZOOM == false}.
+   */
+  private void onDoubleTapZoom(float focalX, float focalY) {
+    if (!de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_PAN_ZOOM) return;
+    if (viewTransform.isIdentity()) {
+      // Zoom in: post‑scale by (DOUBLE_TAP_ZOOM / 1) around focal point.
+      viewTransform.postScale(DOUBLE_TAP_ZOOM, focalX, focalY);
+    } else {
+      // Reset to identity.
+      viewTransform.reset();
+    }
+    syncViewMatrixFromTransform();
+    notifyViewTransformChanged();
+    invalidate();
+  }
+
+  /**
+   * Register a listener notified after every Pan/Zoom mutation. A synchronous callback with the
+   * current state is dispatched immediately so that callers can prime any dependent rendering (e.g.
+   * an {@code ImageView}'s image matrix) without waiting for the next gesture.
+   */
+  public void setOnViewTransformChangedListener(@Nullable OnViewTransformChangedListener l) {
+    this.viewTransformChangedListener = l;
+    notifyViewTransformChanged();
+  }
+
+  /** Latest published Pan/Zoom matrix snapshot (defensive copy). */
+  @NonNull
+  public Matrix getViewMatrix() {
+    return new Matrix(viewMatrix);
+  }
+
+  /** Current Pan/Zoom scale (1.0 = identity, ≥ 1). */
+  public float getViewScale() {
+    return viewTransform.getScale();
+  }
+
+  /** True iff the Pan/Zoom transform is at identity (no zoom, no pan). */
+  public boolean isViewTransformIdentity() {
+    return viewTransform.isIdentity();
+  }
+
+  private void notifyViewTransformChanged() {
+    if (viewTransformChangedListener == null) return;
+    try {
+      viewTransformChangedListener.onViewTransformChanged(
+          viewTransform.getScale(), viewTransform.getTx(), viewTransform.getTy(), viewMatrix);
+    } catch (Throwable t) {
+      Log.w(TAG, "onViewTransformChanged dispatch failed: " + t.getMessage());
+    }
+  }
+
+  /**
+   * Announce the edge-drag start to accessibility services. Routed through the centralized {@link
+   * de.schliweb.makeacopy.utils.ui.A11yUtils#announce(View, CharSequence)} helper so any
+   * platform-specific deprecations stay confined to that utility.
+   */
+  private void announceEdgeDragForA11y() {
+    try {
+      de.schliweb.makeacopy.utils.ui.A11yUtils.announce(
+          this, getResources().getString(R.string.crop_edge_dragged));
+    } catch (Throwable ignore) {
+      // String missing or accessibility not active — best-effort.
+    }
+  }
+
+  private void notifyDragStateChanged(boolean dragging) {
+    if (dragging == lastReportedDragging) return;
+    lastReportedDragging = dragging;
+    if (dragStateChangedListener != null) {
+      try {
+        dragStateChangedListener.onDragStateChanged(dragging);
+      } catch (Throwable t) {
+        Log.w(TAG, "onDragStateChanged dispatch failed: " + t.getMessage());
+      }
+    }
+  }
 
   private boolean initialized = false; // Flag to track if corners have been initialized
   private int initializationAttempts = 0; // Counter for initialization attempts
@@ -162,6 +460,15 @@ public class TrapezoidSelectionView extends View {
     if (ms < 0) ms = 0;
     this.edgeGlideEngageDelayMs = ms;
   }
+
+  // ===== Snap-to-Right-Angle state (FR #72 companion; see docs §5) =====
+  // Two snap-state bits per corner: edgeSnapActive[i] reflects the edge (i, i+1).
+  // The snapped state is only modified during single-corner drag handling; visual cue and
+  // haptic feedback react to transitions inactive→active.
+  private final boolean[] edgeSnapActive = new boolean[4];
+  // Index of the most recently snap-engaged edge (i, i+1); -1 when nothing is snapped.
+  // Used by onDraw to render the subtle visual cue without re-evaluating snap state there.
+  private int snapHighlightEdgeIndex = -1;
 
   // ===== User-adjustment/auto-init suppression state =====
   private boolean isUserAdjusting =
@@ -294,10 +601,92 @@ public class TrapezoidSelectionView extends View {
     hintBackgroundPaint.setStyle(Paint.Style.FILL);
     hintBackgroundPaint.setAntiAlias(true);
 
+    // Edge midpoint handle paint: same orange family as corners but distinct (hollow) so users
+    // can tell handles for edges (lines) apart from corner handles at a glance.
+    edgeHandlePaint = new Paint();
+    edgeHandlePaint.setColor(Color.rgb(255, 102, 0));
+    edgeHandlePaint.setStyle(Paint.Style.FILL);
+    edgeHandlePaint.setAntiAlias(true);
+    edgeHandlePaint.setShadowLayer(4.0f, 2.0f, 2.0f, Color.BLACK);
+
+    // Active edge paint: bright yellow stroke drawn on top of the trapezoid outline while an
+    // edge is being translated (parallel drag).
+    activeEdgePaint = new Paint();
+    activeEdgePaint.setColor(Color.rgb(255, 255, 0));
+    activeEdgePaint.setStyle(Paint.Style.STROKE);
+    activeEdgePaint.setAntiAlias(true);
+    activeEdgePaint.setStrokeCap(Paint.Cap.ROUND);
+    activeEdgePaint.setShadowLayer(6.0f, 0.0f, 0.0f, Color.rgb(255, 255, 100));
+
     // Initialize default magnifier size in px (approx 140dp)
     if (magnifierSizePx == 0) {
       float density = getResources().getDisplayMetrics().density;
       magnifierSizePx = (int) (140 * density + 0.5f);
+    }
+
+    // Pan/Zoom detectors (Phase 2 step 2/4). Always wired; the touch path itself gates on
+    // BuildConfig.FEATURE_CROP_PAN_ZOOM, so unflagged builds remain inert.
+    Context ctx = getContext();
+    if (ctx != null) {
+      scaleDetector =
+          new ScaleGestureDetector(
+              ctx,
+              new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                @Override
+                public boolean onScaleBegin(@NonNull ScaleGestureDetector d) {
+                  inPinchGesture = true;
+                  return true;
+                }
+
+                @Override
+                public boolean onScale(@NonNull ScaleGestureDetector d) {
+                  float factor = d.getScaleFactor();
+                  if (factor <= 0f || Float.isNaN(factor) || Float.isInfinite(factor)) return true;
+                  // Focal point is in raw view coordinates; postScale handles min/max clamping.
+                  viewTransform.postScale(factor, d.getFocusX(), d.getFocusY());
+                  syncViewMatrixFromTransform();
+                  notifyViewTransformChanged();
+                  invalidate();
+                  return true;
+                }
+
+                @Override
+                public void onScaleEnd(@NonNull ScaleGestureDetector d) {
+                  inPinchGesture = false;
+                  // Snap to identity if user pinched almost back.
+                  maybeSnapToIdentity();
+                }
+              });
+      tapDetector =
+          new GestureDetector(
+              ctx,
+              new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDown(@NonNull MotionEvent e) {
+                  // Must return true so the detector keeps receiving subsequent events (and
+                  // recognises ACTION_UP → potential second tap → onDoubleTap). Returning the
+                  // default `false` here would short-circuit further dispatch and silently
+                  // disable double-tap detection.
+                  return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(@NonNull MotionEvent e) {
+                  // Only toggle if the tap is NOT on a corner handle. Edge / interior taps still
+                  // trigger zoom; this matches the FR ‘double‑tap to zoom out of stuck navigation’
+                  // expectation while leaving corner adjustment unaffected.
+                  // Tap coords are in raw view space — map through current viewMatrix inverse for
+                  // the corner hit‑test.
+                  mapTouchToLocal(e.getX(), e.getY(), touchLocalScratch);
+                  int corner = findCornerIndex(touchLocalScratch[0], touchLocalScratch[1]);
+                  if (corner != -1) return false;
+                  Log.d(
+                      TAG,
+                      "onDoubleTap → onDoubleTapZoom focal=(" + e.getX() + "," + e.getY() + ")");
+                  onDoubleTapZoom(e.getX(), e.getY());
+                  return true;
+                }
+              });
     }
 
     Log.d(TAG, "TrapezoidSelectionView initialized with user guidance");
@@ -341,6 +730,52 @@ public class TrapezoidSelectionView extends View {
       int draggingSideStrip = (int) ((modernBackGesture ? 112f : 72f) * density + 0.5f);
 
       java.util.ArrayList<android.graphics.Rect> rects = new java.util.ArrayList<>();
+
+      // While actively dragging (corner or edge), aggressively exclude the left/right side
+      // strips from the system back-gesture. Android limits gesture exclusion to 200dp per edge
+      // (vertical extent on left/right), so we cannot cover the full view height; instead we
+      // place two 200dp tall strips per side, anchored around the active drag point so the
+      // user's current finger position is always inside an exclusion zone.
+      // Treat implicit Pan as a "dragging" state for the purpose of back-gesture exclusion: the
+      // user is performing a single-finger drag across the view and must not be interrupted by
+      // the system's edge-back gesture (concept §6, pan-mode rule).
+      final boolean dragging = (activeCornerIndex != -1) || (activeEdgeIndex != -1) || isPanning;
+      if (dragging) {
+        // 200dp per edge is the system cap; use full width strips on both sides.
+        int sideStrip = (int) (200f * density + 0.5f); // very wide horizontal coverage
+        int vertExtent = (int) (200f * density + 0.5f); // vertical cap per edge
+
+        // Anchor the vertical center near the active drag point if known, otherwise view center.
+        float anchorY = h * 0.5f;
+        if (activeCornerIndex != -1 && corners != null) {
+          anchorY = corners[activeCornerIndex].y;
+        } else if (activeEdgeIndex != -1 && corners != null) {
+          int a = activeEdgeIndex;
+          int b = (activeEdgeIndex + 1) % 4;
+          anchorY = 0.5f * (corners[a].y + corners[b].y);
+        }
+        int top = Math.max(0, Math.round(anchorY - vertExtent * 0.5f));
+        int bottom = Math.min(h, top + vertExtent);
+        if (bottom - top < vertExtent) {
+          top = Math.max(0, bottom - vertExtent);
+        }
+
+        // Left strip
+        rects.add(new android.graphics.Rect(0, top, Math.min(w, sideStrip), bottom));
+        // Right strip
+        rects.add(new android.graphics.Rect(Math.max(0, w - sideStrip), top, w, bottom));
+        setSystemGestureExclusionRects(rects);
+        lastExclusionRects = new java.util.ArrayList<>(rects);
+        if (debugLogsEnabled) {
+          Log.d(
+              TAG,
+              "updateSystemGestureExclusion (dragging) side-strips rects="
+                  + rects.size()
+                  + " anchorY="
+                  + anchorY);
+        }
+        return;
+      }
 
       // Exclude around handles (bigger for active one while dragging)
       if (corners != null) {
@@ -523,6 +958,145 @@ public class TrapezoidSelectionView extends View {
   }
 
   /**
+   * Registers (or clears, when {@code listener} is {@code null}) a listener that is notified
+   * whenever a corner mutation may have changed the off-image state of the quadrilateral.
+   *
+   * <p>When a non-null listener is registered, an initial callback is posted asynchronously (after
+   * layout/bitmap state has settled) so callers do not need to query the state separately. {@link
+   * #isAnyCornerOffImage()} can additionally be queried at any time.
+   */
+  public void setOnCornersChangedListener(@Nullable OnCornersChangedListener listener) {
+    this.cornersChangedListener = listener;
+    // Reset duplicate-suppression so the new listener (or a re-registered one) reliably
+    // receives the next state, even if it matches the previously reported value.
+    this.lastReportedAnyOff = null;
+    if (listener != null) {
+      // Synthesize an initial callback so callers do not have to query separately.
+      // Posted to ensure layout/bitmap state is settled before evaluation.
+      post(this::notifyCornersChanged);
+    }
+  }
+
+  /**
+   * Returns whether at least one of the four trapezoid corners currently lies outside the original
+   * image rectangle in <em>image</em> coordinates ({@code [0,W] × [0,H]}). The tolerance band used
+   * by {@link #updateCorner(int, float, float)} (soft-clamp via {@link
+   * CropEdgeGeometry#IMG_OOB_TOL_DEFAULT}) is intentionally <em>not</em> applied here: this method
+   * reports the user-visible "outside the image" state, not the soft-clamp limit.
+   *
+   * <p>Returns {@code false} when the bitmap or view dimensions are not yet known.
+   */
+  public boolean isAnyCornerOffImage() {
+    int width = getWidth();
+    int height = getHeight();
+    if (width <= 0 || height <= 0) return false;
+    if (imageBitmap == null || imageBitmap.isRecycled()) return false;
+    android.graphics.RectF rect = getDisplayedImageRectF(width, height);
+    if (rect == null) return false;
+    if (corners == null) return false;
+    final float eps = 0.5f; // sub-pixel tolerance to avoid flicker on the boundary
+    for (int i = 0; i < 4; i++) {
+      PointF p = corners[i];
+      if (p == null) continue;
+      if (p.x < rect.left - eps
+          || p.x > rect.right + eps
+          || p.y < rect.top - eps
+          || p.y > rect.bottom + eps) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Computes the current off-image state and dispatches it to {@link #cornersChangedListener},
+   * suppressing duplicate consecutive callbacks. Safe to call from non-touch paths; falls back to
+   * no-op when no listener is registered or when dimensions are not yet known.
+   */
+  private void notifyCornersChanged() {
+    if (cornersChangedListener == null) return;
+    boolean anyOff = isAnyCornerOffImage();
+    if (lastReportedAnyOff != null && lastReportedAnyOff == anyOff) return;
+    lastReportedAnyOff = anyOff;
+    try {
+      cornersChangedListener.onCornersChanged(anyOff);
+    } catch (Throwable t) {
+      Log.w(TAG, "OnCornersChangedListener threw: " + t.getMessage());
+    }
+  }
+
+  /**
+   * Applies the Snap-to-Right-Angle assist for a single-corner drag step (see {@code
+   * docs/fr72_edit_shape_from_export_concept.md} §5). Updates {@link #edgeSnapActive} state for the
+   * two adjacent edges of {@code movingIndex}, fires haptic + a11y feedback on engage, and returns
+   * the (possibly nudged) corner position. Gated by {@code
+   * FeatureFlags.isCropSnapRightAngleEnabled()}; when disabled this is a no-op pass-through.
+   *
+   * @param movingIndex index of the corner being dragged (0..3)
+   * @param x desired (already clamped) x position
+   * @param y desired (already clamped) y position
+   * @return {@code [x, y]} — possibly adjusted to lie on a near-axis edge
+   */
+  private float[] applyRightAngleSnap(int movingIndex, float x, float y) {
+    if (!de.schliweb.makeacopy.utils.infra.FeatureFlags.isCropSnapRightAngleEnabled()) {
+      return new float[] {x, y};
+    }
+    if (movingIndex < 0 || movingIndex >= 4) return new float[] {x, y};
+
+    final int prevEdge = (movingIndex + 3) & 3; // edge (prevEdge, movingIndex)
+    final int nextEdge = movingIndex; // edge (movingIndex, movingIndex+1)
+    final boolean wasPrev = edgeSnapActive[prevEdge];
+    final boolean wasNext = edgeSnapActive[nextEdge];
+
+    de.schliweb.makeacopy.ui.crop.geom.RightAngleSnap.Pt[] pts =
+        new de.schliweb.makeacopy.ui.crop.geom.RightAngleSnap.Pt[4];
+    for (int i = 0; i < 4; i++) {
+      pts[i] = new de.schliweb.makeacopy.ui.crop.geom.RightAngleSnap.Pt(corners[i].x, corners[i].y);
+    }
+    de.schliweb.makeacopy.ui.crop.geom.RightAngleSnap.Result r =
+        de.schliweb.makeacopy.ui.crop.geom.RightAngleSnap.evaluate(
+            pts, movingIndex, x, y, wasPrev, wasNext);
+
+    edgeSnapActive[prevEdge] = r.prevEdgeSnapped;
+    edgeSnapActive[nextEdge] = r.nextEdgeSnapped;
+
+    // Visual-cue index: prefer the edge that just engaged (transition off→on); otherwise pick
+    // any active edge; otherwise -1 (no highlight).
+    boolean engagedPrev = !wasPrev && r.prevEdgeSnapped;
+    boolean engagedNext = !wasNext && r.nextEdgeSnapped;
+    if (engagedPrev) snapHighlightEdgeIndex = prevEdge;
+    else if (engagedNext) snapHighlightEdgeIndex = nextEdge;
+    else if (r.prevEdgeSnapped) snapHighlightEdgeIndex = prevEdge;
+    else if (r.nextEdgeSnapped) snapHighlightEdgeIndex = nextEdge;
+    else snapHighlightEdgeIndex = -1;
+
+    // Haptic + a11y on the inactive→active transition (once per engage event).
+    if (engagedPrev || engagedNext) {
+      try {
+        performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK);
+      } catch (Throwable ignore) {
+        // Best-effort haptic feedback only.
+      }
+      if (de.schliweb.makeacopy.utils.infra.FeatureFlags.isA11yGuidanceEnabled()) {
+        try {
+          de.schliweb.makeacopy.utils.ui.A11yUtils.announce(
+              this, getContext().getString(R.string.crop_snap_engaged));
+        } catch (Throwable ignore) {
+          // Best-effort accessibility announcement.
+        }
+      }
+    }
+
+    return new float[] {(float) r.x, (float) r.y};
+  }
+
+  /** Resets all snap state. Called on pointer-up / cancel to avoid stale highlights. */
+  private void resetRightAngleSnapState() {
+    for (int i = 0; i < 4; i++) edgeSnapActive[i] = false;
+    snapHighlightEdgeIndex = -1;
+  }
+
+  /**
    * Updates both absolute and relative coordinates for a corner
    *
    * @param index Corner index (0-3)
@@ -535,10 +1109,30 @@ public class TrapezoidSelectionView extends View {
     int width = getWidth();
     int height = getHeight();
 
-    // Clamp the target position to the displayed image bounds (or view bounds if image unknown)
-    float[] clamped = clampToImageBounds(x, y, width, height);
-    float cx = clamped[0];
-    float cy = clamped[1];
+    float cx;
+    float cy;
+    // Soft-clamp in image coordinates when edge-drag/off-screen-corners are
+    // enabled and we have a known displayed image rect: corners may travel
+    // up to IMG_OOB_TOL_DEFAULT (25 %) of the image dimension past the rect.
+    // Otherwise fall back to the strict view/image-rect clamp used historically.
+    android.graphics.RectF imgRect =
+        (width > 0 && height > 0) ? getDisplayedImageRectF(width, height) : null;
+    if (de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_EDGE_DRAG && imgRect != null) {
+      float imgW = imgRect.width();
+      float imgH = imgRect.height();
+      float relX = x - imgRect.left;
+      float relY = y - imgRect.top;
+      float[] soft =
+          CropEdgeGeometry.clampToImageBoundsSoft(
+              relX, relY, imgW, imgH, CropEdgeGeometry.IMG_OOB_TOL_DEFAULT);
+      cx = soft[0] + imgRect.left;
+      cy = soft[1] + imgRect.top;
+    } else {
+      // Clamp the target position to the displayed image bounds (or view bounds if image unknown)
+      float[] clamped = clampToImageBounds(x, y, width, height);
+      cx = clamped[0];
+      cy = clamped[1];
+    }
 
     // Update absolute coordinates
     corners[index].set(cx, cy);
@@ -549,6 +1143,8 @@ public class TrapezoidSelectionView extends View {
     }
     // Keep gesture exclusion rects in sync while corners move
     updateSystemGestureExclusion();
+    // Re-evaluate off-image state and notify listener (suppresses duplicates internally).
+    notifyCornersChanged();
   }
 
   // ========================= ASYNC INITIALIZATION =========================
@@ -709,6 +1305,22 @@ public class TrapezoidSelectionView extends View {
         }
       }
 
+      // Heuristic: if the detected quad already spans (nearly) the entire image but
+      // the corners do not cluster near the image's true corners, the input is most
+      // likely an already-cropped image (e.g. a photo shared from the gallery whose
+      // entire content is the document). In that case the model/legacy detector
+      // tends to return degenerate quads — fall back to using (almost) the full
+      // image rectangle so the user gets a sensible default they can fine-tune.
+      Bitmap refBmp = imageBitmap != null ? imageBitmap : work;
+      if (preCroppedHint
+          && refBmp != null
+          && looksAlreadyCropped(imgCorners, refBmp.getWidth(), refBmp.getHeight())) {
+        Log.i(
+            TAG,
+            "Detected quad looks degenerate on a pre-cropped image — using full-image fallback");
+        imgCorners = fullImageQuad(refBmp.getWidth(), refBmp.getHeight());
+      }
+
       // Transform to view-space using existing helper
       Point[] viewPts =
           transformImageToViewCoordinates(imgCorners, imageBitmap != null ? imageBitmap : work);
@@ -726,6 +1338,101 @@ public class TrapezoidSelectionView extends View {
       long dt = android.os.SystemClock.uptimeMillis() - t0;
       if (dt > budgetMs) Log.w(TAG, "Corner detection over budget: " + dt + "ms");
     }
+  }
+
+  /**
+   * Heuristic: detects whether the detected quad is degenerate on what is most likely an
+   * already-cropped image. Triggers when the bounding box of the quad covers nearly the entire
+   * image, but at least one corner does not cluster near its expected image corner (TL→(0,0),
+   * TR→(W,0), BR→(W,H), BL→(0,H)). In that case the model/legacy detector cannot find a real
+   * document inside the frame and we should fall back to the full image rectangle.
+   *
+   * @param quad 4 points in image space, expected order TL, TR, BR, BL
+   * @param imgW image width in pixels
+   * @param imgH image height in pixels
+   */
+  static boolean looksAlreadyCropped(org.opencv.core.Point[] quad, int imgW, int imgH) {
+    if (quad == null || quad.length != 4 || imgW <= 0 || imgH <= 0) return false;
+    for (org.opencv.core.Point p : quad) {
+      if (p == null) return false;
+    }
+
+    // For each corner, measure how close it sits to an image edge (in pixels) and how far
+    // it sits from its expected canonical corner (TL→(0,0), TR→(W,0), BR→(W,H), BL→(0,H)).
+    // If several corners hug image edges (typical for the detector running on an already
+    // pre-cropped image) but at least one corner sits far away from its expected canonical
+    // position, the resulting quad is degenerate (e.g. one corner stuck mid-edge cutting
+    // off a large portion of the image). In that case we treat the input as "already
+    // cropped" and use the full image as the initial selection.
+    double diag = Math.hypot(imgW, imgH);
+    double edgeThr = 0.04 * Math.min(imgW, imgH); // hug-edge tolerance
+    double farThr = 0.18 * diag; // far-from-canonical-corner threshold
+
+    org.opencv.core.Point[] expected =
+        new org.opencv.core.Point[] {
+          new org.opencv.core.Point(0, 0),
+          new org.opencv.core.Point(imgW, 0),
+          new org.opencv.core.Point(imgW, imgH),
+          new org.opencv.core.Point(0, imgH)
+        };
+    int hugEdge = 0;
+    int farFromCanonical = 0;
+    int nearCanonical = 0;
+    for (int i = 0; i < 4; i++) {
+      double x = quad[i].x;
+      double y = quad[i].y;
+      double edgeDist = Math.min(Math.min(x, imgW - x), Math.min(y, imgH - y));
+      if (edgeDist <= edgeThr) hugEdge++;
+      double cornerDist = Math.hypot(x - expected[i].x, y - expected[i].y);
+      if (cornerDist <= 0.10 * diag) nearCanonical++;
+      if (cornerDist >= farThr) farFromCanonical++;
+    }
+
+    // Trigger A (edge-hugging degenerate quad):
+    //  - at least 2 corners hug an image edge (the detector latched onto image borders), AND
+    //  - at least one corner is far from its expected canonical position (degenerate shape), AND
+    //  - the quad is not a clean full-image rectangle (all 4 corners near canonical positions).
+    if (hugEdge >= 2 && farFromCanonical >= 1 && nearCanonical < 4) return true;
+
+    // Trigger B (interior mis-detection on an already-cropped image):
+    // The detector returned a small/medium quad fully inside the image, far away from every edge.
+    // On a real photo the document almost always touches or comes close to at least one image
+    // edge; if every corner sits well inside the image AND the quad's bounding box covers only a
+    // small/medium fraction of the image, the input is most likely already cropped to the document
+    // and the detector latched onto an interior feature (text block, figure, ...). Fall back to
+    // the full image rectangle so the user can fine-tune from a sensible default.
+    double interiorThr = 0.08 * Math.min(imgW, imgH); // "well inside" margin
+    int allInsideCount = 0;
+    double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY;
+    double maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+    for (int i = 0; i < 4; i++) {
+      double x = quad[i].x;
+      double y = quad[i].y;
+      if (x >= interiorThr
+          && x <= imgW - interiorThr
+          && y >= interiorThr
+          && y <= imgH - interiorThr) {
+        allInsideCount++;
+      }
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+    double bboxW = Math.max(0, maxX - minX);
+    double bboxH = Math.max(0, maxY - minY);
+    double bboxCoverage = (bboxW * bboxH) / ((double) imgW * (double) imgH);
+    return allInsideCount == 4 && bboxCoverage < 0.60;
+  }
+
+  /** Builds a full-image quad (TL, TR, BR, BL) in image space. */
+  private static org.opencv.core.Point[] fullImageQuad(int imgW, int imgH) {
+    return new org.opencv.core.Point[] {
+      new org.opencv.core.Point(0, 0),
+      new org.opencv.core.Point(imgW, 0),
+      new org.opencv.core.Point(imgW, imgH),
+      new org.opencv.core.Point(0, imgH)
+    };
   }
 
   /** Builds a heuristic trapezoid in view space (used as fallback). */
@@ -1214,6 +1921,22 @@ public class TrapezoidSelectionView extends View {
       return;
     }
 
+    // Pan/Zoom view transform (Phase 2 step 1; see docs/edge_drag_pan_zoom_concept.md §4.1).
+    // While viewTransform is identity, the save/concat/restore pair is a strict no-op for the
+    // pixel output but already establishes the rendering pathway that subsequent steps
+    // (Pinch‑Zoom, implicit Pan, double‑tap reset) build on.
+    final boolean applyViewMatrix =
+        de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_PAN_ZOOM && !viewTransform.isIdentity();
+    final int viewMatrixSaveCount = applyViewMatrix ? canvas.save() : -1;
+    if (applyViewMatrix) {
+      // Strictly confine the zoomed/panned content to this view's bounds so that the parent
+      // ConstraintLayout's clipChildren="false" (needed for corner-handle overhang) does not
+      // let the scaled overlay bleed outside the preview area. The clip is applied BEFORE the
+      // viewMatrix concat, i.e. in view (post-transform) coordinates.
+      canvas.clipRect(0, 0, getWidth(), getHeight());
+      canvas.concat(viewMatrix);
+    }
+
     // Update animation if in progress
     if (isAnimating) {
       updateAnimation();
@@ -1232,6 +1955,47 @@ public class TrapezoidSelectionView extends View {
 
     // Draw the trapezoid outline
     canvas.drawPath(drawPath, trapezoidPaint);
+
+    // Highlight the active edge (when an edge is being dragged) so the user gets clear visual
+    // feedback that the whole line is being translated, not just a corner.
+    if (activeEdgeIndex != -1) {
+      int a = activeEdgeIndex;
+      int b = (activeEdgeIndex + 1) % 4;
+      float ax = corners[a].x;
+      float ay = corners[a].y;
+      float bx = corners[b].x;
+      float by = corners[b].y;
+      // Draw a thicker yellow line on top of the regular outline for the active edge.
+      activeEdgePaint.setStrokeWidth(trapezoidPaint.getStrokeWidth() + 6f);
+      canvas.drawLine(ax, ay, bx, by, activeEdgePaint);
+    }
+
+    // Subtle visual cue for an engaged Snap-to-Right-Angle edge (FR #72 companion §5.4).
+    // Render a lighter, slightly thicker accent line on top of the snapped edge.
+    if (snapHighlightEdgeIndex >= 0 && snapHighlightEdgeIndex < 4) {
+      int a = snapHighlightEdgeIndex;
+      int b = (a + 1) & 3;
+      float ax = corners[a].x;
+      float ay = corners[a].y;
+      float bx = corners[b].x;
+      float by = corners[b].y;
+      int prevColor = activeEdgePaint.getColor();
+      float prevW = activeEdgePaint.getStrokeWidth();
+      activeEdgePaint.setColor(Color.WHITE);
+      activeEdgePaint.setStrokeWidth(trapezoidPaint.getStrokeWidth() + 2f);
+      canvas.drawLine(ax, ay, bx, by, activeEdgePaint);
+      activeEdgePaint.setColor(prevColor);
+      activeEdgePaint.setStrokeWidth(prevW);
+    }
+
+    // Draw small midpoint handles on each edge to indicate that edges (lines) can be dragged.
+    for (int i = 0; i < 4; i++) {
+      int j = (i + 1) % 4;
+      float mx = (corners[i].x + corners[j].x) * 0.5f;
+      float my = (corners[i].y + corners[j].y) * 0.5f;
+      Paint mp = (i == activeEdgeIndex) ? activePaint : edgeHandlePaint;
+      canvas.drawCircle(mx, my, EDGE_HANDLE_RADIUS, mp);
+    }
 
     // Draw the corner handles
     for (int i = 0; i < 4; i++) {
@@ -1277,6 +2041,10 @@ public class TrapezoidSelectionView extends View {
     // Debug overlay (image rect + exclusion rects + hit areas)
     if (debugOverlayEnabled) {
       drawDebugOverlay(canvas);
+    }
+
+    if (applyViewMatrix) {
+      canvas.restoreToCount(viewMatrixSaveCount);
     }
 
     Log.d(TAG, "Trapezoid drawn with dimensions: " + getWidth() + "x" + getHeight());
@@ -1361,7 +2129,37 @@ public class TrapezoidSelectionView extends View {
     String hint;
     float hintY;
 
-    if (activeCornerIndex != -1) {
+    if (activeEdgeIndex != -1) {
+      // Show edge-specific hint while a line/edge is being translated in parallel.
+      switch (activeEdgeIndex) {
+        case 0:
+          hint = "Drag to move top edge";
+          break;
+        case 1:
+          hint = "Drag to move right edge";
+          break;
+        case 2:
+          hint = "Drag to move bottom edge";
+          break;
+        case 3:
+          hint = "Drag to move left edge";
+          break;
+        default:
+          hint = "Drag edges to adjust document selection";
+          break;
+      }
+      // Place hint opposite to the active edge so the finger does not cover it.
+      if (activeEdgeIndex == 0) { // top edge dragged → hint near bottom
+        int baseBottomOffset = Math.max(100, bottomUiInsetPx + dp(getContext(), 12));
+        hintY = height - baseBottomOffset;
+      } else if (activeEdgeIndex == 2) { // bottom edge dragged → hint near top
+        hintY = 100;
+      } else { // left/right edges → bottom by default
+        int baseBottomOffset = Math.max(100, bottomUiInsetPx + dp(getContext(), 12));
+        hintY = height - baseBottomOffset;
+      }
+      drawHintText(canvas, hint, width / 2f, hintY);
+    } else if (activeCornerIndex != -1) {
       // Show corner-specific hints when a corner is being dragged
       switch (activeCornerIndex) {
         case 0: // Top-left
@@ -1402,9 +2200,9 @@ public class TrapezoidSelectionView extends View {
       boolean isNearlyRectangular = isNearlyRectangular();
 
       if (isNearlyRectangular) {
-        hint = "Adjust corners to match document edges";
+        hint = "Drag corners or edges to match document";
       } else {
-        hint = "Drag any corner to fine-tune selection";
+        hint = "Drag corners or edges to fine-tune selection";
       }
 
       // Position the hint at the bottom of the screen, considering bottom UI inset
@@ -1514,8 +2312,56 @@ public class TrapezoidSelectionView extends View {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    float x = event.getX();
-    float y = event.getY();
+    // Pan/Zoom gesture detection (Phase 2 step 2/4). Pinch‑Zoom and double‑tap are wired to a
+    // shared ScaleGestureDetector + GestureDetector. They short‑circuit the corner/edge drag
+    // path while a multi‑touch gesture is in progress and are inert when the feature flag is
+    // off. Detectors are fed in raw view coordinates (NOT mapped through viewMatrix) — they
+    // operate in the same coordinate system as the canvas before our concat.
+    if (de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_PAN_ZOOM) {
+      boolean wasPinch = inPinchGesture;
+      if (scaleDetector != null) {
+        scaleDetector.onTouchEvent(event);
+      }
+      if (tapDetector != null) {
+        tapDetector.onTouchEvent(event);
+      }
+      // If a pinch just started, cancel any in‑flight single‑pointer drag (corner, edge or
+      // pan) so the trapezoid / view does not jump when the second finger arrives. We
+      // synthesise an ACTION_CANCEL by clearing the per‑drag state and notifying listeners.
+      if (!wasPinch && inPinchGesture) {
+        if (activeCornerIndex != -1 || activeEdgeIndex != -1 || isPanning) {
+          activeCornerIndex = -1;
+          activeEdgeIndex = -1;
+          isPanning = false;
+          lastPanRawX = Float.NaN;
+          lastPanRawY = Float.NaN;
+          isDraggingWithMagnifier = false;
+          if (magnifier != null) {
+            try {
+              magnifier.dismiss();
+            } catch (Throwable ignore) {
+              // Best-effort
+            }
+          }
+          isUserAdjusting = false;
+          notifyDragStateChanged(false);
+          updateSystemGestureExclusion();
+          invalidate();
+        }
+      }
+      // While a pinch is active, swallow further events so that ACTION_MOVE doesn't drag a
+      // corner.
+      if (inPinchGesture) {
+        return true;
+      }
+    }
+
+    // Pan/Zoom: route raw event coordinates through the view transform so that all
+    // hit-tests below operate in the same unscaled local frame as `corners`. While the
+    // transform is identity (Phase 2 step 1 default), this is a strict no-op.
+    mapTouchToLocal(event.getX(), event.getY(), touchLocalScratch);
+    float x = touchLocalScratch[0];
+    float y = touchLocalScratch[1];
 
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
@@ -1558,10 +2404,15 @@ public class TrapezoidSelectionView extends View {
           // Expand gesture exclusion while dragging
           updateSystemGestureExclusion();
 
-          // Initialize and show magnifier if enabled and source is set
+          // Initialize and show magnifier if enabled and source is set.
+          // Magnifier expects coordinates in the source view's coordinate space (i.e. the
+          // on-screen overlay/source view). Pass the *raw* event coordinates here, NOT the
+          // post-mapTouchToLocal values: under Pan/Zoom, the local frame is the unscaled
+          // pre-viewMatrix space, while the source view is currently rendered with
+          // viewMatrix · baseFitMatrix, so its visible content matches the raw screen position.
           ensureMagnifier();
           if (magnifier != null) {
-            PointF src = toSourceCoords(x, y);
+            PointF src = toSourceCoords(event.getX(), event.getY());
             try {
               magnifier.show(src.x, src.y);
             } catch (Throwable t) {
@@ -1569,12 +2420,81 @@ public class TrapezoidSelectionView extends View {
             }
             isDraggingWithMagnifier = true;
           }
+          notifyDragStateChanged(true);
           invalidate();
           return true;
-        } else {
-          invalidate();
-          return false;
         }
+
+        // No corner hit → check for edge hit (parallel-translation drag).
+        if (de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_EDGE_DRAG) {
+          int edgeIdx = findEdgeHitIndex(x, y);
+          if (edgeIdx != -1) {
+            activeEdgeIndex = edgeIdx;
+            userHasEdited = true;
+            isUserAdjusting = true;
+            cancelAdjustIdle();
+            try {
+              getParent().requestDisallowInterceptTouchEvent(true);
+            } catch (Throwable ignore) {
+              // Best-effort
+            }
+            // Snapshot corner state and edge geometry at touch-down.
+            for (int i = 0; i < 4; i++) {
+              edgeAnchorXs[i] = corners[i].x;
+              edgeAnchorYs[i] = corners[i].y;
+            }
+            int a = edgeIdx;
+            int b = (edgeIdx + 1) % 4;
+            edgeAnchorMidX = 0.5f * (edgeAnchorXs[a] + edgeAnchorXs[b]);
+            edgeAnchorMidY = 0.5f * (edgeAnchorYs[a] + edgeAnchorYs[b]);
+            float[] n = CropEdgeGeometry.outwardUnitNormal(edgeAnchorXs, edgeAnchorYs, edgeIdx);
+            edgeAnchorNx = n[0];
+            edgeAnchorNy = n[1];
+            updateSystemGestureExclusion();
+            notifyDragStateChanged(true);
+            // A11y: announce edge-drag start so TalkBack users get audible feedback.
+            if (de.schliweb.makeacopy.BuildConfig.FEATURE_A11Y_GUIDANCE) {
+              announceEdgeDragForA11y();
+            }
+            invalidate();
+            if (debugLogsEnabled) {
+              Log.d(TAG, "ACTION_DOWN edge hit, edgeIndex=" + edgeIdx);
+            }
+            return true;
+          }
+        }
+
+        // No corner and no edge hit. If Pan/Zoom is enabled and the view is currently zoomed,
+        // start an implicit pan: subsequent ACTION_MOVE events translate the viewMatrix.
+        // See docs/edge_drag_pan_zoom_concept.md §4.2.
+        if (de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_PAN_ZOOM
+            && viewTransform.getScale() > CropViewTransform.MIN_SCALE + 1e-4f) {
+          isPanning = true;
+          lastPanRawX = event.getRawX();
+          lastPanRawY = event.getRawY();
+          try {
+            getParent().requestDisallowInterceptTouchEvent(true);
+          } catch (Throwable ignore) {
+            // Best-effort
+          }
+          updateSystemGestureExclusion();
+          // Report drag-state so the host fragment's OnBackPressedCallback also blocks back.
+          notifyDragStateChanged(true);
+          if (debugLogsEnabled) {
+            Log.d(TAG, "ACTION_DOWN pan start, scale=" + viewTransform.getScale());
+          }
+          return true;
+        }
+
+        invalidate();
+        // When Pan/Zoom is enabled we MUST return true so that subsequent ACTION_MOVE/UP and the
+        // ACTION_DOWN of a second tap reach this view. Otherwise Android short-circuits the
+        // gesture stream after the initial DOWN, which silently disables the double-tap and
+        // pinch-zoom detectors. (Concept §4.3, §4.4.)
+        if (de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_PAN_ZOOM) {
+          return true;
+        }
+        return false;
 
       case MotionEvent.ACTION_MOVE:
         // Move the active corner
@@ -1674,12 +2594,20 @@ public class TrapezoidSelectionView extends View {
             }
           }
 
+          // Snap-to-Right-Angle: nudge near-axis adjacent edges onto 0°/90° (FR #72 companion).
+          float[] snapped = applyRightAngleSnap(activeCornerIndex, tx, ty);
+          tx = snapped[0];
+          ty = snapped[1];
+
           // Use updateCorner to maintain both absolute and relative coordinates
           updateCorner(activeCornerIndex, tx, ty);
 
-          // Update magnifier position if active
+          // Update magnifier position if active. Use raw event coordinates so the magnifier
+          // shows the on-screen content under the finger; under Pan/Zoom this is what the
+          // source view actually renders (viewMatrix · baseFitMatrix), whereas tx/ty are in
+          // the unscaled pre-viewMatrix local frame and would yield the wrong source area.
           if (isDraggingWithMagnifier && magnifier != null) {
-            PointF src = toSourceCoords(tx, ty);
+            PointF src = toSourceCoords(event.getX(), event.getY());
             try {
               magnifier.show(src.x, src.y);
             } catch (Throwable t) {
@@ -1711,6 +2639,88 @@ public class TrapezoidSelectionView extends View {
           }
 
           invalidate();
+          return true;
+        }
+
+        // Edge drag (parallel translation): apply only the orthogonal
+        // component of the finger motion to both endpoints of the active edge.
+        if (activeEdgeIndex != -1) {
+          isUserAdjusting = true;
+          cancelAdjustIdle();
+          try {
+            getParent().requestDisallowInterceptTouchEvent(true);
+          } catch (Throwable ignore) {
+            // Best-effort
+          }
+          updateSystemGestureExclusion();
+
+          CropEdgeGeometry.EdgeTranslation res =
+              CropEdgeGeometry.applyEdgeTranslation(
+                  edgeAnchorXs,
+                  edgeAnchorYs,
+                  activeEdgeIndex,
+                  edgeAnchorMidX,
+                  edgeAnchorMidY,
+                  edgeAnchorNx,
+                  edgeAnchorNy,
+                  x,
+                  y);
+          if (res.applied) {
+            // Update both endpoints via updateCorner so absolute, relative, and
+            // gesture-exclusion state stay in sync. updateCorner soft-clamps to
+            // image bounds (with off-screen tolerance) when feasible.
+            int a = activeEdgeIndex;
+            int b = (activeEdgeIndex + 1) % 4;
+            updateCorner(a, res.xs[a], res.ys[a]);
+            updateCorner(b, res.xs[b], res.ys[b]);
+          }
+          if (debugLogsEnabled) {
+            Log.d(
+                TAG,
+                "MOVE edge="
+                    + activeEdgeIndex
+                    + ", applied="
+                    + res.applied
+                    + ", dxOrth="
+                    + res.dxOrth
+                    + ", dyOrth="
+                    + res.dyOrth);
+          }
+          invalidate();
+          return true;
+        }
+        // Implicit Pan (Phase 2 step 3): translate viewMatrix by raw delta while panning.
+        // Translation is clamped so that the mapped image rect still overlaps the view by
+        // at least PAN_MIN_VIEW_OVERLAP in each axis (see §4.2 of the concept doc).
+        if (de.schliweb.makeacopy.BuildConfig.FEATURE_CROP_PAN_ZOOM && isPanning) {
+          float rawX = event.getRawX();
+          float rawY = event.getRawY();
+          if (!Float.isNaN(lastPanRawX) && !Float.isNaN(lastPanRawY)) {
+            float dx = rawX - lastPanRawX;
+            float dy = rawY - lastPanRawY;
+            if (dx != 0f || dy != 0f) {
+              viewTransform.postTranslate(dx, dy);
+              // Clamp against the displayed image rect (in local coords) for the soft 10 %
+              // overlap rule. We use the bitmap rect as displayed under fitCenter — same
+              // domain that overlayToSource is built on.
+              RectF img = getDisplayedImageRectF(getWidth(), getHeight());
+              if (img != null) {
+                viewTransform.clampTranslateToView(
+                    img.left,
+                    img.top,
+                    img.right,
+                    img.bottom,
+                    getWidth(),
+                    getHeight(),
+                    PAN_MIN_VIEW_OVERLAP);
+              }
+              syncViewMatrixFromTransform();
+              notifyViewTransformChanged();
+              invalidate();
+            }
+          }
+          lastPanRawX = rawX;
+          lastPanRawY = rawY;
           return true;
         }
         break;
@@ -1764,11 +2774,26 @@ public class TrapezoidSelectionView extends View {
         }
         isDraggingWithMagnifier = false;
         activeCornerIndex = -1;
+        // Reset edge-drag state
+        activeEdgeIndex = -1;
+        // Reset implicit Pan state and snap residual zoom on lift.
+        if (isPanning) {
+          isPanning = false;
+          lastPanRawX = Float.NaN;
+          lastPanRawY = Float.NaN;
+          // After a pan ends, scale itself didn't change, but if the user happened to
+          // pinch-out and then released without crossing the snap threshold, this catches
+          // the residual case.
+          maybeSnapToIdentity();
+        }
+        notifyDragStateChanged(false);
         // Reset edge-glide state
         isEdgeGlide = false;
         edgeGlidePending = false;
         edgeGlideEligibleSinceMs = 0L;
         lastRawY = Float.NaN;
+        // Reset Snap-to-Right-Angle highlight & state on touch end (FR #72 companion).
+        resetRightAngleSnapState();
         // Keep user-adjusting true for a short idle window to suppress auto re-detection
         scheduleAdjustIdleClear();
         updateSystemGestureExclusion();
@@ -1807,6 +2832,25 @@ public class TrapezoidSelectionView extends View {
   }
 
   /**
+   * Find the index of the quadrilateral edge (0..3) that was touched, or {@code -1} if none. Pure
+   * delegation to {@link CropEdgeGeometry#findEdgeHit} with the current corner positions and a
+   * dp-converted hit radius.
+   */
+  private int findEdgeHitIndex(float x, float y) {
+    if (corners == null || corners.length < 4) return -1;
+    float[] xs = new float[4];
+    float[] ys = new float[4];
+    for (int i = 0; i < 4; i++) {
+      xs[i] = corners[i].x;
+      ys[i] = corners[i].y;
+    }
+    float density = getResources().getDisplayMetrics().density;
+    float radiusPx = EDGE_TOUCH_RADIUS_DP * density;
+    return CropEdgeGeometry.findEdgeHit(
+        xs, ys, x, y, radiusPx, CropEdgeGeometry.EDGE_END_DEADZONE_DEFAULT);
+  }
+
+  /**
    * Get the corners of the trapezoid as OpenCV Points
    *
    * @return Array of 4 OpenCV Points representing the corners
@@ -1817,6 +2861,77 @@ public class TrapezoidSelectionView extends View {
       points[i] = new Point(corners[i].x, corners[i].y);
     }
     return points;
+  }
+
+  /**
+   * Set the trapezoid corners from image coordinates (pixel space of the current display bitmap,
+   * i.e. the bitmap previously passed to {@link #setImageBitmap(Bitmap)}).
+   *
+   * <p>This is used by the Re-Edit flow (FR #72) to restore the previously accepted trapezoid when
+   * the user re-enters the crop screen from the export preview. The view must already have a
+   * non-zero size and a current image bitmap; otherwise the call is deferred via {@link
+   * #post(Runnable)} until the next layout pass.
+   *
+   * <p>After applying the corners, auto-initialization (edge detection / DocQuad) is suppressed for
+   * the next bitmap event so that the restored selection is not overwritten.
+   *
+   * @param imageCorners 4 points in image pixel coordinates of the current display bitmap; order
+   *     [TL, TR, BR, BL]. A null or invalid array is ignored.
+   */
+  public void setCornersFromImageCoordinates(Point[] imageCorners) {
+    if (imageCorners == null || imageCorners.length != 4) {
+      Log.w(TAG, "setCornersFromImageCoordinates: invalid input");
+      return;
+    }
+    final Point[] copy = new Point[4];
+    for (int i = 0; i < 4; i++) {
+      if (imageCorners[i] == null) {
+        Log.w(TAG, "setCornersFromImageCoordinates: null point at index " + i);
+        return;
+      }
+      copy[i] = new Point(imageCorners[i].x, imageCorners[i].y);
+    }
+    final int viewW = getWidth();
+    final int viewH = getHeight();
+    if (viewW <= 0 || viewH <= 0 || imageBitmap == null) {
+      // Defer until layout/bitmap available.
+      post(() -> setCornersFromImageCoordinates(copy));
+      return;
+    }
+    try {
+      Point[] viewPts =
+          CoordinateTransformUtils.transformImageToViewCoordinates(copy, imageBitmap, viewW, viewH);
+      if (viewPts == null || viewPts.length != 4) {
+        Log.w(TAG, "setCornersFromImageCoordinates: transform returned invalid result");
+        return;
+      }
+      for (int i = 0; i < 4; i++) {
+        corners[i].x = (float) viewPts[i].x;
+        corners[i].y = (float) viewPts[i].y;
+      }
+      for (int i = 0; i < 4; i++) {
+        relativeCorners[i] = absoluteToRelative(corners[i].x, corners[i].y, viewW, viewH);
+      }
+      // Mark as user-edited and initialized so subsequent setImageBitmap calls (e.g. caused
+      // by the rotation observer) do not auto-detect and overwrite the restored selection.
+      userHasEdited = true;
+      initialized = true;
+      suppressInitOnce = true;
+      try {
+        removeCallbacks(initCornersRunnable);
+        if (cornerTask != null) {
+          cornerTask.cancel(true);
+          cornerTask = null;
+        }
+        requestedInitSeq++;
+      } catch (Throwable ignore) {
+        // Best-effort; failure is non-critical
+      }
+      notifyCornersChanged();
+      invalidate();
+    } catch (Throwable t) {
+      Log.w(TAG, "setCornersFromImageCoordinates failed: " + t.getMessage(), t);
+    }
   }
 
   /**
@@ -2050,6 +3165,8 @@ public class TrapezoidSelectionView extends View {
     for (int i = 0; i < 4; i++) {
       relativeCorners[i] = absoluteToRelative(corners[i].x, corners[i].y, w, h);
     }
+    // Re-evaluate off-image state after rotation; corners may have crossed the image rect.
+    notifyCornersChanged();
   }
 
   // ===== Magnifier API (public) =====

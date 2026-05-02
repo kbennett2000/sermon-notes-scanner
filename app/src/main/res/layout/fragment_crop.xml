@@ -127,10 +127,12 @@
                 app:autoSizeStepGranularity="1sp"/>
     </LinearLayout>
 
-    <!-- Rotation Icons (über dem Button-Container, nur nach Crop sichtbar) -->
+    <!-- Rotation Icons (über dem Button-Container, nur nach Crop sichtbar).
+         Liegt in derselben Zeile wie die Aspect-Bar: Rotations-Icons zentriert
+         über die volle Breite, Spinner rechts darüber gelegt. -->
     <LinearLayout
             android:id="@+id/rotation_button_bar"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
@@ -167,4 +169,38 @@
                 app:tint="?attr/colorControlNormal"
                 app:tooltipText="@string/rotate_right_cd"/>
     </LinearLayout>
+
+    <!-- Aspect-Ratio-Button: koexistiert in derselben Zeile wie die Rotations-Icons,
+         rechtsbündig. Öffnet beim Klick einen Dialog mit den Aspect-Optionen. -->
+    <ImageButton
+            android:id="@+id/crop_aspect_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/crop_aspect_label"
+            android:padding="8dp"
+            android:src="@drawable/ic_aspect_ratio"
+            app:tint="?attr/colorControlNormal"
+            app:tooltipText="@string/crop_aspect_label"
+            app:layout_constraintTop_toTopOf="@id/rotation_button_bar"
+            app:layout_constraintBottom_toBottomOf="@id/rotation_button_bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"/>
+
+    <!-- Snap-to-Right-Angle Toggle (FR #72 companion): toggles the runtime feature flag.
+         Activated state is reflected via android:selected (tint changes via state list). -->
+    <ImageButton
+            android:id="@+id/crop_snap_toggle_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/crop_snap_toggle_cd"
+            android:padding="8dp"
+            android:src="@drawable/ic_right_angle"
+            app:tint="?attr/colorControlNormal"
+            app:tooltipText="@string/crop_snap_toggle_cd"
+            app:layout_constraintTop_toTopOf="@id/rotation_button_bar"
+            app:layout_constraintBottom_toBottomOf="@id/rotation_button_bar"
+            app:layout_constraintEnd_toStartOf="@id/crop_aspect_button"
+            android:layout_marginEnd="4dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

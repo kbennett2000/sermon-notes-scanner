@@ -10,6 +10,7 @@
 package de.schliweb.makeacopy.ui.crop;
 
 import android.graphics.Bitmap;
+import android.graphics.PointF;
 import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -168,5 +169,120 @@ public class CropViewModel extends BaseViewModel {
     Integer v = userRotationDegrees.getValue();
     int cur = (v == null ? 0 : v);
     setUserRotationDegrees(cur - 90);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Re-Edit support (FR #72)
+  //
+  // The following fields enable a Re-Edit roundtrip from the Export screen back
+  // to CropFragment with the previously accepted trapezoid corners restored.
+  //
+  // Convention for lastAcceptedCornersOriginal:
+  //   - 4 points, in the order returned by TrapezoidSelectionView#getCorners()
+  //   - Coordinates are in the pixel space of the ROTATED full-resolution source
+  //     used for cropping (i.e. originalImageBitmap rotated by lastAcceptedUserRotationDeg).
+  //   - On Re-Edit, restoring userRotationDegrees to lastAcceptedUserRotationDeg yields the
+  //     same source, so the stored corners can be re-applied directly (after scaling
+  //     full-res → displayed bitmap and view).
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Last accepted trapezoid corners in coordinates of the unrotated original image. Order: [TL, TR,
+   * BR, BL]. Null if no crop has been accepted yet.
+   */
+  private final MutableLiveData<PointF[]> lastAcceptedCornersOriginal = new MutableLiveData<>();
+
+  /**
+   * User rotation (degrees, normalized to [0,360)) that was active when the corners in {@link
+   * #lastAcceptedCornersOriginal} were accepted. Stored alongside the corners so the Re-Edit can
+   * reproduce the visible orientation deterministically.
+   */
+  private final MutableLiveData<Integer> lastAcceptedUserRotationDeg = new MutableLiveData<>(0);
+
+  /**
+   * Routing flag: when true, CropFragment was entered via the Re-Edit overlay in ExportFragment.
+   * Used to decide back-navigation target and to pre-populate the trapezoid with the last accepted
+   * corners.
+   */
+  private final MutableLiveData<Boolean> cameFromExport = new MutableLiveData<>(false);
+
+  /** Returns the last accepted trapezoid corners (in unrotated original image coords), or null. */
+  public LiveData<PointF[]> getLastAcceptedCornersOriginal() {
+    return lastAcceptedCornersOriginal;
+  }
+
+  /**
+   * Stores the last accepted trapezoid corners. A defensive copy is taken to decouple the caller's
+   * array from the stored value.
+   *
+   * @param corners 4 points in unrotated original image coordinates, order [TL, TR, BR, BL], or
+   *     null to clear.
+   */
+  public void setLastAcceptedCornersOriginal(PointF[] corners) {
+    if (corners == null) {
+      lastAcceptedCornersOriginal.setValue(null);
+      return;
+    }
+    PointF[] copy = new PointF[corners.length];
+    for (int i = 0; i < corners.length; i++) {
+      copy[i] = corners[i] == null ? null : new PointF(corners[i].x, corners[i].y);
+    }
+    lastAcceptedCornersOriginal.setValue(copy);
+  }
+
+  /** Returns the user rotation (deg) that was active when the last corners were accepted. */
+  public LiveData<Integer> getLastAcceptedUserRotationDeg() {
+    return lastAcceptedUserRotationDeg;
+  }
+
+  /** Stores the user rotation that was active when the last corners were accepted. */
+  public void setLastAcceptedUserRotationDeg(int deg) {
+    lastAcceptedUserRotationDeg.setValue(((deg % 360) + 360) % 360);
+  }
+
+  /** True when CropFragment was entered via the Re-Edit overlay in ExportFragment. */
+  public LiveData<Boolean> isCameFromExport() {
+    return cameFromExport;
+  }
+
+  /** Sets the Re-Edit routing flag. */
+  public void setCameFromExport(boolean v) {
+    cameFromExport.setValue(v);
+  }
+
+  /**
+   * FR #72 multi-page: index of the page in {@code ExportSessionViewModel.pages} that is being
+   * re-edited. Set by ExportFragment when the user taps the Edit overlay; read by CropFragment
+   * after performCrop to update the correct session page (instead of hardcoded index 0). {@code -1}
+   * means "unknown / single-page workflow".
+   */
+  private int reEditPageIndex = -1;
+
+  public int getReEditPageIndex() {
+    return reEditPageIndex;
+  }
+
+  public void setReEditPageIndex(int index) {
+    this.reEditPageIndex = index;
+  }
+
+  /**
+   * FR #72 V1.3 (multi-page filmstrip identity): identity reference to the in-memory bitmap of the
+   * most recently confirmed crop. Held as a {@link java.lang.ref.WeakReference} to avoid extending
+   * bitmap lifetime. Used by ExportFragment to decide whether the currently previewed page is the
+   * freshly captured/re-edited one (and therefore Re-Edit-eligible). Identity match only; not
+   * LiveData on purpose — visibility refreshes are driven by preview/page observers.
+   */
+  private java.lang.ref.WeakReference<Bitmap> lastFreshPageBitmapRef =
+      new java.lang.ref.WeakReference<>(null);
+
+  /** Returns the cached fresh-page bitmap (identity reference) or null when GC'ed/never set. */
+  public Bitmap getLastFreshPageBitmap() {
+    return lastFreshPageBitmapRef.get();
+  }
+
+  /** Sets the identity reference to the freshly produced crop bitmap (post-trim, post-rotate). */
+  public void setLastFreshPageBitmap(Bitmap bmp) {
+    this.lastFreshPageBitmapRef = new java.lang.ref.WeakReference<>(bmp);
   }
 }
