@@ -122,6 +122,28 @@ public class CameraFragment extends Fragment implements SensorEventListener {
   @SuppressWarnings("ThreadLocalUsage") // intentional: reuse stream on CameraX analyzer thread
   private final ThreadLocal<java.io.ByteArrayOutputStream> jpegReuseStream = new ThreadLocal<>();
 
+  // Bitmap pool for the small "upright" detection bitmap produced by yuvToBitmapUprightSmall.
+  // Two slots cover both orientations (portrait/landscape) of DETECTION_MAX_EDGE-sized images.
+  // Reusing bitmaps avoids per-frame allocations of ~720x540 ARGB_8888 (~1.5 MB) and reduces GC.
+  @SuppressWarnings("ThreadLocalUsage") // intentional: per analyzer thread
+  private final ThreadLocal<Bitmap> uprightBitmapPoolA = new ThreadLocal<>();
+
+  @SuppressWarnings("ThreadLocalUsage") // intentional: per analyzer thread
+  private final ThreadLocal<Bitmap> uprightBitmapPoolB = new ThreadLocal<>();
+
+  // Reusable OpenCV Mats for the fast NV21 → RGBA path (avoid per-frame Mat allocations).
+  @SuppressWarnings("ThreadLocalUsage") // intentional: per analyzer thread
+  private final ThreadLocal<org.opencv.core.Mat> nv21MatTL = new ThreadLocal<>();
+
+  @SuppressWarnings("ThreadLocalUsage") // intentional: per analyzer thread
+  private final ThreadLocal<org.opencv.core.Mat> rgbaMatTL = new ThreadLocal<>();
+
+  @SuppressWarnings("ThreadLocalUsage") // intentional: per analyzer thread
+  private final ThreadLocal<org.opencv.core.Mat> resizedMatTL = new ThreadLocal<>();
+
+  @SuppressWarnings("ThreadLocalUsage") // intentional: per analyzer thread
+  private final ThreadLocal<org.opencv.core.Mat> rotatedMatTL = new ThreadLocal<>();
+
   // Light sensor constants
   private static final float LOW_LIGHT_THRESHOLD = 10.0f; // lux
   private static final long MIN_TIME_BETWEEN_PROMPTS = 60000; // ms
@@ -308,6 +330,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     // Init UI visibility
     showCameraMode();
+
+    // If MainActivity received a shared image/PDF (ACTION_SEND / ACTION_VIEW),
+    // route it through the existing import pipeline. Posted to the view so that
+    // the navigation graph and bindings are fully ready.
+    consumePendingShareIfAny();
 
     // DocQuad runner is now injected via Hilt (docQuadOrtRunner field).
     // No proactive loading needed — the singleton is created eagerly by the DI container.
@@ -731,6 +758,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     // ImplMode
     boolean isSony = "sony".equalsIgnoreCase(Build.MANUFACTURER);
+    // Android Emulator (goldfish/ranchu) HAL accepts but silently delivers black frames when
+    // HQ post-processing / ZSL / forced AE FPS range options are applied. Treat it like Sony.
+    boolean isEmulator =
+        Build.HARDWARE.contains("goldfish")
+            || Build.HARDWARE.contains("ranchu")
+            || Build.PRODUCT.contains("sdk")
+            || Build.MODEL.contains("Emulator")
+            || Build.MODEL.contains("Android SDK built for");
     PreviewView.ImplementationMode implMode =
         isSony
             ? PreviewView.ImplementationMode.COMPATIBLE
@@ -739,7 +774,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 : PreviewView.ImplementationMode.COMPATIBLE);
     binding.viewFinder.setImplementationMode(implMode);
     binding.viewFinder.setScaleType(PreviewView.ScaleType.FIT_CENTER);
-    Log.i(TAG, "bindWithTier: implMode=" + implMode + ", scaleType=FIT_CENTER, isSony=" + isSony);
+    Log.i(
+        TAG,
+        "bindWithTier: implMode="
+            + implMode
+            + ", scaleType=FIT_CENTER, isSony="
+            + isSony
+            + ", isEmulator="
+            + isEmulator);
 
     int rotation = getViewFinderRotation();
     Log.i(TAG, "bindWithTier: tier=" + tier + ", rotation=" + toDegrees(rotation));
@@ -786,14 +828,20 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     // Some Sony devices reject sessions when an explicit AE_TARGET_FPS_RANGE is set.
     // To avoid "Unsupported set of inputs/outputs provided" (endConfigure) we skip forcing FPS on
     // Sony.
-    if (!isSony) {
+    if (!isSony && !isEmulator) {
       android.util.Range<Integer> fps = new android.util.Range<>(15, 30);
       pExt.setCaptureRequestOption(
           android.hardware.camera2.CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps);
       cExt.setCaptureRequestOption(
           android.hardware.camera2.CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps);
     } else {
-      Log.i(TAG, "bindWithTier: skipping AE_TARGET_FPS_RANGE on Sony device");
+      Log.i(
+          TAG,
+          "bindWithTier: skipping AE_TARGET_FPS_RANGE (isSony="
+              + isSony
+              + ", isEmulator="
+              + isEmulator
+              + ")");
     }
 
     // AF continuous picture is generally safe and expected; keep for all OEMs
@@ -804,10 +852,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE,
         android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
-    if (!isSony) {
+    if (!isSony && !isEmulator) {
       // High-quality post-processing and ZSL toggles can cause session config failures on some Sony
-      // devices.
-      // Apply only on non-Sony devices.
+      // devices, and result in black preview frames on the Android Emulator HAL.
+      // Apply only on real, non-Sony devices.
       cExt.setCaptureRequestOption(
           android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE,
           android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE_HIGH_QUALITY);
@@ -823,7 +871,13 @@ public class CameraFragment extends Fragment implements SensorEventListener {
       cExt.setCaptureRequestOption(
           android.hardware.camera2.CaptureRequest.CONTROL_ENABLE_ZSL, false);
     } else {
-      Log.i(TAG, "bindWithTier: skipping HQ NR/EDGE/CCA/SHADING and ZSL toggle on Sony device");
+      Log.i(
+          TAG,
+          "bindWithTier: skipping HQ NR/EDGE/CCA/SHADING and ZSL toggle (isSony="
+              + isSony
+              + ", isEmulator="
+              + isEmulator
+              + ")");
     }
 
     imageCapture = captureBuilder.build();
@@ -1120,34 +1174,47 @@ public class CameraFragment extends Fragment implements SensorEventListener {
       ImageCapture.OutputFileOptions outputOptions =
           new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
-      // short AF/AE pre-focus
-      MeteringPointFactory mpf = binding.viewFinder.getMeteringPointFactory();
-      MeteringPoint center =
-          mpf.createPoint(binding.viewFinder.getWidth() / 2f, binding.viewFinder.getHeight() / 2f);
+      // Pre-capture AF/AE/AWB lock for sharper, color-stable document shots.
+      // AWB is included so that warm/cool ambient light (lamps, daylight mix) is locked in
+      // before the shutter, improving OCR-relevant text/background contrast consistency.
+      // Timeout 2s: balance between robust AF convergence and responsive capture; if AF
+      // does not converge within the window, we still proceed (best-effort).
+      if (camera != null && camera.getCameraControl() != null) {
+        MeteringPointFactory mpf = binding.viewFinder.getMeteringPointFactory();
+        MeteringPoint center =
+            mpf.createPoint(
+                binding.viewFinder.getWidth() / 2f, binding.viewFinder.getHeight() / 2f);
 
-      // Reduced timeout from 3s to 1s for faster capture response
-      FocusMeteringAction fma =
-          new FocusMeteringAction.Builder(
-                  center, FocusMeteringAction.FLAG_AF | FocusMeteringAction.FLAG_AE)
-              .setAutoCancelDuration(1, TimeUnit.SECONDS)
-              .build();
+        FocusMeteringAction fma =
+            new FocusMeteringAction.Builder(
+                    center,
+                    FocusMeteringAction.FLAG_AF
+                        | FocusMeteringAction.FLAG_AE
+                        | FocusMeteringAction.FLAG_AWB)
+                .setAutoCancelDuration(2, TimeUnit.SECONDS)
+                .build();
 
-      ListenableFuture<FocusMeteringResult> fut =
-          camera.getCameraControl().startFocusAndMetering(fma);
+        ListenableFuture<FocusMeteringResult> fut =
+            camera.getCameraControl().startFocusAndMetering(fma);
 
-      fut.addListener(
-          () -> {
-            try {
-              FocusMeteringResult result =
-                  fut.get(); // does not block because the listener is only invoked after completion
-              boolean ok = result != null && result.isFocusSuccessful();
-              Log.d(TAG, "captureImage: pre-focus result=" + ok);
-            } catch (Exception e) {
-              Log.w(TAG, "captureImage: pre-focus threw: " + e.getMessage());
-            }
-            doTakePicture(outputOptions, photoFile);
-          },
-          ContextCompat.getMainExecutor(requireContext()));
+        fut.addListener(
+            () -> {
+              try {
+                FocusMeteringResult result =
+                    fut.get(); // does not block; listener fires only after completion
+                boolean ok = result != null && result.isFocusSuccessful();
+                Log.d(TAG, "captureImage: pre-focus(AF/AE/AWB) result=" + ok);
+              } catch (Exception e) {
+                Log.w(TAG, "captureImage: pre-focus threw: " + e.getMessage());
+              }
+              doTakePicture(outputOptions, photoFile);
+            },
+            ContextCompat.getMainExecutor(requireContext()));
+      } else {
+        // Camera not yet bound (edge case): proceed without explicit pre-focus.
+        Log.w(TAG, "captureImage: camera/cameraControl null, skipping pre-focus");
+        doTakePicture(outputOptions, photoFile);
+      }
 
     } catch (Exception e) {
       Log.e(TAG, "captureImage error: " + e.getMessage(), e);
@@ -1188,6 +1255,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
               }
               cameraViewModel.setImagePath(photoFile.getAbsolutePath());
               cameraViewModel.setImageUri(imageUri);
+              // Live camera capture is not pre-cropped — disable the import-only fallback
+              // heuristic.
+              cameraViewModel.setImageSourceIsImported(false);
 
               OCRViewModel ocrVm = new ViewModelProvider(requireActivity()).get(OCRViewModel.class);
               ocrVm.resetForNewImage();
@@ -1438,11 +1508,49 @@ public class CameraFragment extends Fragment implements SensorEventListener {
       imageAnalysis = null;
     }
     if (analysisExecutor != null) {
+      // Release pooled bitmaps and reusable Mats on the analyzer thread (where the
+      // ThreadLocals were populated). Best-effort; failures are non-critical.
+      try {
+        analysisExecutor.submit(this::releaseLiveAnalysisResources).get(200, TimeUnit.MILLISECONDS);
+      } catch (Throwable ignore) {
+        // Best-effort
+      }
       analysisExecutor.shutdownNow();
       analysisExecutor = null;
     }
     streamObserverAttached = false;
     binding = null;
+  }
+
+  /**
+   * Releases per-thread bitmap pool slots and OpenCV Mats used by the live analyzer fast path.
+   * Called from {@link #onDestroyView()} to avoid keeping native memory and Bitmaps around when the
+   * camera UI is gone.
+   */
+  private void releaseLiveAnalysisResources() {
+    Bitmap a = uprightBitmapPoolA.get();
+    if (a != null && !a.isRecycled()) a.recycle();
+    uprightBitmapPoolA.remove();
+    Bitmap b = uprightBitmapPoolB.get();
+    if (b != null && !b.isRecycled()) b.recycle();
+    uprightBitmapPoolB.remove();
+    org.opencv.core.Mat m;
+    if ((m = nv21MatTL.get()) != null) {
+      m.release();
+      nv21MatTL.remove();
+    }
+    if ((m = rgbaMatTL.get()) != null) {
+      m.release();
+      rgbaMatTL.remove();
+    }
+    if ((m = resizedMatTL.get()) != null) {
+      m.release();
+      resizedMatTL.remove();
+    }
+    if ((m = rotatedMatTL.get()) != null) {
+      m.release();
+      rotatedMatTL.remove();
+    }
   }
 
   /**
@@ -2275,9 +2383,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
       Log.w(TAG, "analyzeFrameForCorners failed: " + e.getMessage(), e);
     } finally {
       // Avoid per-frame bitmap accumulation / GC pressure in live analysis.
-      // This bitmap is a temporary downscaled analysis image.
+      // The fast OpenCV path returns a pooled bitmap that must NOT be recycled here
+      // (it is reused on subsequent frames). Only recycle bitmaps that are NOT in the pool
+      // (i.e. produced by the legacy fallback path).
       try {
-        if (bmp != null && !bmp.isRecycled()) bmp.recycle();
+        if (bmp != null && !bmp.isRecycled() && !isPooledBitmap(bmp)) bmp.recycle();
       } catch (Throwable ignore) {
         // Best-effort; failure is non-critical
       }
@@ -2499,6 +2609,144 @@ public class CameraFragment extends Fragment implements SensorEventListener {
   }
 
   private Bitmap yuvToBitmapUprightSmall(@NonNull ImageProxy image, int maxSize) {
+    // Fast path: when OpenCV is initialized, convert NV21 → RGBA directly via Imgproc,
+    // resize and rotate as Mats, then blit into a pooled ARGB_8888 Bitmap. This avoids
+    // the previous YuvImage→JPEG(Q60)→BitmapFactory round-trip (which was both lossy
+    // and CPU-heavy) and reuses a small Bitmap pool to suppress GC churn at ~5–6 FPS.
+    if (OpenCVUtils.isInitialized()) {
+      try {
+        return yuvToBitmapUprightSmallCv(image, maxSize);
+      } catch (Throwable t) {
+        // Defensive: fall through to legacy path on any unexpected CV error.
+        Log.w(TAG, "yuvToBitmapUprightSmallCv failed, falling back: " + t.getMessage());
+      }
+    }
+    return yuvToBitmapUprightSmallLegacy(image, maxSize);
+  }
+
+  /**
+   * OpenCV-based fast path: NV21 → RGBA → resize → rotate → ARGB_8888 Bitmap (pooled). Caller must
+   * ensure {@link OpenCVUtils#isInitialized()} is true.
+   */
+  private Bitmap yuvToBitmapUprightSmallCv(@NonNull ImageProxy image, int maxSize) {
+    byte[] nv21 = toNv21(image);
+    if (nv21 == null) return null;
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+
+    // 1) NV21 wrap (single-channel byte mat of height*3/2 rows)
+    org.opencv.core.Mat nv21Mat = nv21MatTL.get();
+    if (nv21Mat == null
+        || nv21Mat.rows() != h + h / 2
+        || nv21Mat.cols() != w
+        || nv21Mat.type() != org.opencv.core.CvType.CV_8UC1) {
+      if (nv21Mat != null) nv21Mat.release();
+      nv21Mat = new org.opencv.core.Mat(h + h / 2, w, org.opencv.core.CvType.CV_8UC1);
+      nv21MatTL.set(nv21Mat);
+    }
+    nv21Mat.put(0, 0, nv21, 0, w * h * 3 / 2);
+
+    // 2) NV21 → RGBA
+    org.opencv.core.Mat rgbaMat = rgbaMatTL.get();
+    if (rgbaMat == null) {
+      rgbaMat = new org.opencv.core.Mat();
+      rgbaMatTL.set(rgbaMat);
+    }
+    org.opencv.imgproc.Imgproc.cvtColor(
+        nv21Mat, rgbaMat, org.opencv.imgproc.Imgproc.COLOR_YUV2RGBA_NV21);
+
+    // 3) Downscale so the longer edge ≤ maxSize (keep aspect ratio)
+    int sample = computeSampleSize(w, h, maxSize);
+    int targetW = Math.max(1, w / sample);
+    int targetH = Math.max(1, h / sample);
+    org.opencv.core.Mat src = rgbaMat;
+    org.opencv.core.Mat resized = resizedMatTL.get();
+    if (sample > 1) {
+      if (resized == null) {
+        resized = new org.opencv.core.Mat();
+        resizedMatTL.set(resized);
+      }
+      org.opencv.imgproc.Imgproc.resize(
+          rgbaMat,
+          resized,
+          new org.opencv.core.Size(targetW, targetH),
+          0,
+          0,
+          org.opencv.imgproc.Imgproc.INTER_AREA);
+      src = resized;
+    }
+
+    // 4) Rotate to upright orientation. CameraX rotationDegrees is clockwise.
+    int rot = ((image.getImageInfo().getRotationDegrees() % 360) + 360) % 360;
+    org.opencv.core.Mat upright = src;
+    if (rot != 0) {
+      org.opencv.core.Mat rotated = rotatedMatTL.get();
+      if (rotated == null) {
+        rotated = new org.opencv.core.Mat();
+        rotatedMatTL.set(rotated);
+      }
+      switch (rot) {
+        case 90:
+          org.opencv.core.Core.rotate(src, rotated, org.opencv.core.Core.ROTATE_90_CLOCKWISE);
+          break;
+        case 180:
+          org.opencv.core.Core.rotate(src, rotated, org.opencv.core.Core.ROTATE_180);
+          break;
+        case 270:
+          org.opencv.core.Core.rotate(
+              src, rotated, org.opencv.core.Core.ROTATE_90_COUNTERCLOCKWISE);
+          break;
+        default:
+          // Non-orthogonal rotations are not produced by CameraX; treat as no-op.
+          rotated = src;
+          break;
+      }
+      upright = rotated;
+    }
+
+    // 5) Acquire a pooled ARGB_8888 Bitmap of the upright size and blit Mat into it.
+    final int finalW = upright.cols();
+    final int finalH = upright.rows();
+    Bitmap bmp = acquirePooledBitmap(finalW, finalH);
+    org.opencv.android.Utils.matToBitmap(upright, bmp);
+    return bmp;
+  }
+
+  /**
+   * Acquires a Bitmap of the requested dimensions from a small two-slot pool. If neither slot
+   * matches, the older slot is recycled and replaced. Returned bitmaps are ARGB_8888 and writable.
+   */
+  private Bitmap acquirePooledBitmap(int width, int height) {
+    Bitmap a = uprightBitmapPoolA.get();
+    if (a != null && !a.isRecycled() && a.getWidth() == width && a.getHeight() == height) {
+      return a;
+    }
+    Bitmap b = uprightBitmapPoolB.get();
+    if (b != null && !b.isRecycled() && b.getWidth() == width && b.getHeight() == height) {
+      return b;
+    }
+    // No matching slot: place new bitmap into A (recycling the previous A).
+    Bitmap fresh = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    if (a != null && !a.isRecycled()) {
+      // Move existing A to B (so we keep the most recent two distinct sizes around).
+      Bitmap oldB = uprightBitmapPoolB.get();
+      if (oldB != null && !oldB.isRecycled()) oldB.recycle();
+      uprightBitmapPoolB.set(a);
+    }
+    uprightBitmapPoolA.set(fresh);
+    return fresh;
+  }
+
+  /** Returns true iff the given bitmap is currently held in the upright bitmap pool. */
+  private boolean isPooledBitmap(@NonNull Bitmap candidate) {
+    Bitmap a = uprightBitmapPoolA.get();
+    if (a == candidate) return true;
+    Bitmap b = uprightBitmapPoolB.get();
+    return b == candidate;
+  }
+
+  /** Legacy fallback: original YuvImage → JPEG → BitmapFactory path. */
+  private Bitmap yuvToBitmapUprightSmallLegacy(@NonNull ImageProxy image, int maxSize) {
     try {
       byte[] nv21 = toNv21(image);
       if (nv21 == null) return null;
@@ -2623,6 +2871,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
       }
       cameraViewModel.setImagePath(null);
       cameraViewModel.setImageUri(uri);
+      // Imported/shared image: enable the "already-cropped" fallback heuristic in the crop UI.
+      cameraViewModel.setImageSourceIsImported(true);
 
       // Keep behavior consistent with camera scan: always reset OCR state for a newly imported
       // image.
@@ -2658,6 +2908,53 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     PdfImportHelper.handlePdfImport(this, pdfUri, this::processPdfBitmap);
   }
 
+  /**
+   * Consumes a pending shared Uri (set by {@link de.schliweb.makeacopy.MainActivity} from an
+   * incoming ACTION_SEND/ACTION_VIEW intent) and dispatches it through the existing import pipeline
+   * (image -> crop, PDF -> page selection -> crop). The Uri is cleared after consumption so it is
+   * processed only once per share.
+   */
+  private void consumePendingShareIfAny() {
+    if (cameraViewModel == null) return;
+    Uri uri = cameraViewModel.getPendingShareUri();
+    if (uri == null) return;
+    String mime = cameraViewModel.getPendingShareMime();
+    cameraViewModel.clearPendingShare();
+
+    if (mime == null) {
+      try {
+        mime = requireContext().getContentResolver().getType(uri);
+      } catch (Exception e) {
+        Log.w(TAG, "Could not resolve MIME for shared Uri", e);
+      }
+    }
+    if (mime == null) {
+      UIUtils.showToast(requireContext(), R.string.error_unknown_file_type, Toast.LENGTH_SHORT);
+      return;
+    }
+
+    // Defer to the next UI tick so that NavController and view bindings are ready.
+    final String finalMime = mime;
+    final View root = binding != null ? binding.getRoot() : null;
+    Runnable action =
+        () -> {
+          if (!isAdded()) return;
+          if (finalMime.startsWith("image/")) {
+            handleImageImport(uri);
+          } else if ("application/pdf".equals(finalMime)) {
+            handlePdfImport(uri);
+          } else {
+            UIUtils.showToast(
+                requireContext(), R.string.error_unsupported_file_type, Toast.LENGTH_SHORT);
+          }
+        };
+    if (root != null) {
+      root.post(action);
+    } else {
+      action.run();
+    }
+  }
+
   /** Processes a bitmap from PDF and feeds it into the normal workflow (Crop → OCR → Export). */
   private void processPdfBitmap(Bitmap bitmap) {
     if (bitmap == null || !isAdded()) return;
@@ -2675,6 +2972,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     if (cameraViewModel != null) {
       cameraViewModel.setImagePath(null); // No file path, from PDF
       cameraViewModel.setImageUri(null); // No direct URI
+      // PDF page rendering: treat as imported (already framed page) for the crop UI heuristic.
+      cameraViewModel.setImageSourceIsImported(true);
     }
 
     // Keep behavior consistent with camera scan: reset OCR state for a newly imported PDF page.

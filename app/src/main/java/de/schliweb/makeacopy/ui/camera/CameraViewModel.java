@@ -9,6 +9,7 @@
  */
 package de.schliweb.makeacopy.ui.camera;
 
+import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import de.schliweb.makeacopy.ui.BaseViewModel;
@@ -68,5 +69,48 @@ public class CameraViewModel extends BaseViewModel {
    */
   public void setImagePath(String path) {
     mImagePath.setValue(path);
+  }
+
+  /**
+   * Holds an incoming Uri (image or PDF) shared from another app via ACTION_SEND/ACTION_VIEW. The
+   * CameraFragment consumes this once on startup to feed the existing import pipeline.
+   */
+  private Uri pendingShareUri;
+
+  /** Optional MIME type associated with {@link #pendingShareUri}. May be null. */
+  private String pendingShareMime;
+
+  public void setPendingShare(Uri uri, String mime) {
+    this.pendingShareUri = uri;
+    this.pendingShareMime = mime;
+  }
+
+  public Uri getPendingShareUri() {
+    return pendingShareUri;
+  }
+
+  public String getPendingShareMime() {
+    return pendingShareMime;
+  }
+
+  public void clearPendingShare() {
+    this.pendingShareUri = null;
+    this.pendingShareMime = null;
+  }
+
+  /**
+   * True when the current image was loaded via gallery import or share (ACTION_SEND/ACTION_VIEW),
+   * false when it originated from a live camera capture or PDF rendering. Used by the cropping UI
+   * to decide whether to apply the "already-cropped" detector fallback heuristic, which must only
+   * affect imported/shared images and never live scans.
+   */
+  private boolean imageSourceIsImported = false;
+
+  public void setImageSourceIsImported(boolean imported) {
+    this.imageSourceIsImported = imported;
+  }
+
+  public boolean isImageSourceImported() {
+    return imageSourceIsImported;
   }
 }
