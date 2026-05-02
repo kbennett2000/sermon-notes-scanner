@@ -206,4 +206,74 @@ public class OpenCVUtilsAspectRatioTest {
     assertEquals(null, estimate(ok, 0, 100));
     assertEquals(null, estimate(ok, 100, 0));
   }
+
+  // -----------------------------------------------------------------------------------------
+  // Stage B (v3.8.0): fixed-aspect target size
+  // -----------------------------------------------------------------------------------------
+
+  private static Method fixedRatioMethod() throws Exception {
+    Method m =
+        OpenCVUtils.class.getDeclaredMethod(
+            "computeWarpTargetSizeForFixedRatio", Point[].class, double.class);
+    m.setAccessible(true);
+    return m;
+  }
+
+  private static Size fixed(Point[] corners, double r) throws Exception {
+    return (Size) fixedRatioMethod().invoke(null, corners, r);
+  }
+
+  @Test
+  public void computeWarpTargetSizeForFixedRatio_a4_portraitOrientation() throws Exception {
+    // Portrait quad: 800 wide × 1100 tall (longer side vertical).
+    Point[] c =
+        new Point[] {
+          new Point(100, 100),
+          new Point(900, 100),
+          new Point(900, 1200),
+          new Point(100, 1200)
+        };
+    double r = 1.0 / Math.sqrt(2.0); // A4 short/long
+    Size s = fixed(c, r);
+    // Portrait → height is the long side, anchored to longPx (≈1100).
+    assertTrue("expected portrait, got " + s.width + "x" + s.height, s.height >= s.width);
+    double observed = (double) s.width / (double) s.height;
+    assertEquals("output short/long ratio", r, observed, 0.005);
+    // longPx ≈ 1100, +1 anchor → height ~= 1101
+    assertTrue("height anchored to longPx, got " + s.height, s.height >= 1099 && s.height <= 1103);
+  }
+
+  @Test
+  public void computeWarpTargetSizeForFixedRatio_landscape_followsQuad() throws Exception {
+    // Landscape quad: 1200 wide × 700 tall.
+    Point[] c =
+        new Point[] {
+          new Point(0, 0),
+          new Point(1200, 0),
+          new Point(1200, 700),
+          new Point(0, 700)
+        };
+    double r = 0.5; // 1:2 short/long
+    Size s = fixed(c, r);
+    // Landscape → width is the long side.
+    assertTrue("expected landscape, got " + s.width + "x" + s.height, s.width >= s.height);
+    double observed = (double) s.height / (double) s.width;
+    assertEquals(r, observed, 0.005);
+    // longPx ≈ 1200, +1 anchor → width ~= 1201
+    assertTrue("width anchored to longPx, got " + s.width, s.width >= 1199 && s.width <= 1203);
+  }
+
+  @Test
+  public void computeWarpTargetSizeForFixedRatio_invalidInput_returnsTinySize() throws Exception {
+    Size s1 = fixed(null, 0.5);
+    assertEquals(1.0, s1.width, 0.0);
+    assertEquals(1.0, s1.height, 0.0);
+    Point[] ok = {new Point(0, 0), new Point(10, 0), new Point(10, 5), new Point(0, 5)};
+    Size s2 = fixed(ok, 0.0);
+    assertEquals(1.0, s2.width, 0.0);
+    Size s3 = fixed(ok, 1.5); // > 1 invalid
+    assertEquals(1.0, s3.width, 0.0);
+    Size s4 = fixed(ok, Double.NaN);
+    assertEquals(1.0, s4.width, 0.0);
+  }
 }

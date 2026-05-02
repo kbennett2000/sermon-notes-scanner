@@ -236,6 +236,8 @@ public final class BitmapUtils {
       boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
       boolean doAuto = false;
       boolean doOcrRobustGray = false;
+      boolean doGrayClean = false;
+      boolean doColorClean = false;
 
       if (exportAsJpeg) {
         // Preview reflects JPEG options only
@@ -244,12 +246,16 @@ public final class BitmapUtils {
         try {
           JpegExportOptions.Mode mode =
               JpegExportOptions.Mode.valueOf(
-                  prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name()));
+                  prefs.getString("jpeg_mode", JpegExportOptions.Mode.NONE.name()));
           if (mode == JpegExportOptions.Mode.BW_TEXT || mode == JpegExportOptions.Mode.BW_ROBUST) {
             toBw = true;
           } else if (mode == JpegExportOptions.Mode.OCR_ROBUST) {
             // Preview should mirror OCR preprocessing (grayscale), not binary
             doOcrRobustGray = true;
+          } else if (mode == JpegExportOptions.Mode.GRAY_CLEAN) {
+            doGrayClean = true;
+          } else if (mode == JpegExportOptions.Mode.COLOR_CLEAN) {
+            doColorClean = true;
           } else if (mode == JpegExportOptions.Mode.AUTO) {
             doAuto = true;
           }
@@ -271,6 +277,14 @@ public final class BitmapUtils {
             doOcrRobustGray = true;
             toGray = false;
             toBw = false;
+          } else if ("GRAYSCALE_CLEAN".equalsIgnoreCase(mode)) {
+            doGrayClean = true;
+            toGray = false;
+            toBw = false;
+          } else if ("COLOR_CLEAN".equalsIgnoreCase(mode)) {
+            doColorClean = true;
+            toGray = false;
+            toBw = false;
           } else {
             toBw = false;
             // keep toGray as-is (legacy or preset preview)
@@ -283,7 +297,7 @@ public final class BitmapUtils {
       Bitmap safe = BitmapUtils.ensureDisplaySafe(source);
       Bitmap out = safe;
 
-      if (toBw || toGray || doAuto || doOcrRobustGray) {
+      if (toBw || toGray || doAuto || doOcrRobustGray || doGrayClean || doColorClean) {
         try {
           if (!OpenCVUtils.isInitialized()) {
             OpenCVUtils.init(ctx.getApplicationContext());
@@ -325,6 +339,14 @@ public final class BitmapUtils {
             // Mirror OCR robust preprocessing used in export (grayscale, not binary)
             Bitmap pre = OpenCVUtils.prepareForOCR(safe, /*binaryOutput*/ false);
             if (pre != null) out = pre;
+          } else if (doGrayClean) {
+            // High-pass grayscale clean filter (mirrors GRAY_CLEAN / GRAYSCALE_CLEAN export).
+            Bitmap hp = HighPassUtils.applyHighPassGray(safe, /*applyClahe*/ true);
+            if (hp != null) out = hp;
+          } else if (doColorClean) {
+            // High-pass color clean filter (mirrors COLOR_CLEAN export); preserves color.
+            Bitmap hp = HighPassUtils.applyHighPassColor(safe, /*applyClahe*/ true);
+            if (hp != null) out = hp;
           } else if (doAuto) {
             // Apply JPEG Auto enhance for preview: RGBA -> BGR, enhance, back to RGBA
             Mat rgba = new Mat();

@@ -256,17 +256,91 @@ public final class OpenCVUtils {
    *     parameters are invalid, the original bitmap is returned unmodified.
    */
   public static Bitmap applyPerspectiveCorrection(Bitmap originalBitmap, Point[] corners) {
+    return applyPerspectiveCorrection(originalBitmap, corners, WarpMode.AUTO_PROJECTIVE, null);
+  }
+
+  /**
+   * Forces the legacy pixel-distance heuristic for the warp target size, ignoring the projective
+   * estimate from stage A (v3.7.2). This is the implementation of the "Keep original (no aspect
+   * correction)" path in the crop screen aspect-ratio selector. See {@code
+   * docs/aspect_ratio_concept_v3.8.0.md} (§5.4).
+   */
+  public static Bitmap applyPerspectiveCorrectionLegacyHeuristic(
+      Bitmap originalBitmap, Point[] corners) {
+    return applyPerspectiveCorrection(originalBitmap, corners, WarpMode.LEGACY_HEURISTIC, null);
+  }
+
+  /**
+   * Applies a perspective correction with an explicit warp mode and optional fixed target ratio.
+   *
+   * <p>This is the stage B (v3.8.0) overload of the warp pipeline. The {@code mode} parameter
+   * selects how the target rectangle's size is determined:
+   *
+   * <ul>
+   *   <li>{@link WarpMode#AUTO_PROJECTIVE}: stage A behaviour — projective estimate (Zhang & He,
+   *       2006) with heuristic fallback. {@code targetShortOverLong} is ignored.
+   *   <li>{@link WarpMode#LEGACY_HEURISTIC}: forces the v3.7.1 pixel-distance heuristic. {@code
+   *       targetShortOverLong} is ignored.
+   *   <li>{@link WarpMode#FIXED_RATIO}: enforces the supplied {@code targetShortOverLong} ratio
+   *       (short/long edge in {@code (0, 1]}). Orientation (portrait vs. landscape) is derived from
+   *       the quad itself; the longer pixel edge anchors the output resolution so no upscaling
+   *       occurs.
+   * </ul>
+   *
+   * <p>If {@code mode} is {@link WarpMode#FIXED_RATIO} but {@code targetShortOverLong} is missing
+   * or out of range, the method falls back to {@link WarpMode#AUTO_PROJECTIVE}.
+   *
+   * @param originalBitmap source bitmap
+   * @param corners four corners of the selection (TL, TR, BR, BL)
+   * @param mode warp target-size strategy; see above
+   * @param targetShortOverLong short/long edge ratio in {@code (0, 1]}; only used when {@code mode
+   *     == FIXED_RATIO}
+   * @return the cropped bitmap, or {@code originalBitmap} when corners are invalid
+   */
+  public static Bitmap applyPerspectiveCorrection(
+      Bitmap originalBitmap,
+      Point[] corners,
+      WarpMode mode,
+      @androidx.annotation.Nullable Double targetShortOverLong) {
     if (corners == null || corners.length != 4) return originalBitmap;
+    if (mode == null) mode = WarpMode.AUTO_PROJECTIVE;
     Mat mat = new Mat();
     try {
       Utils.bitmapToMat(originalBitmap, mat);
       // Compute a tight target size based on the selection to preserve aspect ratio of the cropped
-      // area. Uses projective aspect-ratio estimation (Zhang & He, 2006) when possible to better
-      // recover the true rectangle proportions; falls back to the pixel-distance heuristic if the
-      // projective estimate is degenerate (e.g., near-fronto-parallel quad). See
-      // docs/aspect_ratio_concept_v3.7.2.md.
-      Size targetSize =
-          computeWarpTargetSize(corners, originalBitmap.getWidth(), originalBitmap.getHeight());
+      // area. The strategy depends on the requested WarpMode:
+      //   - AUTO_PROJECTIVE: projective aspect-ratio estimation (Zhang & He, 2006) with
+      //     heuristic fallback when degenerate. See docs/aspect_ratio_concept_v3.7.2.md.
+      //   - LEGACY_HEURISTIC: pixel-distance heuristic only.
+      //   - FIXED_RATIO: enforce the user-supplied short/long ratio; see
+      //     docs/aspect_ratio_concept_v3.8.0.md (§5).
+      Size targetSize;
+      switch (mode) {
+        case LEGACY_HEURISTIC:
+          targetSize = computeWarpTargetSize(corners);
+          break;
+        case FIXED_RATIO:
+          if (targetShortOverLong == null
+              || !Double.isFinite(targetShortOverLong)
+              || targetShortOverLong <= 0.0
+              || targetShortOverLong > 1.0) {
+            Log.w(
+                TAG,
+                "applyPerspectiveCorrection: FIXED_RATIO requested without a valid"
+                    + " short/long ratio; falling back to AUTO_PROJECTIVE");
+            targetSize =
+                computeWarpTargetSize(
+                    corners, originalBitmap.getWidth(), originalBitmap.getHeight());
+          } else {
+            targetSize = computeWarpTargetSizeForFixedRatio(corners, targetShortOverLong);
+          }
+          break;
+        case AUTO_PROJECTIVE:
+        default:
+          targetSize =
+              computeWarpTargetSize(corners, originalBitmap.getWidth(), originalBitmap.getHeight());
+          break;
+      }
       if (!isSafeMode()) {
         Log.d(TAG, "Using OpenCV warpPerspective");
         Mat warped = warpPerspectiveSafe(mat, corners, targetSize);
@@ -332,6 +406,120 @@ public final class OpenCVUtils {
     paint.setFilterBitmap(true);
     canvas.drawBitmap(srcBitmap, matrix, paint);
     return output;
+  }
+
+  /**
+   * Trims residual non-paper border (e.g. dark background remnants left after a slightly loose
+   * perspective crop) from the four sides of the given bitmap.
+   *
+   * <p>Approach: convert to grayscale, apply Otsu thresholding to obtain a foreground mask, and
+   * compute the dark-pixel ratio for each row and column. As long as the outermost row/column has a
+   * dark-pixel ratio above {@code darkRatioThreshold}, it is considered border and trimmed. To
+   * avoid cutting into the document, no more than {@code maxTrimFraction} of each side is removed.
+   *
+   * <p>Why it works: a clean scan of a document has only sparse dark pixels per row/column
+   * (text/graphics), typically &lt; 30%. A row that is mostly black background sits well above that
+   * threshold and is safely identified as non-paper.
+   *
+   * @param src input bitmap (typically the warpPerspective output). May be null.
+   * @return a new trimmed {@link Bitmap}, or {@code src} unchanged if no trimming is needed or the
+   *     operation cannot be performed.
+   */
+  public static Bitmap trimNonPaperBorder(Bitmap src) {
+    return trimNonPaperBorder(src, 0.30, 0.03);
+  }
+
+  /**
+   * See {@link #trimNonPaperBorder(Bitmap)} for a description of the algorithm.
+   *
+   * @param src input bitmap.
+   * @param darkRatioThreshold a row/column is considered border if its dark-pixel ratio exceeds
+   *     this value (range 0..1, typical 0.3).
+   * @param maxTrimFraction maximum fraction of each side that may be removed (range 0..0.5, typical
+   *     0.03 = 3%).
+   * @return trimmed bitmap, or {@code src} unchanged if nothing was trimmed.
+   */
+  public static Bitmap trimNonPaperBorder(
+      Bitmap src, double darkRatioThreshold, double maxTrimFraction) {
+    if (src == null || src.isRecycled()) return src;
+    final int w = src.getWidth();
+    final int h = src.getHeight();
+    if (w < 8 || h < 8) return src;
+
+    Mat rgba = new Mat();
+    Mat gray = new Mat();
+    Mat bw = new Mat();
+    try {
+      Utils.bitmapToMat(src, rgba);
+      Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
+      // Otsu threshold; INV so that "dark" pixels (border / text) become 255.
+      Imgproc.threshold(gray, bw, 0, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_OTSU);
+
+      final int maxTrimX = Math.max(0, Math.min(w / 2 - 1, (int) Math.round(w * maxTrimFraction)));
+      final int maxTrimY = Math.max(0, Math.min(h / 2 - 1, (int) Math.round(h * maxTrimFraction)));
+
+      // Row sums (dark-pixel count per row). Mat is 8U with values 0/255.
+      Mat rowSum = new Mat();
+      Mat colSum = new Mat();
+      try {
+        Core.reduce(bw, rowSum, 1, Core.REDUCE_SUM, CvType.CV_32S); // h x 1
+        Core.reduce(bw, colSum, 0, Core.REDUCE_SUM, CvType.CV_32S); // 1 x w
+
+        int[] rowBuf = new int[h];
+        int[] colBuf = new int[w];
+        rowSum.get(0, 0, rowBuf);
+        colSum.get(0, 0, colBuf);
+
+        final double rowThreshold = w * 255.0 * darkRatioThreshold;
+        final double colThreshold = h * 255.0 * darkRatioThreshold;
+
+        int top = 0;
+        while (top < maxTrimY && rowBuf[top] > rowThreshold) top++;
+        int bottom = 0;
+        while (bottom < maxTrimY && rowBuf[h - 1 - bottom] > rowThreshold) bottom++;
+        int left = 0;
+        while (left < maxTrimX && colBuf[left] > colThreshold) left++;
+        int right = 0;
+        while (right < maxTrimX && colBuf[w - 1 - right] > colThreshold) right++;
+
+        if (top == 0 && bottom == 0 && left == 0 && right == 0) {
+          return src;
+        }
+        int newW = w - left - right;
+        int newH = h - top - bottom;
+        if (newW < 8 || newH < 8) {
+          // Sanity guard: refuse to trim if it would destroy the image
+          return src;
+        }
+        Log.d(
+            TAG,
+            "trimNonPaperBorder: trimmed L="
+                + left
+                + " R="
+                + right
+                + " T="
+                + top
+                + " B="
+                + bottom
+                + " ("
+                + w
+                + "x"
+                + h
+                + " → "
+                + newW
+                + "x"
+                + newH
+                + ")");
+        return Bitmap.createBitmap(src, left, top, newW, newH);
+      } finally {
+        release(rowSum, colSum);
+      }
+    } catch (Throwable t) {
+      Log.w(TAG, "trimNonPaperBorder failed: " + t.getMessage());
+      return src;
+    } finally {
+      release(rgba, gray, bw);
+    }
   }
 
   // ---------- ONNX utilities ----------
@@ -418,11 +606,6 @@ public final class OpenCVUtils {
   /** Delegates to {@link BinarizationUtils#despeckleFast(Mat, int)}. */
   private static void despeckleFast(Mat bw, int targetDpi) {
     BinarizationUtils.despeckleFast(bw, targetDpi);
-  }
-
-  /** Delegates to {@link BinarizationUtils#clearBorderNoise(Mat)}. */
-  private static void clearBorderNoise(Mat bw) {
-    BinarizationUtils.clearBorderNoise(bw);
   }
 
   /** Delegates to {@link BinarizationUtils#toBw(Bitmap)}. */
@@ -1196,6 +1379,68 @@ public final class OpenCVUtils {
   }
 
   /**
+   * Strategy for {@link #applyPerspectiveCorrection(Bitmap, Point[], WarpMode, Double)}. See {@code
+   * docs/aspect_ratio_concept_v3.8.0.md} (§5).
+   */
+  public enum WarpMode {
+    /** Stage A: projective aspect-ratio estimate (Zhang & He, 2006), with heuristic fallback. */
+    AUTO_PROJECTIVE,
+    /** v3.7.1 pixel-distance heuristic, no projective correction. */
+    LEGACY_HEURISTIC,
+    /** Enforce a user-supplied short/long edge ratio. */
+    FIXED_RATIO
+  }
+
+  /**
+   * Computes the warp target size for an explicit short/long edge ratio. Orientation is derived
+   * from the quad itself (which axis is longer in the image), and the longer pixel edge anchors the
+   * output resolution so no upscaling occurs. See {@code docs/aspect_ratio_concept_v3.8.0.md}
+   * (§5.3).
+   *
+   * @param corners four corners (TL, TR, BR, BL)
+   * @param shortOverLong short/long edge ratio in {@code (0, 1]}
+   */
+  static Size computeWarpTargetSizeForFixedRatio(Point[] corners, double shortOverLong) {
+    if (corners == null || corners.length != 4) {
+      return new Size(1, 1);
+    }
+    if (!(shortOverLong > 0.0) || shortOverLong > 1.0 || !Double.isFinite(shortOverLong)) {
+      return new Size(1, 1);
+    }
+    double wTop = distance(corners[0], corners[1]);
+    double wBottom = distance(corners[2], corners[3]);
+    double hLeft = distance(corners[0], corners[3]);
+    double hRight = distance(corners[1], corners[2]);
+    double meanW = 0.5 * (wTop + wBottom);
+    double meanH = 0.5 * (hLeft + hRight);
+    double longPx = Math.max(Math.max(wTop, wBottom), Math.max(hLeft, hRight));
+    if (longPx < 1.0) {
+      return new Size(1, 1);
+    }
+    boolean landscapeQuad = meanW >= meanH;
+    int w;
+    int h;
+    if (landscapeQuad) {
+      w = (int) Math.round(longPx);
+      h = (int) Math.round(longPx * shortOverLong);
+    } else {
+      h = (int) Math.round(longPx);
+      w = (int) Math.round(longPx * shortOverLong);
+    }
+    w = Math.max(1, w) + 1;
+    h = Math.max(1, h) + 1;
+    Log.d(
+        TAG,
+        "computeWarpTargetSizeForFixedRatio: short/long="
+            + String.format(java.util.Locale.US, "%.4f", shortOverLong)
+            + ", target="
+            + w
+            + "x"
+            + h);
+    return new Size(w, h);
+  }
+
+  /**
    * Computes a tight target size (width/height) for the warp based on the lengths of the selected
    * quadrilateral edges. This preserves the aspect ratio of the selected area when mapping to a
    * rectangle.
@@ -1540,32 +1785,9 @@ public final class OpenCVUtils {
       }
 
       // 3) Background normalization to suppress shadows/gradients (division by blurred background)
-      //    Use floating-point math to avoid banding, then convert back to 8-bit in 'work'.
-      //    SAFE MODE: Skip float conversion (convertTo) which can crash on some emulators due to
-      //    unsupported SIMD instructions. Use simple copy instead.
-      if (isSafeMode()) {
-        Log.d(TAG, "prepareForOCR: Safe mode - skipping float normalization");
-        gray.copyTo(work);
-      } else {
-        int k = Math.max(15, (int) (Math.min(gray.width(), gray.height()) * 0.03));
-        if (k % 2 == 0) k++;
-        Mat bg = new Mat();
-        Imgproc.GaussianBlur(gray, bg, new Size(k, k), 0);
-        Mat gf = new Mat(), bgf = new Mat(), norm = new Mat();
-        try {
-          gray.convertTo(gf, CvType.CV_32F);
-          bg.convertTo(bgf, CvType.CV_32F);
-          Core.max(bgf, new Scalar(1.0), bgf); // prevent div-by-zero
-          Core.divide(gf, bgf, norm); // ~0..1
-          Core.multiply(norm, new Scalar(255.0), norm); // ~0..255
-          norm.convertTo(work, CvType.CV_8U);
-        } finally {
-          bg.release();
-          gf.release();
-          bgf.release();
-          norm.release();
-        }
-      }
+      //    Centralized in HighPassUtils to share behavior with BinarizationUtils and the new
+      //    "clean" filter modes. Safe-mode fallback (plain copy) is handled inside the helper.
+      HighPassUtils.backgroundDivideGray(gray, work, HighPassUtils.KERNEL_FRACTION_OCR);
 
       // 4) Gentle denoise + CLAHE (very mild, avoids over-bleaching)
       Imgproc.medianBlur(work, work, 3);
@@ -1582,22 +1804,32 @@ public final class OpenCVUtils {
         // Sauvola → refine → smart scale
 
         // 5a) Deskew (estimate skew angle and rotate to horizontal baselines)
-        try {
-          deskewInPlace(work); // rotates in-place and resizes 'work' as needed
-        } catch (Throwable ignore) {
-          // Best-effort; failure is non-critical
+        // SAFE MODE: Skip deskewInPlace which uses warpAffine via OpenCV's parallel_for_,
+        // known to cause native SIGILL crashes on emulators / certain ARM SoCs.
+        if (!isSafeMode()) {
+          try {
+            deskewInPlace(work); // rotates in-place and resizes 'work' as needed
+          } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
+          }
+        } else {
+          Log.d(TAG, "prepareForOCR: skipping deskewInPlace (safe mode)");
         }
 
         // 5b) Retinex-like normalization to flatten illumination
-        // SAFE MODE: Skip retinexNormalize which uses convertTo (can crash on emulators)
-        // if (!isSafeMode()) {
-        try {
-          retinexNormalize(
-              work, /*sigma*/ Math.max(15, Math.min(work.width(), work.height()) / 20));
-        } catch (Throwable ignore) {
-          // Best-effort; failure is non-critical
+        // SAFE MODE: Skip retinexNormalize which uses Mat.convertTo via OpenCV's parallel_for_,
+        // known to cause native SIGILL crashes on emulators / certain ARM SoCs (cannot be caught
+        // by try/catch since native signals terminate the process).
+        if (!isSafeMode()) {
+          try {
+            retinexNormalize(
+                work, /*sigma*/ Math.max(15, Math.min(work.width(), work.height()) / 20));
+          } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
+          }
+        } else {
+          Log.d(TAG, "prepareForOCR: skipping retinexNormalize (safe mode)");
         }
-        // }
 
         // Detect low-resolution images (e.g. from autoscan) and use gentler parameters
         int ocrLongSide = Math.max(work.width(), work.height());
@@ -1886,97 +2118,20 @@ public final class OpenCVUtils {
    */
   public static Bitmap prepareForOCRQuick(Bitmap src) {
     if (src == null || src.isRecycled()) return null;
-
-    Mat rgba = new Mat();
-    Mat gray = new Mat();
-    Mat bw = new Mat();
-    Bitmap out = null;
-
+    // Quick now delegates to the Robust grayscale pipeline (binaryOutput=false).
+    // Rationale (FR#74 A/B benchmark, docs/benchmarks/fr74_ocr_ab_2026-04-26.md):
+    // the previous Otsu-based Quick path scored avg CER 0.846 vs. 0.121 for the
+    // raw high-pass / 0.240 for Robust on the 6 FR#74 samples — the global Otsu
+    // step destroyed text on photo-style inputs. The non-binary Robust pipeline
+    // (gray + inversion + high-pass + median + mild CLAHE, no Sauvola/Retinex/
+    // fastNlMeansDenoising) is dramatically more accurate while staying close
+    // to the previous Quick latency budget.
     try {
-      // 1) RGBA -> GRAY
-      Utils.bitmapToMat(src, rgba);
-      Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
-
-      // 2) Gently support low-light (no harsh brightening)
-      if (isLowLight(gray)) {
-        try {
-          CLAHE clahe = Imgproc.createCLAHE(1.0, new Size(8, 8)); // very mild
-          clahe.apply(gray, gray);
-          clahe.collectGarbage();
-        } catch (Throwable ignore) {
-          // Best-effort; failure is non-critical
-        }
-      }
-
-      // 3) Light denoising
-      Imgproc.medianBlur(gray, gray, 3);
-
-      // 4) Otsu (no adaptive artifacts)
-      Imgproc.threshold(gray, bw, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
-
-      // 5) Remove small disturbances
-      despeckleFast(bw, 0); // Use default DPI (300) for OCR preparation
-
-      // 5b) Clear border noise to remove edge artifacts that cause OCR errors
-      clearBorderNoise(bw);
-
-      // 6) Light upscaling if too small (max. ~1.6x)
-      upscaleIfNeeded(bw, /*minLongSidePx*/ 1400, /*maxScale*/ 1.6);
-
-      // 7) Resize back to original dimensions expected by callers/tests
-      if (bw.cols() != src.getWidth() || bw.rows() != src.getHeight()) {
-        Mat resized = new Mat();
-        Imgproc.resize(
-            bw, resized, new Size(src.getWidth(), src.getHeight()), 0, 0, Imgproc.INTER_AREA);
-        bw.release();
-        bw = resized;
-      }
-      // -> ARGB_8888 for Tesseract
-      out = Bitmap.createBitmap(bw.cols(), bw.rows(), Bitmap.Config.ARGB_8888);
-      Utils.matToBitmap(bw, out);
-      return out;
-
+      return prepareForOCR(src, /*binaryOutput*/ false);
     } catch (Throwable t) {
       Log.e("OpenCVUtils", "prepareForOCRQuick failed", t);
       return null;
-    } finally {
-      release(rgba, gray, bw);
     }
-  }
-
-  /**
-   * Upscales the given single-channel matrix if its longer side is smaller than the specified
-   * minimum length. The scaling factor is determined based on the provided maximum scale and the
-   * ratio between the desired minimum long side and the current long side. Uses Lanczos
-   * interpolation for highest quality upscaling, followed by optional sharpening.
-   *
-   * @param singleChannel the single-channel matrix (CV_8U) that may be upscaled
-   * @param minLongSide the minimum length for the longer side of the matrix
-   * @param maxScale the maximum allowed scaling factor
-   */
-  private static void upscaleIfNeeded(
-      Mat singleChannel /*CV_8U*/, int minLongSide, double maxScale) {
-    int w = singleChannel.cols(), h = singleChannel.rows();
-    int longSide = Math.max(w, h);
-    if (longSide >= minLongSide) return;
-
-    double scale = Math.min(maxScale, (double) minLongSide / longSide);
-    int nw = Math.max(1, (int) Math.round(w * scale));
-    int nh = Math.max(1, (int) Math.round(h * scale));
-
-    Mat tmp = new Mat();
-    // Use INTER_LANCZOS4 for highest quality upscaling (better than INTER_CUBIC for text)
-    Imgproc.resize(singleChannel, tmp, new Size(nw, nh), 0, 0, Imgproc.INTER_LANCZOS4);
-
-    // Apply mild sharpening to enhance text edges after upscaling
-    try {
-      sharpenForOCR(tmp);
-    } catch (Throwable ignore) {
-      /* sharpening is optional */
-    }
-
-    tmp.copyTo(singleChannel);
-    tmp.release();
   }
 
   /**

@@ -78,28 +78,10 @@ public final class BinarizationUtils {
       Utils.bitmapToMat(src, rgba);
       Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGBA2GRAY);
 
-      // --- 1) Shadow correction: division-based normalization ---
+      // --- 1) Shadow correction: division-based normalization (centralized) ---
       if (opt.removeShadows && !OpenCVUtils.isSafeMode()) {
-        // Larger kernel captures broader illumination gradients for better shadow removal
-        int k = Math.max(51, (int) (Math.min(gray.width(), gray.height()) * 0.08));
-        if (k % 2 == 0) k++;
-        Mat bg = new Mat();
-        Imgproc.GaussianBlur(gray, bg, new Size(k, k), 0);
-
-        // Use floating-point arithmetic to avoid quantization artifacts
-        Mat gf = new Mat(), bgf = new Mat(), norm = new Mat();
-        work = new Mat(); // Create work Mat only when needed
-        gray.convertTo(gf, CvType.CV_32F);
-        bg.convertTo(bgf, CvType.CV_32F);
-        Core.max(bgf, new Scalar(1.0), bgf); // Prevent division by 0
-        Core.divide(gf, bgf, norm); // ~0..1
-        Core.multiply(norm, new Scalar(255.0), norm); // ~0..255
-        norm.convertTo(work, CvType.CV_8U);
-
-        bg.release();
-        gf.release();
-        bgf.release();
-        norm.release();
+        work = new Mat();
+        HighPassUtils.backgroundDivideGray(gray, work, HighPassUtils.KERNEL_FRACTION_BW, 51);
       } else {
         work = gray; // work points to gray, no separate Mat needed
       }
