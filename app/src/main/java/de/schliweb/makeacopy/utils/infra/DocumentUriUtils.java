@@ -31,10 +31,11 @@ public final class DocumentUriUtils {
   public static Uri deriveParentDocumentUri(Uri documentUri) {
     if (documentUri == null) return null;
     try {
-      if (!android.provider.DocumentsContract.isDocumentUri(null, documentUri)) {
+      // Detect document URIs structurally (authority + path segments) without calling
+      // DocumentsContract.isDocumentUri, which requires a non-null Context on some Android
+      // versions and would otherwise NPE inside PackageManager lookup.
+      if (!isStructurallyDocumentUri(documentUri)) {
         // Not a document URI from a DocumentsProvider — cannot derive parent.
-        // However, isDocumentUri with null context only checks URI structure (authority + path
-        // pattern), which is sufficient here.
         // Fallback: try heuristic path-based parent for content URIs.
         return deriveParentFromPathSegments(documentUri);
       }
@@ -59,6 +60,27 @@ public final class DocumentUriUtils {
       Log.w(TAG, "Could not derive parent document URI", e);
       return null;
     }
+  }
+
+  /**
+   * Lightweight, context-free check whether {@code uri} structurally looks like a document URI
+   * exposed by a {@link android.provider.DocumentsProvider}. We deliberately avoid {@link
+   * android.provider.DocumentsContract#isDocumentUri(android.content.Context, Uri)} because it
+   * requires a non-null Context (it dereferences {@code ctx.getPackageManager()} internally) and
+   * has been observed to NPE when called from background paths where no Context is available.
+   *
+   * <p>Document URIs from the SAF use the form {@code content://<authority>/document/<id>} or, for
+   * tree URIs, {@code content://<authority>/tree/<treeId>/document/<id>}.
+   */
+  static boolean isStructurallyDocumentUri(Uri uri) {
+    if (uri == null) return false;
+    if (!"content".equals(uri.getScheme())) return false;
+    java.util.List<String> seg = uri.getPathSegments();
+    if (seg == null || seg.isEmpty()) return false;
+    // Plain document URI: /document/<id>
+    if (seg.size() >= 2 && "document".equals(seg.get(0))) return true;
+    // Tree document URI: /tree/<treeId>/document/<id>
+    return seg.size() >= 4 && "tree".equals(seg.get(0)) && "document".equals(seg.get(2));
   }
 
   /**

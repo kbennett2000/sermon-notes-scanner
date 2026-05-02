@@ -2,4 +2,6 @@
 <resources>
     <!-- Dark mode specific colors -->
     <color name="button_container_background">#0D2E4F</color> <!-- Darker shade of blue for better visibility in dark mode -->
+    <!-- Dark mode override for crop toolbar active toggle: bright teal accent, well visible on dark surfaces. -->
+    <color name="crop_toggle_active">#FF03DAC5</color>
 </resources>

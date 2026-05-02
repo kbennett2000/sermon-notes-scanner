@@ -9,6 +9,7 @@
  */
 package de.schliweb.makeacopy.utils.infra;
 
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -22,6 +23,26 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class FeatureFlags {
+
+  /**
+   * Test-only override for the layout analysis feature flag. When non-null, this value takes
+   * precedence over the BuildConfig value. Must be reset to null after each test.
+   */
+  private static final AtomicReference<Boolean> layoutAnalysisOverride =
+      new AtomicReference<>(null);
+
+  /**
+   * Sets a test-only override for the layout analysis feature flag. Pass {@code null} to clear the
+   * override and revert to the BuildConfig default.
+   *
+   * <p>This method is intended exclusively for use in test code. Production code must not call it.
+   *
+   * @param enabled {@code true} to force-enable, {@code false} to force-disable, {@code null} to
+   *     use the BuildConfig default
+   */
+  public static void setLayoutAnalysisOverride(Boolean enabled) {
+    layoutAnalysisOverride.set(enabled);
+  }
 
   /**
    * Determines whether the OCR review feature is enabled in the application's build configuration.
@@ -102,10 +123,40 @@ public class FeatureFlags {
   }
 
   /**
+   * Process-wide cached state for the "Snap-to-Right-Angle" assist in the crop view. Persisted via
+   * {@link de.schliweb.makeacopy.ui.crop.CropPrefsHelper}; {@code CropFragment} hydrates this cache
+   * on view-creation and updates it on toggle, so framework-free callers (e.g. {@code
+   * TrapezoidSelectionView}) can read the current state without holding a {@link
+   * android.content.Context}. Default {@code false} when unset.
+   *
+   * <p>See {@code docs/fr72_edit_shape_from_export_concept.md} §5.
+   */
+  private static final AtomicReference<Boolean> cropSnapRightAngleState =
+      new AtomicReference<>(null);
+
+  /** Returns whether the Snap-to-Right-Angle assist is currently enabled. */
+  public static boolean isCropSnapRightAngleEnabled() {
+    Boolean state = cropSnapRightAngleState.get();
+    return state != null && state;
+  }
+
+  /**
+   * Updates the in-memory state for the Snap-to-Right-Angle feature. Persistence is the caller's
+   * responsibility (typically via {@code CropPrefsHelper#setSnapRightAngleEnabled}).
+   */
+  public static void setCropSnapRightAngleEnabled(boolean enabled) {
+    cropSnapRightAngleState.set(enabled);
+  }
+
+  /**
    * Feature flag: enables layout analysis for complex documents. When enabled, OCR can detect and
    * process multi-column documents and tables with optimized settings for each region.
    */
   public static boolean isLayoutAnalysisEnabled() {
+    Boolean override = layoutAnalysisOverride.get();
+    if (override != null) {
+      return override;
+    }
     try {
       Class<?> c = de.schliweb.makeacopy.BuildConfig.class;
       java.lang.reflect.Field f = c.getField("FEATURE_LAYOUT_ANALYSIS");
