@@ -22,19 +22,64 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Dokument-Vorschau -->
-    <ImageView
+    <!-- Dokument-Vorschau (mit Pinch-Zoom und Pan) -->
+    <de.schliweb.makeacopy.ui.export.view.ZoomableImageView
             android:id="@+id/document_preview"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"
-            android:scaleType="fitCenter"
             android:contentDescription="@string/document_preview"
             app:layout_constraintTop_toBottomOf="@id/text_export"
             app:layout_constraintBottom_toTopOf="@+id/pages_container"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- OCR badge overlay (analogous to filmstrip badge in item_export_page.xml):
+         shows [OCR] (green) when the currently previewed page already has OCR text on disk,
+         or [⚠] (orange) when OCR is missing. Tapping the badge while OCR is missing
+         triggers a background OCR run for the active page. Default hidden; ExportFragment
+         toggles visibility/state in updatePreviewOcrBadge(). -->
+    <TextView
+            android:id="@+id/preview_ocr_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="#33000000"
+            android:elevation="6dp"
+            android:minHeight="48dp"
+            android:minWidth="48dp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:contentDescription="@string/document_preview"
+            app:layout_constraintTop_toTopOf="@id/document_preview"
+            app:layout_constraintStart_toStartOf="@id/document_preview" />
+
+    <!-- Edit-Overlay (FR #72): re-enter CropFragment to adjust the trapezoid for the
+         currently displayed preview page. Default hidden; ExportFragment toggles visibility
+         based on whether the original image source for this page is reachable. -->
+    <ImageButton
+            android:id="@+id/button_edit_crop"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="8dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="@string/btn_edit_crop"
+            app:tooltipText="@string/btn_edit_crop"
+            android:background="@drawable/bg_circle_scrim"
+            android:elevation="6dp"
+            app:tint="@android:color/white"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/document_preview"
+            app:layout_constraintEnd_toEndOf="@id/document_preview" />
 
     <!-- Mehrseiten: Container -->
     <LinearLayout

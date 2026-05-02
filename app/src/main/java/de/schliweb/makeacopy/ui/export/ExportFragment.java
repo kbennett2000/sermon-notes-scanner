@@ -209,6 +209,176 @@ public class ExportFragment extends Fragment {
     Bitmap out = BitmapUtils.processForPreview(source, ctx);
     binding.documentPreview.setImageBitmap(out);
     binding.documentPreview.setVisibility(View.VISIBLE);
+    updateEditCropOverlayVisibility();
+    updatePreviewOcrBadge();
+  }
+
+  /**
+   * Updates the OCR badge overlay shown on top of the document preview, mirroring the per-page OCR
+   * indicator used in the filmstrip ({@link
+   * de.schliweb.makeacopy.ui.export.session.ExportPagesAdapter}).
+   *
+   * <p>Behavior:
+   *
+   * <ul>
+   *   <li>Hidden when the preview is not visible or no active page can be determined.
+   *   <li>Shows {@code [OCR]} on a green background when the active page has an existing OCR text
+   *       file on disk.
+   *   <li>Shows {@code [⚠]} on an orange background when OCR is missing; tapping the badge then
+   *       enqueues a background OCR run for the active page via {@link #runInlineOcrForPage(int)}.
+   * </ul>
+   */
+  private void updatePreviewOcrBadge() {
+    if (binding == null || binding.previewOcrBadge == null) return;
+    android.widget.TextView badge = binding.previewOcrBadge;
+    try {
+      // Hide while no preview image is shown.
+      if (binding.documentPreview == null
+          || binding.documentPreview.getVisibility() != View.VISIBLE) {
+        badge.setVisibility(View.GONE);
+        badge.setOnClickListener(null);
+        return;
+      }
+      int idx = findActivePageIndex();
+      List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pages =
+          (exportSessionViewModel != null) ? exportSessionViewModel.getPages().getValue() : null;
+      // Single-page hot workflow without session entry: no badge to show.
+      if (idx < 0 || pages == null || idx >= pages.size()) {
+        badge.setVisibility(View.GONE);
+        badge.setOnClickListener(null);
+        return;
+      }
+      de.schliweb.makeacopy.ui.export.session.CompletedScan s = pages.get(idx);
+      if (s == null) {
+        badge.setVisibility(View.GONE);
+        badge.setOnClickListener(null);
+        return;
+      }
+      String ocrPath = s.ocrTextPath();
+      boolean hasOcr = false;
+      if (ocrPath != null) {
+        try {
+          File f = new File(ocrPath);
+          hasOcr = f.exists() && f.isFile();
+        } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
+        }
+      }
+      if (hasOcr) {
+        badge.setText("[OCR]");
+        badge.setBackgroundColor(0x8032CD32); // semi green
+        badge.setOnClickListener(null);
+      } else {
+        badge.setText("[\u26A0]");
+        badge.setBackgroundColor(0x80FFA500); // semi orange
+        final int pos = idx;
+        badge.setOnClickListener(v -> runInlineOcrForPage(pos));
+      }
+      badge.setVisibility(View.VISIBLE);
+    } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
+      badge.setVisibility(View.GONE);
+      badge.setOnClickListener(null);
+    }
+  }
+
+  /**
+   * Toggles the visibility of the Re-Edit overlay (FR #72) on the document preview.
+   *
+   * <p>The overlay is shown when:
+   *
+   * <ul>
+   *   <li>the document preview is currently visible,
+   *   <li>the {@link CropViewModel} holds the previously accepted trapezoid corners, and
+   *   <li>the original image source (path or URI) for the active page is still reachable via {@link
+   *       CameraViewModel}.
+   * </ul>
+   *
+   * In V1 this effectively limits Re-Edit to the freshly captured / imported single-page workflow.
+   * Multi-page Re-Edit per page is tracked as a follow-up issue.
+   */
+  private void updateEditCropOverlayVisibility() {
+    if (binding == null || binding.buttonEditCrop == null) return;
+    boolean show = false;
+    try {
+      if (cropViewModel != null
+          && cameraViewModel != null
+          && binding.documentPreview.getVisibility() == View.VISIBLE) {
+        boolean hasCorners = cropViewModel.getLastAcceptedCornersOriginal().getValue() != null;
+        String path =
+            cameraViewModel.getImagePath() != null
+                ? cameraViewModel.getImagePath().getValue()
+                : null;
+        Uri u =
+            cameraViewModel.getImageUri() != null ? cameraViewModel.getImageUri().getValue() : null;
+        boolean hasOriginal = (path != null && !path.isEmpty()) || u != null;
+        show = hasCorners && hasOriginal && isActivePageReEditable();
+      }
+    } catch (Throwable ignore) {
+      // Best-effort; failure is non-critical
+    }
+    binding.buttonEditCrop.setVisibility(show ? View.VISIBLE : View.GONE);
+  }
+
+  /**
+   * FR #72 V1: Re-Edit is only possible for the page whose original capture is still tracked by
+   * {@link CameraViewModel} — that is effectively the most recently captured/imported page (its
+   * {@code inMemoryBitmap} is the very last entry in the session pages list). For any other page we
+   * have neither the original source path nor the persisted corners, so editing it would re- crop
+   * the wrong source. We therefore only enable Re-Edit when the currently previewed bitmap matches
+   * the last entry in the session, or when there is only one page (no filmstrip).
+   *
+   * <p>FR #72 multi-page (sibling helper {@link #findActivePageIndex()}): the index lookup below
+   * locates the active page even when it is not the last one, used by the Re-Edit confirm path to
+   * update the correct session slot.
+   */
+
+  /**
+   * FR #72 multi-page: returns the index in {@code ExportSessionViewModel.pages} whose {@code
+   * inMemoryBitmap()} matches the currently previewed bitmap. Returns {@code -1} when unknown (no
+   * session, no preview, or no match — e.g. single-page hot workflow with no session entry yet, in
+   * which case the legacy "page 0" fallback is appropriate).
+   */
+  private int findActivePageIndex() {
+    try {
+      if (exportSessionViewModel == null || exportViewModel == null) return -1;
+      List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pages =
+          exportSessionViewModel.getPages().getValue();
+      if (pages == null || pages.isEmpty()) return -1;
+      Bitmap curPreview = exportViewModel.getDocumentBitmap().getValue();
+      if (curPreview == null) return -1;
+      for (int i = 0; i < pages.size(); i++) {
+        de.schliweb.makeacopy.ui.export.session.CompletedScan s = pages.get(i);
+        if (s != null && s.inMemoryBitmap() == curPreview) return i;
+      }
+      return -1;
+    } catch (Throwable ignore) {
+      return -1;
+    }
+  }
+
+  private boolean isActivePageReEditable() {
+    // FR #72 V1.3: strict identity check against the bitmap that CropFragment marked as
+    // "freshly produced". Filmstrip selection of any other page swaps documentBitmap to a
+    // different identity and therefore correctly hides the Edit overlay. Single-page
+    // workflow without a session entry yet (lastFresh==null and only the seed bitmap is
+    // visible) is treated as editable to keep the hot-workflow UX intact.
+    try {
+      if (exportViewModel == null || cropViewModel == null) return false;
+      Bitmap cur = exportViewModel.getDocumentBitmap().getValue();
+      if (cur == null) return false;
+      Bitmap fresh = cropViewModel.getLastFreshPageBitmap();
+      if (fresh != null) return cur == fresh;
+      // Fallback for sessions where lastFreshPageBitmap was never set (e.g. legacy state
+      // restored across process death): allow Re-Edit only when there is at most one page.
+      if (exportSessionViewModel == null) return true;
+      List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pages =
+          exportSessionViewModel.getPages().getValue();
+      int n = (pages == null) ? 0 : pages.size();
+      return n <= 1;
+    } catch (Throwable ignore) {
+      return false;
+    }
   }
 
   private void renderPreviewFromCurrent() {
@@ -290,6 +460,58 @@ public class ExportFragment extends Fragment {
       }
     }
 
+    // FR #72 — Edit-Overlay: re-enter CropFragment to adjust the trapezoid for the
+    // currently displayed preview page. The overlay is only shown when the original
+    // image source for the active page is reachable (single-page hot workflow in V1):
+    // a known image path / URI in CameraViewModel and previously persisted corners
+    // in CropViewModel.
+    if (binding.buttonEditCrop != null) {
+      binding.buttonEditCrop.setOnClickListener(
+          v -> {
+            android.graphics.PointF[] lastCorners =
+                cropViewModel.getLastAcceptedCornersOriginal().getValue();
+            String path =
+                cameraViewModel.getImagePath() != null
+                    ? cameraViewModel.getImagePath().getValue()
+                    : null;
+            Uri origUri =
+                cameraViewModel.getImageUri() != null
+                    ? cameraViewModel.getImageUri().getValue()
+                    : null;
+            boolean hasOriginal = (path != null && !path.isEmpty()) || origUri != null;
+            if (!hasOriginal || lastCorners == null || !isActivePageReEditable()) {
+              UIUtils.showToast(
+                  requireContext(),
+                  getString(R.string.edit_crop_original_unavailable),
+                  Toast.LENGTH_SHORT);
+              return;
+            }
+            // Mark Re-Edit entry so CropFragment can:
+            //   - reload the original from disk (the in-memory original was nulled here),
+            //   - pre-populate the trapezoid with lastAcceptedCornersOriginal,
+            //   - on confirm/back, pop directly back to Export instead of advancing to OCR.
+            cropViewModel.setCameFromExport(true);
+            cropViewModel.setImageCropped(false);
+            // FR #72 multi-page: remember which session page is being re-edited so the
+            // confirm path can update the correct page instead of hardcoded index 0.
+            cropViewModel.setReEditPageIndex(findActivePageIndex());
+            try {
+              // FR #72 — use forward navigate (not popBackStack) so the existing Export
+              // entry is preserved on the back stack. On confirm/back the Re-Edit flow can
+              // then popBackStack(navigation_export, false) and the very same Export
+              // instance (with its observers) receives the updated cropped bitmap and
+              // re-renders the preview correctly.
+              Navigation.findNavController(v).navigate(R.id.navigation_crop);
+            } catch (Throwable t) {
+              Log.w(TAG, "Re-Edit navigation failed", t);
+              cropViewModel.setCameFromExport(false);
+              cropViewModel.setReEditPageIndex(-1);
+            }
+          });
+      // Visibility is recomputed whenever the preview is rendered; default hidden.
+      updateEditCropOverlayVisibility();
+    }
+
     // Multipage session setup (v1 increment) - use Activity scope so it survives navigation
     exportSessionViewModel =
         new ViewModelProvider(requireActivity())
@@ -299,8 +521,46 @@ public class ExportFragment extends Fragment {
             new de.schliweb.makeacopy.ui.export.session.ExportPagesAdapter.Callbacks() {
               @Override
               public void onRemoveClicked(int position) {
+                if (!isAdded()) return;
+                // Confirm removal to avoid accidental fat-finger deletions (analog to back
+                // navigation)
+                androidx.appcompat.app.AlertDialog dialog =
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle(getString(R.string.confirm_remove_page_title))
+                        .setMessage(getString(R.string.confirm_remove_page_message))
+                        .setPositiveButton(
+                            R.string.confirm,
+                            (dialogInterface, which) -> {
+                              if (exportSessionViewModel == null) return;
+                              List<de.schliweb.makeacopy.ui.export.session.CompletedScan> cur =
+                                  exportSessionViewModel.getPages().getValue();
+                              int n = (cur == null) ? 0 : cur.size();
+                              if (position < 0 || position >= n) return;
+                              exportSessionViewModel.removeAt(position);
+                              // A11y: announce removal
+                              View v = getView();
+                              if (isAdded() && v != null) {
+                                A11yUtils.announce(v, getString(R.string.page_removed));
+                              }
+                            })
+                        .setNegativeButton(
+                            R.string.cancel, (dialogInterface, which) -> dialogInterface.dismiss())
+                        .create();
+                dialog.setOnShowListener(
+                    dlg ->
+                        DialogUtils.improveAlertDialogButtonContrastForNight(
+                            dialog, requireContext()));
+                dialog.show();
+              }
+
+              @Override
+              public void onRemoveConfirmed(int position) {
+                if (!isAdded() || exportSessionViewModel == null) return;
+                List<de.schliweb.makeacopy.ui.export.session.CompletedScan> cur =
+                    exportSessionViewModel.getPages().getValue();
+                int n = (cur == null) ? 0 : cur.size();
+                if (position < 0 || position >= n) return;
                 exportSessionViewModel.removeAt(position);
-                // A11y: announce removal
                 View v = getView();
                 if (isAdded() && v != null) {
                   A11yUtils.announce(v, getString(R.string.page_removed));
@@ -430,6 +690,8 @@ public class ExportFragment extends Fragment {
               }
               // Do not toggle Include OCR checkbox visibility here; it remains hidden and
               // controlled by the dialog.
+              // Refresh OCR badge overlay on the preview (mirrors filmstrip badge state).
+              updatePreviewOcrBadge();
             });
     // Initialize or update pages based on current state and pending add-page flag
     Bitmap initBmp = cropViewModel.getImageBitmap().getValue();
@@ -466,6 +728,14 @@ public class ExportFragment extends Fragment {
           }
         }
         exportSessionViewModel.setInitial(initial);
+        // FR #72 V1.3: mark this bitmap as the "fresh" page (re-editable). Older pages
+        // selected later via the filmstrip will have a different bitmap identity and will
+        // therefore not show the Edit overlay.
+        try {
+          cropViewModel.setLastFreshPageBitmap(initBmp);
+        } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
+        }
         // Persist initial page so it appears in the registry as well
         persistCompletedScanAsync(initial);
       } else {
@@ -509,6 +779,13 @@ public class ExportFragment extends Fragment {
             }
           }
           exportSessionViewModel.add(added);
+          // FR #72 V1.3: the newly added page is the fresh one (its original capture is still
+          // tracked by CameraViewModel). Mark it for the Edit-overlay identity check.
+          try {
+            cropViewModel.setLastFreshPageBitmap(initBmp);
+          } catch (Throwable ignore) {
+            // Best-effort; failure is non-critical
+          }
           // Persist this newly added page into the CompletedScans registry (Insert-Hook)
           persistCompletedScanAsync(added);
         }
@@ -924,6 +1201,7 @@ public class ExportFragment extends Fragment {
                 renderPreview(bitmap);
               } else {
                 binding.documentPreview.setVisibility(View.INVISIBLE);
+                updatePreviewOcrBadge();
               }
             });
 

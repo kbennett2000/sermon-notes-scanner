@@ -695,6 +695,40 @@ public class PdfCreator {
       return base;
     }
 
+    // Grayscale Clean: high-pass filter producing a flat-lit grayscale document that preserves
+    // small-text edges. See HighPassUtils.
+    if (bwMode == BwMode.GRAYSCALE_CLEAN) {
+      Bitmap pre =
+          de.schliweb.makeacopy.utils.image.HighPassUtils.applyHighPassGray(
+              base, /*applyClahe*/ true);
+      if (base != original) {
+        try {
+          base.recycle();
+        } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
+        }
+      }
+      if (pre != null) return pre;
+      return base;
+    }
+
+    // Color Clean: high-pass filter on LAB L-channel while preserving a/b chroma. Produces an
+    // evenly lit color document. See HighPassUtils.
+    if (bwMode == BwMode.COLOR_CLEAN) {
+      Bitmap pre =
+          de.schliweb.makeacopy.utils.image.HighPassUtils.applyHighPassColor(
+              base, /*applyClahe*/ true);
+      if (base != original) {
+        try {
+          base.recycle();
+        } catch (Throwable ignore) {
+          // Best-effort; failure is non-critical
+        }
+      }
+      if (pre != null) return pre;
+      return base;
+    }
+
     if (!toGray) return base;
 
     Bitmap viaCvGray = OpenCVUtils.toGray(base);
@@ -1118,7 +1152,19 @@ public class PdfCreator {
   public enum BwMode {
     ROBUST,
     CLASSIC,
-    OCR_ROBUST
+    OCR_ROBUST,
+    /**
+     * High-pass grayscale filter: background-division normalization + mild CLAHE, produces a clean
+     * grayscale document that preserves small-text edges. See {@link
+     * de.schliweb.makeacopy.utils.image.HighPassUtils}.
+     */
+    GRAYSCALE_CLEAN,
+    /**
+     * High-pass color filter: background-division on LAB L-channel while preserving a/b chroma.
+     * Produces an evenly lit color document. See {@link
+     * de.schliweb.makeacopy.utils.image.HighPassUtils}.
+     */
+    COLOR_CLEAN
   }
 
   /**

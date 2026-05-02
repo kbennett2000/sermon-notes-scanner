@@ -341,7 +341,9 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
                 if (adapterPos == RecyclerView.NO_POSITION)
                   return super.performAccessibilityAction(host, action, args);
                 if (action == de.schliweb.makeacopy.R.id.a11y_action_delete_page) {
-                  callbacks.onRemoveClicked(adapterPos);
+                  // Accessibility actions are explicit user intent; bypass the confirmation
+                  // dialog used for the on-screen delete button.
+                  callbacks.onRemoveConfirmed(adapterPos);
                   return true;
                 } else if (action == de.schliweb.makeacopy.R.id.a11y_action_move_left) {
                   if (adapterPos > 0) {
@@ -391,6 +393,19 @@ public class ExportPagesAdapter extends RecyclerView.Adapter<ExportPagesAdapter.
      * @param position The position of the item in the list that was clicked.
      */
     void onRemoveClicked(int position);
+
+    /**
+     * Handles a confirmed removal request for a page (e.g. issued via an accessibility custom
+     * action), bypassing any confirmation UI. Implementations should remove the item directly.
+     *
+     * <p>The default implementation simply delegates to {@link #onRemoveClicked(int)} to preserve
+     * existing behavior for callers that do not override this method.
+     *
+     * @param position The position of the item in the list to remove.
+     */
+    default void onRemoveConfirmed(int position) {
+      onRemoveClicked(position);
+    }
 
     /**
      * Handles the event when a page in the list is clicked. Typically used to select the page at

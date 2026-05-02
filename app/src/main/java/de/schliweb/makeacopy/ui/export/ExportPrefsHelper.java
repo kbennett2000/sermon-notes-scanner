@@ -76,6 +76,8 @@ public final class ExportPrefsHelper {
     if ("CLASSIC".equalsIgnoreCase(bw)) return PdfCreator.BwMode.CLASSIC;
     if ("ROBUST".equalsIgnoreCase(bw)) return PdfCreator.BwMode.ROBUST;
     if ("OCR_ROBUST".equalsIgnoreCase(bw)) return PdfCreator.BwMode.OCR_ROBUST;
+    if ("GRAYSCALE_CLEAN".equalsIgnoreCase(bw)) return PdfCreator.BwMode.GRAYSCALE_CLEAN;
+    if ("COLOR_CLEAN".equalsIgnoreCase(bw)) return PdfCreator.BwMode.COLOR_CLEAN;
     return null;
   }
 
@@ -98,7 +100,11 @@ public final class ExportPrefsHelper {
     } else if ("CLASSIC".equalsIgnoreCase(pdfModeSel) || "ROBUST".equalsIgnoreCase(pdfModeSel)) {
       convertGray = false;
       convertBw = true;
-    } else if ("OCR_ROBUST".equalsIgnoreCase(pdfModeSel)) {
+    } else if ("OCR_ROBUST".equalsIgnoreCase(pdfModeSel)
+        || "GRAYSCALE_CLEAN".equalsIgnoreCase(pdfModeSel)
+        || "COLOR_CLEAN".equalsIgnoreCase(pdfModeSel)) {
+      // The preprocessing is handled inside processImageForPdf based on the resolved BwMode;
+      // keep both flags false so the generic gray/bw paths don't run first.
       convertGray = false;
       convertBw = false;
     }
@@ -106,11 +112,11 @@ public final class ExportPrefsHelper {
   }
 
   public static JpegExportOptions.Mode resolveJpegMode(Context context) {
-    String saved = getPrefs(context).getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name());
+    String saved = getPrefs(context).getString("jpeg_mode", JpegExportOptions.Mode.NONE.name());
     try {
       return JpegExportOptions.Mode.valueOf(saved);
     } catch (IllegalArgumentException ex) {
-      return JpegExportOptions.Mode.AUTO;
+      return JpegExportOptions.Mode.NONE;
     }
   }
 

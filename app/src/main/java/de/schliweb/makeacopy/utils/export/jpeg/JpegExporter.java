@@ -15,6 +15,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import de.schliweb.makeacopy.utils.image.BinarizationUtils;
+import de.schliweb.makeacopy.utils.image.HighPassUtils;
 import de.schliweb.makeacopy.utils.image.OpenCVUtils;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -196,6 +197,48 @@ public final class JpegExporter {
             Imgproc.GaussianBlur(work, work, new Size(0, 0), 1.2);
             Imgproc.threshold(work, work, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
             Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+          }
+          break;
+
+        case GRAY_CLEAN:
+          // High-pass grayscale filter: background-division + mild CLAHE. Preserves grayscale
+          // edges on small text instead of hard binarization.
+          try {
+            Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+            Utils.matToBitmap(work, tmpIn);
+            Bitmap hp = HighPassUtils.applyHighPassGray(tmpIn, /*applyClahe*/ true);
+            if (hp != null) {
+              Utils.bitmapToMat(hp, work);
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+            } else {
+              // Fallback: plain grayscale
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+            }
+          } catch (Throwable t) {
+            Log.w(TAG, "GRAY_CLEAN failed, falling back to plain grayscale", t);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+          }
+          break;
+
+        case COLOR_CLEAN:
+          // High-pass color filter: background-division on LAB L-channel, a/b preserved.
+          // Flattens uneven lighting while keeping colors.
+          try {
+            Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+            Utils.matToBitmap(work, tmpIn);
+            Bitmap hp = HighPassUtils.applyHighPassColor(tmpIn, /*applyClahe*/ true);
+            if (hp != null) {
+              Utils.bitmapToMat(hp, work); // RGBA, color preserved
+            }
+            // else: work already in RGBA (fallback keeps original colors)
+          } catch (Throwable t) {
+            Log.w(TAG, "COLOR_CLEAN failed, falling back to plain RGBA", t);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
           }
           break;
 
@@ -453,6 +496,43 @@ public final class JpegExporter {
             Imgproc.GaussianBlur(work, work, new Size(0, 0), 1.2);
             Imgproc.threshold(work, work, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
             Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+          }
+          break;
+        case GRAY_CLEAN:
+          // High-pass grayscale filter (see HighPassUtils).
+          try {
+            Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+            Utils.matToBitmap(work, tmpIn);
+            Bitmap hp = HighPassUtils.applyHighPassGray(tmpIn, /*applyClahe*/ true);
+            if (hp != null) {
+              Utils.bitmapToMat(hp, work);
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+            } else {
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_RGBA2GRAY);
+              Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+            }
+          } catch (Throwable t) {
+            Log.w(TAG, "GRAY_CLEAN failed, falling back to plain grayscale", t);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_GRAY2RGBA);
+          }
+          break;
+        case COLOR_CLEAN:
+          // High-pass color filter (see HighPassUtils).
+          try {
+            Bitmap tmpIn = Bitmap.createBitmap(work.cols(), work.rows(), Bitmap.Config.ARGB_8888);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
+            Utils.matToBitmap(work, tmpIn);
+            Bitmap hp = HighPassUtils.applyHighPassColor(tmpIn, /*applyClahe*/ true);
+            if (hp != null) {
+              Utils.bitmapToMat(hp, work);
+            }
+            // else: work is already RGBA
+          } catch (Throwable t) {
+            Log.w(TAG, "COLOR_CLEAN failed, falling back to plain RGBA", t);
+            Imgproc.cvtColor(work, work, Imgproc.COLOR_BGR2RGBA);
           }
           break;
         case NONE:

@@ -29,7 +29,19 @@ public class JpegExportOptions {
      * Use the same robust preprocessing pipeline as OCR (prepareForOCR with binaryOutput=false).
      * This yields the same grayscale-optimized input used for OCR.
      */
-    OCR_ROBUST
+    OCR_ROBUST,
+    /**
+     * Grayscale "clean" mode: high-pass filter (background-division normalization + mild CLAHE).
+     * Preserves grayscale edges on small text instead of hard binarization. See {@link
+     * de.schliweb.makeacopy.utils.image.HighPassUtils}.
+     */
+    GRAY_CLEAN,
+    /**
+     * Color "clean" mode: high-pass filter on the L channel in LAB color space (a/b chroma
+     * preserved). Flattens uneven lighting/shadows while keeping colors. See {@link
+     * de.schliweb.makeacopy.utils.image.HighPassUtils}.
+     */
+    COLOR_CLEAN
   }
 
   /** JPEG quality (0..100). Default 85. */

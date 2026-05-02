@@ -85,6 +85,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/pdf_bw_mode_ocr_robust" />
+
+                <RadioButton
+                    android:id="@+id/dialog_pdf_grayscale_clean"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pdf_bw_mode_grayscale_clean" />
+
+                <RadioButton
+                    android:id="@+id/dialog_pdf_color_clean"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pdf_bw_mode_color_clean" />
             </RadioGroup>
 
             <TextView
@@ -211,6 +223,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/jpeg_mode_ocr_robust" />
+
+                <RadioButton
+                    android:id="@+id/dialog_radio_jpeg_gray_clean"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/jpeg_mode_gray_clean" />
+
+                <RadioButton
+                    android:id="@+id/dialog_radio_jpeg_color_clean"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/jpeg_mode_color_clean" />
             </RadioGroup>
         </LinearLayout>
 

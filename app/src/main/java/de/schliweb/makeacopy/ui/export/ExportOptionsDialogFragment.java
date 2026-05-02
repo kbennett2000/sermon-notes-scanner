@@ -132,6 +132,8 @@ public class ExportOptionsDialogFragment extends DialogFragment {
     RadioButton rbJpegBw = view.findViewById(R.id.dialog_radio_jpeg_bw_text);
     RadioButton rbJpegBwRobust = view.findViewById(R.id.dialog_radio_jpeg_bw_robust);
     RadioButton rbJpegOcrRobust = view.findViewById(R.id.dialog_radio_jpeg_ocr_robust);
+    RadioButton rbJpegGrayClean = view.findViewById(R.id.dialog_radio_jpeg_gray_clean);
+    RadioButton rbJpegColorClean = view.findViewById(R.id.dialog_radio_jpeg_color_clean);
 
     RadioGroup pageFormatGroup = view.findViewById(R.id.dialog_page_format_group);
     RadioButton rbPageFit = view.findViewById(R.id.dialog_radio_page_fit);
@@ -145,17 +147,19 @@ public class ExportOptionsDialogFragment extends DialogFragment {
     RadioButton rbPdfBwRobust = view.findViewById(R.id.dialog_pdf_bw_robust);
     RadioButton rbPdfBwClassic = view.findViewById(R.id.dialog_pdf_bw_classic);
     RadioButton rbPdfOcrRobust = view.findViewById(R.id.dialog_pdf_ocr_robust);
+    RadioButton rbPdfGrayscaleClean = view.findViewById(R.id.dialog_pdf_grayscale_clean);
+    RadioButton rbPdfColorClean = view.findViewById(R.id.dialog_pdf_color_clean);
 
     SharedPreferences prefs = ctx.getSharedPreferences("export_options", Context.MODE_PRIVATE);
     boolean includeOcr = prefs.getBoolean("include_ocr", false);
     boolean exportAsJpeg = prefs.getBoolean("export_as_jpeg", false);
     // Legacy booleans removed; selection now driven solely by pdf_bw_mode
-    String jpegModeSaved = prefs.getString("jpeg_mode", JpegExportOptions.Mode.AUTO.name());
+    String jpegModeSaved = prefs.getString("jpeg_mode", JpegExportOptions.Mode.NONE.name());
     JpegExportOptions.Mode jpegMode;
     try {
       jpegMode = JpegExportOptions.Mode.valueOf(jpegModeSaved);
     } catch (Exception e) {
-      jpegMode = JpegExportOptions.Mode.AUTO;
+      jpegMode = JpegExportOptions.Mode.NONE;
     }
     String pdfBwModeSaved = prefs.getString("pdf_bw_mode", null);
     String presetSaved = prefs.getString("pdf_preset", null);
@@ -192,12 +196,17 @@ public class ExportOptionsDialogFragment extends DialogFragment {
     else if (jpegMode == JpegExportOptions.Mode.BW_TEXT) rbJpegBw.setChecked(true);
     else if (jpegMode == JpegExportOptions.Mode.BW_ROBUST) rbJpegBwRobust.setChecked(true);
     else if (jpegMode == JpegExportOptions.Mode.OCR_ROBUST) rbJpegOcrRobust.setChecked(true);
+    else if (jpegMode == JpegExportOptions.Mode.GRAY_CLEAN) rbJpegGrayClean.setChecked(true);
+    else if (jpegMode == JpegExportOptions.Mode.COLOR_CLEAN) rbJpegColorClean.setChecked(true);
 
     // Initialize PDF mode radios ("none" selected if no saved value)
     if ("GRAYSCALE".equalsIgnoreCase(pdfBwModeSaved)) rbPdfGray.setChecked(true);
     else if ("CLASSIC".equalsIgnoreCase(pdfBwModeSaved)) rbPdfBwClassic.setChecked(true);
     else if ("ROBUST".equalsIgnoreCase(pdfBwModeSaved)) rbPdfBwRobust.setChecked(true);
     else if ("OCR_ROBUST".equalsIgnoreCase(pdfBwModeSaved)) rbPdfOcrRobust.setChecked(true);
+    else if ("GRAYSCALE_CLEAN".equalsIgnoreCase(pdfBwModeSaved))
+      rbPdfGrayscaleClean.setChecked(true);
+    else if ("COLOR_CLEAN".equalsIgnoreCase(pdfBwModeSaved)) rbPdfColorClean.setChecked(true);
     else rbPdfBwNone.setChecked(true);
 
     // ── Inbox Mode UI ──
@@ -308,7 +317,7 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                   boolean asJpeg = rbExportJpeg.isChecked();
 
                   // determine jpeg mode from RadioGroup
-                  JpegExportOptions.Mode mode = JpegExportOptions.Mode.AUTO;
+                  JpegExportOptions.Mode mode = JpegExportOptions.Mode.NONE;
                   int jpegCheckedId = jpegModeGroup.getCheckedRadioButtonId();
                   if (jpegCheckedId == rbJpegNone.getId()) mode = JpegExportOptions.Mode.NONE;
                   else if (jpegCheckedId == rbJpegAuto.getId()) mode = JpegExportOptions.Mode.AUTO;
@@ -317,6 +326,10 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                     mode = JpegExportOptions.Mode.BW_ROBUST;
                   else if (jpegCheckedId == rbJpegOcrRobust.getId())
                     mode = JpegExportOptions.Mode.OCR_ROBUST;
+                  else if (jpegCheckedId == rbJpegGrayClean.getId())
+                    mode = JpegExportOptions.Mode.GRAY_CLEAN;
+                  else if (jpegCheckedId == rbJpegColorClean.getId())
+                    mode = JpegExportOptions.Mode.COLOR_CLEAN;
 
                   // determine PDF color mode from RadioGroup (null = none/original)
                   String pdfBwMode = null;
@@ -325,6 +338,9 @@ public class ExportOptionsDialogFragment extends DialogFragment {
                   else if (pdfBwCheckedId == rbPdfBwClassic.getId()) pdfBwMode = "CLASSIC";
                   else if (pdfBwCheckedId == rbPdfBwRobust.getId()) pdfBwMode = "ROBUST";
                   else if (pdfBwCheckedId == rbPdfOcrRobust.getId()) pdfBwMode = "OCR_ROBUST";
+                  else if (pdfBwCheckedId == rbPdfGrayscaleClean.getId())
+                    pdfBwMode = "GRAYSCALE_CLEAN";
+                  else if (pdfBwCheckedId == rbPdfColorClean.getId()) pdfBwMode = "COLOR_CLEAN";
 
                   // determine pdf preset
                   PdfQualityPreset sel = PdfQualityPreset.STANDARD;
