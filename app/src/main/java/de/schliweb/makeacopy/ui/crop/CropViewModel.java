@@ -15,6 +15,8 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import de.schliweb.makeacopy.ui.BaseViewModel;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * ViewModel class for managing image cropping operations. Provides LiveData to observe the state
@@ -256,15 +258,7 @@ public class CropViewModel extends BaseViewModel {
    * after performCrop to update the correct session page (instead of hardcoded index 0). {@code -1}
    * means "unknown / single-page workflow".
    */
-  private int reEditPageIndex = -1;
-
-  public int getReEditPageIndex() {
-    return reEditPageIndex;
-  }
-
-  public void setReEditPageIndex(int index) {
-    this.reEditPageIndex = index;
-  }
+  @Setter @Getter private int reEditPageIndex = -1;
 
   /**
    * FR #72 V1.3 (multi-page filmstrip identity): identity reference to the in-memory bitmap of the
@@ -276,7 +270,8 @@ public class CropViewModel extends BaseViewModel {
   private java.lang.ref.WeakReference<Bitmap> lastFreshPageBitmapRef =
       new java.lang.ref.WeakReference<>(null);
 
-  private boolean lastFreshPageBitmapFromReEdit = false;
+  /** -- GETTER -- True when the current fresh-page bitmap came from Export → Crop Re-Edit. */
+  @Getter private boolean lastFreshPageBitmapFromReEdit = false;
 
   /** Returns the cached fresh-page bitmap (identity reference) or null when GC'ed/never set. */
   public Bitmap getLastFreshPageBitmap() {
@@ -293,10 +288,5 @@ public class CropViewModel extends BaseViewModel {
   public void setLastFreshReEditPageBitmap(Bitmap bmp) {
     this.lastFreshPageBitmapRef = new java.lang.ref.WeakReference<>(bmp);
     this.lastFreshPageBitmapFromReEdit = true;
-  }
-
-  /** True when the current fresh-page bitmap came from Export → Crop Re-Edit. */
-  public boolean isLastFreshPageBitmapFromReEdit() {
-    return lastFreshPageBitmapFromReEdit;
   }
 }
