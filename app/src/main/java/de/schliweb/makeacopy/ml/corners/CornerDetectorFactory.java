@@ -14,20 +14,26 @@ import androidx.annotation.NonNull;
 import de.schliweb.makeacopy.ml.docquad.DocQuadOrtRunner;
 
 /**
- * Zentrale Policy-Factory, damit Crop und Live nicht auseinanderlaufen.
+ * A factory class for creating instances of {@link CornerDetector}. This factory provides
+ * specialized configurations of corner detectors for different use cases, such as cropping and live
+ * processing. The detectors utilize a combination of DocQuad-based detection and an OpenCV-based
+ * fallback for flexibility and robustness. Smoothing mechanisms can also be applied for live
+ * detection scenarios.
  *
- * <p>DocQuad ist der Standard-Detector mit OpenCV als Fallback.
+ * <p>This class is not intended to be instantiated.
  */
 public final class CornerDetectorFactory {
 
   private CornerDetectorFactory() {}
 
   /**
-   * Crop-Policy: DocQuad → OpenCV-only → Fallback.
+   * Creates a {@link CornerDetector} optimized for cropping operations. This detector combines a
+   * DocQuad-based detection mechanism with an OpenCV fallback to ensure reliability in diverse
+   * scenarios.
    *
-   * <p>Für einmalige Erkennung im Crop-Screen (ohne Throttling).
-   *
-   * @param runner pre-loaded DocQuadOrtRunner
+   * @param ctx the application context used for initializing the detector.
+   * @param runner the pre-loaded {@link DocQuadOrtRunner} instance for DocQuad-based detection.
+   * @return a {@link CornerDetector} instance suitable for cropping operations.
    */
   @NonNull
   public static CornerDetector forCrop(@NonNull Context ctx, @NonNull DocQuadOrtRunner runner) {
@@ -35,16 +41,20 @@ public final class CornerDetectorFactory {
   }
 
   /**
-   * Live-Policy: DocQuad (cached + throttled) → OpenCV-only.
+   * Creates a {@link CornerDetector} optimized for live corner detection during real-time
+   * processing. This detector uses a combination of throttled DocQuad detection and a fallback to
+   * OpenCV-based corner detection. It also applies smoothing using a default One Euro Corner
+   * Smoother for stability.
    *
-   * <p>Für kontinuierliche Live-Kamera-Analyse mit Throttling (~4 Hz).
-   *
-   * @param runner pre-loaded DocQuadOrtRunner
+   * @param ctx the application context used for initializing the detector.
+   * @param runner the pre-loaded {@link DocQuadOrtRunner} instance for DocQuad-based detection.
+   * @return a {@link CornerDetector} instance suitable for live processing.
    */
   @NonNull
   public static CornerDetector forLive(@NonNull Context ctx, @NonNull DocQuadOrtRunner runner) {
+    OneEuroCornerSmoother smoother = OneEuroCornerSmoother.withDefaults();
     return new CompositeCornerDetector(
-        new ThrottledDocQuadLiveDetector(ctx.getApplicationContext(), runner),
+        new ThrottledDocQuadLiveDetector(ctx.getApplicationContext(), runner, smoother),
         new OpenCvCornerDetector());
   }
 }
