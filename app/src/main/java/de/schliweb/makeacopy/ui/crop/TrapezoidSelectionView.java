@@ -1394,6 +1394,49 @@ public class TrapezoidSelectionView extends View {
     //  - the quad is not a clean full-image rectangle (all 4 corners near canonical positions).
     if (hugEdge >= 2 && farFromCanonical >= 1 && nearCanonical < 4) return true;
 
+    // Trigger D (heavily degenerate trapezoid on a pre-cropped image):
+    // Independent of edge-hugging, if the detector returns a quad whose opposing sides differ
+    // dramatically in length (one pair of "parallel" sides is less than half the length of the
+    // other) AND the bounding box does not cover most of the image, the quad is clearly
+    // degenerate (e.g. one corner collapsed onto another, leaving a pinched/triangle-like
+    // shape). This pattern is typical for the detector running on an already-cropped photo
+    // where it cannot find a real document outline. Fall back to the full image rectangle.
+    {
+      double topLen0 = Math.hypot(quad[0].x - quad[1].x, quad[0].y - quad[1].y);
+      double botLen0 = Math.hypot(quad[3].x - quad[2].x, quad[3].y - quad[2].y);
+      double leftLen0 = Math.hypot(quad[0].x - quad[3].x, quad[0].y - quad[3].y);
+      double rightLen0 = Math.hypot(quad[1].x - quad[2].x, quad[1].y - quad[2].y);
+      double parH0 =
+          (Math.max(topLen0, botLen0) > 0)
+              ? Math.min(topLen0, botLen0) / Math.max(topLen0, botLen0)
+              : 0;
+      double parV0 =
+          (Math.max(leftLen0, rightLen0) > 0)
+              ? Math.min(leftLen0, rightLen0) / Math.max(leftLen0, rightLen0)
+              : 0;
+      double minXq = Double.POSITIVE_INFINITY, minYq = Double.POSITIVE_INFINITY;
+      double maxXq = Double.NEGATIVE_INFINITY, maxYq = Double.NEGATIVE_INFINITY;
+      for (int i = 0; i < 4; i++) {
+        if (quad[i].x < minXq) minXq = quad[i].x;
+        if (quad[i].y < minYq) minYq = quad[i].y;
+        if (quad[i].x > maxXq) maxXq = quad[i].x;
+        if (quad[i].y > maxYq) maxYq = quad[i].y;
+      }
+      double cov0 =
+          Math.max(0, maxXq - minXq) * Math.max(0, maxYq - minYq) / ((double) imgW * imgH);
+      if (Math.min(parH0, parV0) < 0.5 && cov0 < 0.60 && nearCanonical < 4) return true;
+    }
+
+    // Trigger C (heavily skewed quad on a pre-cropped image):
+    // If two or more corners sit far away from their expected canonical image corners AND at
+    // least one corner still hugs an image edge, the detected shape is heavily skewed and almost
+    // certainly a mis-detection on an already-cropped image (e.g. on a PDF page where the
+    // detector latched onto two image edges but the other two corners drifted far away from
+    // their canonical positions). The extra hug-edge requirement avoids triggering on normal
+    // photos where the document is fully inside the frame and every corner is naturally far
+    // from the image corners.
+    if (farFromCanonical >= 2 && hugEdge >= 1 && nearCanonical < 4) return true;
+
     // Trigger B (interior mis-detection on an already-cropped image):
     // The detector returned a small/medium quad fully inside the image, far away from every edge.
     // On a real photo the document almost always touches or comes close to at least one image
@@ -1422,7 +1465,26 @@ public class TrapezoidSelectionView extends View {
     double bboxW = Math.max(0, maxX - minX);
     double bboxH = Math.max(0, maxY - minY);
     double bboxCoverage = (bboxW * bboxH) / ((double) imgW * (double) imgH);
-    return allInsideCount == 4 && bboxCoverage < 0.60;
+    if (allInsideCount != 4 || bboxCoverage >= 0.60) return false;
+
+    // Plausibility check: a well-shaped quad whose opposing sides are roughly the same length
+    // is most likely a genuine document detection (e.g. a centred document with margin), even
+    // if the bounding box covers only a small fraction of the image. Skip the fallback in that
+    // case so the detector result is preserved. Only flag clearly degenerate (non-rectangular)
+    // quads as interior misdetections.
+    double topLen = Math.hypot(quad[0].x - quad[1].x, quad[0].y - quad[1].y);
+    double botLen = Math.hypot(quad[3].x - quad[2].x, quad[3].y - quad[2].y);
+    double leftLen = Math.hypot(quad[0].x - quad[3].x, quad[0].y - quad[3].y);
+    double rightLen = Math.hypot(quad[1].x - quad[2].x, quad[1].y - quad[2].y);
+    double parRatioH =
+        (Math.max(topLen, botLen) > 0) ? Math.min(topLen, botLen) / Math.max(topLen, botLen) : 0;
+    double parRatioV =
+        (Math.max(leftLen, rightLen) > 0)
+            ? Math.min(leftLen, rightLen) / Math.max(leftLen, rightLen)
+            : 0;
+    // If both opposing-side ratios are close to 1 (rectangular-ish), consider the quad plausible
+    // and keep the detector result.
+    return !(parRatioH >= 0.85 && parRatioV >= 0.85);
   }
 
   /** Builds a full-image quad (TL, TR, BR, BL) in image space. */
