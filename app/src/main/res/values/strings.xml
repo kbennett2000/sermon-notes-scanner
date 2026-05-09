@@ -239,6 +239,7 @@
     <string name="ocr_mode_original">Original (no preprocessing)</string>
     <string name="ocr_mode_quick">OpenCV Quick (fast)</string>
     <string name="ocr_mode_robust">OpenCV Robust (high quality)</string>
+    <string name="ocr_mode_paddle" tools:ignore="MissingTranslation">PaddleOCR (experimental, no preprocessing)</string>
     <string name="ocr_prep_mode_set">Recognition mode set to %1$s</string>
 
     <!-- Labels -->
@@ -363,7 +364,9 @@
     <string name="opt_ocr_post_processing">OCR post-processing (correct common errors)</string>
     <!-- Options: Layout analysis for complex documents -->
     <string name="opt_layout_analysis">Layout analysis (columns, tables)
-    </string>    <!-- Options: Experimental directional mapping fallback -->    <!-- Developer / Debug options -->    <!-- Library / Collections (developer strings kept non-translatable for now) -->    <!-- PDF Import -->
+    </string>
+    <!-- Options: PaddleOCR strings live in src/paddle/res/values/strings.xml (paddle flavor only). -->
+    <!-- Options: Experimental directional mapping fallback -->    <!-- Developer / Debug options -->    <!-- Library / Collections (developer strings kept non-translatable for now) -->    <!-- PDF Import -->
     <string name="error_unknown_file_type">Unknown file type</string>
     <string name="error_unsupported_file_type">This file type is not supported</string>
     <string name="error_cannot_open_pdf">Could not open PDF</string>
@@ -444,6 +447,8 @@
     <string name="crop_aspect_custom_dialog_title">Custom aspect ratio</string>
     <string name="crop_aspect_custom_width_hint">Width</string>
     <string name="crop_aspect_custom_height_hint">Height</string>
+    <!-- Universal separator displayed between width and height in the custom aspect ratio dialog (e.g. "16 : 9"); not translatable. -->
+    <string name="crop_aspect_ratio_separator" translatable="false">:</string>
     <string name="crop_aspect_custom_invalid">Please enter positive numbers within 1:1 to 1:20.</string>
     <string name="crop_aspect_output_size_hint" tools:ignore="UnusedResources">Output: %1$d × %2$d px</string>
     <!-- Crop: Edge dragging & off-screen corners (see docs/edge_drag_pan_zoom_concept.md) -->

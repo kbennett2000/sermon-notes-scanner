@@ -236,6 +236,7 @@
     <string name="ocr_mode_original">Original (ohne Vorverarbeitung)</string>
     <string name="ocr_mode_quick">OpenCV Schnell (schnell)</string>
     <string name="ocr_mode_robust">OpenCV Robust (hohe Qualität)</string>
+    <string name="ocr_mode_paddle">PaddleOCR (experimentell, ohne Vorverarbeitung)</string>
     <string name="ocr_prep_mode_set">Erkennungsmodus gesetzt: %1$s</string>
 
     <!-- Labels -->
@@ -362,6 +363,7 @@
     <!-- Options: OCR post-processing toggle -->
     <string name="opt_ocr_post_processing">OCR-Nachbearbeitung (häufige Fehler korrigieren)</string>
     <string name="opt_layout_analysis">Layout-Analyse (Spalten, Tabellen)</string>
+    <!-- Options: PaddleOCR-Strings liegen in src/paddle/res/values-de/strings.xml (nur paddle-Flavor). -->
     <!-- Options: Experimental directional mapping fallback -->
     <!-- Developer / Debug options -->
     <!-- Library / Collections -->    <!-- Reorder A11y controls (defined above) -->

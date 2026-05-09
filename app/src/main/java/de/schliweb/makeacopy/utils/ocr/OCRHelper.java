@@ -16,6 +16,7 @@ import android.graphics.RectF;
 import android.util.Log;
 import androidx.core.content.ContextCompat;
 import com.googlecode.tesseract.android.TessBaseAPI;
+import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.utils.image.OpenCVUtils;
 import de.schliweb.makeacopy.utils.infra.FeatureFlags;
 import de.schliweb.makeacopy.utils.layout.DocumentLayoutAnalyzer;
@@ -106,6 +107,14 @@ public class OCRHelper {
 
   public static final int OCR_MODE_QUICK = 1;
   public static final int OCR_MODE_ROBUST = 2;
+
+  /**
+   * PaddleOCR (paddle flavor only): exclusive engine selection. Skips all preprocessing — the
+   * original (rotated) bitmap is fed directly into the Paddle pipeline. When the paddle engine
+   * cannot be initialized at runtime, OCRHelper transparently falls back to Tesseract on the same
+   * original bitmap (i.e. behaves like {@link #OCR_MODE_ORIGINAL}).
+   */
+  public static final int OCR_MODE_PADDLE = 3;
 
   /**
    * Selected recognition mode for region-OCR (layout analysis path). Defaults to ROBUST to preserve
@@ -320,14 +329,11 @@ public class OCRHelper {
   }
 
   /**
-   * Sets the page segmentation mode for the Tesseract OCR engine. The page segmentation mode
-   * determines how Tesseract interprets the structure of the input image, such as whether the input
-   * is a single block of text, a single word, or a single character. This setting can influence the
-   * accuracy and performance of OCR processing.
+   * Sets the page segmentation mode for the OCR engine. The page segmentation mode determines how
+   * the OCR engine divides the input image into text blocks.
    *
-   * @param mode The page segmentation mode to be set. Valid values are defined by the Tesseract API
-   *     and include modes such as single block of text, single word, single character, etc. Refer
-   *     to the Tesseract documentation for details on available modes.
+   * @param mode the page segmentation mode to set. It is an integer value representing the desired
+   *     page segmentation mode. Refer to the OCR engine documentation for valid mode values.
    */
   public void setPageSegMode(int mode) {
     this.pageSegMode = mode;
@@ -344,14 +350,17 @@ public class OCRHelper {
   }
 
   /**
-   * Sets the preprocessing pipeline used by region-OCR in the layout-analysis path. Mirrors the
-   * user-facing OCR mode in OCRFragment so that region-OCR matches the page-level pipeline.
+   * Sets the recognition mode for the OCR processing.
    *
-   * @param mode one of {@link #OCR_MODE_ORIGINAL}, {@link #OCR_MODE_QUICK} or {@link
-   *     #OCR_MODE_ROBUST}. Unknown values fall back to ROBUST.
+   * @param mode The recognition mode to be set. Valid values are: OCR_MODE_ORIGINAL,
+   *     OCR_MODE_QUICK, OCR_MODE_ROBUST, and OCR_MODE_PADDLE. If an invalid value is provided, the
+   *     mode defaults to OCR_MODE_ROBUST.
    */
   public void setRecognitionMode(int mode) {
-    if (mode != OCR_MODE_ORIGINAL && mode != OCR_MODE_QUICK && mode != OCR_MODE_ROBUST) {
+    if (mode != OCR_MODE_ORIGINAL
+        && mode != OCR_MODE_QUICK
+        && mode != OCR_MODE_ROBUST
+        && mode != OCR_MODE_PADDLE) {
       mode = OCR_MODE_ROBUST;
     }
     this.recognitionMode = mode;
@@ -359,8 +368,10 @@ public class OCRHelper {
   }
 
   /**
-   * Toggles forced binary preprocessing for region-OCR in ROBUST mode. See {@link
-   * #forceBinaryRobust}.
+   * Enables or disables the force binary robust mode.
+   *
+   * @param enable A boolean value indicating whether to enable (true) or disable (false) the force
+   *     binary robust mode.
    */
   public void setForceBinaryRobust(boolean enable) {
     this.forceBinaryRobust = enable;
@@ -368,8 +379,10 @@ public class OCRHelper {
   }
 
   /**
-   * Enables/disables reinitialization of Tesseract before each OCR run. Default is true to reduce
-   * variability across runs.
+   * Sets the reinitialization behavior for each run.
+   *
+   * @param enable A boolean value indicating whether reinitialization should be enabled (true) or
+   *     disabled (false).
    */
   public void setReinitPerRun(boolean enable) {
     this.reinitPerRun = enable;
@@ -377,15 +390,10 @@ public class OCRHelper {
   }
 
   /**
-   * Enables/disables Best model optimizations. When enabled, the following optimizations are
-   * applied: - Higher DPI (400 instead of 300) for better detail recognition - Disabled character
-   * whitelist to allow full character set recognition - LSTM-only OCR engine mode for better
-   * accuracy with Best models - Adjusted language model penalties for improved recognition
+   * Configures whether the application should use the best model settings.
    *
-   * <p>Best models are larger and slower but can provide better accuracy on high-quality scans. For
-   * camera photos, Fast models may perform equally well.
-   *
-   * @param enable true to enable Best model optimizations, false for Fast model defaults
+   * @param enable A boolean indicating whether to enable the best model settings. If true, the best
+   *     model settings will be applied; otherwise, default settings will be used.
    */
   public void setUseBestModelSettings(boolean enable) {
     this.useBestModelSettings = enable;
@@ -622,6 +630,12 @@ public class OCRHelper {
     return tessBaseAPI.setVariable(var, value);
   }
 
+  /**
+   * Updates the whitelist of characters for text recognition.
+   *
+   * @param chars the string containing characters to be included in the whitelist
+   * @return true if the whitelist was successfully updated, false otherwise
+   */
   private boolean setWhitelist(String chars) {
     return setVariable("tessedit_char_whitelist", chars);
   }
@@ -727,7 +741,102 @@ public class OCRHelper {
     return t == null || t.trim().isEmpty();
   }
 
+  /**
+   * Selects and initializes the appropriate OCR (Optical Character Recognition) engine based on the
+   * current configuration and system capabilities. This method evaluates feature flags, toggle
+   * states, and initializes the Paddle OCR engine if enabled and supported. Diagnostics data is
+   * recorded for tracking initialization status and fallback scenarios.
+   *
+   * @return An instance of {@code OcrEngine} if the Paddle OCR engine is successfully initialized;
+   *     {@code null} if the engine is not enabled, not supported, or initialization fails.
+   */
+  private OcrEngine selectEngine() {
+    final String lang = language;
+    final String[] abis = android.os.Build.SUPPORTED_ABIS;
+    final String abiInfo = (abis != null && abis.length > 0) ? abis[0] : "unknown";
+    final boolean featureFlag = BuildConfig.FEATURE_PADDLE_OCR;
+    final boolean toggleEnabled = (recognitionMode == OCR_MODE_PADDLE);
+
+    if (!featureFlag) {
+      OcrBackendDiagnostics.record(
+          "tesseract",
+          lang,
+          abiInfo,
+          false,
+          toggleEnabled,
+          OcrBackendDiagnostics.Reason.DISABLED_BY_FLAG);
+      return null;
+    }
+    if (!toggleEnabled) {
+      OcrBackendDiagnostics.record(
+          "tesseract", lang, abiInfo, true, false, OcrBackendDiagnostics.Reason.TOGGLE_OFF);
+      return null;
+    }
+    try {
+      OcrEngine engine = PaddleEngineProvider.create(context, lang);
+      if (engine == null) {
+        OcrBackendDiagnostics.record(
+            "tesseract",
+            lang,
+            abiInfo,
+            true,
+            true,
+            OcrBackendDiagnostics.Reason.PADDLE_INIT_FAILED);
+        return null;
+      }
+      OcrBackendDiagnostics.record(
+          "paddle", lang, abiInfo, true, true, OcrBackendDiagnostics.Reason.PADDLE_OK);
+      return engine;
+    } catch (Throwable t) {
+      Log.w(TAG, "PaddleEngineProvider.create failed → fallback to Tesseract", t);
+      OcrBackendDiagnostics.record(
+          "tesseract", lang, abiInfo, true, true, OcrBackendDiagnostics.Reason.PADDLE_INIT_FAILED);
+      return null;
+    }
+  }
+
+  /**
+   * Releases resources used by the object and performs cleanup. This method ensures that all
+   * dependencies and initialized components are properly deallocated to prevent memory leaks.
+   *
+   * <p>The method performs the following steps: 1. Safely calls `recycle` on the `tessBaseAPI`
+   * instance (if not null), catching any exceptions to avoid disrupting the cleanup process. 2.
+   * Sets the `tessBaseAPI` reference to null and updates the `isInitialized` flag to indicate that
+   * the instance is no longer active. 3. Attempts to release all resources associated with the
+   * `PaddleEngineProvider`, logging any errors that occur during the release process.
+   *
+   * <p>Any exceptions occurring during the cleanup process are logged, but they do not prevent the
+   * method from proceeding with further cleanup tasks.
+   */
+  public void close() {
+    try {
+      if (tessBaseAPI != null) {
+        try {
+          tessBaseAPI.recycle();
+        } catch (Throwable t) {
+          Log.w(TAG, "tessBaseAPI.recycle failed", t);
+        }
+        tessBaseAPI = null;
+        isInitialized = false;
+      }
+    } finally {
+      try {
+        PaddleEngineProvider.releaseAll(context);
+      } catch (Throwable t) {
+        Log.w(TAG, "PaddleEngineProvider.releaseAll failed", t);
+      }
+    }
+  }
+
   public OcrResultWords runOcrWithRetry(Bitmap bitmap) {
+    OcrEngine e = selectEngine();
+    if (e != null) {
+      try {
+        return e.run(bitmap);
+      } catch (Throwable t) {
+        Log.w(TAG, "Paddle failed → fallback to Tesseract", t);
+      }
+    }
     logAllVariables();
     OcrResultWords result = runOcrWithWords(bitmap);
 

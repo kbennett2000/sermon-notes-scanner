@@ -359,6 +359,8 @@ public class OCRFragment extends Fragment {
   private static final int OCR_MODE_ORIGINAL = 0;
   private static final int OCR_MODE_QUICK = 1;
   private static final int OCR_MODE_ROBUST = 2;
+  // PaddleOCR: exclusive engine, no preprocessing (paddle flavor only).
+  private static final int OCR_MODE_PADDLE = 3;
 
   // Maximum number of languages that can be selected for multi-language OCR
   private static final int MAX_LANGUAGES = 2;
@@ -809,6 +811,30 @@ public class OCRFragment extends Fragment {
         stored = OCR_MODE_ROBUST;
         sp.edit().putInt(PREF_KEY_OCR_MODE, stored).apply();
       }
+      // Migration: the experimental PaddleOCR toggle (PaddleOcrPrefs.KEY) used to be a
+      // separate checkbox alongside the prep-mode picker. It is now folded into the
+      // recognition-mode radio group as OCR_MODE_PADDLE. Existing users that opted into
+      // PaddleOCR keep their preference: map the toggle to the new mode and clear the
+      // legacy key.
+      try {
+        if (sp.getBoolean(PaddleOcrPrefs.KEY, false)) {
+          if (PaddleOcrPrefs.isToggleVisible() && stored != OCR_MODE_PADDLE) {
+            stored = OCR_MODE_PADDLE;
+            sp.edit().putInt(PREF_KEY_OCR_MODE, stored).remove(PaddleOcrPrefs.KEY).apply();
+          } else {
+            // Toggle no longer applicable (e.g. unsupported ABI) — drop legacy key.
+            sp.edit().remove(PaddleOcrPrefs.KEY).apply();
+          }
+        }
+      } catch (Throwable ignore) {
+        // Best-effort migration; failure is non-critical.
+      }
+      // If a previously persisted PADDLE mode is no longer applicable (e.g. user installed
+      // a non-paddle build), fall back to Robust without clobbering the stored value to
+      // avoid data loss across re-installs of the paddle flavor.
+      if (stored == OCR_MODE_PADDLE && !PaddleOcrPrefs.isToggleVisible()) {
+        return OCR_MODE_ROBUST;
+      }
       return stored;
     } catch (Throwable ignore) {
       return OCR_MODE_ROBUST;
@@ -840,17 +866,27 @@ public class OCRFragment extends Fragment {
         view.findViewById(R.id.checkbox_ocr_post_processing_dialog);
     android.widget.CheckBox cbLayoutAnalysis =
         view.findViewById(R.id.checkbox_layout_analysis_dialog);
+    android.widget.RadioButton rbPaddle = view.findViewById(R.id.rbtn_mode_paddle);
 
     // Only show layout analysis checkbox if feature flag is enabled
     boolean layoutFeatureEnabled = FeatureFlags.isLayoutAnalysisEnabled();
     cbLayoutAnalysis.setVisibility(
         layoutFeatureEnabled ? android.view.View.VISIBLE : android.view.View.GONE);
 
-    int mode = Math.max(0, Math.min(2, getSelectedOcrMode()));
+    // PaddleOCR (experimental): visible as third radio option only when feature flag
+    // is enabled and ABI is arm64-v8a (see PaddleOcrPrefs.isToggleVisible).
+    final boolean paddleToggleVisible = PaddleOcrPrefs.isToggleVisible();
+    rbPaddle.setVisibility(
+        paddleToggleVisible ? android.view.View.VISIBLE : android.view.View.GONE);
+
+    int mode = Math.max(0, Math.min(OCR_MODE_PADDLE, getSelectedOcrMode()));
     // Quick mode is hidden in the picker (see dialog_ocr_prep_mode.xml: rbtn_mode_quick
     // is gone). Treat any lingering Quick selection as Robust for the UI state.
     if (mode == OCR_MODE_QUICK) mode = OCR_MODE_ROBUST;
-    if (mode == 0) rbOriginal.setChecked(true);
+    // PaddleOCR is only valid when the toggle is visible; otherwise fall back to Robust.
+    if (mode == OCR_MODE_PADDLE && !paddleToggleVisible) mode = OCR_MODE_ROBUST;
+    if (mode == OCR_MODE_ORIGINAL) rbOriginal.setChecked(true);
+    else if (mode == OCR_MODE_PADDLE) rbPaddle.setChecked(true);
     else rbRobust.setChecked(true);
 
     boolean ocrAutoRotateApply = false;
@@ -883,6 +919,8 @@ public class OCRFragment extends Fragment {
                   if (checkedId == R.id.rbtn_mode_original) selectedMode = OCR_MODE_ORIGINAL;
                   else if (checkedId == R.id.rbtn_mode_quick) selectedMode = OCR_MODE_ROBUST;
                   else if (checkedId == R.id.rbtn_mode_robust) selectedMode = OCR_MODE_ROBUST;
+                  else if (checkedId == R.id.rbtn_mode_paddle && paddleToggleVisible)
+                    selectedMode = OCR_MODE_PADDLE;
 
                   setSelectedOcrMode(selectedMode);
                   try {
@@ -899,11 +937,23 @@ public class OCRFragment extends Fragment {
                     // Best-effort; failure is non-critical
                   }
 
+                  // PaddleOCR is now selected as a recognition mode (not a separate toggle).
+                  // When the user moves AWAY from PaddleOCR, release the engine so that the
+                  // next OCR run starts a clean Tesseract session.
+                  if (selectedMode != OCR_MODE_PADDLE) {
+                    try {
+                      PaddleEngineProvider.releaseAll(requireContext());
+                    } catch (Throwable t) {
+                      Log.w(TAG, "PaddleEngineProvider.releaseAll failed", t);
+                    }
+                  }
+
                   CharSequence[] modes =
                       new CharSequence[] {
                         getString(R.string.ocr_mode_original),
                         getString(R.string.ocr_mode_quick),
-                        getString(R.string.ocr_mode_robust)
+                        getString(R.string.ocr_mode_robust),
+                        getString(R.string.ocr_mode_paddle)
                       };
                   // Show toast including selected mode AND current status of OCR options
                   String modeMsg = getString(R.string.ocr_prep_mode_set, modes[selectedMode]);
@@ -1353,7 +1403,11 @@ public class OCRFragment extends Fragment {
                     }
 
                     Bitmap inputForOcr;
-                    if (effectiveMode == OCR_MODE_ORIGINAL) {
+                    if (effectiveMode == OCR_MODE_ORIGINAL || effectiveMode == OCR_MODE_PADDLE) {
+                      // PADDLE: skip preprocessing entirely; the Paddle engine consumes the
+                      // original (rotated) bitmap. If the engine cannot be initialized at
+                      // runtime, OCRHelper transparently falls back to Tesseract on the same
+                      // un-preprocessed bitmap, matching ORIGINAL behavior.
                       inputForOcr = rotated;
                     } else if (effectiveMode == OCR_MODE_QUICK) {
                       inputForOcr = OpenCVUtils.prepareForOCRQuick(rotated);

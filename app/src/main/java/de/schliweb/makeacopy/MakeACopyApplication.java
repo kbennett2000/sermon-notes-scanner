@@ -16,6 +16,7 @@ import de.schliweb.makeacopy.data.library.CollectionsRepository;
 import de.schliweb.makeacopy.services.CacheCleanupService;
 import de.schliweb.makeacopy.utils.image.OpenCVUtils;
 import de.schliweb.makeacopy.utils.infra.FeatureFlags;
+import de.schliweb.makeacopy.utils.ocr.PaddleEngineProvider;
 import javax.inject.Inject;
 
 /**
@@ -126,6 +127,13 @@ public class MakeACopyApplication extends Application {
     } catch (Exception e) {
       Log.e(TAG, "Error during emergency cache cleanup", e);
     }
+
+    try {
+      PaddleEngineProvider.releaseAll(this);
+      Log.i(TAG, "PaddleEngineProvider.releaseAll triggered reason=low-memory");
+    } catch (Throwable t) {
+      Log.w(TAG, "PaddleEngineProvider.releaseAll failed reason=low-memory", t);
+    }
   }
 
   /**
@@ -133,6 +141,9 @@ public class MakeACopyApplication extends Application {
    * unneeded memory from its process
    */
   @Override
+  @SuppressWarnings("deprecation") // TRIM_MEMORY_MODERATE is deprecated since API 35 but still
+  // delivered by older runtimes (minSdk = 29). We keep handling it to release native Paddle/ORT
+  // resources eagerly on those devices.
   public void onTrimMemory(int level) {
     super.onTrimMemory(level);
 
@@ -145,6 +156,20 @@ public class MakeACopyApplication extends Application {
         Log.i(TAG, "Cache cleanup triggered by memory trim (level: " + level + ")");
       } catch (Exception e) {
         Log.e(TAG, "Error during memory trim cache cleanup", e);
+      }
+    }
+
+    if (level >= TRIM_MEMORY_MODERATE) {
+      try {
+        PaddleEngineProvider.releaseAll(this);
+        Log.i(
+            TAG,
+            "PaddleEngineProvider.releaseAll triggered level=" + level + " reason=trim-memory");
+      } catch (Throwable t) {
+        Log.w(
+            TAG,
+            "PaddleEngineProvider.releaseAll failed level=" + level + " reason=trim-memory",
+            t);
       }
     }
   }

@@ -184,6 +184,21 @@ public final class OcrBackgroundJobs {
               int storedMode = sp.getInt(PREF_KEY_OCR_MODE, OCRHelper.OCR_MODE_ROBUST);
               // Migrate legacy Quick → Robust, matching OCRFragment.getSelectedOcrMode().
               if (storedMode == OCRHelper.OCR_MODE_QUICK) storedMode = OCRHelper.OCR_MODE_ROBUST;
+              // Honor legacy PaddleOCR toggle (pref_ocr_paddle_enabled) when the new
+              // recognition-mode picker has not been opened yet. Mirrors the migration in
+              // OCRFragment.getSelectedOcrMode() but without UI side-effects: we do not
+              // rewrite preferences here to avoid races with the UI thread.
+              if (storedMode != OCRHelper.OCR_MODE_PADDLE
+                  && de.schliweb.makeacopy.utils.ocr.PaddleOcrPrefs.isToggleVisible()
+                  && sp.getBoolean(de.schliweb.makeacopy.utils.ocr.PaddleOcrPrefs.KEY, false)) {
+                storedMode = OCRHelper.OCR_MODE_PADDLE;
+              }
+              // Guard: if PADDLE is persisted but no longer applicable on this device/build,
+              // fall back to Robust at runtime (preference itself is preserved).
+              if (storedMode == OCRHelper.OCR_MODE_PADDLE
+                  && !de.schliweb.makeacopy.utils.ocr.PaddleOcrPrefs.isToggleVisible()) {
+                storedMode = OCRHelper.OCR_MODE_ROBUST;
+              }
               prepMode = storedMode;
               allowOcrAutoRotate = sp.getBoolean(BUNDLE_OCR_AUTO_ROTATE_APPLY_EXPORT, false);
               useLayoutAnalysis =
@@ -241,7 +256,11 @@ public final class OcrBackgroundJobs {
               }
 
               Bitmap inputForOcr;
-              if (effectiveMode == OCRHelper.OCR_MODE_ORIGINAL) {
+              if (effectiveMode == OCRHelper.OCR_MODE_ORIGINAL
+                  || effectiveMode == OCRHelper.OCR_MODE_PADDLE) {
+                // PADDLE: skip preprocessing; the Paddle engine consumes the original bitmap.
+                // On Paddle init failure, OCRHelper falls back to Tesseract on the same
+                // bitmap (i.e. matches ORIGINAL behavior). See OCRHelper.selectEngine.
                 inputForOcr = rotated;
               } else if (effectiveMode == OCRHelper.OCR_MODE_QUICK) {
                 inputForOcr = OpenCVUtils.prepareForOCRQuick(rotated);
