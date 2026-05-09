@@ -11,26 +11,24 @@ package de.schliweb.makeacopy.utils.ocr;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.RectF;
-import android.os.Build;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import java.io.InputStream;
-import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Optionaler Smoke-Test für die Paddle-OCR-Engine auf einem arm64-Emulator/Gerät.
+ * Optionaler Smoke-Test für die Paddle-OCR-Engine.
  *
- * <p>Skippt automatisch, wenn {@code arm64-v8a} nicht in {@link Build#SUPPORTED_ABIS} enthalten ist
- * (PP-OCRv5 ONNX-Modelle und {@code libonnxruntime.so} sind nur für arm64 ausgeliefert).
+ * <p>Läuft auf jeder ABI: {@code libonnxruntime.so} liegt für arm64-v8a, armeabi-v7a, x86 und
+ * x86_64 unter {@code src/main/jniLibs/}, die PP-OCRv5 {@code .ort}-Modelle unter
+ * {@code src/paddle/assets/paddleocr/v5/} sind ABI-neutral.
  *
  * <p>Asset {@code clean_scan.jpg} unter {@code app/src/androidTest/assets/} wird als Eingabe
  * genutzt — kein neues Asset, das nach {@code main/assets/} fließen könnte.
@@ -40,10 +38,6 @@ public class PaddleOcrEngineSmokeTest {
 
     @Test
     public void recognize_cleanScan_yieldsTextAndWords() throws Exception {
-        assumeTrue(
-                "arm64-v8a not present — skipping Paddle smoke test",
-                Arrays.asList(Build.SUPPORTED_ABIS).contains("arm64-v8a"));
-
         Context ctx = ApplicationProvider.getApplicationContext();
         AssetManager am = ctx.getAssets();
 
