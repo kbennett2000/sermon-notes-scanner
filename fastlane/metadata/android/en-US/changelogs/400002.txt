@@ -1,2 +1,3 @@
 MakeACopy 4.0.0
 * New OCR engine: PaddleOCR v5 (paddle flavor) alongside Tesseract — pick per document
+* Improved ONNX Runtime compatibility on Android by disabling SVE-specific builds

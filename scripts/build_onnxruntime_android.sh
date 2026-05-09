@@ -404,6 +404,7 @@ for ABI in $ABIS; do
     onnxruntime_USE_MIMALLOC=OFF
     onnxruntime_USE_XNNPACK=ON
     onnxruntime_USE_KLEIDIAI=OFF
+    onnxruntime_USE_SVE=OFF
     onnxruntime_USE_CUDA=OFF
     onnxruntime_USE_TENSORRT=OFF
     onnxruntime_USE_ROCM=OFF
