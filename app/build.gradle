@@ -8,6 +8,19 @@ plugins {
 }
 
 def enableAbiSplits = (project.findProperty("enableAbiSplits") ?: "true").toBoolean()
+// AGP cannot build an Android App Bundle (AAB) while ABI splits are enabled:
+// `minifyXxxReleaseWithR8` then produces one shrunk-resources-*.ap_ per ABI and
+// `buildXxxReleasePreBundle` fails with "Multiple shrunk-resources files found"
+// (see https://issuetracker.google.com/402800800). When the user/CI requests any
+// bundle task in the same Gradle invocation, transparently disable ABI splits.
+if (enableAbiSplits) {
+    def requestedTasks = gradle.startParameter.taskNames
+    def bundleRequested = requestedTasks.any { it.toLowerCase().contains("bundle") }
+    if (bundleRequested) {
+        logger.lifecycle("Bundle task detected in task graph → forcing enableAbiSplits=false to avoid AGP issue 402800800.")
+        enableAbiSplits = false
+    }
+}
 def edition = (project.findProperty("edition") ?: "full")
 def isLight = edition == "light"
 
