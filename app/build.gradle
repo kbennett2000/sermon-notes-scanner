@@ -23,6 +23,10 @@ if (enableAbiSplits) {
 }
 def edition = (project.findProperty("edition") ?: "full")
 def isLight = edition == "light"
+def signingStorePassword = project.findProperty("SIGNING_STORE_PASSWORD") ?: System.getenv("SIGNING_STORE_PASSWORD")
+def signingKeyAlias = project.findProperty("SIGNING_KEY_ALIAS") ?: System.getenv("SIGNING_KEY_ALIAS")
+def signingKeyPassword = project.findProperty("SIGNING_KEY_PASSWORD") ?: System.getenv("SIGNING_KEY_PASSWORD")
+def hasReleaseSigning = signingStorePassword && signingKeyAlias && signingKeyPassword
 
 android {
     namespace = 'de.schliweb.makeacopy'
@@ -84,14 +88,11 @@ android {
 
     signingConfigs {
         release {
-            def myStorePassword = project.findProperty("SIGNING_STORE_PASSWORD") ?: System.getenv("SIGNING_STORE_PASSWORD")
-            def myKeyAlias = project.findProperty("SIGNING_KEY_ALIAS") ?: System.getenv("SIGNING_KEY_ALIAS")
-            def myKeyPassword = project.findProperty("SIGNING_KEY_PASSWORD") ?: System.getenv("SIGNING_KEY_PASSWORD")
-            if (myStorePassword && myKeyAlias && myKeyPassword) {
+            if (hasReleaseSigning) {
                 storeFile file('keystore.jks')
-                storePassword myStorePassword
-                keyAlias myKeyAlias
-                keyPassword myKeyPassword
+                storePassword signingStorePassword
+                keyAlias signingKeyAlias
+                keyPassword signingKeyPassword
             }
         }
     }
@@ -123,9 +124,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             // Only use signing config when available (GitHub Actions)
             // F-Droid will sign with their own keys
-            if ((project.findProperty('SIGNING_KEY_ALIAS') ?: System.getenv('SIGNING_KEY_ALIAS')) &&
-                    (project.findProperty('SIGNING_KEY_PASSWORD') ?: System.getenv('SIGNING_KEY_PASSWORD')) &&
-                    (project.findProperty('SIGNING_STORE_PASSWORD') ?: System.getenv('SIGNING_STORE_PASSWORD'))) {
+            if (hasReleaseSigning) {
                 signingConfig = signingConfigs.release
             }
         }
@@ -450,7 +449,6 @@ tasks.whenTaskAdded { task ->
 tasks.register("verifyNoTestDataInApk") {
     description = "Checks that release and debug APKs do not contain test data"
     group = "verification"
-    dependsOn("assembleRelease")
     doLast {
         def forbidden = ["instrumented_test_data", "layout_test_data", "test_pdfs",
                          "ground_truth", "layout_ground_truth"]
