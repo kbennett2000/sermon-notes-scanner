@@ -123,7 +123,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             // Only use signing config when available (GitHub Actions)
             // F-Droid will sign with their own keys
-            if (project.hasProperty('SIGNING_KEY_ALIAS') && System.getenv('SIGNING_STORE_PASSWORD')) {
+            if ((project.findProperty('SIGNING_KEY_ALIAS') ?: System.getenv('SIGNING_KEY_ALIAS')) &&
+                    (project.findProperty('SIGNING_KEY_PASSWORD') ?: System.getenv('SIGNING_KEY_PASSWORD')) &&
+                    (project.findProperty('SIGNING_STORE_PASSWORD') ?: System.getenv('SIGNING_STORE_PASSWORD'))) {
                 signingConfig = signingConfigs.release
             }
         }
