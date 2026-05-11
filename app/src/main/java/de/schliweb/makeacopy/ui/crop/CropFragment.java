@@ -811,7 +811,8 @@ public class CropFragment extends Fragment {
       // Post-warp safety net: trim residual non-paper border (dark background remnants left
       // when the crop trapezoid was slightly looser than the actual paper edges). This protects
       // downstream OCR from artefacts caused by black borders along the page.
-      try {
+      // TODO: Move to OCRFragement and OCRReviewFragment
+        /*try {
         Bitmap trimmed = OpenCVUtils.trimNonPaperBorder(croppedBitmap);
         if (trimmed != null && trimmed != croppedBitmap) {
           android.util.Log.d(
@@ -829,7 +830,7 @@ public class CropFragment extends Fragment {
         }
       } catch (Throwable t) {
         android.util.Log.w(TAG, LP + "performCrop: trimNonPaperBorder failed: " + t.getMessage());
-      }
+      }*/
       // Hide/stop overlay to avoid further edge detection while we navigate away
       try {
         binding.trapezoidSelection.setVisibility(View.GONE);
