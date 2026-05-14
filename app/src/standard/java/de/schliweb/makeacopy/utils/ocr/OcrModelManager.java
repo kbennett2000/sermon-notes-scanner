@@ -149,6 +149,41 @@ public final class OcrModelManager {
   }
 
   /**
+   * Detects whether a language currently uses an imported Best model instead of the bundled Fast
+   * asset. For multi-language specs, the first language component determines the variant label.
+   */
+  public static boolean isUsingBestModel(Context context, String code) {
+    if (context == null || code == null || code.isEmpty()) return false;
+    String first = code;
+    int plus = code.indexOf('+');
+    if (plus > 0) first = code.substring(0, plus);
+    try {
+      File dir = getOrCreateTessdataDir(context);
+      File local = new File(dir, first + ".traineddata");
+      long localSize = local.exists() ? local.length() : -1L;
+
+      long assetSize = -1L;
+      try (InputStream in = context.getAssets().open("tessdata/" + first + ".traineddata")) {
+        byte[] buf = new byte[8192];
+        long total = 0;
+        int n;
+        while ((n = in.read(buf)) != -1) total += n;
+        assetSize = total;
+      } catch (Throwable ignore) {
+        assetSize = -1L;
+      }
+
+      return localSize > 0 && (assetSize < 0 || localSize > assetSize + 1024);
+    } catch (Throwable ignoreAll) {
+      return false;
+    }
+  }
+
+  public static String[] getAvailableLanguageCodes(Context context) {
+    return null;
+  }
+
+  /**
    * Imports a trained data file from a specified package's assets directory into the application's
    * local tessdata directory. Validates the filename, accesses the package's tessdata folder, and
    * performs the file copy operation atomically.

@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Log;
-import com.googlecode.tesseract.android.TessBaseAPI;
 import de.schliweb.makeacopy.data.CompletedScansRegistry;
 import de.schliweb.makeacopy.ui.export.session.CompletedScan;
 import de.schliweb.makeacopy.utils.image.ImageDecodeUtils;
@@ -24,6 +23,8 @@ import de.schliweb.makeacopy.utils.ocr.OCRHelper;
 import de.schliweb.makeacopy.utils.ocr.OCRUtils;
 import de.schliweb.makeacopy.utils.ocr.OcrEarlyExitPolicy;
 import de.schliweb.makeacopy.utils.ocr.OcrFallbackPolicy;
+import de.schliweb.makeacopy.utils.ocr.OcrModelManager;
+import de.schliweb.makeacopy.utils.ocr.OcrPageSegmentationMode;
 import de.schliweb.makeacopy.utils.ocr.RecognizedWord;
 import de.schliweb.makeacopy.utils.ocr.UnevenLightingPolicy;
 import de.schliweb.makeacopy.utils.ocr.WordsJson;
@@ -166,7 +167,7 @@ public final class OcrBackgroundJobs {
 
             // Detect Best vs Fast model and configure helper BEFORE init (mirrors OCRFragment).
             try {
-              boolean useBest = isUsingBestModel(app, effLang);
+              boolean useBest = OcrModelManager.isUsingBestModel(app, effLang);
               helper.setUseBestModelSettings(useBest);
               Log.d(TAG, "Best model settings enabled=" + useBest + " for lang=" + effLang);
             } catch (Throwable t) {
@@ -213,11 +214,11 @@ public final class OcrBackgroundJobs {
 
             // Tune Tesseract PSM based on recognition mode (Robust benefits from PSM_AUTO).
             try {
-              int psm =
+              OcrPageSegmentationMode psm =
                   (prepMode == OCRHelper.OCR_MODE_ROBUST)
-                      ? TessBaseAPI.PageSegMode.PSM_AUTO
-                      : TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
-              helper.setPageSegMode(psm);
+                      ? OcrPageSegmentationMode.AUTO
+                      : OcrPageSegmentationMode.SINGLE_BLOCK;
+              helper.setPageSegmentationMode(psm);
             } catch (Throwable ignore) {
               // Best-effort; failure is non-critical
             }
@@ -509,42 +510,5 @@ public final class OcrBackgroundJobs {
       // On any failure, be conservative and do not trigger the adaptive switch.
       return false;
     }
-  }
-
-  /**
-   * Detect Best vs Fast model for a given language code by comparing the imported file size in
-   * {@code no_backup/tessdata} against the bundled asset size. Mirrors {@code
-   * OCRFragment.isUsingBestModel(String)}.
-   */
-  private static boolean isUsingBestModel(Context ctx, String code) {
-    if (code == null || code.isEmpty()) return false;
-    // For multi-language specs ("eng+deu"), check the first component.
-    String first = code;
-    int plus = code.indexOf('+');
-    if (plus > 0) first = code.substring(0, plus);
-    try {
-      File dir = OCRHelper.getTessdataDir(ctx);
-      File local = new File(dir, first + ".traineddata");
-      long localSize = local.exists() ? local.length() : -1L;
-
-      long assetSize = -1L;
-      try (java.io.InputStream in = ctx.getAssets().open("tessdata/" + first + ".traineddata")) {
-        byte[] buf = new byte[8192];
-        long total = 0;
-        int n;
-        while ((n = in.read(buf)) != -1) total += n;
-        assetSize = total;
-      } catch (Throwable ignore) {
-        assetSize = -1L;
-      }
-
-      // Decide Best vs Fast with small margin to avoid equality due to copy.
-      if (localSize > 0 && (assetSize < 0 || localSize > assetSize + 1024)) {
-        return true;
-      }
-    } catch (Throwable ignoreAll) {
-      // Best-effort; failure is non-critical
-    }
-    return false;
   }
 }

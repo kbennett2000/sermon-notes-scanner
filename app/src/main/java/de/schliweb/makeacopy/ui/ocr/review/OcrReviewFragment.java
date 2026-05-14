@@ -36,6 +36,7 @@ import de.schliweb.makeacopy.ui.ocr.review.view.OcrOverlayView;
 import de.schliweb.makeacopy.utils.ocr.DictionaryManager;
 import de.schliweb.makeacopy.utils.ocr.OCRHelper;
 import de.schliweb.makeacopy.utils.ocr.OCRUtils;
+import de.schliweb.makeacopy.utils.ocr.OcrPageSegmentationMode;
 import de.schliweb.makeacopy.utils.ocr.RecognizedWord;
 import de.schliweb.makeacopy.utils.ui.DialogUtils;
 import de.schliweb.makeacopy.utils.ui.UIUtils;
@@ -1630,9 +1631,7 @@ public class OcrReviewFragment extends Fragment {
                 OCRHelper ocrHelper = ocrHelperProvider.get();
                 ocrHelper.setLanguage(newLang);
                 // Use PSM_SINGLE_WORD for single word recognition
-                // TODO
-                ocrHelper.setPageSegMode(
-                    com.googlecode.tesseract.android.TessBaseAPI.PageSegMode.PSM_SINGLE_WORD);
+                ocrHelper.setPageSegmentationMode(OcrPageSegmentationMode.SINGLE_WORD);
 
                 if (ocrHelper.initTesseract()) {
                   de.schliweb.makeacopy.utils.ocr.OCRHelper.OcrResultWords result =

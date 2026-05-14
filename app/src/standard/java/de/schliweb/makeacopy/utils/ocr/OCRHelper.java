@@ -349,6 +349,20 @@ public class OCRHelper {
     Log.i(TAG, "setPageSegMode: applied psm=" + mode);
   }
 
+  /** Sets the page segmentation mode using the project-internal, engine-neutral enum. */
+  public void setPageSegmentationMode(OcrPageSegmentationMode mode) {
+    setPageSegMode(toTesseractPageSegMode(mode));
+  }
+
+  private int toTesseractPageSegMode(OcrPageSegmentationMode mode) {
+    if (mode == null) return TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
+    return switch (mode) {
+      case AUTO -> TessBaseAPI.PageSegMode.PSM_AUTO;
+      case SINGLE_WORD -> TessBaseAPI.PageSegMode.PSM_SINGLE_WORD;
+      case SINGLE_BLOCK -> TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
+    };
+  }
+
   /**
    * Sets the recognition mode for the OCR processing.
    *

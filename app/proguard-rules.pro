@@ -21,10 +21,6 @@
     public static *** i(...);
 }
 
-# Tesseract OCR rules
--keep class com.googlecode.tesseract.android.** { *; }
--dontwarn com.googlecode.tesseract.android.**
-
 # PdfBox-Android rules
 -keep class com.tom_roush.pdfbox.** { *; }
 -keep class com.tom_roush.harmony.** { *; }

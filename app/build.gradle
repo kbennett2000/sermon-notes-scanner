@@ -38,8 +38,8 @@ android {
         applicationId "de.schliweb.makeacopy"
         minSdk = 29
         targetSdk = 36
-        versionCode 40000
-        versionName "4.0.0"
+        versionCode 40100
+        versionName "4.1.0"
 
         // Use default AndroidX test runner
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -55,6 +55,8 @@ android {
         buildConfigField "boolean", "FEATURE_INBOX_MODE", "true"
         buildConfigField "boolean", "FEATURE_CROP_EDGE_DRAG", "true"
         buildConfigField "boolean", "FEATURE_CROP_PAN_ZOOM", "true"
+        buildConfigField "boolean", "FEATURE_DOCQUAD_CORNERS", "true"
+        buildConfigField "boolean", "FEATURE_BEST_OF_CROP_CORNERS", "true"
         buildConfigField "boolean", "FEATURE_PADDLE_OCR", "false"
         buildConfigField "boolean", "IS_LIGHT", isLight ? "true" : "false"
 
@@ -102,6 +104,7 @@ android {
         standard {
             dimension "ocr"
             // F-Droid-Default, ohne Paddle-Assets
+            proguardFiles 'proguard-tesseract.pro'
         }
         paddle {
             dimension "ocr"
@@ -168,10 +171,12 @@ android {
         main {
             assets.srcDirs = [
                     'src/main/assets',
-                    isLight ? 'src/light/assets' : 'src/full/assets',
                     layout.buildDirectory.dir("generated/assets/licenses").get().asFile
             ]
             jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+        standard {
+            assets.srcDirs += [isLight ? 'src/light/assets' : 'src/full/assets']
         }
         // Flavor-Asset-Verzeichnisse explizit deklarieren, damit AGP sie zusätzlich
         // zu den oben überschriebenen main-Asset-Pfaden mergt.
@@ -181,7 +186,7 @@ android {
         // Add test assets to the debug APK so target-context based asset loading works
         // (e.g. ApplicationProvider.getApplicationContext().getAssets()). The release build
         // is verified separately to ensure no test data leaks into production.
-        debug {
+        standardDebug {
             assets.srcDirs += [
                     layout.buildDirectory.dir("generated/assets/test_assets").get().asFile,
                     'src/androidTest/assets'
@@ -214,8 +219,8 @@ dependencies {
     implementation libs.camerax.lifecycle
     implementation libs.camerax.view
 
-    // Tesseract OCR dependency
-    implementation libs.tesseract
+    // Tesseract OCR dependency (standard flavor only; paddle flavor must stay Tesseract-free)
+    standardImplementation libs.tesseract
 
     // Onnx-Runtime dependency
     if(!isLight) {
@@ -322,7 +327,7 @@ tasks.whenTaskAdded { task ->
     // mergeStandardDebugAssets, and the corresponding *AndroidTestAssets variants.
     // The previous hook only matched the non-flavor names and therefore never fired
     // for the `paddle`/`standard` flavors, so tessdata_best/ was missing in the APK.
-    if (task.name ==~ /merge(Paddle|Standard)?Debug(AndroidTest)?Assets/) {
+    if (task.name ==~ /merge(Standard)?Debug(AndroidTest)?Assets/) {
         task.dependsOn("copyBestModelsForTest")
     }
 }
