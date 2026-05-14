@@ -11,6 +11,7 @@ package de.schliweb.makeacopy.ml.corners;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
+import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.ml.docquad.DocQuadOrtRunner;
 
 /**
@@ -37,6 +38,9 @@ public final class CornerDetectorFactory {
    */
   @NonNull
   public static CornerDetector forCrop(@NonNull Context ctx, @NonNull DocQuadOrtRunner runner) {
+    if (!BuildConfig.FEATURE_DOCQUAD_CORNERS) {
+      return new OpenCvCornerDetector();
+    }
     return new CompositeCornerDetector(new DocQuadDetector(runner), new OpenCvCornerDetector());
   }
 
@@ -53,6 +57,9 @@ public final class CornerDetectorFactory {
   @NonNull
   public static CornerDetector forLive(@NonNull Context ctx, @NonNull DocQuadOrtRunner runner) {
     OneEuroCornerSmoother smoother = OneEuroCornerSmoother.withDefaults();
+    if (!BuildConfig.FEATURE_DOCQUAD_CORNERS) {
+      return new OpenCvCornerDetector();
+    }
     return new CompositeCornerDetector(
         new ThrottledDocQuadLiveDetector(ctx.getApplicationContext(), runner, smoother),
         new OpenCvCornerDetector());

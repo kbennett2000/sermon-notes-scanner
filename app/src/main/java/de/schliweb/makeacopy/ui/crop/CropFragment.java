@@ -636,6 +636,13 @@ public class CropFragment extends Fragment {
         if (persisted[i] == null) return;
         pts[i] = new org.opencv.core.Point(persisted[i].x, persisted[i].y);
       }
+      Bitmap displayedBitmap = cropViewModel.getImageBitmap().getValue();
+      if (displayedBitmap == null
+          || !TrapezoidSelectionView.isValidImageQuad(
+              pts, displayedBitmap.getWidth(), displayedBitmap.getHeight())) {
+        android.util.Log.w(TAG, "[FR72] Re-Edit: ignoring invalid persisted corners");
+        return;
+      }
       binding.trapezoidSelection.setCornersFromImageCoordinates(pts);
       reEditCornersRestored = true;
       android.util.Log.d(TAG, "[FR72] Re-Edit: pre-populated trapezoid from persisted corners");
@@ -731,10 +738,13 @@ public class CropFragment extends Fragment {
     } catch (Throwable t) {
       android.util.Log.w(TAG, LP + "performCrop: corner transform failed: " + t.getMessage());
     }
-    // Guard: if we have no corners, do not proceed to crop; avoid forwarding the original image
-    if (imgCornersDisplay == null) {
+    // Guard: if we have no valid corners, do not proceed to crop; avoid forwarding the original
+    // image or warping with a degenerate quadrilateral.
+    if (!TrapezoidSelectionView.isValidImageQuad(
+        imgCornersDisplay, displayedBitmap.getWidth(), displayedBitmap.getHeight())) {
       android.util.Log.w(
-          TAG, LP + "performCrop: No corners available; aborting crop and staying in crop UI");
+          TAG,
+          LP + "performCrop: No valid corners available; aborting crop and staying in crop UI");
       UIUtils.showToast(
           requireContext(),
           getString(
@@ -812,7 +822,7 @@ public class CropFragment extends Fragment {
       // when the crop trapezoid was slightly looser than the actual paper edges). This protects
       // downstream OCR from artefacts caused by black borders along the page.
       // TODO: Move to OCRFragement and OCRReviewFragment
-        /*try {
+      /*try {
         Bitmap trimmed = OpenCVUtils.trimNonPaperBorder(croppedBitmap);
         if (trimmed != null && trimmed != croppedBitmap) {
           android.util.Log.d(

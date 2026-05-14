@@ -21,7 +21,9 @@ import android.view.View;
 import android.widget.Magnifier;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.ml.corners.DetectionResult;
 import de.schliweb.makeacopy.utils.image.CoordinateTransformUtils;
 import de.schliweb.makeacopy.utils.image.OpenCVUtils;
 import java.util.concurrent.ExecutorService;
@@ -1269,27 +1271,31 @@ public class TrapezoidSelectionView extends View {
       // Use the central policy factory (DocQuad with OpenCV fallback).
       // DocQuad is used only once per image until a new image is set.
       org.opencv.core.Point[] imgCorners;
+      de.schliweb.makeacopy.ml.corners.Source detectionSource = null;
+      boolean imgCornersAlreadyOriginalScale = false;
       if (!userHasEdited && !docQuadAutoInitConsumed) {
-        de.schliweb.makeacopy.ml.corners.CornerDetector detector =
-            de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forCrop(
-                getContext(), docQuadOrtRunner);
+        if (BuildConfig.FEATURE_DOCQUAD_CORNERS && BuildConfig.FEATURE_BEST_OF_CROP_CORNERS) {
+          imgCorners = detectBestCropCorners(work, scaleToOrig);
+          if (imgCorners == null || imgCorners.length != 4) return null;
+          imgCornersAlreadyOriginalScale = true;
+        } else {
+          de.schliweb.makeacopy.ml.corners.CornerDetector detector =
+              de.schliweb.makeacopy.ml.corners.CornerDetectorFactory.forCrop(
+                  getContext(), docQuadOrtRunner);
 
-        de.schliweb.makeacopy.ml.corners.DetectionResult r = detector.detect(work, getContext());
-        if (r == null
-            || !r.success
-            || r.cornersOriginalTLTRBRBL == null
-            || r.cornersOriginalTLTRBRBL.length != 4) {
-          return null;
+          DetectionResult r = detector.detect(work, getContext());
+          if (r == null
+              || !r.success
+              || r.cornersOriginalTLTRBRBL == null
+              || r.cornersOriginalTLTRBRBL.length != 4) {
+            return null;
+          }
+          detectionSource = r.source;
+          imgCorners = pointsFromDetectionResult(r);
         }
         // Even if the result came from OpenCV fallback inside the composite, we still consider the
         // attempt consumed.
         docQuadAutoInitConsumed = true;
-        imgCorners = new org.opencv.core.Point[4];
-        for (int i = 0; i < 4; i++) {
-          imgCorners[i] =
-              new org.opencv.core.Point(
-                  r.cornersOriginalTLTRBRBL[i][0], r.cornersOriginalTLTRBRBL[i][1]);
-        }
       } else {
         // After user edit or DocQuad consumed, use OpenCV directly
         imgCorners = OpenCVUtils.detectDocumentCorners(getContext(), work);
@@ -1297,11 +1303,34 @@ public class TrapezoidSelectionView extends View {
       }
 
       // back-project to original image scale if we downscaled
-      if (scaleToOrig < 1f) {
-        double inv = 1.0 / scaleToOrig;
-        for (org.opencv.core.Point p : imgCorners) {
-          p.x *= inv;
-          p.y *= inv;
+      if (!imgCornersAlreadyOriginalScale) {
+        scaleImageQuadToOriginal(imgCorners, scaleToOrig);
+      }
+
+      Bitmap refBmp = imageBitmap != null ? imageBitmap : work;
+      if (refBmp == null) {
+        Log.w(TAG, "Detected quad cannot be validated without a reference bitmap");
+        return null;
+      }
+      if (!isValidImageQuad(imgCorners, refBmp.getWidth(), refBmp.getHeight())) {
+        if (detectionSource == de.schliweb.makeacopy.ml.corners.Source.DOCQUAD) {
+          Log.w(TAG, "DocQuad quad is invalid or degenerate — trying OpenCV fallback directly");
+          org.opencv.core.Point[] openCvCorners =
+              OpenCVUtils.detectDocumentCorners(getContext(), work);
+          if (openCvCorners != null && openCvCorners.length == 4) {
+            if (scaleToOrig < 1f) {
+              double inv = 1.0 / scaleToOrig;
+              for (org.opencv.core.Point p : openCvCorners) {
+                p.x *= inv;
+                p.y *= inv;
+              }
+            }
+            imgCorners = openCvCorners;
+          }
+        }
+        if (!isValidImageQuad(imgCorners, refBmp.getWidth(), refBmp.getHeight())) {
+          Log.w(TAG, "Detected quad is invalid or degenerate — using full-image fallback");
+          imgCorners = fullImageQuad(refBmp.getWidth(), refBmp.getHeight());
         }
       }
 
@@ -1311,7 +1340,6 @@ public class TrapezoidSelectionView extends View {
       // entire content is the document). In that case the model/legacy detector
       // tends to return degenerate quads — fall back to using (almost) the full
       // image rectangle so the user gets a sensible default they can fine-tune.
-      Bitmap refBmp = imageBitmap != null ? imageBitmap : work;
       if (preCroppedHint
           && refBmp != null
           && looksAlreadyCropped(imgCorners, refBmp.getWidth(), refBmp.getHeight())) {
@@ -1337,6 +1365,111 @@ public class TrapezoidSelectionView extends View {
     } finally {
       long dt = android.os.SystemClock.uptimeMillis() - t0;
       if (dt > budgetMs) Log.w(TAG, "Corner detection over budget: " + dt + "ms");
+    }
+  }
+
+  @Nullable
+  private org.opencv.core.Point[] detectBestCropCorners(Bitmap work, float scaleToOrig) {
+    org.opencv.core.Point[] docQuadCorners = null;
+    try {
+      DetectionResult docQuadResult =
+          new de.schliweb.makeacopy.ml.corners.DocQuadDetector(docQuadOrtRunner)
+              .detect(work, getContext());
+      if (docQuadResult != null && docQuadResult.success) {
+        docQuadCorners = pointsFromDetectionResult(docQuadResult);
+        scaleImageQuadToOriginal(docQuadCorners, scaleToOrig);
+      }
+    } catch (Throwable t) {
+      Log.w(TAG, "DocQuad crop detection failed in best-of mode: " + t.getMessage());
+    }
+
+    org.opencv.core.Point[] openCvCorners = null;
+    boolean openCvFromHough = false;
+    try {
+      OpenCVUtils.OpenCvCornerDetection openCvDetection =
+          OpenCVUtils.detectDocumentCornersWithOpenCvMetadata(getContext(), work);
+      if (openCvDetection != null) {
+        openCvCorners = openCvDetection.corners();
+        openCvFromHough = openCvDetection.fromHoughFallback();
+      }
+      scaleImageQuadToOriginal(openCvCorners, scaleToOrig);
+    } catch (Throwable t) {
+      Log.w(TAG, "OpenCV crop detection failed in best-of mode: " + t.getMessage());
+    }
+
+    Bitmap refBmp = imageBitmap != null ? imageBitmap : work;
+    if (refBmp == null) return null;
+    boolean docValid = isValidImageQuad(docQuadCorners, refBmp.getWidth(), refBmp.getHeight());
+    boolean openCvValid = isValidImageQuad(openCvCorners, refBmp.getWidth(), refBmp.getHeight());
+    if (docValid && openCvValid) {
+      double docScore = scoreImageQuad(docQuadCorners, refBmp.getWidth(), refBmp.getHeight());
+      double openCvScore = scoreImageQuad(openCvCorners, refBmp.getWidth(), refBmp.getHeight());
+      double requiredOpenCvLead = openCvFromHough && docScore >= 0.55 ? 0.35 : 0.03;
+      if (openCvFromHough && docScore >= 0.70) {
+        requiredOpenCvLead = 0.50;
+      }
+      if (openCvScore > docScore + requiredOpenCvLead) {
+        Log.i(
+            TAG,
+            "Best-of crop corners: using OpenCV"
+                + (openCvFromHough ? " Hough" : " contour")
+                + " (openCv="
+                + openCvScore
+                + ", doc="
+                + docScore
+                + ", requiredLead="
+                + requiredOpenCvLead
+                + ")");
+        return openCvCorners;
+      }
+      if (docScore >= openCvScore) {
+        Log.i(TAG, "Best-of crop corners: using DocQuad (" + docScore + " >= " + openCvScore + ")");
+      } else {
+        Log.i(
+            TAG,
+            "Best-of crop corners: using DocQuad within "
+                + (openCvFromHough ? "Hough guard" : "tolerance")
+                + " (doc="
+                + docScore
+                + ", openCv="
+                + openCvScore
+                + ", requiredLead="
+                + requiredOpenCvLead
+                + ")");
+      }
+      return docQuadCorners;
+    }
+    if (docValid) return docQuadCorners;
+    if (openCvValid) return openCvCorners;
+    return null;
+  }
+
+  @Nullable
+  private static org.opencv.core.Point[] pointsFromDetectionResult(@Nullable DetectionResult r) {
+    if (r == null || r.cornersOriginalTLTRBRBL == null || r.cornersOriginalTLTRBRBL.length != 4) {
+      return null;
+    }
+    org.opencv.core.Point[] points = new org.opencv.core.Point[4];
+    for (int i = 0; i < 4; i++) {
+      if (r.cornersOriginalTLTRBRBL[i] == null || r.cornersOriginalTLTRBRBL[i].length < 2) {
+        return null;
+      }
+      points[i] =
+          new org.opencv.core.Point(
+              r.cornersOriginalTLTRBRBL[i][0], r.cornersOriginalTLTRBRBL[i][1]);
+    }
+    return points;
+  }
+
+  private static void scaleImageQuadToOriginal(
+      @Nullable org.opencv.core.Point[] quad, float scaleToOrig) {
+    if (quad == null || scaleToOrig >= 1f) return;
+    double inv = 1.0 / scaleToOrig;
+    for (org.opencv.core.Point p : quad) {
+      if (p != null) {
+        p.x *= inv;
+        p.y *= inv;
+      }
     }
   }
 
@@ -1485,6 +1618,104 @@ public class TrapezoidSelectionView extends View {
     // If both opposing-side ratios are close to 1 (rectangular-ish), consider the quad plausible
     // and keep the detector result.
     return !(parRatioH >= 0.85 && parRatioV >= 0.85);
+  }
+
+  static boolean isValidImageQuad(org.opencv.core.Point[] quad, int imgW, int imgH) {
+    if (quad == null || quad.length != 4 || imgW <= 0 || imgH <= 0) return false;
+
+    for (org.opencv.core.Point p : quad) {
+      if (p == null || !Double.isFinite(p.x) || !Double.isFinite(p.y)) return false;
+      if (p.x < 0 || p.x > imgW || p.y < 0 || p.y > imgH) return false;
+    }
+
+    double area = signedArea(quad);
+    double areaRatio = Math.abs(area) / ((double) imgW * (double) imgH);
+    if (areaRatio < 0.02) return false;
+
+    double expectedSign = Math.signum(area);
+    if (expectedSign == 0) return false;
+    for (int i = 0; i < 4; i++) {
+      org.opencv.core.Point a = quad[i];
+      org.opencv.core.Point b = quad[(i + 1) % 4];
+      org.opencv.core.Point c = quad[(i + 2) % 4];
+      double cross = cross(a, b, c);
+      if (Math.signum(cross) != expectedSign) return false;
+    }
+
+    return true;
+  }
+
+  static double scoreImageQuad(org.opencv.core.Point[] quad, int imgW, int imgH) {
+    if (!isValidImageQuad(quad, imgW, imgH)) return Double.NEGATIVE_INFINITY;
+
+    double areaRatio = Math.abs(signedArea(quad)) / ((double) imgW * (double) imgH);
+    double areaScore = 1.0 - Math.min(1.0, Math.abs(areaRatio - 0.60) / 0.60);
+
+    double topLen = distance(quad[0], quad[1]);
+    double rightLen = distance(quad[1], quad[2]);
+    double bottomLen = distance(quad[3], quad[2]);
+    double leftLen = distance(quad[0], quad[3]);
+    double horizontalBalance = ratio(topLen, bottomLen);
+    double verticalBalance = ratio(leftLen, rightLen);
+    double sideBalanceScore = (horizontalBalance + verticalBalance) / 2.0;
+
+    double minAngleScore = 1.0;
+    for (int i = 0; i < 4; i++) {
+      double angle = angleDegrees(quad[(i + 3) % 4], quad[i], quad[(i + 1) % 4]);
+      double angleScore = 1.0 - Math.min(1.0, Math.abs(angle - 90.0) / 90.0);
+      minAngleScore = Math.min(minAngleScore, angleScore);
+    }
+
+    double minX = Double.POSITIVE_INFINITY;
+    double minY = Double.POSITIVE_INFINITY;
+    double maxX = Double.NEGATIVE_INFINITY;
+    double maxY = Double.NEGATIVE_INFINITY;
+    for (org.opencv.core.Point p : quad) {
+      minX = Math.min(minX, p.x);
+      minY = Math.min(minY, p.y);
+      maxX = Math.max(maxX, p.x);
+      maxY = Math.max(maxY, p.y);
+    }
+    double bboxCoverage = ((maxX - minX) * (maxY - minY)) / ((double) imgW * (double) imgH);
+    double coverageScore = 1.0 - Math.min(1.0, Math.abs(bboxCoverage - 0.70) / 0.70);
+
+    return 0.35 * areaScore + 0.30 * minAngleScore + 0.20 * sideBalanceScore + 0.15 * coverageScore;
+  }
+
+  private static double distance(org.opencv.core.Point a, org.opencv.core.Point b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  private static double ratio(double a, double b) {
+    double max = Math.max(a, b);
+    return max > 0 ? Math.min(a, b) / max : 0;
+  }
+
+  private static double angleDegrees(
+      org.opencv.core.Point previous, org.opencv.core.Point center, org.opencv.core.Point next) {
+    double ux = previous.x - center.x;
+    double uy = previous.y - center.y;
+    double vx = next.x - center.x;
+    double vy = next.y - center.y;
+    double denom = Math.hypot(ux, uy) * Math.hypot(vx, vy);
+    if (denom == 0) return 0;
+    double cos = Math.max(-1.0, Math.min(1.0, (ux * vx + uy * vy) / denom));
+    return Math.toDegrees(Math.acos(cos));
+  }
+
+  private static double signedArea(org.opencv.core.Point[] quad) {
+    double sum = 0;
+    for (int i = 0; i < 4; i++) {
+      org.opencv.core.Point a = quad[i];
+      org.opencv.core.Point b = quad[(i + 1) % 4];
+      sum += a.x * b.y - b.x * a.y;
+    }
+    return sum / 2.0;
+  }
+
+  private static double cross(
+      org.opencv.core.Point a, org.opencv.core.Point b, org.opencv.core.Point c) {
+    return (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
   }
 
   /** Builds a full-image quad (TL, TR, BR, BL) in image space. */
@@ -1808,10 +2039,24 @@ public class TrapezoidSelectionView extends View {
 
     // Check if all points are within view bounds
     for (Point p : coordinates) {
-      if (p.x < 0 || p.x > viewWidth || p.y < 0 || p.y > viewHeight) {
-        Log.w(TAG, "Point outside view bounds: (" + p.x + "," + p.y + ")");
+      if (p == null
+          || !Double.isFinite(p.x)
+          || !Double.isFinite(p.y)
+          || p.x < 0
+          || p.x > viewWidth
+          || p.y < 0
+          || p.y > viewHeight) {
+        Log.w(
+            TAG,
+            "Invalid point in view coordinates: "
+                + (p != null ? "(" + p.x + "," + p.y + ")" : "null"));
         return false;
       }
+    }
+
+    if (!isStrictlyConvex(coordinates)) {
+      Log.w(TAG, "Quadrilateral is not strictly convex in TL/TR/BR/BL order");
+      return false;
     }
 
     // Check if the quadrilateral has reasonable area (at least 2% of view)
@@ -1831,6 +2076,26 @@ public class TrapezoidSelectionView extends View {
       return false;
     }
 
+    return true;
+  }
+
+  private static boolean isStrictlyConvex(Point[] quad) {
+    if (quad == null || quad.length != 4) return false;
+    double expectedSign = 0;
+    for (int i = 0; i < 4; i++) {
+      Point a = quad[i];
+      Point b = quad[(i + 1) % 4];
+      Point c = quad[(i + 2) % 4];
+      if (a == null || b == null || c == null) return false;
+      double cross = cross(a, b, c);
+      if (cross == 0 || !Double.isFinite(cross)) return false;
+      double sign = Math.signum(cross);
+      if (expectedSign == 0) {
+        expectedSign = sign;
+      } else if (sign != expectedSign) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -2958,6 +3223,10 @@ public class TrapezoidSelectionView extends View {
     if (viewW <= 0 || viewH <= 0 || imageBitmap == null) {
       // Defer until layout/bitmap available.
       post(() -> setCornersFromImageCoordinates(copy));
+      return;
+    }
+    if (!isValidImageQuad(copy, imageBitmap.getWidth(), imageBitmap.getHeight())) {
+      Log.w(TAG, "setCornersFromImageCoordinates: invalid or degenerate image-space quad");
       return;
     }
     try {

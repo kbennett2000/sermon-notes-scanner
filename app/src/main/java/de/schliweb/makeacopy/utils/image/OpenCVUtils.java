@@ -35,6 +35,8 @@ import org.opencv.photo.Photo;
 public final class OpenCVUtils {
   private static final String TAG = "OpenCVUtils";
 
+  public record OpenCvCornerDetection(Point[] corners, boolean fromHoughFallback) {}
+
   @Getter private static boolean isInitialized = false;
 
   private static boolean USE_SAFE_MODE = true;
@@ -671,7 +673,8 @@ public final class OpenCVUtils {
    * @return An array of Points representing the four corners of the detected document. If no
    *     suitable document corners are detected, a fallback rectangle is returned.
    */
-  private static Point[] detectDocumentCornersWithOpenCV(Context context, Bitmap bitmap) {
+  private static OpenCvCornerDetection detectDocumentCornersWithOpenCVDetailed(
+      Context context, Bitmap bitmap) {
     Log.i(TAG, "Starting detectDocumentCornersWithOpenCV()");
 
     Mat rgba = new Mat();
@@ -833,7 +836,7 @@ public final class OpenCVUtils {
 
       if (bestQuad != null) {
         Log.i(TAG, "Document contour found via approxPolyDP");
-        return bestQuad;
+        return new OpenCvCornerDetection(bestQuad, false);
       }
 
       // Fallback: Try Hough lines detection when contour-based detection fails
@@ -841,11 +844,11 @@ public final class OpenCVUtils {
       Point[] houghQuad = detectQuadFromHoughLines(edges, rgba.width(), rgba.height());
       if (houghQuad != null) {
         Log.i(TAG, "Document quad found via Hough lines");
-        return houghQuad;
+        return new OpenCvCornerDetection(houghQuad, true);
       }
 
       Log.w(TAG, "No suitable document contour found (OpenCV) → returning null");
-      return null;
+      return new OpenCvCornerDetection(null, false);
     } finally {
       // Release all contours at once instead of in the loop to avoid accessing released Mats
       for (MatOfPoint c : contours) {
@@ -860,6 +863,31 @@ public final class OpenCVUtils {
       contours.clear();
       release(rgba, gray, threshold, morph, kernel, edges, edgesCopy, hierarchy, debug);
     }
+  }
+
+  private static Point[] detectDocumentCornersWithOpenCV(Context context, Bitmap bitmap) {
+    OpenCvCornerDetection detection = detectDocumentCornersWithOpenCVDetailed(context, bitmap);
+    return detection != null ? detection.corners() : null;
+  }
+
+  public static OpenCvCornerDetection detectDocumentCornersWithOpenCvMetadata(
+      Context context, Bitmap bitmap) {
+    Log.i(
+        TAG,
+        "Starting detectDocumentCornersWithOpenCvMetadata() OpenCV="
+            + (DISABLE_OPENCV_DETECTION ? "OFF" : "ON")
+            + "]");
+
+    if (DISABLE_OPENCV_DETECTION) {
+      return new OpenCvCornerDetection(
+          getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight()), false);
+    }
+    OpenCvCornerDetection detection = detectDocumentCornersWithOpenCVDetailed(context, bitmap);
+    if (detection == null || detection.corners() == null) {
+      return new OpenCvCornerDetection(
+          getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight()), false);
+    }
+    return detection;
   }
 
   /**
