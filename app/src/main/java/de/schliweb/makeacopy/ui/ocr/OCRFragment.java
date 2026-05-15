@@ -374,8 +374,6 @@ public class OCRFragment extends Fragment {
 
     // Determine preferred language: saved preference (if available and installed) else system
     // default
-    String systemLang =
-        OCRUtils.mapSystemLanguageToTesseract(java.util.Locale.getDefault().getLanguage());
     android.content.SharedPreferences sp =
         requireContext().getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE);
     String savedLangSpec = null;
@@ -398,11 +396,9 @@ public class OCRFragment extends Fragment {
 
     // Fallback to system language if no valid saved selection
     if (selectedLanguageCodes.isEmpty()) {
-      final String sysLangFinal = systemLang;
-      boolean systemInList =
-          IntStream.range(0, codes.length).anyMatch(i -> codes[i].equals(sysLangFinal));
-      if (systemInList && isLanguageAvailableSafe(systemLang)) {
-        selectedLanguageCodes.add(systemLang);
+      String defaultLang = resolveDefaultLanguageForDevice(codes);
+      if (defaultLang != null) {
+        selectedLanguageCodes.add(defaultLang);
       } else if (codes.length > 0) {
         selectedLanguageCodes.add(codes[0]);
       }
@@ -427,6 +423,47 @@ public class OCRFragment extends Fragment {
     dropdown.setOnClickListener(v -> showLanguageDialog(codes, displayNames, dropdown));
     dropdown.setFocusable(false);
     dropdown.setClickable(true);
+  }
+
+  private String resolveDefaultLanguageForDevice(String[] codes) {
+    if (codes == null || codes.length == 0) return null;
+
+    String preferred =
+        de.schliweb.makeacopy.BuildConfig.FEATURE_PADDLE_OCR
+            ? mapSystemLanguageToPaddleModel(java.util.Locale.getDefault())
+            : OCRUtils.mapSystemLanguageToTesseract(java.util.Locale.getDefault().getLanguage());
+    if (isCodeAvailable(codes, preferred) && isLanguageAvailableSafe(preferred)) {
+      return preferred;
+    }
+
+    if (de.schliweb.makeacopy.BuildConfig.FEATURE_PADDLE_OCR
+        && isCodeAvailable(codes, "latin")
+        && isLanguageAvailableSafe("latin")) {
+      return "latin";
+    }
+    return null;
+  }
+
+  private static String mapSystemLanguageToPaddleModel(java.util.Locale locale) {
+    String language = locale != null ? locale.getLanguage() : "";
+    return switch (language) {
+      case "en" -> "en";
+      case "ru", "be", "uk" -> "eslav";
+      case "bg", "mk", "mn", "sr" -> "cyrillic";
+      case "ar", "fa", "ur", "ps" -> "arabic";
+      case "hi", "mr", "ne", "sa" -> "devanagari";
+      case "th" -> "th";
+      case "zh", "ja", "ko" -> "zh";
+      default -> "latin";
+    };
+  }
+
+  private static boolean isCodeAvailable(String[] codes, String code) {
+    if (code == null || code.isEmpty()) return false;
+    for (String available : codes) {
+      if (code.equals(available)) return true;
+    }
+    return false;
   }
 
   private void showLanguageDialog(
