@@ -736,6 +736,11 @@ _AGREEMENT_MAX_CORNER_DIST = 32.0
 # Value 50.0 corresponds to ~5 grid cells of disagreement (5 * 10.0).
 _MASK_SCORE_MARGIN = 50.0
 
+# Experimental product-policy switch used by CLI sweeps. The default keeps the Android production
+# behavior exactly unchanged.
+_PRODUCT_PATH_POLICY = "production"
+_PRODUCT_PEAK_MODE = "refine_3x3"
+
 
 def _max_corner_distance(quad1: list[tuple[float, float]], quad2: list[tuple[float, float]]) -> float:
     """Compute maximum Euclidean distance between corresponding corners of two quads."""
@@ -749,6 +754,83 @@ def _max_corner_distance(quad1: list[tuple[float, float]], quad2: list[tuple[flo
         if dist > max_dist:
             max_dist = dist
     return max_dist
+
+
+def _argmax_corners_64_to_256(corner_heatmaps: np.ndarray) -> list[tuple[float, float]]:
+    """Argmax corner extraction matching DocQuadPostprocessor.argmaxCorners64ToCorners256."""
+    corners: list[tuple[float, float]] = []
+    for c in range(4):
+        hm = corner_heatmaps[0, c]
+        idx = int(np.argmax(hm))
+        y, x = np.unravel_index(idx, hm.shape)
+        corners.append(((float(x) + 0.5) * 4.0, (float(y) + 0.5) * 4.0))
+    return corners
+
+
+def _raw_legacy_argmax_corners_64_to_256(corner_heatmaps: np.ndarray) -> list[tuple[float, float]]:
+    """Legacy evaluator RAW argmax mapping kept only for product-logic experiments."""
+    corners: list[tuple[float, float]] = []
+    for c in range(4):
+        hm = corner_heatmaps[0, c]
+        idx = int(np.argmax(hm))
+        y, x = np.unravel_index(idx, hm.shape)
+        corners.append((float(x) * 4.0, float(y) * 4.0))
+    return corners
+
+
+def _refine_corners_64_to_256_5x5_quadratic(corner_heatmaps: np.ndarray) -> list[tuple[float, float]]:
+    """Subpixel refinement port of DocQuadPostprocessor.refineCorners64ToCorners256_5x5Quadratic."""
+    corners: list[tuple[float, float]] = []
+    for c in range(4):
+        hm = corner_heatmaps[0, c]
+        idx = int(np.argmax(hm))
+        best_y, best_x = np.unravel_index(idx, hm.shape)
+
+        dx = 0.0
+        dx_valid = False
+        if 0 < best_x < 63:
+            left = float(hm[best_y, best_x - 1])
+            center = float(hm[best_y, best_x])
+            right = float(hm[best_y, best_x + 1])
+            denom = left - 2.0 * center + right
+            if denom < -1e-12:
+                dx = 0.5 * (left - right) / denom
+                dx = max(-0.5, min(0.5, dx))
+                dx_valid = True
+
+        dy = 0.0
+        dy_valid = False
+        if 0 < best_y < 63:
+            top = float(hm[best_y - 1, best_x])
+            center = float(hm[best_y, best_x])
+            bottom = float(hm[best_y + 1, best_x])
+            denom = top - 2.0 * center + bottom
+            if denom < -1e-12:
+                dy = 0.5 * (top - bottom) / denom
+                dy = max(-0.5, min(0.5, dy))
+                dy_valid = True
+
+        if dx_valid or dy_valid:
+            x64 = float(best_x) + 0.5 + dx
+            y64 = float(best_y) + 0.5 + dy
+        else:
+            x0 = max(0, best_x - 2)
+            x1 = min(63, best_x + 2)
+            y0 = max(0, best_y - 2)
+            y1 = min(63, best_y + 2)
+            window = hm[y0:y1 + 1, x0:x1 + 1].astype(np.float64)
+            max_logit = float(np.max(window))
+            weights = np.exp(window - max_logit)
+            sum_w = float(np.sum(weights))
+            if sum_w == 0.0 or not math.isfinite(sum_w):
+                x64 = float(best_x) + 0.5
+                y64 = float(best_y) + 0.5
+            else:
+                ys, xs = np.mgrid[y0:y1 + 1, x0:x1 + 1]
+                x64 = float(np.sum(weights * (xs + 0.5)) / sum_w)
+                y64 = float(np.sum(weights * (ys + 0.5)) / sum_w)
+        corners.append((x64 * 4.0, y64 * 4.0))
+    return corners
 
 
 def _choose_path(
@@ -783,6 +865,11 @@ def _choose_path(
     if p_b >= _HARD_PENALTY_THRESHOLD:
         return quad_corners256, "CORNERS", p_a, p_b
     
+    if _PRODUCT_PATH_POLICY == "corners_only":
+        return quad_corners256, "CORNERS", p_a, p_b
+    if _PRODUCT_PATH_POLICY == "mask_if_valid":
+        return quad_from_mask256, "MASK", p_a, p_b
+
     # Guardrail 1: Agreement check - if MASK and CORNERS disagree significantly,
     # prefer CORNERS (MASK prediction is unreliable due to distribution shift)
     max_corner_dist = _max_corner_distance(quad_corners256, quad_from_mask256)
@@ -824,7 +911,7 @@ def _apply_product_postprocessing_app(
     """
     Apply PRODUCT mode post-processing IDENTICAL to MakeACopy app.
     
-    This is an EXACT port of DocQuadPostprocessor.postprocess with PeakMode.REFINE_3X3.
+    This is a port of DocQuadPostprocessor.postprocess with configurable PeakMode for experiments.
     
     Args:
         corner_heatmaps: Array of shape (1, 4, 64, 64)
@@ -834,8 +921,15 @@ def _apply_product_postprocessing_app(
     Returns:
         AppPostprocessResult with corners in original image space
     """
-    # 1. Extract corners from heatmaps with 3x3 refinement
-    corners256 = _refine_corners_64_to_256_3x3(corner_heatmaps)
+    # 1. Extract corners from heatmaps with configured refinement
+    if _PRODUCT_PEAK_MODE == "raw_argmax":
+        corners256 = _raw_legacy_argmax_corners_64_to_256(corner_heatmaps)
+    elif _PRODUCT_PEAK_MODE == "argmax":
+        corners256 = _argmax_corners_64_to_256(corner_heatmaps)
+    elif _PRODUCT_PEAK_MODE == "refine_5x5_quadratic":
+        corners256 = _refine_corners_64_to_256_5x5_quadratic(corner_heatmaps)
+    else:
+        corners256 = _refine_corners_64_to_256_3x3(corner_heatmaps)
     
     # 2. Compute quad from mask (PCA-based)
     quad_from_mask256, used_fallback = _quad_from_mask_256(mask_logits, corners256)
@@ -1727,6 +1821,43 @@ Examples:
         default=0.05,
         help="Minimum quad area fraction relative to image area (default: 0.05).",
     )
+    parser.add_argument(
+        "--product-agreement-max-corner-dist",
+        type=float,
+        default=32.0,
+        help=(
+            "Experimental PRODUCT-mode threshold: maximum corner distance in 256-space before "
+            "MASK is considered unreliable (default: 32.0, matches Android production)."
+        ),
+    )
+    parser.add_argument(
+        "--product-mask-score-margin",
+        type=float,
+        default=50.0,
+        help=(
+            "Experimental PRODUCT-mode threshold: MASK must beat CORNERS geometry penalty by "
+            "this margin (default: 50.0, matches Android production)."
+        ),
+    )
+    parser.add_argument(
+        "--product-path-policy",
+        choices=["production", "corners_only", "mask_if_valid"],
+        default="production",
+        help=(
+            "Experimental PRODUCT-mode path policy. 'production' matches Android; "
+            "'corners_only' never chooses MASK except hard invalid fallbacks are bypassed; "
+            "'mask_if_valid' chooses MASK whenever its geometry is valid."
+        ),
+    )
+    parser.add_argument(
+        "--product-peak-mode",
+        choices=["raw_argmax", "argmax", "refine_3x3", "refine_5x5_quadratic"],
+        default="refine_3x3",
+        help=(
+            "Experimental PRODUCT-mode corner peak extraction. Default keeps the historical Python "
+            "evaluator behavior; 'refine_5x5_quadratic' matches current Android DocQuadDetector."
+        ),
+    )
 
     # Failure conditions
     parser.add_argument(
@@ -1751,6 +1882,12 @@ Examples:
     parser.set_defaults(fail_on_oob=True, fail_on_geom=True, fail_on_degenerate=True)
 
     args = parser.parse_args()
+
+    global _AGREEMENT_MAX_CORNER_DIST, _MASK_SCORE_MARGIN, _PRODUCT_PATH_POLICY, _PRODUCT_PEAK_MODE
+    _AGREEMENT_MAX_CORNER_DIST = args.product_agreement_max_corner_dist
+    _MASK_SCORE_MARGIN = args.product_mask_score_margin
+    _PRODUCT_PATH_POLICY = args.product_path_policy
+    _PRODUCT_PEAK_MODE = args.product_peak_mode
 
     # Parse evaluation mode
     eval_mode = EvalMode.RAW if args.mode == "raw" else EvalMode.PRODUCT
