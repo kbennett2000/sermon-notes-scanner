@@ -1388,7 +1388,7 @@ public class TrapezoidSelectionView extends View {
     try {
       OpenCVUtils.OpenCvCornerDetection openCvDetection =
           OpenCVUtils.detectDocumentCornersWithOpenCvMetadata(getContext(), work);
-      if (openCvDetection != null) {
+      if (openCvDetection != null && !openCvDetection.fallbackRectangle()) {
         openCvCorners = openCvDetection.corners();
         openCvFromHough = openCvDetection.fromHoughFallback();
       }

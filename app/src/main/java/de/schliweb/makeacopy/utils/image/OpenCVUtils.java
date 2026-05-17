@@ -35,7 +35,8 @@ import org.opencv.photo.Photo;
 public final class OpenCVUtils {
   private static final String TAG = "OpenCVUtils";
 
-  public record OpenCvCornerDetection(Point[] corners, boolean fromHoughFallback) {}
+  public record OpenCvCornerDetection(
+      Point[] corners, boolean fromHoughFallback, boolean fallbackRectangle) {}
 
   @Getter private static boolean isInitialized = false;
 
@@ -836,7 +837,7 @@ public final class OpenCVUtils {
 
       if (bestQuad != null) {
         Log.i(TAG, "Document contour found via approxPolyDP");
-        return new OpenCvCornerDetection(bestQuad, false);
+        return new OpenCvCornerDetection(bestQuad, false, false);
       }
 
       // Fallback: Try Hough lines detection when contour-based detection fails
@@ -844,11 +845,11 @@ public final class OpenCVUtils {
       Point[] houghQuad = detectQuadFromHoughLines(edges, rgba.width(), rgba.height());
       if (houghQuad != null) {
         Log.i(TAG, "Document quad found via Hough lines");
-        return new OpenCvCornerDetection(houghQuad, true);
+        return new OpenCvCornerDetection(houghQuad, true, false);
       }
 
       Log.w(TAG, "No suitable document contour found (OpenCV) → returning null");
-      return new OpenCvCornerDetection(null, false);
+      return new OpenCvCornerDetection(null, false, false);
     } finally {
       // Release all contours at once instead of in the loop to avoid accessing released Mats
       for (MatOfPoint c : contours) {
@@ -880,12 +881,12 @@ public final class OpenCVUtils {
 
     if (DISABLE_OPENCV_DETECTION) {
       return new OpenCvCornerDetection(
-          getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight()), false);
+          getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight()), false, true);
     }
     OpenCvCornerDetection detection = detectDocumentCornersWithOpenCVDetailed(context, bitmap);
     if (detection == null || detection.corners() == null) {
       return new OpenCvCornerDetection(
-          getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight()), false);
+          getFallbackRectangle(bitmap.getWidth(), bitmap.getHeight()), false, true);
     }
     return detection;
   }
