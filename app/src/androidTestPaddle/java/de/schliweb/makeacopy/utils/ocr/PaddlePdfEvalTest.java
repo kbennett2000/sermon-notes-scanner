@@ -10,6 +10,7 @@
 package de.schliweb.makeacopy.utils.ocr;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
@@ -66,6 +67,19 @@ public class PaddlePdfEvalTest {
     static final double THRESHOLD_WER = 0.20;
     static final double THRESHOLD_MEAN_CONFIDENCE = 60.0;
 
+    /**
+     * Hart-Schwellen für das Regressionssample {@code saudi_executions}.
+     * Dieses Sample deckt den DB-Detektor-Fix ab (zuvor fehlende Zeile
+     * „In a bid to diversify its economy away from oil…"). Sollte die Detection-
+     * Konfiguration künftig regredieren, wird die Zeile wieder verworfen — CER/WER
+     * springen dann deutlich über diese Werte. Die Limits liegen großzügig oberhalb
+     * der aktuell gemessenen Werte (CER≈0.059, WER≈0.070), um normale Recognizer-
+     * Schwankungen zuzulassen, aber eine echte Detection-Regression hart zu fangen.
+     */
+    static final String HARD_REGRESSION_SAMPLE = "saudi_executions";
+    static final double HARD_REGRESSION_CER = 0.08;
+    static final double HARD_REGRESSION_WER = 0.12;
+
     @Test
     public void evaluatePaddlePdf_writesReportAndLogsThresholds() throws Exception {
         Context ctx = ApplicationProvider.getApplicationContext();
@@ -117,6 +131,42 @@ public class PaddlePdfEvalTest {
 
         // Soft-Asserts (§9): nur loggen.
         logThresholdCheck("paddle-pdf", paddleReport);
+
+        // Harter Per-Sample-Assert: Regression des DB-Detection-Fixes für saudi_executions.
+        assertHardRegressionSample(paddleReport);
+    }
+
+    /**
+     * Prüft das dedizierte Regressions-Sample hart gegen feste CER/WER-Schwellen.
+     * Wenn das Sample nicht vorhanden ist (z.B. lokaler Lauf ohne Asset), wird der
+     * Check übersprungen statt zu scheitern.
+     */
+    private static void assertHardRegressionSample(Report r) {
+        SampleMetric sm = null;
+        for (SampleMetric m : r.perSample) {
+            if (HARD_REGRESSION_SAMPLE.equals(m.name)) {
+                sm = m;
+                break;
+            }
+        }
+        if (sm == null) {
+            Log.w(TAG, "[HARD-ASSERT] sample=" + HARD_REGRESSION_SAMPLE
+                    + " not present — skipping regression guard");
+            return;
+        }
+        Log.i(TAG, "[HARD-ASSERT] sample=" + sm.name
+                + " cer=" + fmt(sm.cer) + " (limit " + HARD_REGRESSION_CER + ")"
+                + " wer=" + fmt(sm.wer) + " (limit " + HARD_REGRESSION_WER + ")");
+        assertTrue(
+                "Regression in sample " + sm.name + ": CER=" + fmt(sm.cer)
+                        + " exceeds hard limit " + HARD_REGRESSION_CER
+                        + " — DB detection likely regressed (missing text lines).",
+                sm.cer <= HARD_REGRESSION_CER);
+        assertTrue(
+                "Regression in sample " + sm.name + ": WER=" + fmt(sm.wer)
+                        + " exceeds hard limit " + HARD_REGRESSION_WER
+                        + " — DB detection likely regressed (missing text lines).",
+                sm.wer <= HARD_REGRESSION_WER);
     }
 
     // ---------------------------------------------------------------------
@@ -140,7 +190,7 @@ public class PaddlePdfEvalTest {
     private static List<Sample> loadPdfSamples(Context appCtx, Context testCtx) throws Exception {
         AssetManager am = testCtx.getAssets();
         String[] entries = am.list(EVAL_DIR);
-        if (entries == null) return Collections.emptyList();
+        if (entries == null) return new ArrayList<>();
         List<String> names = new ArrayList<>();
         for (String e : entries) {
             String lower = e.toLowerCase(Locale.ROOT);
@@ -276,6 +326,12 @@ public class PaddlePdfEvalTest {
                     name + " sample=" + s.name + " lang=" + s.language + " cer=" + fmt(cer) + " wer=" + fmt(wer)
                             + " conf=" + (res != null ? res.meanConfidence : null)
                             + " dtMs=" + dtMs);
+            // Erkannten Text vollständig in die Logausgabe schreiben (Diagnose / Vergleich mit GT).
+            // Logcat begrenzt einzelne Einträge auf ~4 KB; daher zeilenweise loggen.
+            logMultiline(TAG, name + " sample=" + s.name + " PRED >>>", prN);
+            logMultiline(TAG, name + " sample=" + s.name + " PRED <<< END", "");
+            logMultiline(TAG, name + " sample=" + s.name + " GT   >>>", gt);
+            logMultiline(TAG, name + " sample=" + s.name + " GT   <<< END", "");
         }
 
         Collections.sort(latencies);
@@ -311,6 +367,22 @@ public class PaddlePdfEvalTest {
 
     private static String fmt(double d) {
         return String.format(Locale.ROOT, "%.4f", d);
+    }
+
+    /**
+     * Logge potenziell mehrzeiligen Text Zeile für Zeile, damit Logcat nichts abschneidet.
+     * Erste Zeile bekommt das Header-Präfix, Folgezeilen werden mit Zeilennummer markiert.
+     */
+    private static void logMultiline(String tag, String header, String body) {
+        if (body == null || body.isEmpty()) {
+            Log.i(tag, header);
+            return;
+        }
+        String[] lines = body.split("\n", -1);
+        Log.i(tag, header + " (" + lines.length + " lines)");
+        for (int i = 0; i < lines.length; i++) {
+            Log.i(tag, "  [" + (i + 1) + "] " + lines[i]);
+        }
     }
 
     private static String normalizeText(String s) {
