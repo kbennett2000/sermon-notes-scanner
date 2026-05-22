@@ -73,7 +73,7 @@
     <string name="share_logs_error">Kon logbestanden niet voorbereiden: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Omzetten naar grijstinten</string>
+    <string name="convert_to_grayscale">Grijstinten</string>
     <string name="export_as_jpeg">Exporteren als JPEG</string>
     <string name="export_as_pdf">Exporteren als PDF (standaard)</string>
 
@@ -90,13 +90,13 @@
     <string name="exposure_compensation_option">Belichtingscompensatie</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Geen verbetering (JPEG)</string>
-    <string name="jpeg_mode_auto">Automatisch verbeteren (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Zwart-wit (klassiek) (JPEG)</string>
+    <string name="jpeg_mode_none">Kleur</string>
+    <string name="jpeg_mode_auto">Grijstinten</string>
+    <string name="jpeg_mode_bw_text">Zwart-wit</string>
     <string name="jpeg_mode_bw_robust">Zwart-wit (robuust) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">Robuuste OCR-voorverwerking (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Z/W (robuust)</string>
+    <string name="pdf_bw_mode_robust">Zwart-wit</string>
     <string name="pdf_bw_mode_classic">Z/W (klassiek)</string>
     <string name="pdf_bw_mode_ocr_robust">Robuuste OCR-voorverwerking (PDF)</string>
     <string name="jpeg_mode_gray_clean">Opgeschoonde grijswaarden (hoogdoorlaatfilter) (JPEG)</string>
@@ -165,7 +165,7 @@
     <string name="pdf_preset_small">Klein (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">Zeer klein (110 dpi, q52)</string>
     <string name="export_options_title">Exportopties</string>
-    <string name="jpeg_enhancement_title">JPEG‑verbetering</string>
+    <string name="jpeg_enhancement_title">JPEG‑uitvoerkleur</string>
     <string name="btn_options">Opties</string>
     <string name="btn_save">Opslaan</string>
     <string name="btn_new">Nieuwe scan</string>
@@ -433,7 +433,7 @@
     <string name="inbox_filename_date_scan">Datum + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">Datum + tijd + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Alleen datum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Origineel (geen filter)</string>
+    <string name="pdf_bw_mode_none">Kleur</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Pagina verwijderen?</string>
     <string name="confirm_remove_page_message">Wil je deze pagina uit de filmstrip verwijderen?</string>
@@ -454,4 +454,10 @@
     <string name="crop_aspect_output_size_hint">Uitvoer: %1$d × %2$d px</string>
     <string name="crop_hint_corner_off_image">Hoek buiten afbeelding — uitvoer kan zwarte randen bevatten</string>
     <string name="crop_edge_dragged">Rand geselecteerd. Sleep om de rand te verplaatsen.</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">Documentopschoning</string>
+    <string name="document_cleanup_original">Origineel</string>
+    <string name="document_cleanup_natural">Natuurlijk</string>
+    <string name="document_cleanup_enhanced">Verbeterd</string>
+    <string name="document_cleanup_clean_text">Schone tekst</string>
 </resources>

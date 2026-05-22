@@ -73,7 +73,7 @@
     <string name="share_logs_error">Не удалось подготовить журналы: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Преобразовать в оттенки серого</string>
+    <string name="convert_to_grayscale">Оттенки серого</string>
     <string name="export_as_jpeg">Экспорт как JPEG</string>
     <string name="export_as_pdf">Экспорт как PDF (по умолчанию)</string>
 
@@ -90,13 +90,13 @@
     <string name="exposure_compensation_option">Компенсация экспозиции</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Без улучшений (JPEG)</string>
-    <string name="jpeg_mode_auto">Автоулучшение (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Чёрно-белый (классический) (JPEG)</string>
+    <string name="jpeg_mode_none">Цвет</string>
+    <string name="jpeg_mode_auto">Оттенки серого</string>
+    <string name="jpeg_mode_bw_text">Чёрно-белый</string>
     <string name="jpeg_mode_bw_robust">Чёрно-белый (устойчивый) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">Надёжная предварительная обработка OCR (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Ч/Б (устойчивый)</string>
+    <string name="pdf_bw_mode_robust">Чёрно-белый</string>
     <string name="pdf_bw_mode_classic">Ч/Б (классический)</string>
     <string name="pdf_bw_mode_ocr_robust">Надёжная предварительная обработка OCR (PDF)</string>
 
@@ -166,7 +166,7 @@
     <string name="pdf_preset_small">Небольшое (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">Очень маленькое (110 dpi, q52)</string>
     <string name="export_options_title">Параметры экспорта</string>
-    <string name="jpeg_enhancement_title">Улучшение JPEG</string>
+    <string name="jpeg_enhancement_title">Цвет вывода JPEG</string>
     <string name="btn_options">Параметры</string>
     <string name="btn_save">Сохранить</string>
     <string name="btn_new">Новое сканирование</string>
@@ -431,7 +431,7 @@
     <string name="inbox_filename_date_scan">Дата + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">Дата + время + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Только дата (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Оригинал (без фильтра)</string>
+    <string name="pdf_bw_mode_none">Цвет</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Удалить страницу?</string>
     <string name="confirm_remove_page_message">Удалить эту страницу из киноленты?</string>
@@ -452,4 +452,10 @@
     <string name="crop_aspect_output_size_hint">Вывод: %1$d × %2$d px</string>
     <string name="crop_hint_corner_off_image">Угол вне изображения — на выходе возможны чёрные поля</string>
     <string name="crop_edge_dragged">Край выбран. Перетащите, чтобы переместить край.</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">Очистка документа</string>
+    <string name="document_cleanup_original">Оригинал</string>
+    <string name="document_cleanup_natural">Естественный</string>
+    <string name="document_cleanup_enhanced">Улучшенный</string>
+    <string name="document_cleanup_clean_text">Чистый текст</string>
 </resources>

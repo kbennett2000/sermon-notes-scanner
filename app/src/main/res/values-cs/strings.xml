@@ -73,7 +73,7 @@
     <string name="share_logs_error">Protokoly se nepodařilo připravit: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Převést na odstíny šedi</string>
+    <string name="convert_to_grayscale">Odstíny šedi</string>
     <string name="export_as_jpeg">Exportovat jako JPEG</string>
     <string name="export_as_pdf">Exportovat jako PDF (výchozí)</string>
 
@@ -90,12 +90,12 @@
     <string name="exposure_compensation_option">Kompenzace expozice</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Bez vylepšení (JPEG)</string>
-    <string name="jpeg_mode_auto">Automatické vylepšení (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Černobílý (klasický) (JPEG)</string>
+    <string name="jpeg_mode_none">Barva</string>
+    <string name="jpeg_mode_auto">Odstíny šedi</string>
+    <string name="jpeg_mode_bw_text">Černobílý</string>
     <string name="jpeg_mode_bw_robust">Černobílý (robustní) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">Odolné předzpracování OCR (JPEG)</string>
-    <string name="pdf_bw_mode_robust">Č/B (robustní)</string>
+    <string name="pdf_bw_mode_robust">Černobílý</string>
     <string name="pdf_bw_mode_classic">Č/B (klasický)</string>
     <string name="pdf_bw_mode_ocr_robust">Odolné předzpracování OCR (PDF)</string>
     <string name="jpeg_mode_gray_clean">Vyčištěné stupně šedi (horní propust) (JPEG)</string>
@@ -163,7 +163,7 @@
     <string name="pdf_preset_small">Malá (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">Velmi malá (110 dpi, q52)</string>
     <string name="export_options_title">Možnosti exportu</string>
-    <string name="jpeg_enhancement_title">Vylepšení JPEG</string>
+    <string name="jpeg_enhancement_title">Výstupní barva JPEG</string>
     <string name="btn_options">Možnosti</string>
     <string name="btn_save">Uložit</string>
     <string name="btn_new">Nové skenování</string>
@@ -430,7 +430,7 @@
     <string name="inbox_filename_date_scan">Datum + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">Datum + čas + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Pouze datum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Originál (bez filtru)</string>
+    <string name="pdf_bw_mode_none">Barva</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Odstranit stránku?</string>
     <string name="confirm_remove_page_message">Chcete tuto stránku odstranit z filmového pásu?</string>
@@ -451,4 +451,10 @@
     <string name="crop_aspect_output_size_hint">Výstup: %1$d × %2$d px</string>
     <string name="crop_hint_corner_off_image">Roh mimo obrázek — výstup může obsahovat černé okraje</string>
     <string name="crop_edge_dragged">Hrana vybrána. Tažením přesuňte hranu.</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">Vyčištění dokumentu</string>
+    <string name="document_cleanup_original">Originál</string>
+    <string name="document_cleanup_natural">Přirozené</string>
+    <string name="document_cleanup_enhanced">Vylepšené</string>
+    <string name="document_cleanup_clean_text">Čistý text</string>
 </resources>

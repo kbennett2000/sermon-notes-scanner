@@ -71,7 +71,7 @@
     <string name="share_logs_error">Kunde inte förbereda loggar: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Konvertera till gråskala</string>
+    <string name="convert_to_grayscale">Gråskala</string>
     <string name="export_as_jpeg">Exportera som JPEG</string>
     <string name="export_as_pdf">Exportera som PDF (standard)</string>
 
@@ -88,13 +88,13 @@
     <string name="exposure_compensation_option">Exponeringskompensation</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Ingen förbättring (JPEG)</string>
-    <string name="jpeg_mode_auto">Automatisk förbättring (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Svartvitt (klassiskt) (JPEG)</string>
+    <string name="jpeg_mode_none">Färg</string>
+    <string name="jpeg_mode_auto">Gråskala</string>
+    <string name="jpeg_mode_bw_text">Svartvitt</string>
     <string name="jpeg_mode_bw_robust">Svartvitt (robust) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">Robust förbehandling för OCR (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">S/V (robust)</string>
+    <string name="pdf_bw_mode_robust">Svartvitt</string>
     <string name="pdf_bw_mode_classic">S/V (klassiskt)</string>
     <string name="pdf_bw_mode_ocr_robust">Robust förbehandling för OCR (PDF)</string>
     <string name="jpeg_mode_gray_clean">Rensad gråskala (högpassfilter) (JPEG)</string>
@@ -163,7 +163,7 @@
     <string name="pdf_preset_small">Liten (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">Mycket liten (110 dpi, q52)</string>
     <string name="export_options_title">Exportalternativ</string>
-    <string name="jpeg_enhancement_title">JPEG-förbättring</string>
+    <string name="jpeg_enhancement_title">JPEG-utskriftsfärg</string>
     <string name="btn_options">Alternativ</string>
     <string name="btn_save">Spara</string>
     <string name="btn_new">Ny skanning</string>
@@ -427,7 +427,7 @@
     <string name="inbox_filename_date_scan">Datum + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">Datum + tid + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Endast datum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Original (inget filter)</string>
+    <string name="pdf_bw_mode_none">Färg</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Ta bort sida?</string>
     <string name="confirm_remove_page_message">Vill du ta bort den här sidan från filmremsan?</string>
@@ -448,4 +448,10 @@
     <string name="crop_aspect_output_size_hint">Utdata: %1$d × %2$d px</string>
     <string name="crop_hint_corner_off_image">Hörn utanför bilden — utdata kan ha svarta kanter</string>
     <string name="crop_edge_dragged">Kant vald. Dra för att flytta kanten.</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">Dokumentrensning</string>
+    <string name="document_cleanup_original">Original</string>
+    <string name="document_cleanup_natural">Naturlig</string>
+    <string name="document_cleanup_enhanced">Förbättrad</string>
+    <string name="document_cleanup_clean_text">Ren text</string>
 </resources>

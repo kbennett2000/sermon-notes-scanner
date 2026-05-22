@@ -65,7 +65,7 @@
     <string name="share_logs_error">无法准备日志：%1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">转为灰度</string>
+    <string name="convert_to_grayscale">灰度</string>
     <string name="export_as_jpeg">导出为 JPEG</string>
     <string name="export_as_pdf">导出为 PDF（默认）</string>
 
@@ -82,13 +82,13 @@
     <string name="exposure_compensation_option">曝光补偿</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">无增强（JPEG）</string>
-    <string name="jpeg_mode_auto">自动增强（JPEG）</string>
-    <string name="jpeg_mode_bw_text">黑白（经典）（JPEG）</string>
+    <string name="jpeg_mode_none">彩色</string>
+    <string name="jpeg_mode_auto">灰度</string>
+    <string name="jpeg_mode_bw_text">黑白</string>
     <string name="jpeg_mode_bw_robust">黑白（稳健）（JPEG）</string>
     <string name="jpeg_mode_ocr_robust">稳健的 OCR 预处理 (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">黑白（稳健）</string>
+    <string name="pdf_bw_mode_robust">黑白</string>
     <string name="pdf_bw_mode_classic">黑白（经典）</string>
     <string name="pdf_bw_mode_ocr_robust">稳健的 OCR 预处理 (PDF)</string>
     <string name="jpeg_mode_gray_clean">清理后的灰度（高通滤波）(JPEG)</string>
@@ -157,7 +157,7 @@
     <string name="pdf_preset_small">小（150 dpi，q62）</string>
     <string name="pdf_preset_very_small">很小（110 dpi，q52）</string>
     <string name="export_options_title">导出选项</string>
-    <string name="jpeg_enhancement_title">JPEG 增强</string>
+    <string name="jpeg_enhancement_title">JPEG 输出颜色</string>
     <string name="btn_options">选项</string>
     <string name="btn_save">保存</string>
     <string name="btn_new">新扫描</string>
@@ -409,7 +409,7 @@
     <string name="inbox_filename_date_scan">日期 + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">日期 + 时间 + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">仅日期 (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">原始（无滤镜）</string>
+    <string name="pdf_bw_mode_none">彩色</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">移除页面？</string>
     <string name="confirm_remove_page_message">要从胶片条中移除此页面吗？</string>
@@ -430,4 +430,10 @@
     <string name="crop_aspect_output_size_hint">输出：%1$d × %2$d 像素</string>
     <string name="crop_hint_corner_off_image">角点位于图像外 — 输出可能含有黑边</string>
     <string name="crop_edge_dragged">已选择边。拖动以移动边。</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">文档清理</string>
+    <string name="document_cleanup_original">原始</string>
+    <string name="document_cleanup_natural">自然</string>
+    <string name="document_cleanup_enhanced">增强</string>
+    <string name="document_cleanup_clean_text">纯文本</string>
 </resources>

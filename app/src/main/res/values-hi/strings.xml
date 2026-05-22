@@ -64,7 +64,7 @@
     <string name="share_logs_error">लॉग तैयार नहीं हो सके: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">ग्रेस्केल में बदलें</string>
+    <string name="convert_to_grayscale">ग्रेस्केल</string>
     <string name="export_as_jpeg">JPEG के रूप में निर्यात करें</string>
     <string name="export_as_pdf">PDF के रूप में निर्यात करें (डिफ़ॉल्ट)</string>
 
@@ -80,14 +80,14 @@
     <string name="exposure_compensation_cd">एक्सपोज़र कम्पेंसेशन स्लाइडर</string>
     <string name="exposure_compensation_option">एक्सपोज़र कम्पेंसेशन</string>
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">कोई सुधार नहीं (JPEG)</string>
-    <string name="jpeg_mode_auto">ऑटो सुधार (JPEG)</string>
-    <string name="jpeg_mode_bw_text">श्वेत-श्याम (क्लासिक) (JPEG)</string>
+    <string name="jpeg_mode_none">रंगीन</string>
+    <string name="jpeg_mode_auto">ग्रेस्केल</string>
+    <string name="jpeg_mode_bw_text">श्वेत-श्याम</string>
     <string name="jpeg_mode_bw_robust">श्वेत-श्याम (रोबस्ट) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">OCR रोबस्ट प्रीप्रोसेसिंग (JPEG)</string>
 
-    <string name="pdf_bw_mode_none">मूल (कोई फ़िल्टर नहीं)</string>
-    <string name="pdf_bw_mode_robust">श्वेत-श्याम (रोबस्ट)</string>
+    <string name="pdf_bw_mode_none">रंगीन</string>
+    <string name="pdf_bw_mode_robust">श्वेत-श्याम</string>
     <string name="pdf_bw_mode_classic">श्वेत-श्याम (क्लासिक)</string>
     <string name="pdf_bw_mode_ocr_robust">OCR रोबस्ट प्रीप्रोसेसिंग (PDF)</string>
     <string name="jpeg_mode_gray_clean">साफ़ ग्रेस्केल (हाई-पास फ़िल्टर) (JPEG)</string>
@@ -160,7 +160,7 @@
     <string name="page_format_a4">A4</string>
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
-    <string name="jpeg_enhancement_title">JPEG सुधार</string>
+    <string name="jpeg_enhancement_title">JPEG आउटपुट रंग</string>
     <string name="btn_options">विकल्प</string>
     <string name="btn_save">सहेजें</string>
     <string name="btn_new">नया स्कैन</string>
@@ -427,4 +427,10 @@
     <string name="crop_aspect_output_size_hint">आउटपुट: %1$d × %2$d px</string>
     <string name="crop_hint_corner_off_image">कोना छवि के बाहर — आउटपुट में काले बॉर्डर हो सकते हैं</string>
     <string name="crop_edge_dragged">किनारा चयनित. किनारा हिलाने के लिए खींचें.</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">दस्तावेज़ सफ़ाई</string>
+    <string name="document_cleanup_original">मूल</string>
+    <string name="document_cleanup_natural">प्राकृतिक</string>
+    <string name="document_cleanup_enhanced">उन्नत</string>
+    <string name="document_cleanup_clean_text">स्वच्छ पाठ</string>
 </resources>

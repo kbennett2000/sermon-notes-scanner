@@ -69,7 +69,7 @@
     <string name="share_logs_error">تعذر تجهيز السجلات: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">تحويل إلى تدرج الرمادي</string>
+    <string name="convert_to_grayscale">تدرج الرمادي</string>
     <string name="export_as_jpeg">تصدير كـ JPEG</string>
     <string name="export_as_pdf">تصدير كـ PDF (افتراضي)</string>
 
@@ -86,12 +86,12 @@
     <string name="exposure_compensation_option">تعويض التعريض</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">بدون تحسين (JPEG)</string>
-    <string name="jpeg_mode_auto">تحسين تلقائي (JPEG)</string>
-    <string name="jpeg_mode_bw_text">أبيض &amp; أسود (كلاسيكي) (JPEG)</string>
+    <string name="jpeg_mode_none">ملون</string>
+    <string name="jpeg_mode_auto">تدرج الرمادي</string>
+    <string name="jpeg_mode_bw_text">أبيض وأسود</string>
     <string name="jpeg_mode_bw_robust">أبيض &amp; أسود (محسّن) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">معالجة OCR محسّنة (JPEG)</string>
-    <string name="pdf_bw_mode_robust">أ&amp;س (محسّن)</string>
+    <string name="pdf_bw_mode_robust">أبيض وأسود</string>
     <string name="pdf_bw_mode_classic">أ&amp;س (كلاسيكي)</string>
     <string name="pdf_bw_mode_ocr_robust">معالجة OCR محسّنة (PDF)</string>
     <string name="jpeg_mode_gray_clean">تدرج رمادي نظيف (مرشح تمرير عالي) (JPEG)</string>
@@ -157,7 +157,7 @@
     <string name="pdf_preset_small">صغيرة (150 dpi، q62)</string>
     <string name="pdf_preset_very_small">صغيرة جدًا (110 dpi، q52)</string>
     <string name="export_options_title">خيارات التصدير</string>
-    <string name="jpeg_enhancement_title">تحسين JPEG</string>
+    <string name="jpeg_enhancement_title">لون إخراج JPEG</string>
     <string name="btn_options">خيارات</string>
     <string name="btn_save">حفظ</string>
     <string name="btn_new">مسح جديد</string>
@@ -419,7 +419,7 @@
     <string name="inbox_filename_date_scan">تاريخ + مسح (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">تاريخ + وقت + مسح (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">تاريخ فقط (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">أصلي (بدون فلتر)</string>
+    <string name="pdf_bw_mode_none">ملون</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">إزالة الصفحة؟</string>
     <string name="confirm_remove_page_message">هل تريد إزالة هذه الصفحة من شريط الأفلام؟</string>
@@ -440,4 +440,10 @@
     <string name="crop_aspect_output_size_hint">الإخراج: %1$d × %2$d بكسل</string>
     <string name="crop_hint_corner_off_image">الزاوية خارج الصورة — قد يحتوي الإخراج المعدّل على حدود سوداء</string>
     <string name="crop_edge_dragged">تم تحديد الحافة. اسحب لتحريك الحافة.</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">تنظيف المستند</string>
+    <string name="document_cleanup_original">أصلي</string>
+    <string name="document_cleanup_natural">طبيعي</string>
+    <string name="document_cleanup_enhanced">محسّن</string>
+    <string name="document_cleanup_clean_text">نص نظيف</string>
 </resources>

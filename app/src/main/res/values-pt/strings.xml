@@ -74,7 +74,7 @@
     <string name="share_logs_error">Não foi possível preparar os logs: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Converter para tons de cinza</string>
+    <string name="convert_to_grayscale">Tons de cinza</string>
     <string name="export_as_jpeg">Exportar como JPEG</string>
     <string name="export_as_pdf">Exportar como PDF (padrão)</string>
 
@@ -91,13 +91,13 @@
     <string name="exposure_compensation_option">Compensação de exposição</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Sem melhoria (JPEG)</string>
-    <string name="jpeg_mode_auto">Melhorar automaticamente (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Preto e Branco (clássico) (JPEG)</string>
+    <string name="jpeg_mode_none">Cor</string>
+    <string name="jpeg_mode_auto">Tons de cinza</string>
+    <string name="jpeg_mode_bw_text">Preto e branco</string>
     <string name="jpeg_mode_bw_robust">Preto e Branco (robusto) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">Pré-processamento OCR robusto (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">P/B (robusto)</string>
+    <string name="pdf_bw_mode_robust">Preto e branco</string>
     <string name="pdf_bw_mode_classic">P/B (clássico)</string>
     <string name="pdf_bw_mode_ocr_robust">Pré-processamento OCR robusto (PDF)</string>
 
@@ -166,7 +166,7 @@
     <string name="pdf_preset_small">Pequeno (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">Muito pequeno (110 dpi, q52)</string>
     <string name="export_options_title">Opções de exportação</string>
-    <string name="jpeg_enhancement_title">Aprimoramento de JPEG</string>
+    <string name="jpeg_enhancement_title">Cor de saída JPEG</string>
     <string name="btn_options">Opções</string>
     <string name="btn_save">Salvar</string>
     <string name="btn_new">Nova digitalização</string>
@@ -433,7 +433,7 @@
     <string name="inbox_filename_date_scan">Data + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">Data + hora + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Apenas data (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Original (sem filtro)</string>
+    <string name="pdf_bw_mode_none">Cor</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Remover página?</string>
     <string name="confirm_remove_page_message">Deseja remover esta página da tira de filme?</string>
@@ -454,4 +454,10 @@
     <string name="crop_aspect_output_size_hint">Saída: %1$d × %2$d px</string>
     <string name="crop_hint_corner_off_image">Canto fora da imagem — a saída pode ter bordas pretas</string>
     <string name="crop_edge_dragged">Borda selecionada. Arraste para mover a borda.</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">Limpeza do documento</string>
+    <string name="document_cleanup_original">Original</string>
+    <string name="document_cleanup_natural">Natural</string>
+    <string name="document_cleanup_enhanced">Melhorado</string>
+    <string name="document_cleanup_clean_text">Texto limpo</string>
 </resources>

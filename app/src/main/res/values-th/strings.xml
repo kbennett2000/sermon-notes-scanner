@@ -69,7 +69,7 @@
     <string name="share_logs_error">ไม่สามารถเตรียมบันทึกได้: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">แปลงเป็นระดับเทา</string>
+    <string name="convert_to_grayscale">ระดับเทา</string>
     <string name="export_as_jpeg">ส่งออกเป็น JPEG</string>
     <string name="export_as_pdf">ส่งออกเป็น PDF (ค่าเริ่มต้น)</string>
 
@@ -86,13 +86,13 @@
     <string name="exposure_compensation_option">การชดเชยแสง</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">ไม่ปรับแต่ง (JPEG)</string>
-    <string name="jpeg_mode_auto">ปรับแต่งอัตโนมัติ (JPEG)</string>
-    <string name="jpeg_mode_bw_text">ขาวดำ (คลาสสิก) (JPEG)</string>
+    <string name="jpeg_mode_none">สี</string>
+    <string name="jpeg_mode_auto">ระดับเทา</string>
+    <string name="jpeg_mode_bw_text">ขาวดำ</string>
     <string name="jpeg_mode_bw_robust">ขาวดำ (ทนทาน) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">การประมวลผลล่วงหน้า OCR แบบทนทาน (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">ขาวดำ (ทนทาน)</string>
+    <string name="pdf_bw_mode_robust">ขาวดำ</string>
     <string name="pdf_bw_mode_classic">ขาวดำ (คลาสสิก)</string>
     <string name="pdf_bw_mode_ocr_robust">การประมวลผลล่วงหน้า OCR แบบทนทาน (PDF)</string>
     <string name="jpeg_mode_gray_clean">ขาวดำแบบปรับให้สะอาด (ฟิลเตอร์ความถี่สูง) (JPEG)</string>
@@ -160,7 +160,7 @@
     <string name="pdf_preset_small">เล็ก (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">เล็กมาก (110 dpi, q52)</string>
     <string name="export_options_title">ตัวเลือกการส่งออก</string>
-    <string name="jpeg_enhancement_title">การปรับปรุง JPEG</string>
+    <string name="jpeg_enhancement_title">สีผลลัพธ์ JPEG</string>
     <string name="btn_options">ตัวเลือก</string>
     <string name="btn_save">บันทึก</string>
     <string name="btn_new">สแกนใหม่</string>
@@ -425,7 +425,7 @@
     <string name="inbox_filename_date_scan">วันที่ + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">วันที่ + เวลา + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">วันที่เท่านั้น (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">ต้นฉบับ (ไม่มีฟิลเตอร์)</string>
+    <string name="pdf_bw_mode_none">สี</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">ลบหน้านี้หรือไม่?</string>
     <string name="confirm_remove_page_message">คุณต้องการลบหน้านี้ออกจากแถบฟิล์มหรือไม่?</string>
@@ -446,4 +446,10 @@
     <string name="crop_aspect_output_size_hint">ผลลัพธ์: %1$d × %2$d พิกเซล</string>
     <string name="crop_hint_corner_off_image">มุมอยู่นอกภาพ — ผลลัพธ์อาจมีขอบสีดำ</string>
     <string name="crop_edge_dragged">เลือกขอบแล้ว ลากเพื่อย้ายขอบ</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">การทำความสะอาดเอกสาร</string>
+    <string name="document_cleanup_original">ต้นฉบับ</string>
+    <string name="document_cleanup_natural">เป็นธรรมชาติ</string>
+    <string name="document_cleanup_enhanced">ปรับปรุง</string>
+    <string name="document_cleanup_clean_text">ข้อความสะอาด</string>
 </resources>

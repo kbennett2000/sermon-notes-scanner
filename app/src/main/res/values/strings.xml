@@ -71,9 +71,14 @@
     <string name="share_logs_error">Could not prepare logs: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Convert to grayscale</string>
+    <string name="convert_to_grayscale">Grayscale</string>
     <string name="export_as_jpeg">Export as JPEG</string>
     <string name="export_as_pdf">Export as PDF (default)</string>
+    <string name="document_cleanup_title">Document cleanup</string>
+    <string name="document_cleanup_original">Original</string>
+    <string name="document_cleanup_natural">Natural</string>
+    <string name="document_cleanup_enhanced">Enhanced</string>
+    <string name="document_cleanup_clean_text">Clean Text</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Toggle flashlight</string>
@@ -87,19 +92,20 @@
     <string name="exposure_compensation_cd">Exposure compensation slider</string>
     <string name="exposure_compensation_option">Exposure compensation</string>
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">No enhancement (JPEG)</string>
-    <string name="jpeg_mode_auto">Auto enhance (JPEG)</string>
-    <string name="jpeg_mode_bw_text">Black &amp; White (classic) (JPEG)</string>
+    <string name="jpeg_mode_none">Color</string>
+    <string name="jpeg_mode_auto">Grayscale</string>
+    <string name="jpeg_mode_bw_text">Black &amp; White</string>
     <string name="jpeg_mode_bw_robust">Black &amp; White (robust) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">OCR robust preprocessing (JPEG)</string>
     <string name="jpeg_mode_gray_clean">Grayscale clean (high-pass) (JPEG)</string>
     <string name="jpeg_mode_color_clean">Color clean (high-pass) (JPEG)</string>
-    <string name="pdf_bw_mode_none">Original (no filter)</string>
-    <string name="pdf_bw_mode_robust">B&amp;W (robust)</string>
+    <string name="pdf_bw_mode_none">Color</string>
+    <string name="pdf_bw_mode_robust">Black &amp; White</string>
     <string name="pdf_bw_mode_classic">B&amp;W (classic)</string>
     <string name="pdf_bw_mode_ocr_robust">OCR robust preprocessing (PDF)</string>
     <string name="pdf_bw_mode_grayscale_clean">Grayscale clean (high-pass)</string>
     <string name="pdf_bw_mode_color_clean">Color clean (high-pass)</string>
+    <string name="output_color_title" translatable="false">Output color</string>
     <string name="skip_ocr_export_only">Skip OCR (export only)</string>
     <string name="preview_corner_detection">Preview corner detection</string>
     <string name="skip_cropping">Skip cropping</string>
@@ -173,7 +179,7 @@
     <string name="page_format_a4">A4</string>
     <string name="page_format_letter">US Letter</string>
     <string name="page_format_legal">Legal</string>
-    <string name="jpeg_enhancement_title">JPEG enhancement</string>
+    <string name="jpeg_enhancement_title">JPEG output color</string>
     <string name="btn_options">Options</string>
     <string name="btn_save">Save</string>
     <string name="btn_new">New scan</string>

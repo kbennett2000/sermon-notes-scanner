@@ -73,7 +73,7 @@
     <string name="share_logs_error">Protokolle konnten nicht vorbereitet werden: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">In Graustufen konvertieren</string>
+    <string name="convert_to_grayscale">Graustufen</string>
     <string name="export_as_jpeg">Als JPEG exportieren</string>
     <string name="export_as_pdf">Als PDF exportieren (Standard)</string>
 
@@ -89,19 +89,20 @@
     <string name="exposure_compensation_cd">Schieberegler für Belichtungskorrektur</string>
     <string name="exposure_compensation_option">Belichtungskorrektur</string>
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Keine Verbesserung (JPEG)</string>
-    <string name="jpeg_mode_auto">Automatisch verbessern (JPEG)</string>
-    <string name="jpeg_mode_bw_text">S/W (klassisch) (JPEG)</string>
+    <string name="jpeg_mode_none">Farbe</string>
+    <string name="jpeg_mode_auto">Graustufen</string>
+    <string name="jpeg_mode_bw_text">Schwarz-Weiß</string>
     <string name="jpeg_mode_bw_robust">S/W (robust) (JPEG)</string>
     <string name="jpeg_mode_ocr_robust">Robuste OCR-Vorverarbeitung (JPEG)</string>
     <string name="jpeg_mode_gray_clean">Graustufen „clean“ (High-Pass) (JPEG)</string>
     <string name="jpeg_mode_color_clean">Farbe „clean“ (High-Pass) (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">S/W (robust)</string>
+    <string name="pdf_bw_mode_robust">Schwarz-Weiß</string>
     <string name="pdf_bw_mode_classic">S/W (klassisch)</string>
     <string name="pdf_bw_mode_ocr_robust">Robuste OCR-Vorverarbeitung (PDF)</string>
     <string name="pdf_bw_mode_grayscale_clean">Graustufen „clean“ (High-Pass)</string>
     <string name="pdf_bw_mode_color_clean">Farbe „clean“ (High-Pass)</string>
+    <string name="output_color_title">Ausgabefarbe</string>
 
     <string name="skip_ocr_export_only">OCR überspringen (nur Export)</string>
     <string name="skip_cropping">Zuschneiden überspringen</string>
@@ -168,7 +169,7 @@
     <string name="pdf_preset_small">Klein (150 dpi, q62)</string>
     <string name="pdf_preset_very_small">Sehr klein (110 dpi, q52)</string>
     <string name="export_options_title">Export-Optionen</string>
-    <string name="jpeg_enhancement_title">JPEG-Verbesserung</string>
+    <string name="jpeg_enhancement_title">JPEG-Ausgabefarbe</string>
     <string name="btn_options">Optionen</string>
     <string name="btn_save">Speichern</string>
     <string name="btn_new">Neuer Scan</string>
@@ -445,7 +446,7 @@
     <string name="inbox_filename_date_scan">Datum + Scan (2026-03-04_scan)</string>
     <string name="inbox_filename_date_time_scan">Datum + Uhrzeit + Scan (2026-03-04_143022_scan)</string>
     <string name="inbox_filename_date_only">Nur Datum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Original (kein Filter)</string>
+    <string name="pdf_bw_mode_none">Farbe</string>
     <!-- Crop: Aspect-Ratio-Auswahl (v3.8.0) -->
     <string name="crop_aspect_label">Seitenverhältnis</string>
     <string name="crop_aspect_auto">Automatisch (empfohlen)</string>
@@ -473,4 +474,10 @@
     <string name="crop_snap_toggle_cd">Rechtwinkel-Einrasten umschalten</string>
     <string name="crop_snap_toggle_on">Rechtwinkel-Einrasten an</string>
     <string name="crop_snap_toggle_off">Rechtwinkel-Einrasten aus</string>
+    <!-- Document cleanup -->
+    <string name="document_cleanup_title">Dokumentbereinigung</string>
+    <string name="document_cleanup_original">Original</string>
+    <string name="document_cleanup_natural">Natürlich</string>
+    <string name="document_cleanup_enhanced">Verbessert</string>
+    <string name="document_cleanup_clean_text">Reiner Text</string>
 </resources>
