@@ -16,12 +16,16 @@ import static org.junit.Assume.assumeTrue;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import de.schliweb.makeacopy.utils.image.OpenCVUtils;
+import org.opencv.core.Point;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -214,6 +218,14 @@ public class PaddlePdfEvalTest {
                 Log.w(TAG, "Skipping " + pdf + ": render failed");
                 continue;
             }
+            // App-Pipeline-Parität: nach dem PDF-Render durchläuft das Bitmap in der App
+            // CropFragment.performCrop, selbst wenn der User „volles Bild" wählt. Dieser
+            // Warp-Schritt reproduziert das Resampling, das im Test bislang fehlte.
+            Bitmap cropped = fullImageCropLikeApp(appCtx, base, bm);
+            if (cropped != bm) {
+                bm.recycle();
+            }
+            bm = cropped;
             out.add(new Sample(base, languageFromSampleName(base), bm, gt));
         }
         return out;
@@ -236,19 +248,116 @@ public class PaddlePdfEvalTest {
             if (renderer.getPageCount() == 0) return null;
             PdfRenderer.Page page = renderer.openPage(0);
             try {
-                // Die synthetischen Eval-JPGs liegen bei ca. 150 DPI; PDF-Rendering nutzt
-                // dieselbe Zielauflösung, damit Speicherbedarf und OCR-Bedingungen vergleichbar bleiben.
-                float scale = 150f / 72f;
+                // Bit-für-Bit-Nachbildung von PdfImportHelper.renderPdfPage:
+                //   TARGET_DPI=300, PDF_DPI=72, scale=300/72, Matrix.setScale,
+                //   weißer Hintergrund, MAX_DIMENSION=4096-Deckel,
+                //   RENDER_MODE_FOR_DISPLAY.
+                // Wichtig: page.render(..., matrix, ...) statt null, damit dieselbe
+                // Sampling-Pipeline wie im App-Pfad zum Einsatz kommt.
+                final int TARGET_DPI = 300;
+                final float PDF_DPI = 72f;
+                float scale = TARGET_DPI / PDF_DPI;
+
                 int width = (int) (page.getWidth() * scale);
                 int height = (int) (page.getHeight() * scale);
+
+                final int MAX_DIMENSION = 4096;
+                if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                    float downScale =
+                            Math.min((float) MAX_DIMENSION / width, (float) MAX_DIMENSION / height);
+                    width = (int) (width * downScale);
+                    height = (int) (height * downScale);
+                    scale *= downScale;
+                }
+
+                boolean forceSaudiAppWidth = assetPath.endsWith("/saudi_executions.pdf");
+                float scaleX = scale;
+                float scaleY = scale;
+                if (forceSaudiAppWidth && width != 2479 && height == 3504) {
+                    Log.w(
+                            TAG,
+                            "renderPdfFirstPage: forcing saudi_executions width from " + width
+                                    + " to 2479 to match app crop source log");
+                    width = 2479;
+                    scaleX = (float) width / page.getWidth();
+                }
+
                 Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 bitmap.eraseColor(android.graphics.Color.WHITE);
-                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+
+                Matrix matrix = new Matrix();
+                matrix.setScale(scaleX, scaleY);
+
+                page.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
                 return bitmap;
             } finally {
                 page.close();
             }
         }
+    }
+
+    /**
+     * Reproduziert den App-Pfad {@code CropFragment.performCrop}: aspect=AUTO →
+     * {@code WarpMode.AUTO_PROJECTIVE}. Für {@code saudi_executions} werden die im
+     * App-Log beobachteten echten Crop-Ecken verwendet (2479×3504 → 2455×3505),
+     * für andere Samples bleibt es beim bisherigen Vollbild-Trapez.
+     */
+    private static Bitmap fullImageCropLikeApp(Context ctx, String sampleName, Bitmap src) {
+        if (!OpenCVUtils.isInitialized()) {
+            OpenCVUtils.init(ctx);
+        }
+        int w = src.getWidth();
+        int h = src.getHeight();
+        boolean useSaudiAppCorners = "saudi_executions".equals(sampleName);
+        Point[] corners = useSaudiAppCorners
+                ? new Point[] {
+                        new Point(24.79, 0.0),
+                        new Point(2479, 0.0),
+                        new Point(2479, 3504),
+                        new Point(24.79, 3504)
+                }
+                : new Point[] {
+                        new Point(0, 0),
+                        new Point(w, 0),
+                        new Point(w, h),
+                        new Point(0, h)
+                };
+        Log.i(
+                TAG,
+                "fullImageCropLikeApp: sample=" + sampleName
+                        + " src=" + w + "x" + h
+                        + " corners=" + formatCorners(corners));
+        if (useSaudiAppCorners && (w != 2479 || h != 3504)) {
+            Log.w(
+                    TAG,
+                    "fullImageCropLikeApp: saudi_executions render size differs from app log: "
+                            + w + "x" + h + " (expected 2479x3504)");
+        }
+        Bitmap cropped =
+                OpenCVUtils.applyPerspectiveCorrection(
+                        src, corners, OpenCVUtils.WarpMode.AUTO_PROJECTIVE, null);
+        if (cropped == null) {
+            Log.w(TAG, "fullImageCropLikeApp: crop returned null — falling back to source");
+            return src;
+        }
+        Log.i(
+                TAG,
+                "fullImageCropLikeApp: sample=" + sampleName + " src=" + w + "x" + h
+                        + " -> cropped=" + cropped.getWidth() + "x" + cropped.getHeight());
+        return cropped;
+    }
+
+    private static String formatCorners(Point[] corners) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < corners.length; i++) {
+            if (i > 0) sb.append(',');
+            sb.append('(')
+                    .append(corners[i].x)
+                    .append(',')
+                    .append(corners[i].y)
+                    .append(')');
+        }
+        return sb.append(']').toString();
     }
 
     private static File copyAssetToCache(Context appCtx, Context testCtx, String assetPath)
@@ -302,6 +411,7 @@ public class PaddlePdfEvalTest {
 
         for (Sample s : samples) {
             engine.setLanguage(s.language);
+            logBitmapInfo(name + " sample=" + s.name + " before engine.run", s.bitmap);
             long t0 = System.nanoTime();
             OCRHelper.OcrResultWords res = engine.run(s.bitmap);
             long dtMs = (System.nanoTime() - t0) / 1_000_000L;
@@ -341,6 +451,23 @@ public class PaddlePdfEvalTest {
         r.latencyMsP50 = percentile(latencies, 50);
         r.latencyMsP95 = percentile(latencies, 95);
         return r;
+    }
+
+    private static void logBitmapInfo(String prefix, Bitmap bitmap) {
+        if (bitmap == null) {
+            Log.i(TAG, "Bitmap config: " + prefix + " bitmap=null");
+            return;
+        }
+        Log.i(
+                TAG,
+                "Bitmap config: " + prefix
+                        + " size=" + bitmap.getWidth() + "x" + bitmap.getHeight()
+                        + " config=" + bitmap.getConfig()
+                        + " premultiplied=" + bitmap.isPremultiplied()
+                        + " hasAlpha=" + bitmap.hasAlpha()
+                        + " colorSpace=" + bitmap.getColorSpace()
+                        + " allocationByteCount=" + bitmap.getAllocationByteCount()
+                        + " rowBytes=" + bitmap.getRowBytes());
     }
 
     private static long percentile(List<Long> sorted, int p) {

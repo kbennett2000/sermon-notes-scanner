@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  * - This class is thread-safe.
  * - An internal mechanism ensures proper handling of detection and recognition runners.
  */
-final class PaddleOcrEngine implements OcrEngine {
+public final class PaddleOcrEngine implements OcrEngine {
 
     private static final String TAG = "PaddleOcrEngine";
 
@@ -72,6 +72,7 @@ final class PaddleOcrEngine implements OcrEngine {
 
     private final RunnerSupplier supplier;
     private volatile String language;
+    private volatile boolean highQualityDetectionEnabled;
 
     PaddleOcrEngine(Context context) {
         this(context, defaultSupplier(context));
@@ -135,6 +136,10 @@ final class PaddleOcrEngine implements OcrEngine {
         // Tatsächliche Modell-Auflösung erfolgt pro run() in PaddleLanguageRouter.
     }
 
+    public void setHighQualityDetectionEnabled(boolean enabled) {
+        highQualityDetectionEnabled = enabled;
+    }
+
     @Override
     public OCRHelper.OcrResultWords run(Bitmap bitmap) throws Exception {
         if (bitmap == null || bitmap.isRecycled()) {
@@ -169,7 +174,7 @@ final class PaddleOcrEngine implements OcrEngine {
                     bitmap, "img_" + Integer.toHexString(System.identityHashCode(bitmap)));
         }
 
-        List<Quad> quads = det.detect(bitmap);
+        List<Quad> quads = det.detect(bitmap, highQualityDetectionEnabled);
         OCRHelper.OcrResultWords result =
                 PaddleResultBuilder.build(bitmap, quads, rec, supplier.cropper());
         long tEnd = System.nanoTime();

@@ -57,7 +57,10 @@ class PaddleDetOrtRunner implements AutoCloseable {
      * processes inputs within a consistent and optimal size range, balancing performance
      * and accuracy.
      */
-    static final int DEFAULT_MAX_SIDE = 1280;
+    static final int DEFAULT_MAX_SIDE = 1536;
+    private static final int DENSE_DOCUMENT_RETRY_MAX_SIDE = 1920;
+    private static final int DENSE_DOCUMENT_MIN_SOURCE_SIDE = 3000;
+    private static final int DENSE_DOCUMENT_RETRY_QUAD_LIMIT = 19;
 
     /**
      * Precomputed mean values for the BGR (Blue, Green, Red) color channels used in image normalization.
@@ -213,7 +216,11 @@ class PaddleDetOrtRunner implements AutoCloseable {
      * @throws OrtException If an error occurs during the ONNX Runtime inference or post-processing.
      */
     List<Quad> detect(Bitmap bitmap) throws OrtException {
-        return detect(bitmap, DEFAULT_MAX_SIDE);
+        return detect(bitmap, DEFAULT_MAX_SIDE, false);
+    }
+
+    List<Quad> detect(Bitmap bitmap, boolean allowHighQualityRetry) throws OrtException {
+        return detect(bitmap, DEFAULT_MAX_SIDE, allowHighQualityRetry);
     }
 
     /**
@@ -232,9 +239,47 @@ class PaddleDetOrtRunner implements AutoCloseable {
      * @throws OrtException If an error occurs during the ONNX Runtime inference or post-processing.
      */
     List<Quad> detect(Bitmap bitmap, int maxSide) throws OrtException {
+        return detect(bitmap, maxSide, false);
+    }
+
+    List<Quad> detect(Bitmap bitmap, int maxSide, boolean allowHighQualityRetry) throws OrtException {
         if (bitmap == null || bitmap.isRecycled()) {
             throw new IllegalArgumentException("bitmap must be non-null and not recycled");
         }
+        List<Quad> quads = detectOnce(bitmap, maxSide);
+        int longestSide = Math.max(bitmap.getWidth(), bitmap.getHeight());
+        if (allowHighQualityRetry
+                && maxSide == DEFAULT_MAX_SIDE
+                && longestSide >= DENSE_DOCUMENT_MIN_SOURCE_SIDE
+                && quads.size() <= DENSE_DOCUMENT_RETRY_QUAD_LIMIT) {
+            Log.i(
+                    TAG,
+                    "detect retry: large document produced only "
+                            + quads.size()
+                            + " quads at maxSide="
+                            + maxSide
+                            + ", retrying maxSide="
+                            + DENSE_DOCUMENT_RETRY_MAX_SIDE);
+            List<Quad> retryQuads = detectOnce(bitmap, DENSE_DOCUMENT_RETRY_MAX_SIDE);
+            if (retryQuads.size() > quads.size()) {
+                Log.i(
+                        TAG,
+                        "detect retry accepted: "
+                                + quads.size()
+                                + " -> "
+                                + retryQuads.size()
+                                + " quads");
+                return retryQuads;
+            }
+            Log.i(
+                    TAG,
+                    "detect retry kept original: retryQuads=" + retryQuads.size()
+                            + " originalQuads=" + quads.size());
+        }
+        return quads;
+    }
+
+    private List<Quad> detectOnce(Bitmap bitmap, int maxSide) throws OrtException {
         long tStart = System.nanoTime();
         final int srcW = bitmap.getWidth();
         final int srcH = bitmap.getHeight();
@@ -269,6 +314,7 @@ class PaddleDetOrtRunner implements AutoCloseable {
                 long tPost = System.nanoTime();
                 List<Quad> quadsLb = postProcessor.process(prob);
                 long tPostEnd = System.nanoTime();
+                // logPostprocessSensitivity(prob, quadsLb.size());
 
                 // 4) De-letterbox.
                 List<Quad> quads = new java.util.ArrayList<>(quadsLb.size());
