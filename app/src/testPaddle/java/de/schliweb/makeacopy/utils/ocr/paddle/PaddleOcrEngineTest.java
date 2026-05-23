@@ -49,6 +49,11 @@ public class PaddleOcrEngineTest {
         List<Quad> detect(Bitmap bitmap) {
             return quads;
         }
+
+        @Override
+        List<Quad> detect(Bitmap bitmap, boolean allowHighQualityRetry) {
+            return quads;
+        }
     }
 
     /** Stub-Rec: deterministische Tokens+Konfidenzen aus FIFO-Liste. */
