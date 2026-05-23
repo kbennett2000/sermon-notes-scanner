@@ -217,6 +217,7 @@
     <string name="ocr_mode_original">原始（无预处理）</string>
     <string name="ocr_mode_quick">OpenCV Quick（快速）</string>
     <string name="ocr_mode_robust">OpenCV Robust（高质量）</string>
+    <string name="opt_paddle_best_ocr">最佳 Paddle OCR 质量（较慢）</string>
     <string name="ocr_prep_mode_set">识别模式已设置为 %1$s</string>
 
     <!-- Labels -->

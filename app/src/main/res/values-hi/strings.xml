@@ -217,6 +217,7 @@
     <string name="ocr_mode_original">मूल (कोई प्रीप्रोसेसिंग नहीं)</string>
     <string name="ocr_mode_quick">OpenCV क्विक (तेज़)</string>
     <string name="ocr_mode_robust">OpenCV रोबस्ट (उच्च गुणवत्ता)</string>
+    <string name="opt_paddle_best_ocr">सर्वोत्तम Paddle OCR गुणवत्ता (धीमा)</string>
     <string name="ocr_prep_mode_set">पहचान मोड सेट: %1$s</string>
 
     <!-- Labels -->

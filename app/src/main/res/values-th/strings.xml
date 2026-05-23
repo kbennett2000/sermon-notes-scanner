@@ -228,6 +228,7 @@
     <string name="ocr_mode_original">ต้นฉบับ (ไม่ประมวลผลล่วงหน้า)</string>
     <string name="ocr_mode_quick">OpenCV Quick (รวดเร็ว)</string>
     <string name="ocr_mode_robust">OpenCV Robust (คุณภาพสูง)</string>
+    <string name="opt_paddle_best_ocr">คุณภาพ Paddle OCR ดีที่สุด (ช้าลง)</string>
     <string name="ocr_prep_mode_set">ตั้งค่าโหมดการรู้จำเป็น %1$s แล้ว</string>
 
     <!-- Labels -->

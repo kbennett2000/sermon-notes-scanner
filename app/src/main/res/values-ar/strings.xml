@@ -223,6 +223,7 @@
     <string name="ocr_mode_original">الأصلية (بدون معالجة مسبقة)</string>
     <string name="ocr_mode_quick">OpenCV Quick (سريع)</string>
     <string name="ocr_mode_robust">OpenCV Robust (جودة عالية)</string>
+    <string name="opt_paddle_best_ocr">أفضل جودة Paddle OCR (أبطأ)</string>
     <string name="ocr_prep_mode_set">تم تعيين وضع التعرّف إلى %1$s</string>
 
     <!-- Labels -->
