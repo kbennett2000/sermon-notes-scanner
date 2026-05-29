@@ -1,4 +1,5 @@
 MakeACopy 4.3.0
+* Added Greek OCR support in the PaddleOCR flavor, including Greek language routing and bundled recognition assets.
 * Improved searchable PDFs with a new line-based text layer for cleaner copy & paste.
 * Added a compatibility option for word-positioned PDF text layers.
 * Export options now remember the selected PDF text-layer mode.
