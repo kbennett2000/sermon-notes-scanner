@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        >
+        xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Package visibility for discovering installed Language-Packs (Android 11+) -->
     <queries>
@@ -13,6 +13,9 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <!-- Haptics for subtle accessibility feedback (no runtime prompt required) -->
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission
+            android:name="android.permission.ACCESS_NETWORK_STATE"
+            tools:node="remove"/>
 
     <uses-feature
             android:name="android.hardware.camera"
