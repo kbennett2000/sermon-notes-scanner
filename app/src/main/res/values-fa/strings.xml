@@ -30,7 +30,6 @@
     <string name="image_to_crop">تصویر برای برش</string>
     <string name="cropped_image">تصویر برش‌خورده</string>
     <string name="document_preview">پیش‌نمایش سند</string>
-    <string name="include_ocr_text">صادرکردن OCR به‌عنوان فایل TXT جداگانه</string>
     <string name="ocr_results_will_appear_here">نتایج OCR اینجا نمایش داده می‌شود</string>
     <string name="ocr_no_text_detected">هیچ متنی شناسایی نشد</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">گوشه‌های ذوزنقه را
@@ -72,9 +71,6 @@
     <string name="share_logs_error">آماده‌سازی لاگ‌ها ممکن نشد: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">خاکستری</string>
-    <string name="export_as_jpeg">خروجی به صورت JPEG</string>
-    <string name="export_as_pdf">خروجی به صورت PDF (پیش‌فرض)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">تغییر وضعیت چراغ‌قوه</string>
@@ -103,18 +99,6 @@
     <string name="camera_zoom_ratio">%1$s×</string>
     <string name="camera_zoom_not_available">زوم در این دستگاه در دسترس نیست</string>
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">رنگی</string>
-    <string name="jpeg_mode_auto">خاکستری</string>
-    <string name="jpeg_mode_bw_text">سیاه و سفید</string>
-    <string name="jpeg_mode_bw_robust">سیاه &amp; سفید (مقاوم) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">پیش‌پردازش مقاوم برای OCR (JPEG)</string>
-    <string name="pdf_bw_mode_robust">سیاه و سفید</string>
-    <string name="pdf_bw_mode_classic">سیاه‌وسفید (کلاسیک)</string>
-    <string name="pdf_bw_mode_ocr_robust">پیش‌پردازش مقاوم برای OCR (PDF)</string>
-    <string name="jpeg_mode_gray_clean">خاکستری تمیز (فیلتر گذر بالا) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">رنگ تمیز (فیلتر گذر بالا) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">خاکستریِ تمیز (فیلتر بالاگذر)</string>
-    <string name="pdf_bw_mode_color_clean">رنگیِ تمیز (فیلتر بالاگذر)</string>
     <string name="skip_ocr_export_only">رد کردن OCR (فقط خروجی)</string>
     <string name="preview_corner_detection">پیش‌نمایش تشخیص گوشه‌ها</string>
     <string name="skip_cropping">رد کردن برش</string>
@@ -124,7 +108,6 @@
     <string name="add_another_page">افزودن صفحه</string>
     <string name="clear_all_pages">پاک کردن همه</string>
     <string name="remove_this_page">حذف این صفحه</string>
-    <string name="multipage_not_implemented">خروجی چندصفحه‌ای هنوز پیاده‌سازی نشده است</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">جابجایی صفحه به چپ</string>
@@ -170,16 +153,6 @@
     <string name="remove">حذف</string>
     <string name="removed_from_registry_toast">مورد حذف شد</string>
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">کیفیت / حجم PDF</string>
-    <string name="pdf_preset_high">بالا (300 dpi، q85)</string>
-    <string name="pdf_preset_standard">استاندارد (200 dpi، q72)</string>
-    <string name="pdf_preset_small">کوچک (150 dpi، q62)</string>
-    <string name="pdf_preset_very_small">خیلی کوچک (110 dpi، q52)</string>
-    <string name="pdf_text_layer_mode_title">لایهٔ متن PDF</string>
-    <string name="pdf_text_layer_mode_line_based">مبتنی بر خط (توصیه‌شده)</string>
-    <string name="pdf_text_layer_mode_word_positioned">موقعیت‌دهی بر اساس واژه (سازگاری)</string>
-    <string name="export_options_title">گزینه‌های خروجی</string>
-    <string name="jpeg_enhancement_title">رنگ خروجی JPEG</string>
     <string name="btn_options">گزینه‌ها</string>
     <string name="btn_save">ذخیره</string>
     <string name="btn_new">اسکن جدید</string>
@@ -291,23 +264,8 @@
     <string name="delete_warning_irreversible">فایل از دستگاه حذف خواهد شد. این عمل قابل بازگشت نیست.</string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">هیچ سندی برای خروجی وجود ندارد</string>
-    <string name="failed_to_export_document">خروجی گرفتن از سند ناموفق بود</string>
-    <string name="error_during_export_with_reason">خطا هنگام خروجی: %1$s</string>
-    <string name="document_exported">سند %1$s خروجی گرفته شد</string>
-    <string name="document_multipage_exported">سند (چندصفحه‌ای) %1$s خروجی گرفته شد</string>
-    <string name="no_target_selected">هیچ مقصدی انتخاب نشده است</string>
-    <string name="image_exported">تصویر %1$s خروجی گرفته شد</string>
-    <string name="failed_to_export_image">خروجی گرفتن از تصویر ناموفق بود</string>
-    <string name="error_during_jpeg_export_with_reason">خطا هنگام خروجی JPEG: %1$s</string>
-    <string name="zip_exported">ZIP %1$s خروجی گرفته شد</string>
-    <string name="failed_to_export_zip">خروجی گرفتن از ZIP ناموفق بود</string>
-    <string name="error_during_zip_export_with_reason">خطا هنگام خروجی ZIP: %1$s</string>
-    <string name="ocr_text_exported_as_txt">متن OCR به صورت TXT خروجی گرفته شد</string>
-    <string name="error_exporting_ocr_text_with_reason">خطا هنگام خروجی گرفتن متن OCR: %1$s</string>
     <string name="no_document_to_share_export_first">هیچ سندی برای اشتراک‌گذاری وجود ندارد. ابتدا یک سند خروجی بگیرید.
     </string>
-    <string name="error_sharing_document_with_reason">خطا هنگام اشتراک‌گذاری سند: %1$s</string>
     <string name="feature_scan_library_disabled">ویژگی کتابخانهٔ اسکن غیرفعال است</string>
     <string name="navigation_failed">ناوبری ناموفق بود</string>
 
@@ -359,7 +317,6 @@
     </string>    <!-- Accessibility: Recycler item description and announcements -->
     <string name="page_n_of_m">صفحهٔ %1$d از %2$d</string>
     <string name="pages_count_announcement">صفحات: %1$d</string>
-    <string name="export_started">خروجی شروع شد</string>
     <string name="page_removed">صفحه حذف شد</string>
     <string name="page_moved_to_position">به موقعیت %1$d منتقل شد</string>
     <!-- RecyclerView custom accessibility actions (defined once above in Reorder A11y controls) -->
@@ -408,12 +365,6 @@
 
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">اندازه صفحه</string>
-    <string name="dpi_settings_label">تنظیمات DPI</string>
-    <string name="page_format_fit">تناسب با تصویر (پیشنهادی)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">بازیابی دسترسی</string>
     <string name="status">وضعیت</string>
@@ -431,21 +382,6 @@
     <string name="cleanup_max_count">حداکثر تعداد</string>
     <string name="cleanup_max_storage_mb">حداکثر فضای ذخیره‌سازی (مگابایت)</string>
     <string name="cleanup_settings_saved">تنظیمات پاک‌سازی ذخیره شد</string>
-    <string name="inbox_mode">حالت صندوق ورودی</string>
-    <string name="inbox_mode_enable">فعال‌سازی پوشه پیش‌فرض خروجی</string>
-    <string name="inbox_select_folder">انتخاب پوشه</string>
-    <string name="inbox_folder_set">پوشه صندوق ورودی: %1$s</string>
-    <string name="inbox_folder_none">پوشه‌ای انتخاب نشده</string>
-    <string name="inbox_saved">✓ در صندوق ورودی ذخیره شد</string>
-    <string name="inbox_permission_lost">دسترسی به پوشه صندوق ورودی از دست رفت. لطفاً پوشه جدیدی انتخاب کنید.</string>
-    <string name="inbox_no_folder_selected">لطفاً ابتدا پوشه صندوق ورودی را انتخاب کنید.</string>
-    <string name="inbox_clear">پاک کردن پوشه صندوق ورودی</string>
-    <string name="inbox_filename_format">قالب نام فایل</string>
-    <string name="inbox_auto_new_scan">شروع خودکار اسکن جدید پس از خروجی</string>
-    <string name="inbox_filename_date_scan">تاریخ + اسکن (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">تاریخ + زمان + اسکن (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">فقط تاریخ (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">رنگی</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">حذف صفحه؟</string>
     <string name="confirm_remove_page_message">آیا می‌خواهید این صفحه را از نوار فیلم حذف کنید؟</string>
@@ -467,9 +403,4 @@
     <string name="crop_hint_corner_off_image">گوشه خارج از تصویر — خروجی ممکن است حاشیه‌های سیاه داشته باشد</string>
     <string name="crop_edge_dragged">لبه انتخاب شد. برای جابجایی لبه بکشید.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">پاک‌سازی سند</string>
-    <string name="document_cleanup_original">اصلی</string>
-    <string name="document_cleanup_natural">طبیعی</string>
-    <string name="document_cleanup_enhanced">بهبود‌یافته</string>
-    <string name="document_cleanup_clean_text">متن تمیز</string>
 </resources>

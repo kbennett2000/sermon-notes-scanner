@@ -30,7 +30,6 @@
     <string name="image_to_crop">Kép kivágáshoz</string>
     <string name="cropped_image">Kivágott kép</string>
     <string name="document_preview">Dokumentum előnézete</string>
-    <string name="include_ocr_text">OCR exportálása külön TXT fájlként</string>
     <string name="ocr_results_will_appear_here">Az OCR eredményei itt jelennek meg</string>
     <string name="ocr_no_text_detected">Nem észlelhető szöveg</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Állítsa be a trapéz
@@ -72,9 +71,6 @@
     <string name="share_logs_error">A naplókat nem sikerült előkészíteni: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Szürkeárnyalatos</string>
-    <string name="export_as_jpeg">Exportálás JPEG-ként</string>
-    <string name="export_as_pdf">Exportálás PDF-ként (alapértelmezett)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Vaku be/ki</string>
@@ -104,19 +100,7 @@
     <string name="camera_zoom_not_available">A zoom nem érhető el ezen az eszközön</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Színes</string>
-    <string name="jpeg_mode_auto">Szürkeárnyalatos</string>
-    <string name="jpeg_mode_bw_text">Fekete-fehér</string>
-    <string name="jpeg_mode_bw_robust">Fekete-fehér (robosztus) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Robusztus OCR-előfeldolgozás (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Fekete-fehér</string>
-    <string name="pdf_bw_mode_classic">F/F (klasszikus)</string>
-    <string name="pdf_bw_mode_ocr_robust">Robusztus OCR-előfeldolgozás (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Tisztított szürkeárnyalatos (felüláteresztő szűrő) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Tisztított színes (felüláteresztő szűrő) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Szürkeárnyalatos – tisztított (high-pass)</string>
-    <string name="pdf_bw_mode_color_clean">Színes – tisztított (high-pass)</string>
     <string name="skip_ocr_export_only">OCR kihagyása (csak exportálás)</string>
     <string name="skip_cropping">Kivágás kihagyása</string>
     <string name="preview_corner_detection">Sarokérzékelés előnézete</string>
@@ -126,7 +110,6 @@
     <string name="add_another_page">Oldal hozzáadása</string>
     <string name="clear_all_pages">Összes törlése</string>
     <string name="remove_this_page">Oldal eltávolítása</string>
-    <string name="multipage_not_implemented">Többoldalas exportálás még nem elérhető</string>
 
     <!-- Reorder controls -->
     <string name="move_page_left">Oldal balra mozgatása</string>
@@ -171,16 +154,6 @@
     <string name="removed_from_registry_toast">Bejegyzés eltávolítva</string>
 
     <!-- PDF quality presets -->
-    <string name="pdf_quality_title">PDF minőség / méret</string>
-    <string name="pdf_preset_high">Magas (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Normál (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Kicsi (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Nagyon kicsi (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF szövegréteg</string>
-    <string name="pdf_text_layer_mode_line_based">Soralapú (ajánlott)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Szavanként pozicionált (kompatibilitás)</string>
-    <string name="export_options_title">Exportálási beállítások</string>
-    <string name="jpeg_enhancement_title">JPEG kimeneti szín</string>
     <string name="btn_options">Beállítások</string>
     <string name="btn_save">Mentés</string>
     <string name="btn_new">Új szkennelés</string>
@@ -294,23 +267,8 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Nincs exportálható dokumentum</string>
-    <string name="failed_to_export_document">A dokumentum exportálása nem sikerült</string>
-    <string name="error_during_export_with_reason">Hiba az exportálás során: %1$s</string>
-    <string name="document_exported">Dokumentum %1$s exportálva</string>
-    <string name="document_multipage_exported">Dokumentum (többoldalas) %1$s exportálva</string>
-    <string name="no_target_selected">Nincs cél kiválasztva</string>
-    <string name="image_exported">Kép %1$s exportálva</string>
-    <string name="failed_to_export_image">A kép exportálása nem sikerült</string>
-    <string name="error_during_jpeg_export_with_reason">Hiba a JPEG exportálása során: %1$s</string>
-    <string name="zip_exported">ZIP %1$s exportálva</string>
-    <string name="failed_to_export_zip">A ZIP exportálása nem sikerült</string>
-    <string name="error_during_zip_export_with_reason">Hiba a ZIP exportálása során: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR szöveg TXT formátumban exportálva</string>
-    <string name="error_exporting_ocr_text_with_reason">Hiba az OCR szöveg exportálása során: %1$s</string>
     <string name="no_document_to_share_export_first">Nincs megosztható dokumentum. Először exportálj egy dokumentumot.
     </string>
-    <string name="error_sharing_document_with_reason">Hiba a dokumentum megosztása során: %1$s</string>
     <string name="feature_scan_library_disabled">A szkennelési könyvtár funkció le van tiltva</string>
     <string name="navigation_failed">A navigáció nem sikerült</string>
 
@@ -363,7 +321,6 @@
     </string>    <!-- Akadálymentesítés: listaelem leírása és értesítések -->
     <string name="page_n_of_m">%1$d. oldal / %2$d</string>
     <string name="pages_count_announcement">Oldalak száma: %1$d</string>
-    <string name="export_started">Export elindítva</string>
     <string name="page_removed">Oldal eltávolítva</string>
     <string name="page_moved_to_position">%1$d. pozícióra áthelyezve</string>
 
@@ -412,12 +369,6 @@
     <string name="label_document">Dokumentum</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Oldalméret</string>
-    <string name="dpi_settings_label">DPI beállítások</string>
-    <string name="page_format_fit">Képhez igazítás (ajánlott)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Hozzáférés visszaállítása</string>
     <string name="status">Állapot</string>
@@ -435,21 +386,6 @@
     <string name="cleanup_max_count">Maximális darabszám</string>
     <string name="cleanup_max_storage_mb">Maximális tárhely (MB)</string>
     <string name="cleanup_settings_saved">Tisztítási beállítások mentve</string>
-    <string name="inbox_mode">Inbox mód</string>
-    <string name="inbox_mode_enable">Alapértelmezett exportmappa engedélyezése</string>
-    <string name="inbox_select_folder">Mappa kiválasztása</string>
-    <string name="inbox_folder_set">Inbox mappa: %1$s</string>
-    <string name="inbox_folder_none">Nincs mappa kiválasztva</string>
-    <string name="inbox_saved">✓ Mentve az Inboxba</string>
-    <string name="inbox_permission_lost">Az Inbox mappa hozzáférése elveszett. Kérjük, válasszon új mappát.</string>
-    <string name="inbox_no_folder_selected">Kérjük, először válasszon Inbox mappát.</string>
-    <string name="inbox_clear">Inbox mappa törlése</string>
-    <string name="inbox_filename_format">Fájlnév formátum</string>
-    <string name="inbox_auto_new_scan">Exportálás után automatikusan új szkennelés indítása</string>
-    <string name="inbox_filename_date_scan">Dátum + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Dátum + idő + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Csak dátum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Színes</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Oldal eltávolítása?</string>
     <string name="confirm_remove_page_message">Eltávolítja ezt az oldalt a filmcsíkból?</string>
@@ -471,9 +407,4 @@
     <string name="crop_hint_corner_off_image">A sarok a képen kívül — a kimenet fekete keretet tartalmazhat</string>
     <string name="crop_edge_dragged">Él kiválasztva. Húzza az él mozgatásához.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Dokumentum tisztítása</string>
-    <string name="document_cleanup_original">Eredeti</string>
-    <string name="document_cleanup_natural">Természetes</string>
-    <string name="document_cleanup_enhanced">Javított</string>
-    <string name="document_cleanup_clean_text">Tiszta szöveg</string>
 </resources>

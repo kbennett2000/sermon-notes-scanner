@@ -30,7 +30,6 @@
     <string name="image_to_crop">Imagine de decupat</string>
     <string name="cropped_image">Imagine decupată</string>
     <string name="document_preview">Previzualizare document</string>
-    <string name="include_ocr_text">Exportă OCR ca fișier TXT separat</string>
     <string name="ocr_results_will_appear_here">Rezultatele OCR vor apărea aici</string>
     <string name="ocr_no_text_detected">Nu a fost detectat niciun text</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Ajustează colțurile
@@ -73,9 +72,6 @@
     <string name="share_logs_error">Nu s-au putut pregăti jurnalele: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Tonuri de gri</string>
-    <string name="export_as_jpeg">Exportă ca JPEG</string>
-    <string name="export_as_pdf">Exportă ca PDF (implicit)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Comută lanterna</string>
@@ -105,19 +101,7 @@
     <string name="camera_zoom_not_available">Zoomul nu este disponibil pe acest dispozitiv</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Culoare</string>
-    <string name="jpeg_mode_auto">Tonuri de gri</string>
-    <string name="jpeg_mode_bw_text">Alb-negru</string>
-    <string name="jpeg_mode_bw_robust">Alb-negru (robust) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Preprocesare OCR robustă (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Alb-negru</string>
-    <string name="pdf_bw_mode_classic">A/N (clasic)</string>
-    <string name="pdf_bw_mode_ocr_robust">Preprocesare OCR robustă (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Nuanțe de gri curățate (filtru trece-sus) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Culori curățate (filtru trece-sus) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Tonuri de gri – curățate (trece-sus)</string>
-    <string name="pdf_bw_mode_color_clean">Culoare – curățată (trece-sus)</string>
     <string name="skip_ocr_export_only">Omite OCR (doar export)</string>
     <string name="skip_cropping">Omite decuparea</string>
     <string name="preview_corner_detection">Previzualizare detecție colțuri</string>
@@ -128,7 +112,6 @@
 
     <string name="clear_all_pages">Șterge tot</string>
     <string name="remove_this_page">Elimină această pagină</string>
-    <string name="multipage_not_implemented">Exportul multipagină nu este încă implementat</string>
 
     <!-- Reorder controls -->
     <string name="move_page_left">Mută pagina la stânga</string>
@@ -175,16 +158,6 @@
     <string name="removed_from_registry_toast">Înregistrare eliminată</string>
 
     <!-- PDF quality presets -->
-    <string name="pdf_quality_title">Calitate / dimensiune PDF</string>
-    <string name="pdf_preset_high">Înaltă (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standard (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Mică (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Foarte mică (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">Strat de text PDF</string>
-    <string name="pdf_text_layer_mode_line_based">Bazat pe linii (recomandat)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Poziționat pe cuvinte (compatibilitate)</string>
-    <string name="export_options_title">Opțiuni de export</string>
-    <string name="jpeg_enhancement_title">Culoare de ieșire JPEG</string>
     <string name="btn_options">Opțiuni</string>
     <string name="btn_save">Salvează</string>
     <string name="btn_new">Scanare nouă</string>
@@ -300,24 +273,9 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Niciun document de exportat</string>
-    <string name="failed_to_export_document">Nu s-a putut exporta documentul</string>
-    <string name="error_during_export_with_reason">Eroare în timpul exportului: %1$s</string>
-    <string name="document_exported">Documentul %1$s a fost exportat</string>
-    <string name="document_multipage_exported">Documentul (cu mai multe pagini) %1$s a fost exportat</string>
-    <string name="no_target_selected">Nicio destinație selectată</string>
-    <string name="image_exported">Imaginea %1$s a fost exportată</string>
-    <string name="failed_to_export_image">Nu s-a putut exporta imaginea</string>
-    <string name="error_during_jpeg_export_with_reason">Eroare în timpul exportului JPEG: %1$s</string>
-    <string name="zip_exported">Fișierul ZIP %1$s a fost exportat</string>
-    <string name="failed_to_export_zip">Nu s-a putut exporta fișierul ZIP</string>
-    <string name="error_during_zip_export_with_reason">Eroare în timpul exportului ZIP: %1$s</string>
-    <string name="ocr_text_exported_as_txt">Textul OCR a fost exportat ca TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Eroare la exportul textului OCR: %1$s</string>
     <string name="no_document_to_share_export_first">Niciun document disponibil pentru partajare. Exportați mai întâi un
         document.
     </string>
-    <string name="error_sharing_document_with_reason">Eroare la partajarea documentului: %1$s</string>
     <string name="feature_scan_library_disabled">Funcția bibliotecii de scanări este dezactivată</string>
     <string name="navigation_failed">Navigarea a eșuat</string>
 
@@ -371,7 +329,6 @@
     </string>    <!-- Accesibilitate: descrierea elementelor din listă și anunțuri -->
     <string name="page_n_of_m">Pagina %1$d din %2$d</string>
     <string name="pages_count_announcement">Pagini: %1$d</string>
-    <string name="export_started">Export pornit</string>
     <string name="page_removed">Pagina eliminată</string>
     <string name="page_moved_to_position">Mutat la poziția %1$d</string>
 
@@ -420,12 +377,6 @@
     <string name="label_document">Document</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Dimensiune pagină</string>
-    <string name="dpi_settings_label">Setări DPI</string>
-    <string name="page_format_fit">Potrivire la imagine (recomandat)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Restabilește accesul</string>
     <string name="status">Stare</string>
@@ -443,21 +394,6 @@
     <string name="cleanup_max_count">Număr maxim</string>
     <string name="cleanup_max_storage_mb">Spațiu maxim de stocare (MB)</string>
     <string name="cleanup_settings_saved">Setările de curățare au fost salvate</string>
-    <string name="inbox_mode">Mod Inbox</string>
-    <string name="inbox_mode_enable">Activează folderul implicit de export</string>
-    <string name="inbox_select_folder">Selectează folder</string>
-    <string name="inbox_folder_set">Folder Inbox: %1$s</string>
-    <string name="inbox_folder_none">Niciun folder selectat</string>
-    <string name="inbox_saved">✓ Salvat în Inbox</string>
-    <string name="inbox_permission_lost">Accesul la folderul Inbox a fost pierdut. Selectați un folder nou.</string>
-    <string name="inbox_no_folder_selected">Selectați mai întâi un folder Inbox.</string>
-    <string name="inbox_clear">Șterge folderul Inbox</string>
-    <string name="inbox_filename_format">Format nume fișier</string>
-    <string name="inbox_auto_new_scan">Pornește automat o scanare nouă după export</string>
-    <string name="inbox_filename_date_scan">Dată + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Dată + oră + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Doar dată (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Culoare</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Eliminați pagina?</string>
     <string name="confirm_remove_page_message">Doriți să eliminați această pagină din peliculă?</string>
@@ -479,9 +415,4 @@
     <string name="crop_hint_corner_off_image">Colț în afara imaginii — ieșirea poate avea margini negre</string>
     <string name="crop_edge_dragged">Margine selectată. Trageți pentru a muta marginea.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Curățare document</string>
-    <string name="document_cleanup_original">Original</string>
-    <string name="document_cleanup_natural">Natural</string>
-    <string name="document_cleanup_enhanced">Îmbunătățit</string>
-    <string name="document_cleanup_clean_text">Text curat</string>
 </resources>

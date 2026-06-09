@@ -28,7 +28,6 @@
     <string name="image_to_crop">صورة للاقتصاص</string>
     <string name="cropped_image">الصورة المقصوصة</string>
     <string name="document_preview">معاينة المستند</string>
-    <string name="include_ocr_text">تصدير OCR كملف TXT منفصل</string>
     <string name="ocr_results_will_appear_here">ستظهر نتائج OCR هنا</string>
     <string name="ocr_no_text_detected">لم يتم اكتشاف أي نص</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">اضبط زوايا شبه
@@ -69,9 +68,6 @@
     <string name="share_logs_error">تعذر تجهيز السجلات: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">تدرج الرمادي</string>
-    <string name="export_as_jpeg">تصدير كـ JPEG</string>
-    <string name="export_as_pdf">تصدير كـ PDF (افتراضي)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">تبديل الفلاش</string>
@@ -101,18 +97,6 @@
     <string name="camera_zoom_not_available">التكبير غير متاح على هذا الجهاز</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">ملون</string>
-    <string name="jpeg_mode_auto">تدرج الرمادي</string>
-    <string name="jpeg_mode_bw_text">أبيض وأسود</string>
-    <string name="jpeg_mode_bw_robust">أبيض &amp; أسود (محسّن) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">معالجة OCR محسّنة (JPEG)</string>
-    <string name="pdf_bw_mode_robust">أبيض وأسود</string>
-    <string name="pdf_bw_mode_classic">أ&amp;س (كلاسيكي)</string>
-    <string name="pdf_bw_mode_ocr_robust">معالجة OCR محسّنة (PDF)</string>
-    <string name="jpeg_mode_gray_clean">تدرج رمادي نظيف (مرشح تمرير عالي) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">ألوان نظيفة (مرشح تمرير عالي) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">تدرج رمادي مُنقّى (تمرير عالي)</string>
-    <string name="pdf_bw_mode_color_clean">ألوان مُنقّاة (تمرير عالي)</string>
     <string name="skip_ocr_export_only">تخطي OCR (تصدير فقط)</string>
     <string name="preview_corner_detection">معاينة اكتشاف الزوايا</string>
     <string name="skip_cropping">تخطي الاقتصاص</string>
@@ -122,7 +106,6 @@
     <string name="add_another_page">إضافة صفحة</string>
     <string name="clear_all_pages">مسح الكل</string>
     <string name="remove_this_page">إزالة هذه الصفحة</string>
-    <string name="multipage_not_implemented">تصدير متعدد الصفحات غير مُنفّذ بعد</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">تحريك الصفحة لليسار</string>
@@ -166,16 +149,6 @@
     <string name="remove">إزالة</string>
     <string name="removed_from_registry_toast">تمت إزالة الإدخال</string>
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">جودة / حجم PDF</string>
-    <string name="pdf_preset_high">عالية (300 dpi، q85)</string>
-    <string name="pdf_preset_standard">قياسية (200 dpi، q72)</string>
-    <string name="pdf_preset_small">صغيرة (150 dpi، q62)</string>
-    <string name="pdf_preset_very_small">صغيرة جدًا (110 dpi، q52)</string>
-    <string name="pdf_text_layer_mode_title">طبقة نص PDF</string>
-    <string name="pdf_text_layer_mode_line_based">مستندة إلى الأسطر (موصى بها)</string>
-    <string name="pdf_text_layer_mode_word_positioned">موضوعة حسب الكلمات (للتوافق)</string>
-    <string name="export_options_title">خيارات التصدير</string>
-    <string name="jpeg_enhancement_title">لون إخراج JPEG</string>
     <string name="btn_options">خيارات</string>
     <string name="btn_save">حفظ</string>
     <string name="btn_new">مسح جديد</string>
@@ -287,22 +260,6 @@
     <string name="delete_warning_irreversible">سيتم حذف الملف من الجهاز. لا يمكن التراجع عن هذا الإجراء.</string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">لا يوجد مستند للتصدير</string>
-    <string name="failed_to_export_document">فشل تصدير المستند</string>
-    <string name="error_during_export_with_reason">خطأ أثناء التصدير: %1$s</string>
-    <string name="document_exported">تم تصدير المستند %1$s</string>
-    <string name="document_multipage_exported">تم تصدير المستند (متعدد الصفحات) %1$s</string>
-    <string name="no_target_selected">لم يتم تحديد وجهة</string>
-    <string name="image_exported">تم تصدير الصورة %1$s</string>
-    <string name="failed_to_export_image">فشل تصدير الصورة</string>
-    <string name="error_during_jpeg_export_with_reason">خطأ أثناء تصدير JPEG: %1$s</string>
-    <string name="zip_exported">تم تصدير ملف ZIP %1$s</string>
-    <string name="failed_to_export_zip">فشل تصدير ZIP</string>
-    <string name="error_during_zip_export_with_reason">خطأ أثناء تصدير ZIP: %1$s</string>
-    <string name="ocr_text_exported_as_txt">تم تصدير نص OCR كملف TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">خطأ أثناء تصدير نص OCR: %1$s</string>
-    <string name="no_document_to_share_export_first">لا يوجد مستند للمشاركة. صدّر مستندًا أولًا.</string>
-    <string name="error_sharing_document_with_reason">خطأ أثناء مشاركة المستند: %1$s</string>
     <string name="feature_scan_library_disabled">ميزة مكتبة المسح معطلة</string>
     <string name="navigation_failed">فشلت عملية التنقل</string>
 
@@ -353,7 +310,6 @@
     </string>    <!-- Accessibility: Recycler item description and announcements -->
     <string name="page_n_of_m">الصفحة %1$d من %2$d</string>
     <string name="pages_count_announcement">الصفحات: %1$d</string>
-    <string name="export_started">بدأ التصدير</string>
     <string name="page_removed">تمت إزالة الصفحة</string>
     <string name="page_moved_to_position">تم النقل إلى الموضع %1$d</string>
     <!-- RecyclerView custom accessibility actions (defined once above in Reorder A11y controls) -->
@@ -401,12 +357,6 @@
     <string name="label_document">مستند</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">حجم الصفحة</string>
-    <string name="dpi_settings_label">إعدادات DPI</string>
-    <string name="page_format_fit">مطابقة الصورة (موصى به)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">استعادة الوصول</string>
     <string name="status">الحالة</string>
@@ -424,21 +374,6 @@
     <string name="cleanup_max_count">الحد الأقصى للعدد</string>
     <string name="cleanup_max_storage_mb">الحد الأقصى للتخزين (ميغابايت)</string>
     <string name="cleanup_settings_saved">تم حفظ إعدادات التنظيف</string>
-    <string name="inbox_mode">وضع صندوق الوارد</string>
-    <string name="inbox_mode_enable">تفعيل مجلد التصدير الافتراضي</string>
-    <string name="inbox_select_folder">اختيار مجلد</string>
-    <string name="inbox_folder_set">مجلد الوارد: %1$s</string>
-    <string name="inbox_folder_none">لم يتم اختيار مجلد</string>
-    <string name="inbox_saved">✓ تم الحفظ في صندوق الوارد</string>
-    <string name="inbox_permission_lost">فُقد الوصول إلى مجلد الوارد. يرجى اختيار مجلد جديد.</string>
-    <string name="inbox_no_folder_selected">يرجى اختيار مجلد الوارد أولاً.</string>
-    <string name="inbox_clear">مسح مجلد الوارد</string>
-    <string name="inbox_filename_format">تنسيق اسم الملف</string>
-    <string name="inbox_auto_new_scan">بدء مسح جديد تلقائيًا بعد التصدير</string>
-    <string name="inbox_filename_date_scan">تاريخ + مسح (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">تاريخ + وقت + مسح (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">تاريخ فقط (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">ملون</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">إزالة الصفحة؟</string>
     <string name="confirm_remove_page_message">هل تريد إزالة هذه الصفحة من شريط الأفلام؟</string>
@@ -460,9 +395,4 @@
     <string name="crop_hint_corner_off_image">الزاوية خارج الصورة — قد يحتوي الإخراج المعدّل على حدود سوداء</string>
     <string name="crop_edge_dragged">تم تحديد الحافة. اسحب لتحريك الحافة.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">تنظيف المستند</string>
-    <string name="document_cleanup_original">أصلي</string>
-    <string name="document_cleanup_natural">طبيعي</string>
-    <string name="document_cleanup_enhanced">محسّن</string>
-    <string name="document_cleanup_clean_text">نص نظيف</string>
 </resources>

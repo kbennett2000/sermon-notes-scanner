@@ -30,7 +30,6 @@
     <string name="image_to_crop">Изображение для обрезки</string>
     <string name="cropped_image">Обрезанное изображение</string>
     <string name="document_preview">Предпросмотр документа</string>
-    <string name="include_ocr_text">Экспортировать OCR как отдельный TXT</string>
     <string name="ocr_results_will_appear_here">Результаты OCR будут показаны здесь</string>
     <string name="ocr_no_text_detected">Текст не распознан</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Отрегулируйте углы
@@ -73,9 +72,6 @@
     <string name="share_logs_error">Не удалось подготовить журналы: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Оттенки серого</string>
-    <string name="export_as_jpeg">Экспорт как JPEG</string>
-    <string name="export_as_pdf">Экспорт как PDF (по умолчанию)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Переключить фонарик</string>
@@ -105,20 +101,8 @@
     <string name="camera_zoom_not_available">Зум недоступен на этом устройстве</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Цвет</string>
-    <string name="jpeg_mode_auto">Оттенки серого</string>
-    <string name="jpeg_mode_bw_text">Чёрно-белый</string>
-    <string name="jpeg_mode_bw_robust">Чёрно-белый (устойчивый) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Надёжная предварительная обработка OCR (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Чёрно-белый</string>
-    <string name="pdf_bw_mode_classic">Ч/Б (классический)</string>
-    <string name="pdf_bw_mode_ocr_robust">Надёжная предварительная обработка OCR (PDF)</string>
 
-    <string name="jpeg_mode_gray_clean">Очищенные оттенки серого (высокочастотный фильтр) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Очищенные цвета (высокочастотный фильтр) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Оттенки серого — очищенные (высокочастотный фильтр)</string>
-    <string name="pdf_bw_mode_color_clean">Цвет — очищенный (высокочастотный фильтр)</string>
     <string name="skip_ocr_export_only">Пропустить OCR (только экспорт)</string>
     <string name="skip_cropping">Пропустить обрезку</string>
     <string name="preview_corner_detection">Предпросмотр обнаружения углов</string>
@@ -129,7 +113,6 @@
 
     <string name="clear_all_pages">Очистить все</string>
     <string name="remove_this_page">Удалить эту страницу</string>
-    <string name="multipage_not_implemented">Многостраничный экспорт ещё не реализован</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">Переместить страницу влево</string>
@@ -175,16 +158,6 @@
     <string name="removed_from_registry_toast">Запись удалена</string>
 
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">Качество/размер PDF</string>
-    <string name="pdf_preset_high">Высокое (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Стандартное (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Небольшое (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Очень маленькое (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">Текстовый слой PDF</string>
-    <string name="pdf_text_layer_mode_line_based">По строкам (рекомендуется)</string>
-    <string name="pdf_text_layer_mode_word_positioned">По позициям слов (совместимость)</string>
-    <string name="export_options_title">Параметры экспорта</string>
-    <string name="jpeg_enhancement_title">Цвет вывода JPEG</string>
     <string name="btn_options">Параметры</string>
     <string name="btn_save">Сохранить</string>
     <string name="btn_new">Новое сканирование</string>
@@ -297,23 +270,8 @@
     <string name="delete_warning_irreversible">Файл будет удалён с устройства. Это действие нельзя отменить.</string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Нет документа для экспорта</string>
-    <string name="failed_to_export_document">Не удалось экспортировать документ</string>
-    <string name="error_during_export_with_reason">Ошибка при экспорте: %1$s</string>
-    <string name="document_exported">Документ %1$s экспортирован</string>
-    <string name="document_multipage_exported">Документ (многостраничный) %1$s экспортирован</string>
-    <string name="no_target_selected">Цель не выбрана</string>
-    <string name="image_exported">Изображение %1$s экспортировано</string>
-    <string name="failed_to_export_image">Не удалось экспортировать изображение</string>
-    <string name="error_during_jpeg_export_with_reason">Ошибка при экспорте JPEG: %1$s</string>
-    <string name="zip_exported">ZIP %1$s экспортирован</string>
-    <string name="failed_to_export_zip">Не удалось экспортировать ZIP</string>
-    <string name="error_during_zip_export_with_reason">Ошибка при экспорте ZIP: %1$s</string>
-    <string name="ocr_text_exported_as_txt">Текст OCR экспортирован как TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Ошибка при экспорте текста OCR: %1$s</string>
     <string name="no_document_to_share_export_first">Нет документа для общего доступа. Сначала экспортируйте документ.
     </string>
-    <string name="error_sharing_document_with_reason">Ошибка при обмене документом: %1$s</string>
     <string name="feature_scan_library_disabled">Функция библиотеки сканов отключена</string>
     <string name="navigation_failed">Ошибка навигации</string>
 
@@ -364,7 +322,6 @@
     </string>    <!-- Доступность: описание элементов списка и объявления -->
     <string name="page_n_of_m">Страница %1$d из %2$d</string>
     <string name="pages_count_announcement">Страниц: %1$d</string>
-    <string name="export_started">Экспорт начат</string>
     <string name="page_removed">Страница удалена</string>
     <string name="page_moved_to_position">Перемещено на позицию %1$d</string>
 
@@ -413,12 +370,6 @@
     <string name="label_document">Документ</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Размер страницы</string>
-    <string name="dpi_settings_label">Настройки DPI</string>
-    <string name="page_format_fit">По размеру изображения (рекомендуется)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Восстановить доступ</string>
     <string name="status">Статус</string>
@@ -436,21 +387,6 @@
     <string name="cleanup_max_count">Максимальное количество</string>
     <string name="cleanup_max_storage_mb">Максимальный объём хранения (МБ)</string>
     <string name="cleanup_settings_saved">Настройки очистки сохранены</string>
-    <string name="inbox_mode">Режим Входящие</string>
-    <string name="inbox_mode_enable">Включить папку экспорта по умолчанию</string>
-    <string name="inbox_select_folder">Выбрать папку</string>
-    <string name="inbox_folder_set">Папка Inbox: %1$s</string>
-    <string name="inbox_folder_none">Папка не выбрана</string>
-    <string name="inbox_saved">✓ Сохранено в Inbox</string>
-    <string name="inbox_permission_lost">Доступ к папке Inbox потерян. Выберите новую папку.</string>
-    <string name="inbox_no_folder_selected">Сначала выберите папку Inbox.</string>
-    <string name="inbox_clear">Очистить папку Inbox</string>
-    <string name="inbox_filename_format">Формат имени файла</string>
-    <string name="inbox_auto_new_scan">Автоматически начать новое сканирование после экспорта</string>
-    <string name="inbox_filename_date_scan">Дата + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Дата + время + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Только дата (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Цвет</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Удалить страницу?</string>
     <string name="confirm_remove_page_message">Удалить эту страницу из киноленты?</string>
@@ -472,9 +408,4 @@
     <string name="crop_hint_corner_off_image">Угол вне изображения — на выходе возможны чёрные поля</string>
     <string name="crop_edge_dragged">Край выбран. Перетащите, чтобы переместить край.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Очистка документа</string>
-    <string name="document_cleanup_original">Оригинал</string>
-    <string name="document_cleanup_natural">Естественный</string>
-    <string name="document_cleanup_enhanced">Улучшенный</string>
-    <string name="document_cleanup_clean_text">Чистый текст</string>
 </resources>

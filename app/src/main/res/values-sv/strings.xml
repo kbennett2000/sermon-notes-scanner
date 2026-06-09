@@ -30,7 +30,6 @@
     <string name="image_to_crop">Bild att beskära</string>
     <string name="cropped_image">Beskuren bild</string>
     <string name="document_preview">Förhandsgranskning av dokument</string>
-    <string name="include_ocr_text">Exportera OCR som separat TXT</string>
     <string name="ocr_results_will_appear_here">OCR-resultaten visas här</string>
     <string name="ocr_no_text_detected">Ingen text upptäcktes</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Justera
@@ -71,9 +70,6 @@
     <string name="share_logs_error">Kunde inte förbereda loggar: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Gråskala</string>
-    <string name="export_as_jpeg">Exportera som JPEG</string>
-    <string name="export_as_pdf">Exportera som PDF (standard)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Växla ficklampa</string>
@@ -103,19 +99,7 @@
     <string name="camera_zoom_not_available">Zoom är inte tillgänglig på den här enheten</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Färg</string>
-    <string name="jpeg_mode_auto">Gråskala</string>
-    <string name="jpeg_mode_bw_text">Svartvitt</string>
-    <string name="jpeg_mode_bw_robust">Svartvitt (robust) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Robust förbehandling för OCR (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Svartvitt</string>
-    <string name="pdf_bw_mode_classic">S/V (klassiskt)</string>
-    <string name="pdf_bw_mode_ocr_robust">Robust förbehandling för OCR (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Rensad gråskala (högpassfilter) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Rensade färger (högpassfilter) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Gråskala – rensad (högpassfilter)</string>
-    <string name="pdf_bw_mode_color_clean">Färg – rensad (högpassfilter)</string>
     <string name="skip_ocr_export_only">Hoppa över OCR (endast export)</string>
     <string name="skip_cropping">Hoppa över beskärning</string>
     <string name="preview_corner_detection">Förhandsvisning av hörndetektering</string>
@@ -126,7 +110,6 @@
 
     <string name="clear_all_pages">Rensa alla</string>
     <string name="remove_this_page">Ta bort denna sida</string>
-    <string name="multipage_not_implemented">Flersidig export är ännu inte implementerad</string>
 
     <!-- Reorder controls -->
     <string name="move_page_left">Flytta sidan åt vänster</string>
@@ -172,16 +155,6 @@
     <string name="removed_from_registry_toast">Post borttagen</string>
 
     <!-- PDF quality presets -->
-    <string name="pdf_quality_title">PDF-kvalitet / storlek</string>
-    <string name="pdf_preset_high">Hög (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standard (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Liten (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Mycket liten (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF-textlager</string>
-    <string name="pdf_text_layer_mode_line_based">Radbaserat (rekommenderas)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Ordplacerat (kompatibilitet)</string>
-    <string name="export_options_title">Exportalternativ</string>
-    <string name="jpeg_enhancement_title">JPEG-utskriftsfärg</string>
     <string name="btn_options">Alternativ</string>
     <string name="btn_save">Spara</string>
     <string name="btn_new">Ny skanning</string>
@@ -294,22 +267,6 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Inget dokument att exportera</string>
-    <string name="failed_to_export_document">Kunde inte exportera dokumentet</string>
-    <string name="error_during_export_with_reason">Fel vid export: %1$s</string>
-    <string name="document_exported">Dokument %1$s har exporterats</string>
-    <string name="document_multipage_exported">Dokument (flera sidor) %1$s har exporterats</string>
-    <string name="no_target_selected">Ingen målplats vald</string>
-    <string name="image_exported">Bild %1$s har exporterats</string>
-    <string name="failed_to_export_image">Kunde inte exportera bilden</string>
-    <string name="error_during_jpeg_export_with_reason">Fel vid JPEG-export: %1$s</string>
-    <string name="zip_exported">ZIP %1$s har exporterats</string>
-    <string name="failed_to_export_zip">Kunde inte exportera ZIP</string>
-    <string name="error_during_zip_export_with_reason">Fel vid ZIP-export: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR-text exporterad som TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Fel vid export av OCR-text: %1$s</string>
-    <string name="no_document_to_share_export_first">Inget dokument att dela. Exportera ett dokument först.</string>
-    <string name="error_sharing_document_with_reason">Fel vid delning av dokument: %1$s</string>
     <string name="feature_scan_library_disabled">Funktionen för skanningsbibliotek är inaktiverad</string>
     <string name="navigation_failed">Navigering misslyckades</string>
 
@@ -360,7 +317,6 @@
     </string>    <!-- Tillgänglighet: beskrivning av listelement och meddelanden -->
     <string name="page_n_of_m">Sida %1$d av %2$d</string>
     <string name="pages_count_announcement">Sidor: %1$d</string>
-    <string name="export_started">Export startad</string>
     <string name="page_removed">Sida borttagen</string>
     <string name="page_moved_to_position">Flyttad till position %1$d</string>
 
@@ -409,12 +365,6 @@
     <string name="label_document">Dokument</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Sidstorlek</string>
-    <string name="dpi_settings_label">DPI-inställningar</string>
-    <string name="page_format_fit">Anpassa till bild (rekommenderat)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Återställ åtkomst</string>
     <string name="status">Status</string>
@@ -432,21 +382,6 @@
     <string name="cleanup_max_count">Maximalt antal</string>
     <string name="cleanup_max_storage_mb">Maximalt lagringsutrymme (MB)</string>
     <string name="cleanup_settings_saved">Rensningsinställningar sparade</string>
-    <string name="inbox_mode">Inbox-läge</string>
-    <string name="inbox_mode_enable">Aktivera standardexportmapp</string>
-    <string name="inbox_select_folder">Välj mapp</string>
-    <string name="inbox_folder_set">Inbox-mapp: %1$s</string>
-    <string name="inbox_folder_none">Ingen mapp vald</string>
-    <string name="inbox_saved">✓ Sparat i Inbox</string>
-    <string name="inbox_permission_lost">Åtkomst till Inbox-mapp förlorad. Välj en ny mapp.</string>
-    <string name="inbox_no_folder_selected">Välj en Inbox-mapp först.</string>
-    <string name="inbox_clear">Rensa Inbox-mapp</string>
-    <string name="inbox_filename_format">Filnamnsformat</string>
-    <string name="inbox_auto_new_scan">Starta ny skanning automatiskt efter export</string>
-    <string name="inbox_filename_date_scan">Datum + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Datum + tid + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Endast datum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Färg</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Ta bort sida?</string>
     <string name="confirm_remove_page_message">Vill du ta bort den här sidan från filmremsan?</string>
@@ -468,9 +403,4 @@
     <string name="crop_hint_corner_off_image">Hörn utanför bilden — utdata kan ha svarta kanter</string>
     <string name="crop_edge_dragged">Kant vald. Dra för att flytta kanten.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Dokumentrensning</string>
-    <string name="document_cleanup_original">Original</string>
-    <string name="document_cleanup_natural">Naturlig</string>
-    <string name="document_cleanup_enhanced">Förbättrad</string>
-    <string name="document_cleanup_clean_text">Ren text</string>
 </resources>

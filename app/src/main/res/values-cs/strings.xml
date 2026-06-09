@@ -31,7 +31,6 @@
     <string name="image_to_crop">Obrázek k oříznutí</string>
     <string name="cropped_image">Oříznutý obrázek</string>
     <string name="document_preview">Náhled dokumentu</string>
-    <string name="include_ocr_text">Exportovat OCR jako samostatný TXT</string>
     <string name="ocr_results_will_appear_here">Výsledky OCR se zobrazí zde</string>
     <string name="ocr_no_text_detected">Nebyl rozpoznán žádný text</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Upravte rohy
@@ -73,9 +72,6 @@
     <string name="share_logs_error">Protokoly se nepodařilo připravit: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Odstíny šedi</string>
-    <string name="export_as_jpeg">Exportovat jako JPEG</string>
-    <string name="export_as_pdf">Exportovat jako PDF (výchozí)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Přepnout svítilnu</string>
@@ -105,18 +101,6 @@
     <string name="camera_zoom_not_available">Přiblížení není na tomto zařízení dostupné</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Barva</string>
-    <string name="jpeg_mode_auto">Odstíny šedi</string>
-    <string name="jpeg_mode_bw_text">Černobílý</string>
-    <string name="jpeg_mode_bw_robust">Černobílý (robustní) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Odolné předzpracování OCR (JPEG)</string>
-    <string name="pdf_bw_mode_robust">Černobílý</string>
-    <string name="pdf_bw_mode_classic">Č/B (klasický)</string>
-    <string name="pdf_bw_mode_ocr_robust">Odolné předzpracování OCR (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Vyčištěné stupně šedi (horní propust) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Vyčištěné barvy (horní propust) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Odstíny šedi – vyčištěné (high-pass)</string>
-    <string name="pdf_bw_mode_color_clean">Barvy – vyčištěné (high-pass)</string>
     <string name="skip_ocr_export_only">Přeskočit OCR (pouze export)</string>
     <string name="skip_cropping">Přeskočit oříznutí</string>
     <string name="preview_corner_detection">Náhled detekce rohů</string>
@@ -126,7 +110,6 @@
     <string name="add_another_page">Přidat stránku</string>
     <string name="clear_all_pages">Vymazat vše</string>
     <string name="remove_this_page">Odebrat tuto stránku</string>
-    <string name="multipage_not_implemented">Vícestránkový export zatím není implementován</string>
 
     <!-- Reorder controls -->
     <string name="move_page_left">Posunout stránku doleva</string>
@@ -172,16 +155,6 @@
     <string name="removed_from_registry_toast">Položka odstraněna</string>
 
     <!-- PDF quality presets -->
-    <string name="pdf_quality_title">Kvalita / velikost PDF</string>
-    <string name="pdf_preset_high">Vysoká (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standardní (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Malá (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Velmi malá (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">Textová vrstva PDF</string>
-    <string name="pdf_text_layer_mode_line_based">Po řádcích (doporučeno)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Podle pozic slov (kompatibilita)</string>
-    <string name="export_options_title">Možnosti exportu</string>
-    <string name="jpeg_enhancement_title">Výstupní barva JPEG</string>
     <string name="btn_options">Možnosti</string>
     <string name="btn_save">Uložit</string>
     <string name="btn_new">Nové skenování</string>
@@ -294,22 +267,6 @@
     <string name="delete_warning_irreversible">Soubor bude odstraněn ze zařízení. Tuto akci nelze vrátit zpět.</string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Žádný dokument k exportu</string>
-    <string name="failed_to_export_document">Export dokumentu se nezdařil</string>
-    <string name="error_during_export_with_reason">Chyba při exportu: %1$s</string>
-    <string name="document_exported">Dokument %1$s exportován</string>
-    <string name="document_multipage_exported">Dokument (vícestránkový) %1$s exportován</string>
-    <string name="no_target_selected">Nebyl vybrán cíl</string>
-    <string name="image_exported">Obrázek %1$s exportován</string>
-    <string name="failed_to_export_image">Export obrázku se nezdařil</string>
-    <string name="error_during_jpeg_export_with_reason">Chyba při exportu JPEG: %1$s</string>
-    <string name="zip_exported">Soubor ZIP %1$s exportován</string>
-    <string name="failed_to_export_zip">Export ZIP se nezdařil</string>
-    <string name="error_during_zip_export_with_reason">Chyba při exportu ZIP: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR text exportován jako TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Chyba při exportu OCR textu: %1$s</string>
-    <string name="no_document_to_share_export_first">Žádný dokument k sdílení. Nejprve dokument exportujte.</string>
-    <string name="error_sharing_document_with_reason">Chyba při sdílení dokumentu: %1$s</string>
     <string name="feature_scan_library_disabled">Funkce knihovny skenů je deaktivována</string>
     <string name="navigation_failed">Navigace se nezdařila</string>
 
@@ -362,7 +319,6 @@
     </string>    <!-- Přístupnost: popis položky v seznamu a oznámení -->
     <string name="page_n_of_m">Strana %1$d z %2$d</string>
     <string name="pages_count_announcement">Počet stran: %1$d</string>
-    <string name="export_started">Export zahájen</string>
     <string name="page_removed">Strana odebrána</string>
     <string name="page_moved_to_position">Přesunuto na pozici %1$d</string>
 
@@ -412,12 +368,6 @@
 
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Velikost stránky</string>
-    <string name="dpi_settings_label">Nastavení DPI</string>
-    <string name="page_format_fit">Přizpůsobit obrázku (doporučeno)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Obnovit přístup</string>
     <string name="status">Stav</string>
@@ -435,21 +385,6 @@
     <string name="cleanup_max_count">Maximální počet</string>
     <string name="cleanup_max_storage_mb">Maximální úložiště (MB)</string>
     <string name="cleanup_settings_saved">Nastavení čištění uloženo</string>
-    <string name="inbox_mode">Režim Inbox</string>
-    <string name="inbox_mode_enable">Povolit výchozí složku pro export</string>
-    <string name="inbox_select_folder">Vybrat složku</string>
-    <string name="inbox_folder_set">Složka Inbox: %1$s</string>
-    <string name="inbox_folder_none">Žádná složka nevybrána</string>
-    <string name="inbox_saved">✓ Uloženo do Inboxu</string>
-    <string name="inbox_permission_lost">Přístup ke složce Inbox ztracen. Vyberte prosím novou složku.</string>
-    <string name="inbox_no_folder_selected">Nejprve prosím vyberte složku Inbox.</string>
-    <string name="inbox_clear">Vymazat složku Inbox</string>
-    <string name="inbox_filename_format">Formát názvu souboru</string>
-    <string name="inbox_auto_new_scan">Po exportu automaticky zahájit nové skenování</string>
-    <string name="inbox_filename_date_scan">Datum + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Datum + čas + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Pouze datum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Barva</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Odstranit stránku?</string>
     <string name="confirm_remove_page_message">Chcete tuto stránku odstranit z filmového pásu?</string>
@@ -471,9 +406,4 @@
     <string name="crop_hint_corner_off_image">Roh mimo obrázek — výstup může obsahovat černé okraje</string>
     <string name="crop_edge_dragged">Hrana vybrána. Tažením přesuňte hranu.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Vyčištění dokumentu</string>
-    <string name="document_cleanup_original">Originál</string>
-    <string name="document_cleanup_natural">Přirozené</string>
-    <string name="document_cleanup_enhanced">Vylepšené</string>
-    <string name="document_cleanup_clean_text">Čistý text</string>
 </resources>
