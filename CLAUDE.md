@@ -12,8 +12,10 @@ stop and ask Kris.
 
 ## Prime directive — the scan/OCR core is frozen
 
-Never modify: CameraX/Camera2 capture, the crop/perspective fragment, ONNX corner detection,
-OpenCV enhancement/dewarp, the Tesseract OCR integration, or the native OpenCV/ONNX build setup.
+Never modify: CameraX/Camera2 capture, the crop/perspective fragment, ONNX DocQuad corner
+detection, OpenCV enhancement/dewarp, PaddleOCR inference, `OCRPostProcessor` text assembly
+(`wordsToText()` on the live paddle path), multi-page capture, the 22 paddle model assets
+(`app/src/paddle/assets/paddleocr/v5/`), or the native OpenCV/ONNX build setup.
 Output quality is already validated on real handouts. Everything else in the app exists to be
 deleted or replaced — when in doubt, removing UI is the default.
 
@@ -31,6 +33,9 @@ edit screen (text, anchor, title, tags) → finalize (build JSON → POST to son
 
 Until F4 lands the edit screen, the kept app terminates at the upstream **OCR result/review screen**
 (`OcrReviewFragment`), which displays the recognized text. It is a temporary terminus, replaced in F4.
+`ExportFragment` survives as the multi-page **page hub** (filmstrip, add/clear page, preview, per-page
+OCR badge, registry persistence) but, since F1c-2, offers **no export of any kind** — all PDF/JPEG/ZIP/
+TXT/share/inbox output was removed. Document files are not this fork's output; F5/F6 emit songbird JSON.
 
 ## Output contract (summary — full spec is brief Appendix A)
 
@@ -147,7 +152,7 @@ UI/data (trimmed in F1c per D3).
 - [x] F1a — fork identity: applicationId io.github.kbennett2000.sermonscanner, label "Sermon Scanner", v0-upstream-baseline tag (engine choice inverted by F1b)
 - [x] F1b — engine correction: paddle restored as sole flavor, Tesseract removed
 - [x] F1c — strip (re-scoped to safe non-code islands): deleted Tesseract data assets (tessdata 66 MB + dictionaries 4 MB; fonts kept — PDF-coupled), store scaffolding (fastlane/ + F-Droid metadata/), langpack-latin-best module + its CI workflow + copyBestModelsForTest, the unused libs.tesseract alias, and the release-CI publish/signing; README rewrite. The strip's entangled CODE is re-sliced along DI seams (below) because this app is heavily Hilt-wired — features interconnect through DI + the Application + the export screen, not clean islands.
-- [ ] F1c-2 — export-output excision: ExportFragment export-output (~900 interleaved lines) + PDF/JPEG/share/inbox classes + pdfbox removal. Gated by the page-hub behavioral contract. Keep the page hub (filmstrip, add-page, preview, OCR display).
+- [x] F1c-2 — export-output excision: removed ExportFragment export-output + PDF/JPEG/ZIP/TXT/share/inbox classes (PdfCreator, PdfTextUtils, PdfQualityPreset, PageFormat, JpegExporter, JpegExportOptions, InboxExporter, ExportTxtHelper, ExportOptionsDialogFragment, ExportUiBindings) + pdfbox & documentfile deps + FEATURE_INBOX_MODE + orphaned export strings; trimmed ExportPrefsHelper to skip_ocr/pending_add_page/last_import_uri. Page hub kept (filmstrip, add/clear page, preview, OCR badge, ScanPersister persistence). Kept-and-deferred to F1c-3: ShareIntentHelper (used by ui/library/ScanDetailsFragment) + ScanLibraryIndexer.
 - [ ] F1c-3 — library/Room subgraph: ui/library, data/library (Room), di/DatabaseModule, ui/export/ScanLibraryIndexer, DictionaryManager + DictionarySuggestProvider, library buttons/nav, CacheCleanupService library bits. DI/Application surgery (MakeACopyApplication, @Inject sites). NOTE: DictionaryManager is dead under paddle (only text-affecting use, processWithDictionary, is gated `!selectedPaddleMode`) → removed here. **OCRPostProcessor is FROZEN CORE** — its `wordsToText()` assembles recognized words into output text on the live paddle path (OCRFragment, OcrReviewFragment); never schedule it for deletion.
 - [ ] F2 — two-shot capture + concatenated OCR text
 - [ ] F3 — book map + anchor finder (pure logic, fixture-tested)
