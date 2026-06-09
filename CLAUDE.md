@@ -19,6 +19,17 @@ detection, OpenCV enhancement/dewarp, PaddleOCR inference, `OCRPostProcessor` te
 Output quality is already validated on real handouts. Everything else in the app exists to be
 deleted or replaced — when in doubt, removing UI is the default.
 
+"Frozen" means the **validated scan behavior**, not byte-frozen files: nav/UI stitching edits
+*inside* a frozen-core file are allowed when **forced** by deletion elsewhere (e.g. removing a
+library button whose nav target no longer exists), must be minimal, and trigger on-device
+re-validation of the affected flow. Electively editing a frozen file for hygiene is out of bounds.
+
+`utils/ocr/DictionaryManager.java` is **RETAINED-DEAD**: it survives solely because its only inbound
+reference is the paddle-dead `OCRPostProcessor.processWithDictionary()` inside byte-frozen
+`OCRPostProcessor`. Do not open OCRPostProcessor to delete that method electively. Disposal rule: the
+next slice that opens OCRPostProcessor for a forced/behavioral reason deletes `processWithDictionary()`
+and DictionaryManager together.
+
 ## Fork & licensing
 
 - `origin` = github.com/kbennett2000/sermon-notes-scanner (this repo — public fork)
@@ -153,7 +164,7 @@ UI/data (trimmed in F1c per D3).
 - [x] F1b — engine correction: paddle restored as sole flavor, Tesseract removed
 - [x] F1c — strip (re-scoped to safe non-code islands): deleted Tesseract data assets (tessdata 66 MB + dictionaries 4 MB; fonts kept — PDF-coupled), store scaffolding (fastlane/ + F-Droid metadata/), langpack-latin-best module + its CI workflow + copyBestModelsForTest, the unused libs.tesseract alias, and the release-CI publish/signing; README rewrite. The strip's entangled CODE is re-sliced along DI seams (below) because this app is heavily Hilt-wired — features interconnect through DI + the Application + the export screen, not clean islands.
 - [x] F1c-2 — export-output excision: removed ExportFragment export-output + PDF/JPEG/ZIP/TXT/share/inbox classes (PdfCreator, PdfTextUtils, PdfQualityPreset, PageFormat, JpegExporter, JpegExportOptions, InboxExporter, ExportTxtHelper, ExportOptionsDialogFragment, ExportUiBindings) + pdfbox & documentfile deps + FEATURE_INBOX_MODE + orphaned export strings; trimmed ExportPrefsHelper to skip_ocr/pending_add_page/last_import_uri. Page hub kept (filmstrip, add/clear page, preview, OCR badge, ScanPersister persistence). Kept-and-deferred to F1c-3: ShareIntentHelper (used by ui/library/ScanDetailsFragment) + ScanLibraryIndexer.
-- [ ] F1c-3 — library/Room subgraph: ui/library, data/library (Room), di/DatabaseModule, ui/export/ScanLibraryIndexer, DictionaryManager + DictionarySuggestProvider, library buttons/nav, CacheCleanupService library bits. DI/Application surgery (MakeACopyApplication, @Inject sites). NOTE: DictionaryManager is dead under paddle (only text-affecting use, processWithDictionary, is gated `!selectedPaddleMode`) → removed here. **OCRPostProcessor is FROZEN CORE** — its `wordsToText()` assembles recognized words into output text on the live paddle path (OCRFragment, OcrReviewFragment); never schedule it for deletion.
+- [x] F1c-3 — library/Room subgraph removed: deleted ui/library, data/library (Room), di/DatabaseModule, ui/export/ScanLibraryIndexer, ui/ocr/review/suggest/DictionarySuggestProvider, utils/export/ShareIntentHelper, library buttons/nav (incl. forced minimal edits to CameraFragment + fragment_camera.xml), Room deps, FEATURE_SCAN_LIBRARY + FeatureFlags.isScanLibraryEnable; MakeACopyApplication + CacheCleanupService de-Roomed (startup is now OpenCV → CacheCleanupService, no DB at launch). The app is **database-free**: scan → view text → dead-end (until F2–F6). DictionaryManager was **de-wired but KEPT (RETAINED-DEAD)** to preserve OCRPostProcessor byte-zero-diff (see prime directive). CompletedScansRegistry/RegistryCleaner/ScanPersister (JSON registry, Room-free) kept.
 - [ ] F2 — two-shot capture + concatenated OCR text
 - [ ] F3 — book map + anchor finder (pure logic, fixture-tested)
 - [ ] F4 — edit screen (text, anchor, title, tags)
