@@ -15,7 +15,6 @@
     <string name="btn_scan">扫描</string>
     <string name="btn_crop">裁剪</string>
     <string name="btn_process">处理</string>
-    <string name="btn_share">分享</string>
     <string name="next">下一步</string>
     <string name="back">返回</string>
 
@@ -123,7 +122,6 @@
     <string name="picker_title_completed_scans">从已完成的扫描中选择</string>
     <string name="picker_empty">未找到已完成的扫描</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">已完成的扫描</string>
     <string name="done">下一步</string>
     <string name="thumbnail">缩略图</string>
     <string name="delete">删除</string>
@@ -230,44 +228,17 @@
     <string name="error_empty_input">请输入一个值</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">新建收藏集</string>
-    <string name="collection_name_hint">收藏集名称</string>
-    <string name="create">创建</string>
-    <string name="collection_not_empty">收藏集不为空</string>
-    <string name="collection_items_count">%1$d 个项目</string>
-    <string name="deleted">已删除</string>
-    <string name="open_collections">收藏集</string>
-    <string name="index_existing_scans">索引现有扫描</string>
-    <string name="rename">重命名</string>
     <string name="ok">确定</string>
-    <string name="no_scans_yet">暂无扫描</string>
-    <string name="rename_collection_title">重命名收藏集</string>
-    <string name="action_add_to_collection">添加到收藏集…</string>
-    <string name="place_in_collection_title">添加到收藏集</string>
-    <string name="create_new_collection">创建新收藏集…</string>
     <string name="scan_added_to_collection">已将扫描添加到“%1$s”</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">库操作</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">属于：%1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">文件将从设备中删除。此操作无法撤销。</string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">扫描库功能已禁用</string>
-    <string name="navigation_failed">导航失败</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">缺少扫描 ID</string>
-    <string name="picker_failed">选择失败</string>
-    <string name="share_failed">共享失败</string>
-    <string name="no_app_found_to_open_file">未找到可打开此文件的应用程序</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">从此集合中移除？</string>
-    <string name="removed_from_collection">已从集合中移除</string>
-    <string name="indexed_new_items">已索引 %1$d 个新项目</string>
-    <string name="nothing_new_to_index">没有新的项目可索引</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">文档已对齐</string>
@@ -348,7 +319,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">恢复访问</string>
     <string name="status">状态</string>
     <string name="ocr_text_editor_hint">编辑 OCR 文本</string>
 

@@ -16,7 +16,6 @@
     <string name="btn_scan">Szkennelés</string>
     <string name="btn_crop">Kivágás</string>
     <string name="btn_process">Feldolgozás</string>
-    <string name="btn_share">Megosztás</string>
     <string name="next">Tovább</string>
     <string name="back">Vissza</string>
 
@@ -128,7 +127,6 @@
     <string name="picker_title_completed_scans">Válasszon a befejezett szkennelések közül</string>
     <string name="picker_empty">Nincs befejezett szkennelés</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Befejezett szkennelések</string>
     <string name="done">Tovább</string>
     <string name="thumbnail">Előnézet</string>
     <string name="delete">Törlés</string>
@@ -242,47 +240,19 @@
     <string name="error_empty_input">Kérjük, adjon meg egy értéket</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Új gyűjtemény</string>
-    <string name="collection_name_hint">Gyűjtemény neve</string>
-    <string name="create">Létrehozás</string>
-    <string name="collection_not_empty">A gyűjtemény nem üres</string>
-    <string name="collection_items_count">%1$d elem</string>
-    <string name="deleted">Törölve</string>
-    <string name="open_collections">Gyűjtemények</string>
-    <string name="index_existing_scans">Meglévő beolvasások indexelése</string>
-    <string name="rename">Átnevezés</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Még nincsenek beolvasások</string>
-    <string name="rename_collection_title">Gyűjtemény átnevezése</string>
-    <string name="action_add_to_collection">Hozzáadás a gyűjteményhez…</string>
-    <string name="place_in_collection_title">Hozzáadás a gyűjteményhez</string>
-    <string name="create_new_collection">Új gyűjtemény létrehozása…</string>
     <string name="scan_added_to_collection">Beolvasás hozzáadva a(z) „%1$s” gyűjteményhez</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Könyvtári műveletek</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">Ebben: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">A fájl törölve lesz az eszközről. Ez a művelet nem vonható vissza.
-    </string>
 
     <!-- ExportFragment toasts -->
     <string name="no_document_to_share_export_first">Nincs megosztható dokumentum. Először exportálj egy dokumentumot.
     </string>
-    <string name="feature_scan_library_disabled">A szkennelési könyvtár funkció le van tiltva</string>
-    <string name="navigation_failed">A navigáció nem sikerült</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Hiányzó szkennelési azonosító</string>
-    <string name="picker_failed">A kiválasztás nem sikerült</string>
-    <string name="share_failed">A megosztás nem sikerült</string>
-    <string name="no_app_found_to_open_file">Nem található alkalmazás a fájl megnyitásához</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Eltávolítod ebből a gyűjteményből?</string>
-    <string name="removed_from_collection">Eltávolítva a gyűjteményből</string>
-    <string name="indexed_new_items">%1$d új elem indexelve</string>
-    <string name="nothing_new_to_index">Nincs új elem indexelésre</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Dokumentum igazítva</string>
@@ -370,7 +340,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Hozzáférés visszaállítása</string>
     <string name="status">Állapot</string>
     <string name="ocr_text_editor_hint">OCR-szöveg szerkesztése</string>
 

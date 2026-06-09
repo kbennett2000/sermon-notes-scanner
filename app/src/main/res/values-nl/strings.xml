@@ -16,7 +16,6 @@
     <string name="btn_scan">Scannen</string>
     <string name="btn_crop">Bijsnijden</string>
     <string name="btn_process">Verwerken</string>
-    <string name="btn_share">Delen</string>
     <string name="next">Verder</string>
     <string name="back">Terug</string>
 
@@ -131,7 +130,6 @@
     <string name="picker_title_completed_scans">Kies uit voltooide scans</string>
     <string name="picker_empty">Geen voltooide scans gevonden</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Voltooide scans</string>
     <string name="done">Verder</string>
     <string name="thumbnail">Miniatuur</string>
     <string name="delete">Verwijderen</string>
@@ -244,46 +242,17 @@
     <string name="error_empty_input">Voer een waarde in</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Nieuwe verzameling</string>
-    <string name="collection_name_hint">Naam van de verzameling</string>
-    <string name="create">Aanmaken</string>
-    <string name="collection_not_empty">Verzameling is niet leeg</string>
-    <string name="collection_items_count">%1$d item(s)</string>
-    <string name="deleted">Verwijderd</string>
-    <string name="open_collections">Verzamelingen</string>
-    <string name="index_existing_scans">Bestaande scans indexeren</string>
-    <string name="rename">Hernoemen</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Nog geen scans</string>
-    <string name="rename_collection_title">Verzameling hernoemen</string>
-    <string name="action_add_to_collection">Toevoegen aan verzameling…</string>
-    <string name="place_in_collection_title">Toevoegen aan verzameling</string>
-    <string name="create_new_collection">Nieuwe verzameling aanmaken…</string>
     <string name="scan_added_to_collection">Scan toegevoegd aan “%1$s”</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Bibliotheekacties</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">In: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Het bestand wordt van het apparaat verwijderd. Deze actie kan niet
-        ongedaan worden gemaakt.
-    </string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">Scanbibliotheekfunctie is uitgeschakeld</string>
-    <string name="navigation_failed">Navigatie mislukt</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Scan-ID ontbreekt</string>
-    <string name="picker_failed">Selectie mislukt</string>
-    <string name="share_failed">Delen mislukt</string>
-    <string name="no_app_found_to_open_file">Geen app gevonden om dit bestand te openen</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Verwijderen uit deze collectie?</string>
-    <string name="removed_from_collection">Verwijderd uit collectie</string>
-    <string name="indexed_new_items">%1$d nieuw(e) item(s) geïndexeerd</string>
-    <string name="nothing_new_to_index">Niets nieuws om te indexeren</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Document uitgelijnd</string>
@@ -372,7 +341,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Toegang herstellen</string>
     <string name="status">Status</string>
     <string name="ocr_text_editor_hint">OCR-tekst bewerken</string>
 

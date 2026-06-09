@@ -16,7 +16,6 @@
     <string name="btn_scan">Scan</string>
     <string name="btn_crop">Beskær</string>
     <string name="btn_process">Behandl</string>
-    <string name="btn_share">Del</string>
     <string name="next">Næste</string>
     <string name="back">Tilbage</string>
 
@@ -128,7 +127,6 @@
     <string name="picker_title_completed_scans">Vælg fra fuldførte scanninger</string>
     <string name="picker_empty">Ingen fuldførte scanninger fundet</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Fuldførte scanninger</string>
     <string name="done">Næste</string>
     <string name="thumbnail">Miniature</string>
     <string name="delete">Slet</string>
@@ -241,45 +239,17 @@
     <string name="error_empty_input">Indtast venligst en værdi</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Ny samling</string>
-    <string name="collection_name_hint">Navn på samling</string>
-    <string name="create">Opret</string>
-    <string name="collection_not_empty">Samlingen er ikke tom</string>
-    <string name="collection_items_count">%1$d element(er)</string>
-    <string name="deleted">Slettet</string>
-    <string name="open_collections">Samlinger</string>
-    <string name="index_existing_scans">Indekser eksisterende scanninger</string>
-    <string name="rename">Omdøb</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Ingen scanninger endnu</string>
-    <string name="rename_collection_title">Omdøb samling</string>
-    <string name="action_add_to_collection">Føj til samling…</string>
-    <string name="place_in_collection_title">Føj til samling</string>
-    <string name="create_new_collection">Opret ny samling…</string>
     <string name="scan_added_to_collection">Scanning tilføjet til "%1$s"</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Bibliotekshandlinger</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">I: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Filen vil blive slettet fra enheden. Denne handling kan ikke fortrydes.
-    </string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">Funktionen for skanningsbibliotek er deaktiveret</string>
-    <string name="navigation_failed">Navigation mislykkedes</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Manglende skannings-ID</string>
-    <string name="picker_failed">Valg mislykkedes</string>
-    <string name="share_failed">Deling mislykkedes</string>
-    <string name="no_app_found_to_open_file">Ingen app fundet til at åbne denne fil</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Fjern fra denne samling?</string>
-    <string name="removed_from_collection">Fjernet fra samling</string>
-    <string name="indexed_new_items">Indekserede %1$d nye element(er)</string>
-    <string name="nothing_new_to_index">Intet nyt at indeksere</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Dokument justeret</string>
@@ -366,7 +336,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Gendan adgang</string>
     <string name="status">Status</string>
     <string name="ocr_text_editor_hint">Rediger OCR-tekst</string>
 

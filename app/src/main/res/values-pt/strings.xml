@@ -16,7 +16,6 @@
     <string name="btn_scan">Digitalizar</string>
     <string name="btn_crop">Cortar</string>
     <string name="btn_process">Processar</string>
-    <string name="btn_share">Compartilhar</string>
     <string name="next">Avançar</string>
     <string name="back">Voltar</string>
 
@@ -132,7 +131,6 @@
     <string name="picker_title_completed_scans">Escolha entre digitalizações concluídas</string>
     <string name="picker_empty">Nenhuma digitalização concluída encontrada</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Digitalizações concluídas</string>
     <string name="done">Avançar</string>
     <string name="thumbnail">Miniatura</string>
     <string name="delete">Excluir</string>
@@ -246,47 +244,19 @@
     <string name="error_empty_input">Por favor, insira um valor</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Nova coleção</string>
-    <string name="collection_name_hint">Nome da coleção</string>
-    <string name="create">Criar</string>
-    <string name="collection_not_empty">A coleção não está vazia</string>
-    <string name="collection_items_count">%1$d item(ns)</string>
-    <string name="deleted">Excluído</string>
-    <string name="open_collections">Coleções</string>
-    <string name="index_existing_scans">Indexar digitalizações existentes</string>
-    <string name="rename">Renomear</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Nenhuma digitalização ainda</string>
-    <string name="rename_collection_title">Renomear coleção</string>
-    <string name="action_add_to_collection">Adicionar à coleção…</string>
-    <string name="place_in_collection_title">Adicionar à coleção</string>
-    <string name="create_new_collection">Criar nova coleção…</string>
     <string name="scan_added_to_collection">Digitalização adicionada a “%1$s”</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Ações da biblioteca</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">Em: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Plik zostanie usunięty z urządzenia. Tej operacji nie można cofnąć.
-    </string>
 
     <!-- ExportFragment toasts -->
     <string name="no_document_to_share_export_first">Brak dokumentu do udostępnienia. Najpierw wyeksportuj dokument.
     </string>
-    <string name="feature_scan_library_disabled">Funkcja biblioteki skanów jest wyłączona</string>
-    <string name="navigation_failed">Nawigacja nie powiodła się</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Brak identyfikatora skanu</string>
-    <string name="picker_failed">Nie udało się wybrać</string>
-    <string name="share_failed">Udostępnianie nie powiodło się</string>
-    <string name="no_app_found_to_open_file">Nie znaleziono aplikacji do otwarcia tego pliku</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Usunąć z tej kolekcji?</string>
-    <string name="removed_from_collection">Usunięto z kolekcji</string>
-    <string name="indexed_new_items">Zindeksowano %1$d nowych element(ów)</string>
-    <string name="nothing_new_to_index">Brak nowych elementów do zindeksowania</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Documento alinhado</string>
@@ -373,7 +343,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Restaurar acesso</string>
     <string name="status">Status</string>
     <string name="ocr_text_editor_hint">Editar texto OCR</string>
 

@@ -17,7 +17,6 @@
     <string name="btn_scan">Scanner</string>
     <string name="btn_crop">Recadrer</string>
     <string name="btn_process">Traiter</string>
-    <string name="btn_share">Partager</string>
     <string name="next">Suivant</string>
     <string name="back">Retour</string>
 
@@ -131,7 +130,6 @@
     <string name="picker_title_completed_scans">Choisir parmi les numérisations terminées</string>
     <string name="picker_empty">Aucune numérisation terminée trouvée</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Numérisations terminées</string>
     <string name="done">Suivant</string>
     <string name="thumbnail">Vignette</string>
     <string name="delete">Supprimer</string>
@@ -245,45 +243,17 @@
     <string name="error_empty_input">Veuillez saisir une valeur</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Nouvelle collection</string>
-    <string name="collection_name_hint">Nom de la collection</string>
-    <string name="create">Créer</string>
-    <string name="collection_not_empty">La collection n’est pas vide</string>
-    <string name="collection_items_count">%1$d élément(s)</string>
-    <string name="deleted">Supprimé</string>
-    <string name="open_collections">Collections</string>
-    <string name="index_existing_scans">Indexer les numérisations existantes</string>
-    <string name="rename">Renommer</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Aucune numérisation pour le moment</string>
-    <string name="rename_collection_title">Renommer la collection</string>
-    <string name="action_add_to_collection">Ajouter à la collection…</string>
-    <string name="place_in_collection_title">Ajouter à la collection</string>
-    <string name="create_new_collection">Créer une nouvelle collection…</string>
     <string name="scan_added_to_collection">Numérisation ajoutée à « %1$s »</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Actions de la bibliothèque</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">Dans : %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Le fichier sera supprimé de l’appareil. Cette action est irréversible.
-    </string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">La fonction de bibliothèque de numérisations est désactivée</string>
-    <string name="navigation_failed">Échec de la navigation</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">ID de numérisation manquant</string>
-    <string name="picker_failed">Échec de la sélection</string>
-    <string name="share_failed">Échec du partage</string>
-    <string name="no_app_found_to_open_file">Aucune application trouvée pour ouvrir ce fichier</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Retirer de cette collection ?</string>
-    <string name="removed_from_collection">Retiré de la collection</string>
-    <string name="indexed_new_items">%1$d nouvel(s) élément(s) indexé(s)</string>
-    <string name="nothing_new_to_index">Aucun nouvel élément à indexer</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Document aligné</string>
@@ -372,7 +342,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Restaurer l’accès</string>
     <string name="status">Statut</string>
     <string name="ocr_text_editor_hint">Modifier le texte OCR</string>
 

@@ -14,7 +14,6 @@
     <string name="btn_scan">Σάρωση</string>
     <string name="btn_crop">Περικοπή</string>
     <string name="btn_process">Επεξεργασία</string>
-    <string name="btn_share">Κοινοποίηση</string>
     <string name="next">Επόμενο</string>
     <string name="back">Πίσω</string>
 
@@ -119,7 +118,6 @@
     <string name="picker_title_completed_scans">Επιλογή από ολοκληρωμένες σαρώσεις</string>
     <string name="picker_empty">Δεν βρέθηκαν ολοκληρωμένες σαρώσεις</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Ολοκληρωμένες σαρώσεις</string>
     <string name="done">Επόμενο</string>
     <string name="thumbnail">Μικρογραφία</string>
     <string name="delete">Διαγραφή</string>
@@ -222,44 +220,17 @@
     <string name="error_empty_input">Παρακαλώ εισαγάγετε μια τιμή</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Νέα συλλογή</string>
-    <string name="collection_name_hint">Όνομα συλλογής</string>
-    <string name="create">Δημιουργία</string>
-    <string name="collection_not_empty">Η συλλογή δεν είναι κενή</string>
-    <string name="collection_items_count">%1$d στοιχείο/στοιχεία</string>
-    <string name="deleted">Διαγράφηκε</string>
-    <string name="open_collections">Συλλογές</string>
-    <string name="index_existing_scans">Ευρετηρίαση υπαρχουσών σαρώσεων</string>
-    <string name="rename">Μετονομασία</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Δεν υπάρχουν σαρώσεις ακόμη</string>
-    <string name="rename_collection_title">Μετονομασία συλλογής</string>
-    <string name="action_add_to_collection">Προσθήκη σε συλλογή…</string>
-    <string name="place_in_collection_title">Προσθήκη σε συλλογή</string>
-    <string name="create_new_collection">Δημιουργία νέας συλλογής…</string>
     <string name="scan_added_to_collection">Η σάρωση προστέθηκε στο \"%1$s\"</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Ενέργειες βιβλιοθήκης</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">Σε: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Το αρχείο θα διαγραφεί από τη συσκευή. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">Η λειτουργία βιβλιοθήκης σαρώσεων είναι απενεργοποιημένη</string>
-    <string name="navigation_failed">Η πλοήγηση απέτυχε</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Λείπει αναγνωριστικό σάρωσης</string>
-    <string name="picker_failed">Ο επιλογέας απέτυχε</string>
-    <string name="share_failed">Η κοινοποίηση απέτυχε</string>
-    <string name="no_app_found_to_open_file">Δεν βρέθηκε εφαρμογή για άνοιγμα αυτού του αρχείου</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Αφαίρεση από αυτήν τη συλλογή;</string>
-    <string name="removed_from_collection">Αφαιρέθηκε από τη συλλογή</string>
-    <string name="indexed_new_items">Ευρετηριάστηκαν %1$d νέα στοιχεία</string>
-    <string name="nothing_new_to_index">Δεν υπάρχει τίποτα νέο για ευρετηρίαση</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Το έγγραφο είναι ευθυγραμμισμένο</string>
@@ -340,7 +311,6 @@
     <string name="label_text">Κείμενο</string>
     <string name="label_document">Έγγραφο</string>
     <string name="ocr_text_editor_hint">Επεξεργασία κειμένου OCR</string>
-    <string name="restore_access">Επαναφορά πρόσβασης</string>
     <string name="status">Κατάσταση</string>
     <!-- Scan cleanup settings -->
     <string name="scan_cleanup_settings">Ρυθμίσεις καθαρισμού ολοκληρωμένων σαρώσεων</string>

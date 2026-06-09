@@ -17,7 +17,6 @@
     <string name="btn_scan">اسکن</string>
     <string name="btn_crop">برش</string>
     <string name="btn_process">پردازش</string>
-    <string name="btn_share">اشتراک‌گذاری</string>
     <string name="next">بعدی</string>
     <string name="back">بازگشت</string>
 
@@ -128,7 +127,6 @@
     <string name="picker_title_completed_scans">از اسکن‌های تکمیل‌شده انتخاب کنید</string>
     <string name="picker_empty">هیچ اسکن تکمیل‌شده‌ای پیدا نشد</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">اسکن‌های تکمیل‌شده</string>
     <string name="done">بعدی</string>
     <string name="thumbnail">تصویر بندانگشتی</string>
     <string name="delete">حذف</string>
@@ -240,46 +238,19 @@
     <string name="error_empty_input">لطفاً یک مقدار وارد کنید</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">مجموعهٔ جدید</string>
-    <string name="collection_name_hint">نام مجموعه</string>
-    <string name="create">ایجاد</string>
-    <string name="collection_not_empty">مجموعه خالی نیست</string>
-    <string name="collection_items_count">%1$d مورد</string>
-    <string name="deleted">حذف شد</string>
-    <string name="open_collections">مجموعه‌ها</string>
-    <string name="index_existing_scans">فهرست‌کردن اسکن‌های موجود</string>
-    <string name="rename">تغییر نام</string>
     <string name="ok">باشه</string>
-    <string name="no_scans_yet">هنوز اسکن‌ای وجود ندارد</string>
-    <string name="rename_collection_title">تغییر نام مجموعه</string>
-    <string name="action_add_to_collection">افزودن به مجموعه…</string>
-    <string name="place_in_collection_title">افزودن به مجموعه</string>
-    <string name="create_new_collection">ایجاد مجموعهٔ جدید…</string>
     <string name="scan_added_to_collection">اسکن به \"%1$s\" اضافه شد</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">اقدامات کتابخانه</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">در: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">فایل از دستگاه حذف خواهد شد. این عمل قابل بازگشت نیست.</string>
 
     <!-- ExportFragment toasts -->
     <string name="no_document_to_share_export_first">هیچ سندی برای اشتراک‌گذاری وجود ندارد. ابتدا یک سند خروجی بگیرید.
     </string>
-    <string name="feature_scan_library_disabled">ویژگی کتابخانهٔ اسکن غیرفعال است</string>
-    <string name="navigation_failed">ناوبری ناموفق بود</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">شناسهٔ اسکن موجود نیست</string>
-    <string name="picker_failed">انتخاب‌گر ناموفق بود</string>
-    <string name="share_failed">اشتراک‌گذاری ناموفق بود</string>
-    <string name="no_app_found_to_open_file">هیچ برنامه‌ای برای باز کردن فایل پیدا نشد</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">از این مجموعه حذف شود؟</string>
-    <string name="removed_from_collection">از مجموعه حذف شد</string>
-    <string name="indexed_new_items">%1$d مورد جدید فهرست شد</string>
-    <string name="nothing_new_to_index">چیز جدیدی برای فهرست‌کردن نیست</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">سند تراز است</string>
@@ -366,7 +337,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">بازیابی دسترسی</string>
     <string name="status">وضعیت</string>
     <string name="ocr_text_editor_hint">ویرایش متن OCR</string>
 

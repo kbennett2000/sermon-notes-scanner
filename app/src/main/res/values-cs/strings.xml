@@ -17,7 +17,6 @@
     <string name="btn_scan">Skenovat</string>
     <string name="btn_crop">Oříznout</string>
     <string name="btn_process">Zpracovat</string>
-    <string name="btn_share">Sdílet</string>
     <string name="next">Další</string>
     <string name="back">Zpět</string>
 
@@ -129,7 +128,6 @@
     <string name="picker_title_completed_scans">Vyberte z dokončených skenů</string>
     <string name="picker_empty">Nebyly nalezeny žádné dokončené skeny</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Dokončené skeny</string>
     <string name="done">Další</string>
     <string name="thumbnail">Náhled</string>
     <string name="delete">Smazat</string>
@@ -243,44 +241,17 @@
     <string name="error_empty_input">Zadejte prosím hodnotu</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Nová kolekce</string>
-    <string name="collection_name_hint">Název kolekce</string>
-    <string name="create">Vytvořit</string>
-    <string name="collection_not_empty">Kolekce není prázdná</string>
-    <string name="collection_items_count">%1$d položka(y)</string>
-    <string name="deleted">Smazáno</string>
-    <string name="open_collections">Kolekce</string>
-    <string name="index_existing_scans">Indexovat existující skeny</string>
-    <string name="rename">Přejmenovat</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Zatím žádné skeny</string>
-    <string name="rename_collection_title">Přejmenovat kolekci</string>
-    <string name="action_add_to_collection">Přidat do kolekce…</string>
-    <string name="place_in_collection_title">Přidat do kolekce</string>
-    <string name="create_new_collection">Vytvořit novou kolekci…</string>
     <string name="scan_added_to_collection">Sken přidán do "%1$s"</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Akce knihovny</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">V: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Soubor bude odstraněn ze zařízení. Tuto akci nelze vrátit zpět.</string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">Funkce knihovny skenů je deaktivována</string>
-    <string name="navigation_failed">Navigace se nezdařila</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Chybí ID skenu</string>
-    <string name="picker_failed">Výběr se nezdařil</string>
-    <string name="share_failed">Sdílení se nezdařilo</string>
-    <string name="no_app_found_to_open_file">Nebyla nalezena aplikace pro otevření tohoto souboru</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Odebrat z této kolekce?</string>
-    <string name="removed_from_collection">Odebráno z kolekce</string>
-    <string name="indexed_new_items">Indexováno %1$d nových položek</string>
-    <string name="nothing_new_to_index">Žádné nové položky k indexování</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Dokument zarovnán</string>
@@ -369,7 +340,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Obnovit přístup</string>
     <string name="status">Stav</string>
     <string name="ocr_text_editor_hint">Upravit text OCR</string>
 
