@@ -55,7 +55,6 @@ android {
         buildConfigField "boolean", "FEATURE_FRAMING_LOGGING", "false"
         buildConfigField "boolean", "FEATURE_A11Y_GUIDANCE", "true"
         buildConfigField "boolean", "FEATURE_LAYOUT_ANALYSIS", "false"
-        buildConfigField "boolean", "FEATURE_INBOX_MODE", "true"
         buildConfigField "boolean", "FEATURE_CROP_EDGE_DRAG", "true"
         buildConfigField "boolean", "FEATURE_CROP_PAN_ZOOM", "true"
         buildConfigField "boolean", "FEATURE_DOCQUAD_CORNERS", "true"
@@ -222,10 +221,7 @@ dependencies {
         implementation fileTree(dir: 'libs', include: ['*.aar'])
     }
 
-    // PdfBox-Android dependency
-    implementation libs.pdfbox.android
     implementation libs.exifinterface
-    implementation libs.documentfile
 
     // Room (for scan index)
     implementation libs.room.runtime
