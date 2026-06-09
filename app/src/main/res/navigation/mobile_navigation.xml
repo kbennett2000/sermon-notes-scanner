@@ -40,25 +40,4 @@
         android:name="de.schliweb.makeacopy.ui.ocr.review.OcrReviewFragment"
         android:label="@string/btn_review"
         tools:layout="@layout/fragment_ocr_review" />
-
-    <!-- Experimental scan library destination -->
-    <fragment
-        android:id="@+id/navigation_scans_library"
-        android:name="de.schliweb.makeacopy.ui.library.ScansLibraryFragment"
-        android:label="Scans Library"
-        tools:layout="@layout/fragment_scans_library" />
-
-    <!-- Experimental collections destination -->
-    <fragment
-        android:id="@+id/navigation_collections"
-        android:name="de.schliweb.makeacopy.ui.library.CollectionsFragment"
-        android:label="Collections"
-        tools:layout="@layout/fragment_collections" />
-
-    <!-- Experimental scan details destination -->
-    <fragment
-        android:id="@+id/navigation_scan_details"
-        android:name="de.schliweb.makeacopy.ui.library.ScanDetailsFragment"
-        android:label="Scan Details"
-        tools:layout="@layout/fragment_scan_details" />
 </navigation>
