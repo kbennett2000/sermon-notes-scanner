@@ -559,6 +559,35 @@ public class ExportFragment extends Fragment {
     binding.pagesRecycler.setLayoutManager(lm);
     binding.pagesRecycler.setAdapter(pagesAdapter);
 
+    // F2-TEMP (remove when F4 edit screen lands): long-press the preview to inspect the combined
+    // OCR string (all pages, hub order, "\n\n" seam) — the F2 artifact F3/F4/F5 will consume.
+    if (binding.documentPreview != null) {
+      binding.documentPreview.setOnLongClickListener(
+          v -> {
+            if (!isAdded() || exportSessionViewModel == null) return false;
+            String combined =
+                de.schliweb.makeacopy.ui.export.session.CombinedOcrTextProvider.fromPages(
+                    exportSessionViewModel.getPages().getValue());
+            Log.d(
+                TAG,
+                "[F2_PROOF] combined OCR len="
+                    + (combined == null ? 0 : combined.length())
+                    + "\n"
+                    + combined);
+            androidx.appcompat.app.AlertDialog dialog =
+                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("F2-TEMP: combined OCR")
+                    .setMessage((combined == null || combined.isEmpty()) ? "(empty)" : combined)
+                    .setPositiveButton(android.R.string.ok, (d, w) -> d.dismiss())
+                    .create();
+            dialog.setOnShowListener(
+                dlg ->
+                    DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext()));
+            dialog.show();
+            return true;
+          });
+    }
+
     // Enable drag & drop reordering via ItemTouchHelper (horizontal)
     androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback cb =
         new androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback(
