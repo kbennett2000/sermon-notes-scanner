@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">Текстовый режим: Разрывы строк и знаки препинания в настоящее время
         нормализуются до пробелов. Если введено меньше слов, чем было распознано, оставшиеся слова OCR остаются без

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">Mode texte : les retours à la ligne et la ponctuation sont actuellement
         normalisés en espaces. Si vous saisissez moins de mots que ceux reconnus, les mots OCR restants restent

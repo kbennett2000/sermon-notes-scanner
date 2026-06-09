@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">Mod text: În prezent, întreruperile de rând și semnele de punctuație sunt
         normalizate la spații. Dacă se introduc mai puține cuvinte decât au fost recunoscute, celelalte cuvinte OCR

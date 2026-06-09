@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">文字模式：目前换行符和标点符号会被规范化为空格。如果输入的词比识别出的少，剩余的
         OCR 词将保持不变。更改会在短暂的停顿后生效。

@@ -57,6 +57,7 @@ edit screen is the safety net. Canonical fixture: brief Appendix C must yield `1
 | D2 | Chapter-only anchor end-verse via bundled offline verse-count table generated from Concord | pending — recommended (a) |
 | D3 | OCR languages to keep | pending |
 | D4 | Finalize = POST to songbird `/api/v1/import`, save/share as fallback; base URL + token in settings | pending — recommended yes |
+| D5 | Standard (Tesseract) flavor only; paddle removed in F1a. Changing OCR engine would invalidate the validated-quality premise — spec change, ask Kris first. | locked |
 
 Do not implement against a pending decision — ask first. Update this table when Kris locks one.
 
@@ -105,22 +106,23 @@ bash scripts/prepare_opencv.sh              # -> app/src/main/jniLibs/arm64-v8a/
 bash scripts/build_onnxruntime_android.sh   # -> jniLibs/ + app/libs/onnxruntime-1.24.1.jar (~6 min)
 ```
 
-### Assemble debug APKs — both flavors, arm64-v8a only (~1 min after deps cached)
+### Assemble debug APK — standard (Tesseract) flavor, arm64-v8a only (~1 min after deps cached)
 ```
 echo "sdk.dir=$ANDROID_HOME" > local.properties      # gitignored
-./gradlew :app:assembleStandardDebug :app:assemblePaddleDebug -PenableAbiSplits=true -PABIS=arm64-v8a
+./gradlew :app:assembleStandardDebug -PenableAbiSplits=true -PABIS=arm64-v8a
 ```
-- Output APKs:
-  - standard (Tesseract): `app/build/outputs/apk/standard/debug/app-standard-arm64-v8a-debug.apk` (~262 MB)
-  - paddle  (PaddleOCR):  `app/build/outputs/apk/paddle/debug/app-paddle-arm64-v8a-debug.apk`  (~154 MB)
-- Both share applicationId `de.schliweb.makeacopy` → install one at a time.
-- Sideload (device not assumed connected): `adb install -r <apk>`
+- Output APK: `app/build/outputs/apk/standard/debug/app-standard-arm64-v8a-debug.apk` (~262 MB).
+- applicationId `io.github.kbennett2000.sermonscanner` (coexists with stock MakeACopy).
+  Sideload (device not assumed connected): `adb install -r <apk>`; uninstall:
+  `adb uninstall io.github.kbennett2000.sermonscanner`.
 
-Notes: `jniLibs/`, `app/libs/*.jar`, and `local.properties` are gitignored — the native build never
-dirties the tree and submodule gitlink SHAs stay at upstream's pins. For all four ABIs (CI default) set
-`ABIS="arm64-v8a armeabi-v7a x86 x86_64"` for both the scripts and `-PABIS=...`. Dropping
-`-PenableAbiSplits=true` yields one fat universal APK (carries every dependency ABI). The big debug APK
-size is unstripped OCR language data/fonts (trimmed in a later slice, not F0b).
+Notes: paddle flavor removed in F1a (D5) — there is no `assemblePaddleDebug` and no paddle APK. A fresh
+ONNX rebuild is now **DocQuad-only** (the paddle ops config is gone; `build_onnxruntime_android.sh` skips
+it via its file-exists guard), which is exactly what the Tesseract flavor needs. `jniLibs/`, `app/libs/*.jar`,
+and `local.properties` are gitignored — the native build never dirties the tree and submodule gitlink SHAs
+stay at upstream's pins. For all four ABIs (CI default) set `ABIS="arm64-v8a armeabi-v7a x86 x86_64"` for both
+the scripts and `-PABIS=...`. Dropping `-PenableAbiSplits=true` yields one fat universal APK. The big debug
+APK size is unstripped OCR language data/fonts (trimmed in F1b).
 
 ## Methodology (non-negotiable)
 
@@ -134,9 +136,10 @@ size is unstripped OCR language data/fonts (trimmed in a later slice, not F0b).
 
 ## Slice map
 
-- [ ] F0a — fork + repo wiring (bootstrap)
-- [ ] F0b — green build: sideloaded debug APK; capture → crop → OCR verified unchanged
-- [ ] F1 — strip to barebones (brief §3 keep/strip lists)
+- [x] F0a — fork + repo wiring (bootstrap)
+- [x] F0b — green build: sideloaded debug APK; capture → crop → OCR verified unchanged
+- [x] F1a — fork identity: applicationId io.github.kbennett2000.sermonscanner, label "Sermon Scanner", paddle flavor removed, v0-upstream-baseline tag
+- [ ] F1b — strip to barebones (brief §3 keep/strip lists + D3 English-only OCR)
 - [ ] F2 — two-shot capture + concatenated OCR text
 - [ ] F3 — book map + anchor finder (pure logic, fixture-tested)
 - [ ] F4 — edit screen (text, anchor, title, tags)

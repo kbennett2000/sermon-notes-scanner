@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">टेक्स्ट मोड: लाइन ब्रेक और विराम चिह्न वर्तमान में स्पेस में बदले जाते हैं। यदि पहचाने गए शब्दों से कम शब्द दर्ज किए जाते हैं, तो शेष OCR शब्द अपरिवर्तित रहते हैं। परिवर्तन एक छोटे विराम के बाद लागू होते हैं।
     </string>

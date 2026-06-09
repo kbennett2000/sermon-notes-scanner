@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">Modalità testo: le interruzioni di riga e la punteggiatura vengono attualmente
         normalizzate in spazi. Se vengono inserite meno parole di quelle riconosciute, le restanti parole OCR rimangono
