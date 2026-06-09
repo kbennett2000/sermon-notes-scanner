@@ -21,12 +21,6 @@ public class FeatureFlagsTest {
   }
 
   @Test
-  public void isScanLibraryEnable_returnsBooleanWithoutThrowing() {
-    boolean result = FeatureFlags.isScanLibraryEnable();
-    assertTrue(result || !result);
-  }
-
-  @Test
   public void isFramingLoggingEnabled_returnsBooleanWithoutThrowing() {
     boolean result = FeatureFlags.isFramingLoggingEnabled();
     assertTrue(result || !result);

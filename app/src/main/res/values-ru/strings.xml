@@ -16,7 +16,6 @@
     <string name="btn_scan">Сканировать</string>
     <string name="btn_crop">Обрезать</string>
     <string name="btn_process">Обработать</string>
-    <string name="btn_share">Поделиться</string>
     <string name="next">Далее</string>
     <string name="back">Назад</string>
 
@@ -133,7 +132,6 @@
     <string name="picker_empty">Завершённые сканы не найдены</string>
     <string name="done">Далее</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Завершённые сканы</string>
     <string name="thumbnail">Миниатюра</string>
     <string name="delete">Удалить</string>
 
@@ -246,46 +244,19 @@
     <string name="error_empty_input">Введите значение</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Новая коллекция</string>
-    <string name="collection_name_hint">Название коллекции</string>
-    <string name="create">Создать</string>
-    <string name="collection_not_empty">Коллекция не пуста</string>
-    <string name="collection_items_count">%1$d элемент(ов)</string>
-    <string name="deleted">Удалено</string>
-    <string name="open_collections">Коллекции</string>
-    <string name="index_existing_scans">Индексировать существующие сканы</string>
-    <string name="rename">Переименовать</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Пока нет сканов</string>
-    <string name="rename_collection_title">Переименовать коллекцию</string>
-    <string name="action_add_to_collection">Добавить в коллекцию…</string>
-    <string name="place_in_collection_title">Добавить в коллекцию</string>
-    <string name="create_new_collection">Создать новую коллекцию…</string>
     <string name="scan_added_to_collection">Скан добавлен в «%1$s»</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Действия библиотеки</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">В: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Файл будет удалён с устройства. Это действие нельзя отменить.</string>
 
     <!-- ExportFragment toasts -->
     <string name="no_document_to_share_export_first">Нет документа для общего доступа. Сначала экспортируйте документ.
     </string>
-    <string name="feature_scan_library_disabled">Функция библиотеки сканов отключена</string>
-    <string name="navigation_failed">Ошибка навигации</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Отсутствует идентификатор скана</string>
-    <string name="picker_failed">Ошибка выбора</string>
-    <string name="share_failed">Ошибка при обмене</string>
-    <string name="no_app_found_to_open_file">Не найдено приложение для открытия этого файла</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Удалить из этой коллекции?</string>
-    <string name="removed_from_collection">Удалено из коллекции</string>
-    <string name="indexed_new_items">Проиндексировано %1$d новых элемент(ов)</string>
-    <string name="nothing_new_to_index">Нет новых элементов для индексирования</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Документ выровнен</string>
@@ -371,7 +342,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Восстановить доступ</string>
     <string name="status">Статус</string>
     <string name="ocr_text_editor_hint">Редактировать текст OCR</string>
 

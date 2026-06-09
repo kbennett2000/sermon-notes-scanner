@@ -498,21 +498,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
           return true; // consume to suppress actual volume change
         });
 
-    // Library entry from Camera screen (feature-gated)
-    if (FeatureFlags.isScanLibraryEnable()) {
-      binding.buttonOpenLibraryCam.setVisibility(View.VISIBLE);
-      binding.buttonOpenLibraryCam.setOnClickListener(
-          v -> {
-            try {
-              Navigation.findNavController(requireView()).navigate(R.id.navigation_scans_library);
-            } catch (IllegalArgumentException | IllegalStateException ex) {
-              Log.w(TAG, "Navigation to scans library failed", ex);
-            }
-          });
-    } else {
-      binding.buttonOpenLibraryCam.setVisibility(View.GONE);
-    }
-
     // Set up retake and confirm button listeners
     binding.buttonRetake.setOnClickListener(
         v -> {

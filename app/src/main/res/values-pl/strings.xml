@@ -16,7 +16,6 @@
     <string name="btn_scan">Skanuj</string>
     <string name="btn_crop">Przytnij</string>
     <string name="btn_process">Przetwórz</string>
-    <string name="btn_share">Udostępnij</string>
     <string name="next">Dalej</string>
     <string name="back">Wstecz</string>
 
@@ -128,7 +127,6 @@
     <string name="picker_title_completed_scans">Wybierz z ukończonych skanów</string>
     <string name="picker_empty">Brak ukończonych skanów</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Zakończone skany</string>
     <string name="done">Dalej</string>
     <string name="thumbnail">Miniatura</string>
     <string name="delete">Usuń</string>
@@ -242,47 +240,19 @@
     <string name="error_empty_input">Wprowadź wartość</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Nowa kolekcja</string>
-    <string name="collection_name_hint">Nazwa kolekcji</string>
-    <string name="create">Utwórz</string>
-    <string name="collection_not_empty">Kolekcja nie jest pusta</string>
-    <string name="collection_items_count">%1$d element(ów)</string>
-    <string name="deleted">Usunięto</string>
-    <string name="open_collections">Kolekcje</string>
-    <string name="index_existing_scans">Indeksuj istniejące skany</string>
-    <string name="rename">Zmień nazwę</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Brak skanów</string>
-    <string name="rename_collection_title">Zmień nazwę kolekcji</string>
-    <string name="action_add_to_collection">Dodaj do kolekcji…</string>
-    <string name="place_in_collection_title">Dodaj do kolekcji</string>
-    <string name="create_new_collection">Utwórz nową kolekcję…</string>
     <string name="scan_added_to_collection">Skan dodany do „%1$s”</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Akcje biblioteki</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">W: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Plik zostanie usunięty z urządzenia. Tej operacji nie można cofnąć.
-    </string>
 
     <!-- ExportFragment toasts -->
     <string name="no_document_to_share_export_first">Brak dokumentu do udostępnienia. Najpierw wyeksportuj dokument.
     </string>
-    <string name="feature_scan_library_disabled">Funkcja biblioteki skanów jest wyłączona</string>
-    <string name="navigation_failed">Nawigacja nie powiodła się</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Brak identyfikatora skanu</string>
-    <string name="picker_failed">Nie udało się wybrać</string>
-    <string name="share_failed">Udostępnianie nie powiodło się</string>
-    <string name="no_app_found_to_open_file">Nie znaleziono aplikacji do otwarcia tego pliku</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Usunąć z tej kolekcji?</string>
-    <string name="removed_from_collection">Usunięto z kolekcji</string>
-    <string name="indexed_new_items">Zindeksowano %1$d nowych element(ów)</string>
-    <string name="nothing_new_to_index">Brak nowych elementów do zindeksowania</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Dokument wyrównany</string>
@@ -371,7 +341,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Przywróć dostęp</string>
     <string name="status">Status</string>
     <string name="ocr_text_editor_hint">Edytuj tekst OCR</string>
 

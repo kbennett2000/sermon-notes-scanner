@@ -14,7 +14,6 @@
     <string name="btn_scan">स्कैन</string>
     <string name="btn_crop">क्रॉप</string>
     <string name="btn_process">प्रोसेस</string>
-    <string name="btn_share">शेयर</string>
     <string name="next">अगला</string>
     <string name="back">पीछे</string>
 
@@ -118,7 +117,6 @@
 
     <!-- Registry Picker -->
     <string name="picker_title_completed_scans">पूर्ण स्कैन में से चुनें</string>
-    <string name="collection_completed_scans">पूर्ण स्कैन</string>
     <string name="picker_empty">कोई पूर्ण स्कैन नहीं मिला</string>
     <string name="done">अगला</string>
     <string name="thumbnail">थंबनेल</string>
@@ -223,48 +221,20 @@
     <string name="error_empty_input">कृपया एक मान दर्ज करें</string>
 
     <!-- Collections / Library -->
-    <string name="new_collection_title">नया संग्रह</string>
-    <string name="collection_name_hint">संग्रह का नाम</string>
-    <string name="create">बनाएँ</string>
-    <string name="collection_not_empty">संग्रह खाली नहीं है</string>
-    <string name="collection_items_count">%1$d आइटम</string>
-    <string name="deleted">हटाया गया</string>
-    <string name="open_collections">संग्रह</string>
-    <string name="index_existing_scans">मौजूदा स्कैन अनुक्रमित करें</string>
-    <string name="rename">नाम बदलें</string>
     <string name="ok">ठीक है</string>
-    <string name="no_scans_yet">अभी तक कोई स्कैन नहीं</string>
-    <string name="rename_collection_title">संग्रह का नाम बदलें</string>
-    <string name="action_add_to_collection">संग्रह में जोड़ें…</string>
-    <string name="place_in_collection_title">संग्रह में जोड़ें</string>
-    <string name="create_new_collection">नया संग्रह बनाएँ…</string>
     <string name="scan_added_to_collection">स्कैन \"%1$s\" में जोड़ा गया</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">लाइब्रेरी कार्य</string>
-    <string name="in_collections_prefix">में: %1$s</string>
 
     <!-- Delete confirmation -->
-    <string name="delete_warning_irreversible">फ़ाइल डिवाइस से हटा दी जाएगी। यह क्रिया पूर्ववत नहीं की जा सकती।
-    </string>
 
     <!-- ExportFragment toasts -->
     <string name="no_document_to_share_export_first">शेयर करने के लिए कोई दस्तावेज़ नहीं। पहले निर्यात करें।
     </string>
-    <string name="feature_scan_library_disabled">स्कैन लाइब्रेरी सुविधा अक्षम है</string>
-    <string name="navigation_failed">नेविगेशन विफल</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">स्कैन ID गायब है</string>
-    <string name="picker_failed">चयन विफल</string>
-    <string name="share_failed">शेयर विफल</string>
-    <string name="no_app_found_to_open_file">इस फ़ाइल को खोलने के लिए कोई ऐप नहीं मिला</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">इस संग्रह से हटाएँ?</string>
-    <string name="removed_from_collection">संग्रह से हटाया गया</string>
-    <string name="indexed_new_items">%1$d नए आइटम अनुक्रमित किए गए</string>
-    <string name="nothing_new_to_index">अनुक्रमित करने के लिए कुछ नया नहीं</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">दस्तावेज़ संरेखित</string>
@@ -345,7 +315,6 @@
     <string name="label_text">टेक्स्ट</string>
     <string name="label_document">दस्तावेज़</string>
     <string name="ocr_text_editor_hint">OCR टेक्स्ट संपादित करें</string>
-    <string name="restore_access">पहुँच पुनर्स्थापित करें</string>
     <string name="status">स्थिति</string>
 
     <!-- Scan cleanup settings -->

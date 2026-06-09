@@ -17,7 +17,6 @@
     <string name="btn_scan">Tara</string>
     <string name="btn_crop">Kırp</string>
     <string name="btn_process">İşle</string>
-    <string name="btn_share">Paylaş</string>
     <string name="next">İleri</string>
     <string name="back">Geri</string>
 
@@ -129,7 +128,6 @@
     <string name="picker_title_completed_scans">Tamamlanmış taramalardan seçin</string>
     <string name="picker_empty">Tamamlanmış tarama bulunamadı</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Tamamlanmış Taramalar</string>
     <string name="done">İleri</string>
     <string name="thumbnail">Küçük resim</string>
     <string name="delete">Sil</string>
@@ -241,45 +239,17 @@
     <string name="error_empty_input">Lütfen bir değer girin</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Yeni koleksiyon</string>
-    <string name="collection_name_hint">Koleksiyon adı</string>
-    <string name="create">Oluştur</string>
-    <string name="collection_not_empty">Koleksiyon boş değil</string>
-    <string name="collection_items_count">%1$d öğe</string>
-    <string name="deleted">Silindi</string>
-    <string name="open_collections">Koleksiyonlar</string>
-    <string name="index_existing_scans">Mevcut taramaları dizinle</string>
-    <string name="rename">Yeniden adlandır</string>
     <string name="ok">Tamam</string>
-    <string name="no_scans_yet">Henüz tarama yok</string>
-    <string name="rename_collection_title">Koleksiyonu yeniden adlandır</string>
-    <string name="action_add_to_collection">Koleksiyona ekle…</string>
-    <string name="place_in_collection_title">Koleksiyona ekle</string>
-    <string name="create_new_collection">Yeni koleksiyon oluştur…</string>
     <string name="scan_added_to_collection">Tarama \"%1$s\" koleksiyonuna eklendi</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Kütüphane işlemleri</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">İçinde: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">Dosya cihazdan silinecektir. Bu işlem geri alınamaz.
-    </string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">Tarama kütüphanesi özelliği devre dışı</string>
-    <string name="navigation_failed">Gezinme başarısız</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Tarama kimliği eksik</string>
-    <string name="picker_failed">Seçici başarısız</string>
-    <string name="share_failed">Paylaşım başarısız</string>
-    <string name="no_app_found_to_open_file">Bu dosyayı açacak uygulama bulunamadı</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Bu koleksiyondan kaldırılsın mı?</string>
-    <string name="removed_from_collection">Koleksiyondan kaldırıldı</string>
-    <string name="indexed_new_items">%1$d yeni öğe dizinlendi</string>
-    <string name="nothing_new_to_index">Dizinlenecek yeni öğe yok</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Belge hizalandı</string>
@@ -367,7 +337,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Erişimi geri yükle</string>
     <string name="status">Durum</string>
     <string name="ocr_text_editor_hint">OCR metnini düzenle</string>
 

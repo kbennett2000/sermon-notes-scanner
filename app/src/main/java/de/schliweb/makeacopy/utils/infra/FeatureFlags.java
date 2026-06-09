@@ -63,24 +63,6 @@ public class FeatureFlags {
   }
 
   /**
-   * Determines whether the scan library feature is enabled in the application's build
-   * configuration. The method checks for the presence of the "FEATURE_SCAN_LIBRARY" field in the
-   * application's BuildConfig class and retrieves its boolean value.
-   *
-   * @return true if the "FEATURE_SCAN_LIBRARY" field exists and is set to true; false otherwise,
-   *     including cases where the field is not found or an exception occurs.
-   */
-  public static boolean isScanLibraryEnable() {
-    try {
-      Class<?> c = de.schliweb.makeacopy.BuildConfig.class;
-      java.lang.reflect.Field f = c.getField("FEATURE_SCAN_LIBRARY");
-      return f.getBoolean(null);
-    } catch (Throwable ignore) {
-      return false;
-    }
-  }
-
-  /**
    * Feature flag: enables logging of FramingEngine results during camera analysis. This does not
    * change any UI behavior and is safe for experimental builds.
    */

@@ -17,7 +17,6 @@
     <string name="btn_scan">Escanear</string>
     <string name="btn_crop">Recortar</string>
     <string name="btn_process">Procesar</string>
-    <string name="btn_share">Compartir</string>
     <string name="next">Siguiente</string>
     <string name="back">Atrás</string>
 
@@ -134,7 +133,6 @@
     <string name="picker_title_completed_scans">Elegir de escaneos completados</string>
     <string name="picker_empty">No se encontraron escaneos completados</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Escaneos completados</string>
     <string name="done">Siguiente</string>
     <string name="thumbnail">Miniatura</string>
     <string name="delete">Eliminar</string>
@@ -248,49 +246,20 @@
     <string name="error_empty_input">Por favor, introduce un valor</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">Nueva colección</string>
-    <string name="collection_name_hint">Nombre de la colección</string>
-    <string name="create">Crear</string>
-    <string name="collection_not_empty">La colección no está vacía</string>
-    <string name="collection_items_count">%1$d elemento(s)</string>
-    <string name="deleted">Eliminado</string>
-    <string name="open_collections">Colecciones</string>
-    <string name="index_existing_scans">Indexar escaneos existentes</string>
-    <string name="rename">Renombrar</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">Aún no hay escaneos</string>
-    <string name="rename_collection_title">Renombrar colección</string>
-    <string name="action_add_to_collection">Añadir a colección…</string>
-    <string name="place_in_collection_title">Añadir a colección</string>
-    <string name="create_new_collection">Crear nueva colección…</string>
     <string name="scan_added_to_collection">Escaneo añadido a "%1$s"</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Acciones de biblioteca</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">En: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">El archivo se eliminará del dispositivo. Esta acción no se puede
-        deshacer.
-    </string>
 
     <!-- ExportFragment toasts -->
     <string name="no_document_to_share_export_first">No hay documento disponible para compartir. Exporta un documento
         primero.
     </string>
-    <string name="feature_scan_library_disabled">La función de biblioteca de escaneos está desactivada</string>
-    <string name="navigation_failed">Error de navegación</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Falta el ID del escaneo</string>
-    <string name="picker_failed">Error al seleccionar</string>
-    <string name="share_failed">Error al compartir</string>
-    <string name="no_app_found_to_open_file">No se encontró ninguna aplicación para abrir este archivo</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">¿Eliminar de esta colección?</string>
-    <string name="removed_from_collection">Eliminado de la colección</string>
-    <string name="indexed_new_items">Se indexaron %1$d nuevos elemento(s)</string>
-    <string name="nothing_new_to_index">No hay nada nuevo para indexar</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Documento alineado</string>
@@ -382,7 +351,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">Restaurar acceso</string>
     <string name="status">Estado</string>
     <string name="ocr_text_editor_hint">Editar texto OCR</string>
 

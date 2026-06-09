@@ -17,7 +17,6 @@
     <string name="btn_scan">Scan</string>
     <string name="btn_crop">Crop</string>
     <string name="btn_process">Process</string>
-    <string name="btn_share">Share</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
 
@@ -132,7 +131,6 @@
     <string name="picker_title_completed_scans">Choose from completed scans</string>
     <string name="picker_empty">No completed scans found</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">Completed Scans</string>
     <string name="done">Next</string>
     <string name="thumbnail">Thumbnail</string>
     <string name="delete">Delete</string>
@@ -247,45 +245,17 @@
     <string name="error_empty_input">Please enter a value</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">New collection</string>
-    <string name="collection_name_hint">Collection name</string>
-    <string name="create">Create</string>
-    <string name="collection_not_empty">Collection is not empty</string>
-    <string name="collection_items_count">%1$d item(s)</string>
-    <string name="deleted">Deleted</string>
-    <string name="open_collections">Collections</string>
-    <string name="index_existing_scans">Index existing scans</string>
-    <string name="rename">Rename</string>
     <string name="ok">OK</string>
-    <string name="no_scans_yet">No scans yet</string>
-    <string name="rename_collection_title">Rename collection</string>
-    <string name="action_add_to_collection">Add to collection…</string>
-    <string name="place_in_collection_title">Add to collection</string>
-    <string name="create_new_collection">Create new collection…</string>
     <string name="scan_added_to_collection">Scan added to "%1$s"</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">Library actions</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">In: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">The file will be deleted from the device. This action cannot be undone.
-    </string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">Scan library feature is disabled</string>
-    <string name="navigation_failed">Navigation failed</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">Missing scan id</string>
-    <string name="picker_failed">Picker failed</string>
-    <string name="share_failed">Share failed</string>
-    <string name="no_app_found_to_open_file">No app found to open this file</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">Remove from this collection?</string>
-    <string name="removed_from_collection">Removed from collection</string>
-    <string name="indexed_new_items">Indexed %1$d new item(s)</string>
-    <string name="nothing_new_to_index">Nothing new to index</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">Document aligned</string>
@@ -371,7 +341,6 @@
     <string name="label_text">Text</string>
     <string name="label_document">Document</string>
     <string name="ocr_text_editor_hint">Edit OCR text</string>
-    <string name="restore_access">Restore access</string>
     <string name="status">Status</string>
     <!-- Scan cleanup settings -->
     <string name="scan_cleanup_settings">Completed Scan cleanup settings</string>

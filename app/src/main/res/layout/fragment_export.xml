@@ -135,21 +135,6 @@
                 app:tooltipText="@string/add_another_page"
                 android:background="?attr/selectableItemBackgroundBorderless"/>
 
-        <!-- Library actions icon placed to the left of the trash icon -->
-        <ImageButton
-                android:id="@+id/button_library_actions"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp"
-                android:contentDescription="@string/library_actions"
-                android:src="@drawable/ic_library"
-                app:tint="?attr/colorControlNormal"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                app:tooltipText="@string/library_actions"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
-
         <ImageButton
                 android:id="@+id/button_clear_pages"
                 android:layout_width="0dp"

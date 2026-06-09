@@ -34,7 +34,6 @@ import de.schliweb.makeacopy.ui.ocr.review.model.OcrDoc;
 import de.schliweb.makeacopy.ui.ocr.review.model.OcrDocReadingOrder;
 import de.schliweb.makeacopy.ui.ocr.review.view.MinimapView;
 import de.schliweb.makeacopy.ui.ocr.review.view.OcrOverlayView;
-import de.schliweb.makeacopy.utils.ocr.DictionaryManager;
 import de.schliweb.makeacopy.utils.ocr.OCRHelper;
 import de.schliweb.makeacopy.utils.ocr.OCRPostProcessor;
 import de.schliweb.makeacopy.utils.ocr.OCRUtils;
@@ -55,7 +54,6 @@ import javax.inject.Provider;
 public class OcrReviewFragment extends Fragment {
 
   @Inject Provider<OCRHelper> ocrHelperProvider;
-  @Inject DictionaryManager dictionaryManager;
 
   private boolean minimapVisible = true;
 
@@ -1100,21 +1098,6 @@ public class OcrReviewFragment extends Fragment {
         new android.widget.LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-    if (!BuildConfig.FEATURE_PADDLE_OCR) {
-      // Suggestions section (ChipGroup with dictionary suggestions)
-      com.google.android.material.chip.ChipGroup suggestionsGroup =
-          new com.google.android.material.chip.ChipGroup(requireContext());
-      suggestionsGroup.setSingleLine(false);
-      android.widget.LinearLayout.LayoutParams suggestionsLp =
-          new android.widget.LinearLayout.LayoutParams(
-              ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-      suggestionsLp.topMargin = (int) (8 * getResources().getDisplayMetrics().density);
-      root.addView(suggestionsGroup, suggestionsLp);
-
-      // Load suggestions asynchronously
-      loadSuggestionsAsync(word.t, suggestionsGroup, input);
-    }
-
     // Actions row
     android.widget.LinearLayout actions = new android.widget.LinearLayout(requireContext());
     actions.setOrientation(android.widget.LinearLayout.HORIZONTAL);
@@ -1180,85 +1163,6 @@ public class OcrReviewFragment extends Fragment {
           }
           return false;
         });
-  }
-
-  /**
-   * Loads dictionary-based suggestions asynchronously and populates the ChipGroup.
-   *
-   * @param wordText the word text to get suggestions for
-   * @param suggestionsGroup the ChipGroup to populate with suggestion chips
-   * @param input the input field to update when a suggestion is clicked
-   */
-  private void loadSuggestionsAsync(
-      String wordText,
-      com.google.android.material.chip.ChipGroup suggestionsGroup,
-      com.google.android.material.textfield.TextInputEditText input) {
-    if (BuildConfig.FEATURE_PADDLE_OCR) {
-      return;
-    }
-    if (getContext() == null || wordText == null || wordText.isEmpty()) {
-      return;
-    }
-
-    // Get current OCR language from OCRViewModel
-    String langSpec = null;
-    try {
-      de.schliweb.makeacopy.ui.ocr.OCRViewModel ocrViewModel =
-          new ViewModelProvider(requireActivity())
-              .get(de.schliweb.makeacopy.ui.ocr.OCRViewModel.class);
-      de.schliweb.makeacopy.ui.ocr.OCRViewModel.OcrUiState state =
-          ocrViewModel.getState().getValue();
-      if (state != null) {
-        langSpec = state.language();
-      }
-    } catch (Throwable ignore) {
-      // Best-effort; failure is non-critical
-    }
-
-    final String finalLangSpec = langSpec;
-
-    // Run suggestion lookup on background thread
-    new Thread(
-            () -> {
-              try {
-                de.schliweb.makeacopy.ui.ocr.review.suggest.DictionarySuggestProvider provider =
-                    new de.schliweb.makeacopy.ui.ocr.review.suggest.DictionarySuggestProvider(
-                        dictionaryManager, finalLangSpec);
-                java.util.List<
-                        de.schliweb.makeacopy.ui.ocr.review.suggest.DictionarySuggestProvider
-                            .Suggestion>
-                    suggestions = provider.getSuggestions(wordText);
-
-                // Update UI on main thread
-                if (getActivity() != null && !suggestions.isEmpty()) {
-                  getActivity()
-                      .runOnUiThread(
-                          () -> {
-                            if (getContext() == null) return;
-                            for (de.schliweb.makeacopy.ui.ocr.review.suggest
-                                    .DictionarySuggestProvider.Suggestion
-                                suggestion : suggestions) {
-                              com.google.android.material.chip.Chip chip =
-                                  new com.google.android.material.chip.Chip(requireContext());
-                              chip.setText(suggestion.text());
-                              chip.setCheckable(false);
-                              chip.setClickable(true);
-                              chip.setOnClickListener(
-                                  v -> {
-                                    input.setText(suggestion.text());
-                                    if (input.getText() != null) {
-                                      input.setSelection(input.getText().length());
-                                    }
-                                  });
-                              suggestionsGroup.addView(chip);
-                            }
-                          });
-                }
-              } catch (Throwable t) {
-                dbgWarn("Failed to load suggestions", t);
-              }
-            })
-        .start();
   }
 
   /**

@@ -16,7 +16,6 @@
     <string name="btn_scan">สแกน</string>
     <string name="btn_crop">ครอบตัด</string>
     <string name="btn_process">ประมวลผล</string>
-    <string name="btn_share">แชร์</string>
     <string name="next">ถัดไป</string>
     <string name="back">ย้อนกลับ</string>
 
@@ -126,7 +125,6 @@
     <string name="picker_title_completed_scans">เลือกจากการสแกนที่เสร็จแล้ว</string>
     <string name="picker_empty">ไม่พบการสแกนที่เสร็จแล้ว</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">การสแกนที่เสร็จสมบูรณ์</string>
     <string name="done">ถัดไป</string>
     <string name="thumbnail">ภาพขนาดย่อ</string>
     <string name="delete">ลบ</string>
@@ -241,44 +239,17 @@
     <string name="error_empty_input">กรุณากรอกค่า</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">คอลเลกชันใหม่</string>
-    <string name="collection_name_hint">ชื่อคอลเลกชัน</string>
-    <string name="create">สร้าง</string>
-    <string name="collection_not_empty">คอลเลกชันนี้ไม่ว่างเปล่า</string>
-    <string name="collection_items_count">%1$d รายการ</string>
-    <string name="deleted">ลบแล้ว</string>
-    <string name="open_collections">คอลเลกชัน</string>
-    <string name="index_existing_scans">จัดทำดัชนีการสแกนที่มีอยู่</string>
-    <string name="rename">เปลี่ยนชื่อ</string>
     <string name="ok">ตกลง</string>
-    <string name="no_scans_yet">ยังไม่มีการสแกน</string>
-    <string name="rename_collection_title">เปลี่ยนชื่อคอลเลกชัน</string>
-    <string name="action_add_to_collection">เพิ่มไปยังคอลเลกชัน…</string>
-    <string name="place_in_collection_title">เพิ่มไปยังคอลเลกชัน</string>
-    <string name="create_new_collection">สร้างคอลเลกชันใหม่…</string>
     <string name="scan_added_to_collection">เพิ่มการสแกนไปยัง “%1$s” แล้ว</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">การทำงานของไลบรารี</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">อยู่ใน: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">ไฟล์จะถูกลบออกจากอุปกรณ์ การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">ฟีเจอร์คลังสแกนถูกปิดใช้งาน</string>
-    <string name="navigation_failed">การนำทางล้มเหลว</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">ไม่มีรหัสสแกน</string>
-    <string name="picker_failed">การเลือกไม่สำเร็จ</string>
-    <string name="share_failed">การแชร์ไม่สำเร็จ</string>
-    <string name="no_app_found_to_open_file">ไม่พบแอปสำหรับเปิดไฟล์นี้</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">ลบออกจากคอลเลกชันนี้หรือไม่?</string>
-    <string name="removed_from_collection">ลบออกจากคอลเลกชันแล้ว</string>
-    <string name="indexed_new_items">จัดทำดัชนี %1$d รายการใหม่แล้ว</string>
-    <string name="nothing_new_to_index">ไม่มีรายการใหม่สำหรับจัดทำดัชนี</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">จัดแนวเอกสารแล้ว</string>
@@ -364,7 +335,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">กู้คืนการเข้าถึง</string>
     <string name="status">สถานะ</string>
     <string name="ocr_text_editor_hint">แก้ไขข้อความ OCR</string>
 

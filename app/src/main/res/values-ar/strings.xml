@@ -16,7 +16,6 @@
     <string name="btn_scan">مسح</string>
     <string name="btn_crop">اقتصاص</string>
     <string name="btn_process">معالجة</string>
-    <string name="btn_share">مشاركة</string>
     <string name="next">التالي</string>
     <string name="back">رجوع</string>
 
@@ -124,7 +123,6 @@
     <string name="picker_title_completed_scans">اختر من عمليات المسح المكتملة</string>
     <string name="picker_empty">لم يتم العثور على عمليات مسح مكتملة</string>
     <!-- Library default collection -->
-    <string name="collection_completed_scans">عمليات المسح المكتملة</string>
     <string name="done">التالي</string>
     <string name="thumbnail">صورة مصغرة</string>
     <string name="delete">حذف</string>
@@ -236,44 +234,17 @@
     <string name="error_empty_input">يرجى إدخال قيمة</string>
 
     <!-- Collections / Library (feature-flagged) -->
-    <string name="new_collection_title">مجموعة جديدة</string>
-    <string name="collection_name_hint">اسم المجموعة</string>
-    <string name="create">إنشاء</string>
-    <string name="collection_not_empty">المجموعة ليست فارغة</string>
-    <string name="collection_items_count">%1$d عنصر/عناصر</string>
-    <string name="deleted">تم الحذف</string>
-    <string name="open_collections">المجموعات</string>
-    <string name="index_existing_scans">فهرسة عمليات المسح الموجودة</string>
-    <string name="rename">إعادة تسمية</string>
     <string name="ok">موافق</string>
-    <string name="no_scans_yet">لا توجد عمليات مسح بعد</string>
-    <string name="rename_collection_title">إعادة تسمية المجموعة</string>
-    <string name="action_add_to_collection">إضافة إلى مجموعة…</string>
-    <string name="place_in_collection_title">إضافة إلى مجموعة</string>
-    <string name="create_new_collection">إنشاء مجموعة جديدة…</string>
     <string name="scan_added_to_collection">تمت إضافة المسح إلى \"%1$s\"</string>
 
     <!-- Export: Library actions dialog -->
-    <string name="library_actions">إجراءات المكتبة</string>    <!-- Library list: collections membership -->
-    <string name="in_collections_prefix">ضمن: %1$s</string>
     <!-- Delete confirmation (ScanDetails) -->
-    <string name="delete_warning_irreversible">سيتم حذف الملف من الجهاز. لا يمكن التراجع عن هذا الإجراء.</string>
 
     <!-- ExportFragment toasts -->
-    <string name="feature_scan_library_disabled">ميزة مكتبة المسح معطلة</string>
-    <string name="navigation_failed">فشلت عملية التنقل</string>
 
     <!-- ScanDetailsFragment toasts -->
-    <string name="missing_scan_id">معرّف المسح مفقود</string>
-    <string name="picker_failed">فشل المُنتقي</string>
-    <string name="share_failed">فشلت المشاركة</string>
-    <string name="no_app_found_to_open_file">لم يتم العثور على تطبيق لفتح الملف</string>
 
     <!-- ScansLibraryFragment toasts/dialogs -->
-    <string name="remove_from_collection_question">إزالة من هذه المجموعة؟</string>
-    <string name="removed_from_collection">تمت الإزالة من المجموعة</string>
-    <string name="indexed_new_items">تمت فهرسة %1$d عنصر/عناصر جديدة</string>
-    <string name="nothing_new_to_index">لا يوجد شيء جديد للفهرسة</string>
 
     <!-- Accessibility guidance phrases -->
     <string name="a11y_hint_ok">تمت محاذاة المستند</string>
@@ -358,7 +329,6 @@
 
     <!-- Page format selection (PDF export) -->
 
-    <string name="restore_access">استعادة الوصول</string>
     <string name="status">الحالة</string>
     <string name="ocr_text_editor_hint">تحرير نص OCR</string>
 

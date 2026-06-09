@@ -825,14 +825,6 @@ public class ExportFragment extends Fragment {
                   DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext()));
           dialog.show();
         });
-    binding.buttonLibraryActions.setOnClickListener(
-        v -> {
-          try {
-            Navigation.findNavController(requireView()).navigate(R.id.navigation_scans_library);
-          } catch (IllegalArgumentException | IllegalStateException ex) {
-            Log.w(TAG, "Navigation to library failed", ex);
-          }
-        });
 
     // Listen for results from CompletedScansPickerFragment
     getParentFragmentManager()

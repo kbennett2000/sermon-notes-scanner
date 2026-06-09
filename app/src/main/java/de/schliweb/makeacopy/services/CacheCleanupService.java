@@ -19,10 +19,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import de.schliweb.makeacopy.data.CompletedScansRegistry;
 import de.schliweb.makeacopy.data.RegistryCleaner;
-import de.schliweb.makeacopy.data.library.AppDatabase;
-import de.schliweb.makeacopy.data.library.DefaultCollectionsRepository;
-import de.schliweb.makeacopy.data.library.DefaultScansRepository;
-import de.schliweb.makeacopy.data.library.ExistingScansIndexer;
 import de.schliweb.makeacopy.ui.export.session.CompletedScan;
 import java.io.File;
 import java.util.Arrays;
@@ -442,61 +438,12 @@ public class CacheCleanupService extends Service {
 
       if (totalRemoved > 0) {
         Log.i(TAG, "Cleaned up " + totalRemoved + " completed scans (policy=" + policy + ")");
-        // Re-index to keep Room database in sync after deletions
-        reindexAfterCleanup();
       }
       return totalRemoved;
 
     } catch (Exception e) {
       Log.e(TAG, "Error cleaning up completed scans", e);
       return 0;
-    }
-  }
-
-  /**
-   * Re-indexes the scan library database after cleanup to keep Room in sync. Removes Room entries
-   * whose IDs are no longer in the CompletedScansRegistry, then runs incremental indexing to repair
-   * any remaining metadata.
-   */
-  private void reindexAfterCleanup() {
-    try {
-      AppDatabase db = AppDatabase.getInstance(this);
-      DefaultScansRepository scansRepo =
-          new DefaultScansRepository(db.scansDao(), db.scanCollectionJoinDao());
-      DefaultCollectionsRepository collectionsRepo =
-          new DefaultCollectionsRepository(
-              db.collectionsDao(), db.scanCollectionJoinDao(), db.scansDao());
-
-      // Collect IDs still present in the registry
-      java.util.Set<String> registryIds = new java.util.HashSet<>();
-      for (CompletedScan s : CompletedScansRegistry.get(this).listAllOrderedByDateDesc()) {
-        if (s != null && s.id() != null) registryIds.add(s.id());
-      }
-
-      // Remove Room entries that are no longer in the registry
-      int removed = 0;
-      List<de.schliweb.makeacopy.data.library.ScanEntity> allScans = scansRepo.getAllScans(this);
-      if (allScans != null) {
-        for (de.schliweb.makeacopy.data.library.ScanEntity se : allScans) {
-          if (se == null || se.id == null) continue;
-          if (!registryIds.contains(se.id)) {
-            scansRepo.deleteScan(this, se.id);
-            removed++;
-          }
-        }
-      }
-
-      // Run incremental indexing to repair metadata for remaining entries
-      int indexed = ExistingScansIndexer.runIncremental(this, scansRepo, collectionsRepo);
-      Log.i(
-          TAG,
-          "Re-indexed scan library after cleanup: removed="
-              + removed
-              + " stale Room entries, indexed="
-              + indexed
-              + " items");
-    } catch (Exception e) {
-      Log.e(TAG, "Error re-indexing scan library after cleanup", e);
     }
   }
 
