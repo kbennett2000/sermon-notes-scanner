@@ -48,6 +48,7 @@ OCR text top-to-bottom: a known book token (Appendix B map, after normalization:
 numeral → arabic, lowercase, strip whitespace and `.`) followed by a chapter, with optional
 `:verse[-verse]`. No Concord call, no verse/chapter-existence checking. Best-effort only — the
 edit screen is the safety net. Canonical fixture: brief Appendix C must yield `1SA 22:1`.
+The Appendix C fixture is **PaddleOCR** output captured from the stock app — the same engine this fork ships (D5).
 
 ## Decisions
 
@@ -55,9 +56,9 @@ edit screen is the safety net. Canonical fixture: brief Appendix C must yield `1
 |---|---|---|
 | D1 | Note body = minimal: `# title`, `passage — date` line, edited OCR lines as flat list | pending — recommended yes |
 | D2 | Chapter-only anchor end-verse via bundled offline verse-count table generated from Concord | pending — recommended (a) |
-| D3 | OCR languages to keep | pending |
+| D3 | English only. Strip non-English OCR UI/data; ship only the model/data files English recognition requires. | locked |
 | D4 | Finalize = POST to songbird `/api/v1/import`, save/share as fallback; base URL + token in settings | pending — recommended yes |
-| D5 | Standard (Tesseract) flavor only; paddle removed in F1a. Changing OCR engine would invalidate the validated-quality premise — spec change, ask Kris first. | locked |
+| D5 | PaddleOCR only (re-locked, inverted from F1a). The stock build Kris validated runs PaddleOCR — confirmed on-device by side-by-side comparison and the in-app engine notice. Tesseract/standard flavor removed in F1b. Changing OCR engine invalidates the validated-quality premise — spec change, ask Kris first. | locked |
 
 Do not implement against a pending decision — ask first. Update this table when Kris locks one.
 
@@ -106,23 +107,25 @@ bash scripts/prepare_opencv.sh              # -> app/src/main/jniLibs/arm64-v8a/
 bash scripts/build_onnxruntime_android.sh   # -> jniLibs/ + app/libs/onnxruntime-1.24.1.jar (~6 min)
 ```
 
-### Assemble debug APK — standard (Tesseract) flavor, arm64-v8a only (~1 min after deps cached)
+### Assemble debug APK — paddle (PaddleOCR) flavor, arm64-v8a only (~1 min after deps cached)
 ```
 echo "sdk.dir=$ANDROID_HOME" > local.properties      # gitignored
-./gradlew :app:assembleStandardDebug -PenableAbiSplits=true -PABIS=arm64-v8a
+./gradlew :app:assemblePaddleDebug -PenableAbiSplits=true -PABIS=arm64-v8a
 ```
-- Output APK: `app/build/outputs/apk/standard/debug/app-standard-arm64-v8a-debug.apk` (~262 MB).
+- Output APK: `app/build/outputs/apk/paddle/debug/app-paddle-arm64-v8a-debug.apk` (~154 MB).
 - applicationId `io.github.kbennett2000.sermonscanner` (coexists with stock MakeACopy).
   Sideload (device not assumed connected): `adb install -r <apk>`; uninstall:
   `adb uninstall io.github.kbennett2000.sermonscanner`.
 
-Notes: paddle flavor removed in F1a (D5) — there is no `assemblePaddleDebug` and no paddle APK. A fresh
-ONNX rebuild is now **DocQuad-only** (the paddle ops config is gone; `build_onnxruntime_android.sh` skips
-it via its file-exists guard), which is exactly what the Tesseract flavor needs. `jniLibs/`, `app/libs/*.jar`,
-and `local.properties` are gitignored — the native build never dirties the tree and submodule gitlink SHAs
-stay at upstream's pins. For all four ABIs (CI default) set `ABIS="arm64-v8a armeabi-v7a x86 x86_64"` for both
-the scripts and `-PABIS=...`. Dropping `-PenableAbiSplits=true` yields one fat universal APK. The big debug
-APK size is unstripped OCR language data/fonts (trimmed in F1b).
+Notes: paddle is the sole flavor (F1b, D5) — Tesseract removed; there is no `assembleStandardDebug`. The
+packaged ONNX runtime carries **DocQuad + PaddleOCR** ops; the on-disk `libonnxruntime.so` is the F0b
+merged-ops build, and a fresh clone rebuilds the same because `build_onnxruntime_android.sh` re-merges the
+restored paddle ops config (`app/src/paddle/assets/paddleocr/v5/paddleocr_v5.required_operators.config`).
+`jniLibs/`, `app/libs/*.jar`, and `local.properties` are gitignored — the native build never dirties the tree
+and submodule gitlink SHAs stay at upstream's pins. For all four ABIs (CI default) set
+`ABIS="arm64-v8a armeabi-v7a x86 x86_64"` for both the scripts and `-PABIS=...`. Dropping
+`-PenableAbiSplits=true` yields one fat universal APK. The remaining APK size is unstripped non-English OCR
+UI/data (trimmed in F1c per D3).
 
 ## Methodology (non-negotiable)
 
@@ -138,8 +141,9 @@ APK size is unstripped OCR language data/fonts (trimmed in F1b).
 
 - [x] F0a — fork + repo wiring (bootstrap)
 - [x] F0b — green build: sideloaded debug APK; capture → crop → OCR verified unchanged
-- [x] F1a — fork identity: applicationId io.github.kbennett2000.sermonscanner, label "Sermon Scanner", paddle flavor removed, v0-upstream-baseline tag
-- [ ] F1b — strip to barebones (brief §3 keep/strip lists + D3 English-only OCR)
+- [x] F1a — fork identity: applicationId io.github.kbennett2000.sermonscanner, label "Sermon Scanner", v0-upstream-baseline tag (engine choice inverted by F1b)
+- [x] F1b — engine correction: paddle restored as sole flavor, Tesseract removed
+- [ ] F1c — strip to barebones (brief §3 keep/strip lists + D3 English-only OCR; remove dead Tesseract-guarded src/main code)
 - [ ] F2 — two-shot capture + concatenated OCR text
 - [ ] F3 — book map + anchor finder (pure logic, fixture-tested)
 - [ ] F4 — edit screen (text, anchor, title, tags)
