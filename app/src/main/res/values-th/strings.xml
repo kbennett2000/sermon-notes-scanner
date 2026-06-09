@@ -28,7 +28,6 @@
     <string name="image_to_crop">รูปภาพสำหรับครอบตัด</string>
     <string name="cropped_image">รูปที่ครอบตัดแล้ว</string>
     <string name="document_preview">ตัวอย่างเอกสาร</string>
-    <string name="include_ocr_text">ส่งออก OCR เป็นไฟล์ TXT แยก</string>
     <string name="ocr_results_will_appear_here">ผลลัพธ์ OCR จะแสดงที่นี่</string>
     <string name="ocr_no_text_detected">ไม่พบข้อความ</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">
@@ -69,9 +68,6 @@
     <string name="share_logs_error">ไม่สามารถเตรียมบันทึกได้: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">ระดับเทา</string>
-    <string name="export_as_jpeg">ส่งออกเป็น JPEG</string>
-    <string name="export_as_pdf">ส่งออกเป็น PDF (ค่าเริ่มต้น)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">เปิด/ปิดไฟฉาย</string>
@@ -101,19 +97,7 @@
     <string name="camera_zoom_not_available">อุปกรณ์นี้ไม่รองรับการซูม</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">สี</string>
-    <string name="jpeg_mode_auto">ระดับเทา</string>
-    <string name="jpeg_mode_bw_text">ขาวดำ</string>
-    <string name="jpeg_mode_bw_robust">ขาวดำ (ทนทาน) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">การประมวลผลล่วงหน้า OCR แบบทนทาน (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">ขาวดำ</string>
-    <string name="pdf_bw_mode_classic">ขาวดำ (คลาสสิก)</string>
-    <string name="pdf_bw_mode_ocr_robust">การประมวลผลล่วงหน้า OCR แบบทนทาน (PDF)</string>
-    <string name="jpeg_mode_gray_clean">ขาวดำแบบปรับให้สะอาด (ฟิลเตอร์ความถี่สูง) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">สีแบบปรับให้สะอาด (ฟิลเตอร์ความถี่สูง) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">โทนสีเทาแบบปรับให้สะอาด (ฟิลเตอร์ผ่านความถี่สูง)</string>
-    <string name="pdf_bw_mode_color_clean">สีแบบปรับให้สะอาด (ฟิลเตอร์ผ่านความถี่สูง)</string>
     <string name="skip_ocr_export_only">ข้าม OCR (ส่งออกเท่านั้น)</string>
     <string name="skip_cropping">ข้ามการครอบตัด</string>
     <string name="preview_corner_detection">แสดงตัวอย่างการตรวจจับมุม</string>
@@ -124,7 +108,6 @@
 
     <string name="clear_all_pages">ล้างทั้งหมด</string>
     <string name="remove_this_page">ลบหน้านี้</string>
-    <string name="multipage_not_implemented">ยังไม่รองรับการส่งออกหลายหน้า</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">ย้ายหน้าไปทางซ้าย</string>
@@ -169,16 +152,6 @@
     <string name="removed_from_registry_toast">ลบเรียบร้อยแล้ว</string>
 
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">คุณภาพ/ขนาด PDF</string>
-    <string name="pdf_preset_high">สูง (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">มาตรฐาน (200 dpi, q72)</string>
-    <string name="pdf_preset_small">เล็ก (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">เล็กมาก (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">เลเยอร์ข้อความ PDF</string>
-    <string name="pdf_text_layer_mode_line_based">ตามบรรทัด (แนะนำ)</string>
-    <string name="pdf_text_layer_mode_word_positioned">วางตำแหน่งตามคำ (ความเข้ากันได้)</string>
-    <string name="export_options_title">ตัวเลือกการส่งออก</string>
-    <string name="jpeg_enhancement_title">สีผลลัพธ์ JPEG</string>
     <string name="btn_options">ตัวเลือก</string>
     <string name="btn_save">บันทึก</string>
     <string name="btn_new">สแกนใหม่</string>
@@ -292,22 +265,6 @@
     <string name="delete_warning_irreversible">ไฟล์จะถูกลบออกจากอุปกรณ์ การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">ไม่มีเอกสารสำหรับส่งออก</string>
-    <string name="failed_to_export_document">ไม่สามารถส่งออกเอกสารได้</string>
-    <string name="error_during_export_with_reason">เกิดข้อผิดพลาดระหว่างการส่งออก: %1$s</string>
-    <string name="document_exported">ส่งออกเอกสาร %1$s แล้ว</string>
-    <string name="document_multipage_exported">ส่งออกเอกสาร (หลายหน้า) %1$s แล้ว</string>
-    <string name="no_target_selected">ยังไม่ได้เลือกปลายทาง</string>
-    <string name="image_exported">ส่งออกภาพ %1$s แล้ว</string>
-    <string name="failed_to_export_image">ไม่สามารถส่งออกภาพได้</string>
-    <string name="error_during_jpeg_export_with_reason">เกิดข้อผิดพลาดระหว่างการส่งออก JPEG: %1$s</string>
-    <string name="zip_exported">ส่งออก ZIP %1$s แล้ว</string>
-    <string name="failed_to_export_zip">ไม่สามารถส่งออก ZIP ได้</string>
-    <string name="error_during_zip_export_with_reason">เกิดข้อผิดพลาดระหว่างการส่งออก ZIP: %1$s</string>
-    <string name="ocr_text_exported_as_txt">ส่งออกข้อความ OCR เป็น TXT แล้ว</string>
-    <string name="error_exporting_ocr_text_with_reason">เกิดข้อผิดพลาดในการส่งออกข้อความ OCR: %1$s</string>
-    <string name="no_document_to_share_export_first">ไม่มีเอกสารสำหรับแชร์ โปรดส่งออกเอกสารก่อน</string>
-    <string name="error_sharing_document_with_reason">เกิดข้อผิดพลาดในการแชร์เอกสาร: %1$s</string>
     <string name="feature_scan_library_disabled">ฟีเจอร์คลังสแกนถูกปิดใช้งาน</string>
     <string name="navigation_failed">การนำทางล้มเหลว</string>
 
@@ -358,7 +315,6 @@
     </string>    <!-- การช่วยการเข้าถึง: คำอธิบายรายการและการประกาศ -->
     <string name="page_n_of_m">หน้า %1$d จาก %2$d</string>
     <string name="pages_count_announcement">จำนวนหน้า: %1$d</string>
-    <string name="export_started">เริ่มการส่งออกแล้ว</string>
     <string name="page_removed">ลบหน้าแล้ว</string>
     <string name="page_moved_to_position">ย้ายไปยังตำแหน่ง %1$d</string>
 
@@ -407,12 +363,6 @@
     <string name="label_document">เอกสาร</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">ขนาดหน้า</string>
-    <string name="dpi_settings_label">การตั้งค่า DPI</string>
-    <string name="page_format_fit">ปรับตามภาพ (แนะนำ)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">กู้คืนการเข้าถึง</string>
     <string name="status">สถานะ</string>
@@ -430,21 +380,6 @@
     <string name="cleanup_max_count">จำนวนสูงสุด</string>
     <string name="cleanup_max_storage_mb">พื้นที่จัดเก็บสูงสุด (MB)</string>
     <string name="cleanup_settings_saved">บันทึกการตั้งค่าการล้างข้อมูลแล้ว</string>
-    <string name="inbox_mode">โหมดกล่องขาเข้า</string>
-    <string name="inbox_mode_enable">เปิดใช้โฟลเดอร์ส่งออกเริ่มต้น</string>
-    <string name="inbox_select_folder">เลือกโฟลเดอร์</string>
-    <string name="inbox_folder_set">โฟลเดอร์ Inbox: %1$s</string>
-    <string name="inbox_folder_none">ไม่ได้เลือกโฟลเดอร์</string>
-    <string name="inbox_saved">✓ บันทึกไปยัง Inbox แล้ว</string>
-    <string name="inbox_permission_lost">สูญเสียการเข้าถึงโฟลเดอร์ Inbox กรุณาเลือกโฟลเดอร์ใหม่</string>
-    <string name="inbox_no_folder_selected">กรุณาเลือกโฟลเดอร์ Inbox ก่อน</string>
-    <string name="inbox_clear">ล้างโฟลเดอร์ Inbox</string>
-    <string name="inbox_filename_format">รูปแบบชื่อไฟล์</string>
-    <string name="inbox_auto_new_scan">เริ่มสแกนใหม่โดยอัตโนมัติหลังส่งออก</string>
-    <string name="inbox_filename_date_scan">วันที่ + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">วันที่ + เวลา + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">วันที่เท่านั้น (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">สี</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">ลบหน้านี้หรือไม่?</string>
     <string name="confirm_remove_page_message">คุณต้องการลบหน้านี้ออกจากแถบฟิล์มหรือไม่?</string>
@@ -466,9 +401,4 @@
     <string name="crop_hint_corner_off_image">มุมอยู่นอกภาพ — ผลลัพธ์อาจมีขอบสีดำ</string>
     <string name="crop_edge_dragged">เลือกขอบแล้ว ลากเพื่อย้ายขอบ</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">การทำความสะอาดเอกสาร</string>
-    <string name="document_cleanup_original">ต้นฉบับ</string>
-    <string name="document_cleanup_natural">เป็นธรรมชาติ</string>
-    <string name="document_cleanup_enhanced">ปรับปรุง</string>
-    <string name="document_cleanup_clean_text">ข้อความสะอาด</string>
 </resources>

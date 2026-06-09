@@ -27,7 +27,6 @@
     <string name="image_to_crop">待裁剪的图像</string>
     <string name="cropped_image">已裁剪的图像</string>
     <string name="document_preview">文档预览</string>
-    <string name="include_ocr_text">将 OCR 导出为单独的 TXT 文件</string>
     <string name="ocr_results_will_appear_here">识别结果将在此显示</string>
     <string name="ocr_no_text_detected">未检测到文本</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">
@@ -65,9 +64,6 @@
     <string name="share_logs_error">无法准备日志：%1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">灰度</string>
-    <string name="export_as_jpeg">导出为 JPEG</string>
-    <string name="export_as_pdf">导出为 PDF（默认）</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">切换闪光灯</string>
@@ -97,19 +93,7 @@
     <string name="camera_zoom_not_available">此设备不支持变焦</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">彩色</string>
-    <string name="jpeg_mode_auto">灰度</string>
-    <string name="jpeg_mode_bw_text">黑白</string>
-    <string name="jpeg_mode_bw_robust">黑白（稳健）（JPEG）</string>
-    <string name="jpeg_mode_ocr_robust">稳健的 OCR 预处理 (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">黑白</string>
-    <string name="pdf_bw_mode_classic">黑白（经典）</string>
-    <string name="pdf_bw_mode_ocr_robust">稳健的 OCR 预处理 (PDF)</string>
-    <string name="jpeg_mode_gray_clean">清理后的灰度（高通滤波）(JPEG)</string>
-    <string name="jpeg_mode_color_clean">清理后的颜色（高通滤波）(JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">灰度清理（高通滤波）</string>
-    <string name="pdf_bw_mode_color_clean">彩色清理（高通滤波）</string>
     <string name="skip_ocr_export_only">跳过 OCR（仅导出）</string>
     <string name="skip_cropping">跳过裁剪</string>
     <string name="preview_corner_detection">角点检测预览</string>
@@ -120,7 +104,6 @@
 
     <string name="clear_all_pages">全部清除</string>
     <string name="remove_this_page">移除此页</string>
-    <string name="multipage_not_implemented">尚未实现多页导出</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">向左移动页面</string>
@@ -166,16 +149,6 @@
     <string name="removed_from_registry_toast">条目已移除</string>
 
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">PDF 质量 / 大小</string>
-    <string name="pdf_preset_high">高（300 dpi，q85）</string>
-    <string name="pdf_preset_standard">标准（200 dpi，q72）</string>
-    <string name="pdf_preset_small">小（150 dpi，q62）</string>
-    <string name="pdf_preset_very_small">很小（110 dpi，q52）</string>
-    <string name="pdf_text_layer_mode_title">PDF 文本层</string>
-    <string name="pdf_text_layer_mode_line_based">基于行（推荐）</string>
-    <string name="pdf_text_layer_mode_word_positioned">按词定位（兼容性）</string>
-    <string name="export_options_title">导出选项</string>
-    <string name="jpeg_enhancement_title">JPEG 输出颜色</string>
     <string name="btn_options">选项</string>
     <string name="btn_save">保存</string>
     <string name="btn_new">新扫描</string>
@@ -281,22 +254,6 @@
     <string name="delete_warning_irreversible">文件将从设备中删除。此操作无法撤销。</string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">没有可导出的文档</string>
-    <string name="failed_to_export_document">文档导出失败</string>
-    <string name="error_during_export_with_reason">导出时出错：%1$s</string>
-    <string name="document_exported">文档 %1$s 已导出</string>
-    <string name="document_multipage_exported">文档（多页）%1$s 已导出</string>
-    <string name="no_target_selected">未选择目标位置</string>
-    <string name="image_exported">图像 %1$s 已导出</string>
-    <string name="failed_to_export_image">图像导出失败</string>
-    <string name="error_during_jpeg_export_with_reason">导出 JPEG 时出错：%1$s</string>
-    <string name="zip_exported">ZIP 文件 %1$s 已导出</string>
-    <string name="failed_to_export_zip">ZIP 导出失败</string>
-    <string name="error_during_zip_export_with_reason">导出 ZIP 时出错：%1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR 文本已导出为 TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">导出 OCR 文本时出错：%1$s</string>
-    <string name="no_document_to_share_export_first">没有可分享的文档。请先导出文档。</string>
-    <string name="error_sharing_document_with_reason">共享文档时出错：%1$s</string>
     <string name="feature_scan_library_disabled">扫描库功能已禁用</string>
     <string name="navigation_failed">导航失败</string>
 
@@ -342,7 +299,6 @@
     <string name="a11y_capture_success">已拍摄图像。</string>    <!-- 无障碍：列表项描述与提示 -->
     <string name="page_n_of_m">第 %1$d 页，共 %2$d 页</string>
     <string name="pages_count_announcement">页数：%1$d</string>
-    <string name="export_started">导出已开始</string>
     <string name="page_removed">页面已移除</string>
     <string name="page_moved_to_position">已移动到位置 %1$d</string>
 
@@ -391,12 +347,6 @@
     <string name="label_document">文档</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">页面大小</string>
-    <string name="dpi_settings_label">DPI 设置</string>
-    <string name="page_format_fit">适应图像（推荐）</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">恢复访问</string>
     <string name="status">状态</string>
@@ -414,21 +364,6 @@
     <string name="cleanup_max_count">最大数量</string>
     <string name="cleanup_max_storage_mb">最大存储空间（MB）</string>
     <string name="cleanup_settings_saved">清理设置已保存</string>
-    <string name="inbox_mode">收件箱模式</string>
-    <string name="inbox_mode_enable">启用默认导出文件夹</string>
-    <string name="inbox_select_folder">选择文件夹</string>
-    <string name="inbox_folder_set">收件箱文件夹：%1$s</string>
-    <string name="inbox_folder_none">未选择文件夹</string>
-    <string name="inbox_saved">✓ 已保存到收件箱</string>
-    <string name="inbox_permission_lost">收件箱文件夹访问权限丢失。请选择新文件夹。</string>
-    <string name="inbox_no_folder_selected">请先选择收件箱文件夹。</string>
-    <string name="inbox_clear">清除收件箱文件夹</string>
-    <string name="inbox_filename_format">文件名格式</string>
-    <string name="inbox_auto_new_scan">导出后自动开始新扫描</string>
-    <string name="inbox_filename_date_scan">日期 + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">日期 + 时间 + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">仅日期 (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">彩色</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">移除页面？</string>
     <string name="confirm_remove_page_message">要从胶片条中移除此页面吗？</string>
@@ -450,9 +385,4 @@
     <string name="crop_hint_corner_off_image">角点位于图像外 — 输出可能含有黑边</string>
     <string name="crop_edge_dragged">已选择边。拖动以移动边。</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">文档清理</string>
-    <string name="document_cleanup_original">原始</string>
-    <string name="document_cleanup_natural">自然</string>
-    <string name="document_cleanup_enhanced">增强</string>
-    <string name="document_cleanup_clean_text">纯文本</string>
 </resources>

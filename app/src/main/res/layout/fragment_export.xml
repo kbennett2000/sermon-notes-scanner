@@ -121,21 +121,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/export_options_group">
 
-        <!-- Options (gear) to the left of Plus -->
-        <ImageButton
-                android:id="@+id/button_options"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp"
-                android:contentDescription="@string/btn_options"
-                android:src="@drawable/ic_build"
-                app:tint="?attr/colorControlNormal"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                app:tooltipText="@string/btn_options"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
-
         <ImageButton
                 android:id="@+id/button_add_page"
                 android:layout_width="0dp"
@@ -177,22 +162,6 @@
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 app:tooltipText="@string/clear_all_pages"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
-
-        <!-- Share icon identical behavior to Share button -->
-        <ImageButton
-                android:id="@+id/button_share_small"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp"
-                android:contentDescription="@string/btn_share"
-                android:src="@drawable/ic_share"
-                app:tint="?attr/colorControlNormal"
-                android:enabled="false"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                app:tooltipText="@string/btn_share"
                 android:background="?attr/selectableItemBackgroundBorderless"/>
     </LinearLayout>
 
@@ -257,38 +226,7 @@
                     app:autoSizeMinTextSize="10sp"
                     app:autoSizeMaxTextSize="16sp"
                     app:autoSizeStepGranularity="1sp" />
-
-            <!-- Export-Button (Right) -->
-            <Button
-                    android:id="@+id/button_export"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/rounded_bg_light"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:text="@string/btn_save"
-                    android:enabled="false"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    app:autoSizeTextType="uniform"
-                    app:autoSizeMinTextSize="10sp"
-                    app:autoSizeMaxTextSize="16sp"
-                    app:autoSizeStepGranularity="1sp" />
         </LinearLayout>
-
-        <!-- Progress indicator for long exports (multi-page PDF/JPEG) -->
-        <ProgressBar
-            android:id="@+id/export_progress"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:visibility="gone"
-            android:max="100"
-            android:indeterminate="false" />
-
 
     </LinearLayout>
 

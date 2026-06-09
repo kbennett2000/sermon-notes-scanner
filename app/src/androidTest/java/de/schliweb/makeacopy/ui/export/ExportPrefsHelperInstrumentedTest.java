@@ -34,33 +34,4 @@ public class ExportPrefsHelperInstrumentedTest {
     ExportPrefsHelper.setLastImportUri(context, testUri);
     assertEquals(testUri, ExportPrefsHelper.getLastImportUri(context));
   }
-
-  @Test
-  public void testLastExportUriPersistence() {
-    String testUri = "content://com.android.externalstorage.documents/tree/primary%3ADownloads";
-
-    // Initially null
-    assertNull(ExportPrefsHelper.getLastExportUri(context));
-
-    // Set and retrieve
-    ExportPrefsHelper.setLastExportUri(context, testUri);
-    assertEquals(testUri, ExportPrefsHelper.getLastExportUri(context));
-  }
-
-  @Test
-  public void testUrisAreIndependent() {
-    String importUri = "content://import/path";
-    String exportUri = "content://export/path";
-
-    ExportPrefsHelper.setLastImportUri(context, importUri);
-    ExportPrefsHelper.setLastExportUri(context, exportUri);
-
-    assertEquals(importUri, ExportPrefsHelper.getLastImportUri(context));
-    assertEquals(exportUri, ExportPrefsHelper.getLastExportUri(context));
-
-    // Update one, check other
-    ExportPrefsHelper.setLastImportUri(context, "content://new/import");
-    assertEquals("content://new/import", ExportPrefsHelper.getLastImportUri(context));
-    assertEquals(exportUri, ExportPrefsHelper.getLastExportUri(context));
-  }
 }

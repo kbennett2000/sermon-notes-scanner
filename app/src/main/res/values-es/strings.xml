@@ -31,7 +31,6 @@
     <string name="image_to_crop">Imagen para recortar</string>
     <string name="cropped_image">Imagen recortada</string>
     <string name="document_preview">Vista previa del documento</string>
-    <string name="include_ocr_text">Exportar OCR como TXT separado</string>
     <string name="ocr_results_will_appear_here">Los resultados de OCR aparecerán aquí</string>
     <string name="ocr_no_text_detected">No se detectó texto</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Ajusta las esquinas
@@ -76,9 +75,6 @@
     <string name="share_logs_error">No se pudieron preparar los registros: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Escala de grises</string>
-    <string name="export_as_jpeg">Exportar como JPEG</string>
-    <string name="export_as_pdf">Exportar como PDF (predeterminado)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Activar/desactivar linterna</string>
@@ -108,19 +104,7 @@
     <string name="camera_zoom_not_available">El zoom no está disponible en este dispositivo</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Color</string>
-    <string name="jpeg_mode_auto">Escala de grises</string>
-    <string name="jpeg_mode_bw_text">Blanco y negro</string>
-    <string name="jpeg_mode_bw_robust">Blanco y negro (robusto) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Preprocesamiento OCR robusto (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Blanco y negro</string>
-    <string name="pdf_bw_mode_classic">B/N (clásico)</string>
-    <string name="pdf_bw_mode_ocr_robust">Preprocesamiento OCR robusto (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Escala de grises limpia (filtro de paso alto) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Color limpio (filtro de paso alto) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Escala de grises limpia (pasa altos)</string>
-    <string name="pdf_bw_mode_color_clean">Color limpio (pasa altos)</string>
     <string name="skip_ocr_export_only">Omitir OCR (solo exportar)</string>
     <string name="skip_cropping">Omitir recorte</string>
     <string name="preview_corner_detection">Vista previa de detección de esquinas</string>
@@ -130,7 +114,6 @@
     <string name="add_another_page">Agregar página</string>
     <string name="clear_all_pages">Eliminar todas</string>
     <string name="remove_this_page">Eliminar esta página</string>
-    <string name="multipage_not_implemented">Exportación de varias páginas aún no implementada</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">Mover página a la izquierda</string>
@@ -176,16 +159,6 @@
     <string name="remove">Eliminar</string>
     <string name="removed_from_registry_toast">Entrada eliminada</string>
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">Calidad/tamaño PDF</string>
-    <string name="pdf_preset_high">Alta (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Estándar (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Pequeño (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Muy pequeño (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">Capa de texto PDF</string>
-    <string name="pdf_text_layer_mode_line_based">Basada en líneas (recomendado)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Con palabras posicionadas (compatibilidad)</string>
-    <string name="export_options_title">Opciones de exportación</string>
-    <string name="jpeg_enhancement_title">Color de salida JPEG</string>
     <string name="btn_options">Opciones</string>
     <string name="btn_save">Guardar</string>
     <string name="btn_new">Nuevo escaneo</string>
@@ -301,24 +274,9 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">No hay documento para exportar</string>
-    <string name="failed_to_export_document">Error al exportar el documento</string>
-    <string name="error_during_export_with_reason">Error durante la exportación: %1$s</string>
-    <string name="document_exported">Documento %1$s exportado</string>
-    <string name="document_multipage_exported">Documento (de varias páginas) %1$s exportado</string>
-    <string name="no_target_selected">No se ha seleccionado un destino</string>
-    <string name="image_exported">Imagen %1$s exportada</string>
-    <string name="failed_to_export_image">Error al exportar la imagen</string>
-    <string name="error_during_jpeg_export_with_reason">Error durante la exportación JPEG: %1$s</string>
-    <string name="zip_exported">ZIP %1$s exportado</string>
-    <string name="failed_to_export_zip">Error al exportar el ZIP</string>
-    <string name="error_during_zip_export_with_reason">Error durante la exportación ZIP: %1$s</string>
-    <string name="ocr_text_exported_as_txt">Texto OCR exportado como TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Error al exportar el texto OCR: %1$s</string>
     <string name="no_document_to_share_export_first">No hay documento disponible para compartir. Exporta un documento
         primero.
     </string>
-    <string name="error_sharing_document_with_reason">Error al compartir el documento: %1$s</string>
     <string name="feature_scan_library_disabled">La función de biblioteca de escaneos está desactivada</string>
     <string name="navigation_failed">Error de navegación</string>
 
@@ -373,7 +331,6 @@
     </string>    <!-- Accesibilidad: descripción de elementos de la lista y anuncios -->
     <string name="page_n_of_m">Página %1$d de %2$d</string>
     <string name="pages_count_announcement">Páginas: %1$d</string>
-    <string name="export_started">Exportación iniciada</string>
     <string name="page_removed">Página eliminada</string>
     <string name="page_moved_to_position">Movido a la posición %1$d</string>
 
@@ -424,12 +381,6 @@
 
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Tamaño de página</string>
-    <string name="dpi_settings_label">Configuración de DPI</string>
-    <string name="page_format_fit">Ajustar a imagen (recomendado)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Restaurar acceso</string>
     <string name="status">Estado</string>
@@ -447,21 +398,6 @@
     <string name="cleanup_max_count">Cantidad máxima</string>
     <string name="cleanup_max_storage_mb">Almacenamiento máximo (MB)</string>
     <string name="cleanup_settings_saved">Configuración de limpieza guardada</string>
-    <string name="inbox_mode">Modo Bandeja de entrada</string>
-    <string name="inbox_mode_enable">Activar carpeta de exportación predeterminada</string>
-    <string name="inbox_select_folder">Seleccionar carpeta</string>
-    <string name="inbox_folder_set">Carpeta Inbox: %1$s</string>
-    <string name="inbox_folder_none">Ninguna carpeta seleccionada</string>
-    <string name="inbox_saved">✓ Guardado en Inbox</string>
-    <string name="inbox_permission_lost">Se perdió el acceso a la carpeta Inbox. Seleccione una nueva carpeta.</string>
-    <string name="inbox_no_folder_selected">Seleccione primero una carpeta Inbox.</string>
-    <string name="inbox_clear">Borrar carpeta Inbox</string>
-    <string name="inbox_filename_format">Formato de nombre de archivo</string>
-    <string name="inbox_auto_new_scan">Iniciar nuevo escaneo automáticamente después de exportar</string>
-    <string name="inbox_filename_date_scan">Fecha + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Fecha + hora + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Solo fecha (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Color</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">¿Quitar página?</string>
     <string name="confirm_remove_page_message">¿Quieres quitar esta página de la tira?</string>
@@ -483,9 +419,4 @@
     <string name="crop_hint_corner_off_image">Esquina fuera de la imagen — la salida puede tener bordes negros</string>
     <string name="crop_edge_dragged">Borde seleccionado. Arrastra para moverlo.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Limpieza del documento</string>
-    <string name="document_cleanup_original">Original</string>
-    <string name="document_cleanup_natural">Natural</string>
-    <string name="document_cleanup_enhanced">Mejorado</string>
-    <string name="document_cleanup_clean_text">Texto limpio</string>
 </resources>

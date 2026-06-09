@@ -30,7 +30,6 @@
     <string name="image_to_crop">Bilde å beskjære</string>
     <string name="cropped_image">Beskåret bilde</string>
     <string name="document_preview">Dokumentforhåndsvisning</string>
-    <string name="include_ocr_text">Eksporter OCR som separat TXT</string>
     <string name="ocr_results_will_appear_here">OCR-resultater vises her</string>
     <string name="ocr_no_text_detected">Ingen tekst oppdaget</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Juster hjørnene på
@@ -71,9 +70,6 @@
     <string name="share_logs_error">Kunne ikke forberede logger: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Gråtoner</string>
-    <string name="export_as_jpeg">Eksporter som JPEG</string>
-    <string name="export_as_pdf">Eksporter som PDF (standard)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Slå av/på lommelykt</string>
@@ -103,20 +99,8 @@
     <string name="camera_zoom_not_available">Zoom er ikke tilgjengelig på denne enheten</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Farge</string>
-    <string name="jpeg_mode_auto">Gråtoner</string>
-    <string name="jpeg_mode_bw_text">Svart/hvitt</string>
-    <string name="jpeg_mode_bw_robust">Svart/hvitt (robust) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Robust OCR-forbehandling (JPEG)</string>
 
 
-    <string name="pdf_bw_mode_robust">Svart/hvitt</string>
-    <string name="pdf_bw_mode_classic">S/H (klassisk)</string>
-    <string name="pdf_bw_mode_ocr_robust">Robust OCR-forbehandling (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Renset gråskala (høypassfilter) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Rensede farger (høypassfilter) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Gråtoner – renset (høypass)</string>
-    <string name="pdf_bw_mode_color_clean">Farger – renset (høypass)</string>
     <string name="skip_ocr_export_only">Hopp over OCR (kun eksport)</string>
     <string name="skip_cropping">Hopp over beskjæring</string>
     <string name="preview_corner_detection">Forhåndsvisning av hjørnedeteksjon</string>
@@ -126,7 +110,6 @@
     <string name="add_another_page">Legg til side</string>
     <string name="clear_all_pages">Fjern alle</string>
     <string name="remove_this_page">Fjern denne siden</string>
-    <string name="multipage_not_implemented">Flersidig eksport er ikke implementert ennå</string>
 
     <!-- Reorder controls -->
     <string name="move_page_left">Flytt side til venstre</string>
@@ -171,16 +154,6 @@
     <string name="removed_from_registry_toast">Oppføring fjernet</string>
 
     <!-- PDF quality presets -->
-    <string name="pdf_quality_title">PDF-kvalitet / størrelse</string>
-    <string name="pdf_preset_high">Høy (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standard (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Liten (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Veldig liten (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF-tekstlag</string>
-    <string name="pdf_text_layer_mode_line_based">Linjebasert (anbefalt)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Ordplassert (kompatibilitet)</string>
-    <string name="export_options_title">Eksportalternativer</string>
-    <string name="jpeg_enhancement_title">JPEG-utdatafarge</string>
     <string name="btn_options">Alternativer</string>
     <string name="btn_save">Lagre</string>
     <string name="btn_new">Ny skanning</string>
@@ -294,22 +267,6 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Ingen dokumenter å eksportere</string>
-    <string name="failed_to_export_document">Kunne ikke eksportere dokumentet</string>
-    <string name="error_during_export_with_reason">Feil under eksport: %1$s</string>
-    <string name="document_exported">Dokument %1$s eksportert</string>
-    <string name="document_multipage_exported">Dokument (flersidig) %1$s eksportert</string>
-    <string name="no_target_selected">Ingen mål valgt</string>
-    <string name="image_exported">Bilde %1$s eksportert</string>
-    <string name="failed_to_export_image">Kunne ikke eksportere bildet</string>
-    <string name="error_during_jpeg_export_with_reason">Feil under JPEG-eksport: %1$s</string>
-    <string name="zip_exported">ZIP %1$s eksportert</string>
-    <string name="failed_to_export_zip">Kunne ikke eksportere ZIP</string>
-    <string name="error_during_zip_export_with_reason">Feil under ZIP-eksport: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR-tekst eksportert som TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Feil ved eksport av OCR-tekst: %1$s</string>
-    <string name="no_document_to_share_export_first">Ingen dokumenter å dele. Eksporter et dokument først.</string>
-    <string name="error_sharing_document_with_reason">Feil ved deling av dokument: %1$s</string>
     <string name="feature_scan_library_disabled">Funksjonen for skannebibliotek er deaktivert</string>
     <string name="navigation_failed">Navigering mislyktes</string>
 
@@ -360,7 +317,6 @@
     </string>    <!-- Tilgjengelighet: beskrivelse av listeelementer og kunngjøringer -->
     <string name="page_n_of_m">Side %1$d av %2$d</string>
     <string name="pages_count_announcement">Sider: %1$d</string>
-    <string name="export_started">Eksport startet</string>
     <string name="page_removed">Side fjernet</string>
     <string name="page_moved_to_position">Flyttet til posisjon %1$d</string>
 
@@ -409,12 +365,6 @@
     <string name="label_document">Dokument</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Sidestørrelse</string>
-    <string name="dpi_settings_label">DPI-innstillinger</string>
-    <string name="page_format_fit">Tilpass til bilde (anbefalt)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Gjenopprett tilgang</string>
     <string name="status">Status</string>
@@ -432,21 +382,6 @@
     <string name="cleanup_max_count">Maksimalt antall</string>
     <string name="cleanup_max_storage_mb">Maksimal lagringsplass (MB)</string>
     <string name="cleanup_settings_saved">Oppryddingsinnstillinger lagret</string>
-    <string name="inbox_mode">Innboks-modus</string>
-    <string name="inbox_mode_enable">Aktiver standard eksportmappe</string>
-    <string name="inbox_select_folder">Velg mappe</string>
-    <string name="inbox_folder_set">Innboks-mappe: %1$s</string>
-    <string name="inbox_folder_none">Ingen mappe valgt</string>
-    <string name="inbox_saved">✓ Lagret i Innboks</string>
-    <string name="inbox_permission_lost">Tilgang til Innboks-mappe mistet. Velg en ny mappe.</string>
-    <string name="inbox_no_folder_selected">Velg en Innboks-mappe først.</string>
-    <string name="inbox_clear">Tøm Innboks-mappe</string>
-    <string name="inbox_filename_format">Filnavnformat</string>
-    <string name="inbox_auto_new_scan">Start ny skanning automatisk etter eksport</string>
-    <string name="inbox_filename_date_scan">Dato + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Dato + tid + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Kun dato (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Farge</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Fjerne siden?</string>
     <string name="confirm_remove_page_message">Vil du fjerne denne siden fra filmstripen?</string>
@@ -468,9 +403,4 @@
     <string name="crop_hint_corner_off_image">Hjørne utenfor bildet — utdata kan ha svarte kanter</string>
     <string name="crop_edge_dragged">Kant valgt. Dra for å flytte kanten.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Dokumentopprydding</string>
-    <string name="document_cleanup_original">Original</string>
-    <string name="document_cleanup_natural">Naturlig</string>
-    <string name="document_cleanup_enhanced">Forbedret</string>
-    <string name="document_cleanup_clean_text">Ren tekst</string>
 </resources>

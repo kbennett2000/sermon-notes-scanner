@@ -30,7 +30,6 @@
     <string name="image_to_crop">Billede til beskæring</string>
     <string name="cropped_image">Beskåret billede</string>
     <string name="document_preview">Dokumentforhåndsvisning</string>
-    <string name="include_ocr_text">Eksportér OCR som separat TXT</string>
     <string name="ocr_results_will_appear_here">OCR-resultater vises her</string>
     <string name="ocr_no_text_detected">Ingen tekst fundet</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Juster
@@ -71,9 +70,6 @@
     <string name="share_logs_error">Kunne ikke forberede logfiler: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Gråtoner</string>
-    <string name="export_as_jpeg">Eksporter som JPEG</string>
-    <string name="export_as_pdf">Eksporter som PDF (standard)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Tænd/sluk lommelygte</string>
@@ -103,19 +99,7 @@
     <string name="camera_zoom_not_available">Zoom er ikke tilgængelig på denne enhed</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Farve</string>
-    <string name="jpeg_mode_auto">Gråtoner</string>
-    <string name="jpeg_mode_bw_text">Sort/hvid</string>
-    <string name="jpeg_mode_bw_robust">Sort/hvid (robust) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Robust OCR-forbehandling (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Sort/hvid</string>
-    <string name="pdf_bw_mode_classic">S/H (klassisk)</string>
-    <string name="pdf_bw_mode_ocr_robust">Robust OCR-forbehandling (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Renset gråtoner (højpasfilter) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Rensede farver (højpasfilter) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Gråtoner – renset (high-pass)</string>
-    <string name="pdf_bw_mode_color_clean">Farver – renset (high-pass)</string>
     <string name="skip_ocr_export_only">Spring OCR over (kun eksport)</string>
     <string name="skip_cropping">Spring beskæring over</string>
     <string name="preview_corner_detection">Forhåndsvisning af hjørnedetektion</string>
@@ -125,7 +109,6 @@
     <string name="add_another_page">Tilføj side</string>
     <string name="clear_all_pages">Ryd alt</string>
     <string name="remove_this_page">Fjern denne side</string>
-    <string name="multipage_not_implemented">Flersidet eksport er endnu ikke implementeret</string>
 
     <!-- Reorder controls -->
     <string name="move_page_left">Flyt side til venstre</string>
@@ -171,16 +154,6 @@
     <string name="removed_from_registry_toast">Post fjernet</string>
 
     <!-- PDF quality presets -->
-    <string name="pdf_quality_title">PDF-kvalitet / størrelse</string>
-    <string name="pdf_preset_high">Høj (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standard (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Lille (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Meget lille (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF-tekstlag</string>
-    <string name="pdf_text_layer_mode_line_based">Linjebaseret (anbefalet)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Ordplaceret (kompatibilitet)</string>
-    <string name="export_options_title">Eksportindstillinger</string>
-    <string name="jpeg_enhancement_title">JPEG-udskriftsfarve</string>
     <string name="btn_options">Indstillinger</string>
     <string name="btn_save">Gem</string>
     <string name="btn_new">Ny scanning</string>
@@ -293,22 +266,6 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Intet dokument at eksportere</string>
-    <string name="failed_to_export_document">Kunne ikke eksportere dokument</string>
-    <string name="error_during_export_with_reason">Fejl under eksport: %1$s</string>
-    <string name="document_exported">Dokument %1$s eksporteret</string>
-    <string name="document_multipage_exported">Dokument (flersidet) %1$s eksporteret</string>
-    <string name="no_target_selected">Ingen destination valgt</string>
-    <string name="image_exported">Billede %1$s eksporteret</string>
-    <string name="failed_to_export_image">Kunne ikke eksportere billede</string>
-    <string name="error_during_jpeg_export_with_reason">Fejl under JPEG-eksport: %1$s</string>
-    <string name="zip_exported">ZIP %1$s eksporteret</string>
-    <string name="failed_to_export_zip">Kunne ikke eksportere ZIP</string>
-    <string name="error_during_zip_export_with_reason">Fejl under ZIP-eksport: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR-tekst eksporteret som TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Fejl ved eksport af OCR-tekst: %1$s</string>
-    <string name="no_document_to_share_export_first">Intet dokument at dele. Eksporter et dokument først.</string>
-    <string name="error_sharing_document_with_reason">Fejl ved deling af dokument: %1$s</string>
     <string name="feature_scan_library_disabled">Funktionen for skanningsbibliotek er deaktiveret</string>
     <string name="navigation_failed">Navigation mislykkedes</string>
 
@@ -360,7 +317,6 @@
     </string>    <!-- Tilgængelighed: beskrivelse af listeelement og meddelelser -->
     <string name="page_n_of_m">Side %1$d af %2$d</string>
     <string name="pages_count_announcement">Antal sider: %1$d</string>
-    <string name="export_started">Eksport startet</string>
     <string name="page_removed">Side fjernet</string>
     <string name="page_moved_to_position">Flyttet til position %1$d</string>
 
@@ -409,12 +365,6 @@
     <string name="label_document">Dokument</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Sidestørrelse</string>
-    <string name="dpi_settings_label">DPI-indstillinger</string>
-    <string name="page_format_fit">Tilpas til billede (anbefalet)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Gendan adgang</string>
     <string name="status">Status</string>
@@ -432,21 +382,6 @@
     <string name="cleanup_max_count">Maksimalt antal</string>
     <string name="cleanup_max_storage_mb">Maksimal lagerplads (MB)</string>
     <string name="cleanup_settings_saved">Oprydningsindstillinger gemt</string>
-    <string name="inbox_mode">Inbox-tilstand</string>
-    <string name="inbox_mode_enable">Aktivér standardeksportmappe</string>
-    <string name="inbox_select_folder">Vælg mappe</string>
-    <string name="inbox_folder_set">Inbox-mappe: %1$s</string>
-    <string name="inbox_folder_none">Ingen mappe valgt</string>
-    <string name="inbox_saved">✓ Gemt i Inbox</string>
-    <string name="inbox_permission_lost">Adgang til Inbox-mappe mistet. Vælg venligst en ny mappe.</string>
-    <string name="inbox_no_folder_selected">Vælg venligst en Inbox-mappe først.</string>
-    <string name="inbox_clear">Ryd Inbox-mappe</string>
-    <string name="inbox_filename_format">Filnavnformat</string>
-    <string name="inbox_auto_new_scan">Start ny scanning automatisk efter eksport</string>
-    <string name="inbox_filename_date_scan">Dato + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Dato + tid + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Kun dato (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Farve</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Fjern side?</string>
     <string name="confirm_remove_page_message">Vil du fjerne denne side fra filmstrimlen?</string>
@@ -468,9 +403,4 @@
     <string name="crop_hint_corner_off_image">Hjørne uden for billedet — output kan have sorte kanter</string>
     <string name="crop_edge_dragged">Kant valgt. Træk for at flytte kanten.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Dokumentoprydning</string>
-    <string name="document_cleanup_original">Original</string>
-    <string name="document_cleanup_natural">Naturlig</string>
-    <string name="document_cleanup_enhanced">Forbedret</string>
-    <string name="document_cleanup_clean_text">Ren tekst</string>
 </resources>

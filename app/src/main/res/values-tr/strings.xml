@@ -31,7 +31,6 @@
     <string name="image_to_crop">Kırpılacak görüntü</string>
     <string name="cropped_image">Kırpılmış görüntü</string>
     <string name="document_preview">Belge önizleme</string>
-    <string name="include_ocr_text">OCR metnini ayrı TXT olarak dışa aktar</string>
     <string name="ocr_results_will_appear_here">OCR sonuçları burada görünecek</string>
     <string name="ocr_no_text_detected">Metin algılanamadı</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Kırpılacak alanı
@@ -72,9 +71,6 @@
     <string name="share_logs_error">Günlükler hazırlanamadı: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Gri tonlamalı</string>
-    <string name="export_as_jpeg">JPEG olarak dışa aktar</string>
-    <string name="export_as_pdf">PDF olarak dışa aktar (varsayılan)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Feneri aç/kapat</string>
@@ -103,19 +99,7 @@
     <string name="camera_zoom_ratio">%1$s×</string>
     <string name="camera_zoom_not_available">Yakınlaştırma bu cihazda kullanılamıyor</string>
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Renkli</string>
-    <string name="jpeg_mode_auto">Gri tonlamalı</string>
-    <string name="jpeg_mode_bw_text">Siyah Beyaz</string>
-    <string name="jpeg_mode_bw_robust">Siyah Beyaz (güçlü) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">OCR güçlü ön işleme (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Siyah Beyaz</string>
-    <string name="pdf_bw_mode_classic">S&amp;B (klasik)</string>
-    <string name="pdf_bw_mode_ocr_robust">OCR güçlü ön işleme (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Temizlenmiş gri tonlama (yüksek geçiren filtre) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Temizlenmiş renkler (yüksek geçiren filtre) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Gri tonlama – temizlenmiş (yüksek geçiren filtre)</string>
-    <string name="pdf_bw_mode_color_clean">Renk – temizlenmiş (yüksek geçiren filtre)</string>
     <string name="skip_ocr_export_only">OCR\'yi atla (yalnızca dışa aktar)</string>
     <string name="skip_cropping">Kırpmayı atla</string>
     <string name="preview_corner_detection">Köşe algılama önizlemesi</string>
@@ -125,7 +109,6 @@
     <string name="add_another_page">Sayfa ekle</string>
     <string name="clear_all_pages">Tümünü temizle</string>
     <string name="remove_this_page">Bu sayfayı kaldır</string>
-    <string name="multipage_not_implemented">Çok sayfalı dışa aktarım henüz uygulanmadı</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">Sayfayı sola taşı</string>
@@ -171,16 +154,6 @@
     <string name="remove">Kaldır</string>
     <string name="removed_from_registry_toast">Kayıt kaldırıldı</string>
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">PDF kalitesi / boyutu</string>
-    <string name="pdf_preset_high">Yüksek (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standart (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Küçük (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Çok küçük (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF metin katmanı</string>
-    <string name="pdf_text_layer_mode_line_based">Satır tabanlı (önerilir)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Kelime konumlu (uyumluluk)</string>
-    <string name="export_options_title">Dışa aktarım seçenekleri</string>
-    <string name="jpeg_enhancement_title">JPEG çıkış rengi</string>
     <string name="btn_options">Seçenekler</string>
     <string name="btn_save">Kaydet</string>
     <string name="btn_new">Yeni tarama</string>
@@ -293,22 +266,6 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Dışa aktarılacak belge yok</string>
-    <string name="failed_to_export_document">Belge dışa aktarılamadı</string>
-    <string name="error_during_export_with_reason">Dışa aktarım sırasında hata: %1$s</string>
-    <string name="document_exported">Belge %1$s dışa aktarıldı</string>
-    <string name="document_multipage_exported">Belge (çok sayfalı) %1$s dışa aktarıldı</string>
-    <string name="no_target_selected">Hedef seçilmedi</string>
-    <string name="image_exported">Görüntü %1$s dışa aktarıldı</string>
-    <string name="failed_to_export_image">Görüntü dışa aktarılamadı</string>
-    <string name="error_during_jpeg_export_with_reason">JPEG dışa aktarımı sırasında hata: %1$s</string>
-    <string name="zip_exported">ZIP %1$s dışa aktarıldı</string>
-    <string name="failed_to_export_zip">ZIP dışa aktarılamadı</string>
-    <string name="error_during_zip_export_with_reason">ZIP dışa aktarımı sırasında hata: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR metni TXT olarak dışa aktarıldı</string>
-    <string name="error_exporting_ocr_text_with_reason">OCR metni dışa aktarılırken hata: %1$s</string>
-    <string name="no_document_to_share_export_first">Paylaşılacak belge yok. Önce bir belge dışa aktarın.</string>
-    <string name="error_sharing_document_with_reason">Belge paylaşılırken hata: %1$s</string>
     <string name="feature_scan_library_disabled">Tarama kütüphanesi özelliği devre dışı</string>
     <string name="navigation_failed">Gezinme başarısız</string>
 
@@ -361,7 +318,6 @@
     </string>    <!-- Erişilebilirlik: Liste öğesi açıklaması ve duyurular -->
     <string name="page_n_of_m">Sayfa %1$d / %2$d</string>
     <string name="pages_count_announcement">Sayfalar: %1$d</string>
-    <string name="export_started">Dışa aktarım başladı</string>
     <string name="page_removed">Sayfa kaldırıldı</string>
     <string name="page_moved_to_position">%1$d konumuna taşındı</string>
 
@@ -410,12 +366,6 @@
     <string name="label_document">Belge</string>
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Sayfa boyutu</string>
-    <string name="dpi_settings_label">DPI ayarları</string>
-    <string name="page_format_fit">Görüntüye sığdır (önerilen)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Erişimi geri yükle</string>
     <string name="status">Durum</string>
@@ -433,21 +383,6 @@
     <string name="cleanup_max_count">Maksimum sayı</string>
     <string name="cleanup_max_storage_mb">Maksimum depolama (MB)</string>
     <string name="cleanup_settings_saved">Temizleme ayarları kaydedildi</string>
-    <string name="inbox_mode">Gelen Kutusu Modu</string>
-    <string name="inbox_mode_enable">Varsayılan dışa aktarma klasörünü etkinleştir</string>
-    <string name="inbox_select_folder">Klasör seç</string>
-    <string name="inbox_folder_set">Inbox klasörü: %1$s</string>
-    <string name="inbox_folder_none">Klasör seçilmedi</string>
-    <string name="inbox_saved">✓ Inbox\'a kaydedildi</string>
-    <string name="inbox_permission_lost">Inbox klasörüne erişim kaybedildi. Lütfen yeni bir klasör seçin.</string>
-    <string name="inbox_no_folder_selected">Lütfen önce bir Inbox klasörü seçin.</string>
-    <string name="inbox_clear">Inbox klasörünü temizle</string>
-    <string name="inbox_filename_format">Dosya adı biçimi</string>
-    <string name="inbox_auto_new_scan">Dışa aktarma sonrası otomatik olarak yeni tarama başlat</string>
-    <string name="inbox_filename_date_scan">Tarih + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Tarih + saat + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Yalnızca tarih (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Renkli</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Sayfa kaldırılsın mı?</string>
     <string name="confirm_remove_page_message">Bu sayfayı film şeridinden kaldırmak istiyor musun?</string>
@@ -469,9 +404,4 @@
     <string name="crop_hint_corner_off_image">Köşe görüntü dışında — çıktıda siyah kenarlar olabilir</string>
     <string name="crop_edge_dragged">Kenar seçildi. Kenarı taşımak için sürükleyin.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Belge temizleme</string>
-    <string name="document_cleanup_original">Orijinal</string>
-    <string name="document_cleanup_natural">Doğal</string>
-    <string name="document_cleanup_enhanced">Geliştirilmiş</string>
-    <string name="document_cleanup_clean_text">Temiz metin</string>
 </resources>

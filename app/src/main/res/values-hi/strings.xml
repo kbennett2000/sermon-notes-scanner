@@ -27,7 +27,6 @@
     <string name="image_to_crop">क्रॉप करने के लिए चित्र</string>
     <string name="cropped_image">क्रॉप किया गया चित्र</string>
     <string name="document_preview">दस्तावेज़ पूर्वावलोकन</string>
-    <string name="include_ocr_text">OCR को अलग TXT के रूप में निर्यात करें</string>
     <string name="ocr_results_will_appear_here">OCR परिणाम यहाँ दिखाई देंगे</string>
     <string name="ocr_no_text_detected">कोई टेक्स्ट नहीं मिला</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">क्रॉप करने के लिए ट्रैपेज़ॉइड कोनों को समायोजित करें, फिर क्रॉप बटन दबाएँ।
@@ -64,9 +63,6 @@
     <string name="share_logs_error">लॉग तैयार नहीं हो सके: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">ग्रेस्केल</string>
-    <string name="export_as_jpeg">JPEG के रूप में निर्यात करें</string>
-    <string name="export_as_pdf">PDF के रूप में निर्यात करें (डिफ़ॉल्ट)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">फ्लैशलाइट टॉगल करें</string>
@@ -95,20 +91,7 @@
     <string name="camera_zoom_ratio">%1$s×</string>
     <string name="camera_zoom_not_available">इस डिवाइस पर ज़ूम उपलब्ध नहीं है</string>
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">रंगीन</string>
-    <string name="jpeg_mode_auto">ग्रेस्केल</string>
-    <string name="jpeg_mode_bw_text">श्वेत-श्याम</string>
-    <string name="jpeg_mode_bw_robust">श्वेत-श्याम (रोबस्ट) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">OCR रोबस्ट प्रीप्रोसेसिंग (JPEG)</string>
 
-    <string name="pdf_bw_mode_none">रंगीन</string>
-    <string name="pdf_bw_mode_robust">श्वेत-श्याम</string>
-    <string name="pdf_bw_mode_classic">श्वेत-श्याम (क्लासिक)</string>
-    <string name="pdf_bw_mode_ocr_robust">OCR रोबस्ट प्रीप्रोसेसिंग (PDF)</string>
-    <string name="jpeg_mode_gray_clean">साफ़ ग्रेस्केल (हाई-पास फ़िल्टर) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">साफ़ रंग (हाई-पास फ़िल्टर) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">ग्रेस्केल साफ़ (हाई-पास)</string>
-    <string name="pdf_bw_mode_color_clean">रंग साफ़ (हाई-पास)</string>
     <string name="skip_ocr_export_only">OCR छोड़ें (केवल निर्यात)</string>
     <string name="skip_cropping">क्रॉपिंग छोड़ें</string>
     <string name="preview_corner_detection">कोना पहचान पूर्वावलोकन</string>
@@ -118,7 +101,6 @@
     <string name="add_another_page">पृष्ठ जोड़ें</string>
     <string name="clear_all_pages">सभी हटाएँ</string>
     <string name="remove_this_page">यह पृष्ठ हटाएँ</string>
-    <string name="multipage_not_implemented">मल्टी-पेज निर्यात अभी लागू नहीं हुआ</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">पृष्ठ बाएँ ले जाएँ</string>
@@ -162,23 +144,7 @@
     <string name="remove">हटाएँ</string>
     <string name="removed_from_registry_toast">प्रविष्टि हटाई गई</string>
     <!-- PDF quality presets -->
-    <string name="pdf_quality_title">PDF गुणवत्ता / आकार</string>
-    <string name="dpi_settings_label">DPI सेटिंग्स</string>
-    <string name="pdf_preset_high">उच्च (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">मानक (200 dpi, q72)</string>
-    <string name="pdf_preset_small">छोटा (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">बहुत छोटा (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF टेक्स्ट लेयर</string>
-    <string name="pdf_text_layer_mode_line_based">लाइन-आधारित (अनुशंसित)</string>
-    <string name="pdf_text_layer_mode_word_positioned">शब्द-स्थित (संगतता)</string>
-    <string name="export_options_title">निर्यात विकल्प</string>
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">पृष्ठ आकार</string>
-    <string name="page_format_fit">चित्र के अनुसार (अनुशंसित)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
-    <string name="jpeg_enhancement_title">JPEG आउटपुट रंग</string>
     <string name="btn_options">विकल्प</string>
     <string name="btn_save">सहेजें</string>
     <string name="btn_new">नया स्कैन</string>
@@ -283,23 +249,8 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">निर्यात के लिए कोई दस्तावेज़ नहीं</string>
-    <string name="failed_to_export_document">दस्तावेज़ निर्यात विफल</string>
-    <string name="error_during_export_with_reason">निर्यात में त्रुटि: %1$s</string>
-    <string name="document_exported">दस्तावेज़ %1$s निर्यात किया गया</string>
-    <string name="document_multipage_exported">दस्तावेज़ (बहु-पृष्ठ) %1$s निर्यात किया गया</string>
-    <string name="no_target_selected">कोई लक्ष्य चयनित नहीं</string>
-    <string name="image_exported">चित्र %1$s निर्यात किया गया</string>
-    <string name="failed_to_export_image">चित्र निर्यात विफल</string>
-    <string name="error_during_jpeg_export_with_reason">JPEG निर्यात में त्रुटि: %1$s</string>
-    <string name="zip_exported">ZIP %1$s निर्यात किया गया</string>
-    <string name="failed_to_export_zip">ZIP निर्यात विफल</string>
-    <string name="error_during_zip_export_with_reason">ZIP निर्यात में त्रुटि: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR टेक्स्ट TXT के रूप में निर्यात किया गया</string>
-    <string name="error_exporting_ocr_text_with_reason">OCR टेक्स्ट निर्यात में त्रुटि: %1$s</string>
     <string name="no_document_to_share_export_first">शेयर करने के लिए कोई दस्तावेज़ नहीं। पहले निर्यात करें।
     </string>
-    <string name="error_sharing_document_with_reason">दस्तावेज़ शेयर करने में त्रुटि: %1$s</string>
     <string name="feature_scan_library_disabled">स्कैन लाइब्रेरी सुविधा अक्षम है</string>
     <string name="navigation_failed">नेविगेशन विफल</string>
 
@@ -348,7 +299,6 @@
     <string name="a11y_capture_success">चित्र कैप्चर किया गया।</string>
     <string name="page_n_of_m">पृष्ठ %1$d / %2$d</string>
     <string name="pages_count_announcement">पृष्ठ: %1$d</string>
-    <string name="export_started">निर्यात शुरू हुआ</string>
     <string name="page_removed">पृष्ठ हटाया गया</string>
     <string name="page_moved_to_position">स्थिति %1$d पर ले जाया गया</string>
 
@@ -412,20 +362,6 @@
     <string name="cleanup_settings_saved">सफ़ाई सेटिंग्स सहेजी गईं</string>
 
     <!-- Inbox Mode -->
-    <string name="inbox_mode">इनबॉक्स मोड</string>
-    <string name="inbox_mode_enable">डिफ़ॉल्ट निर्यात निर्देशिका सक्षम करें</string>
-    <string name="inbox_select_folder">फ़ोल्डर चुनें</string>
-    <string name="inbox_folder_set">इनबॉक्स फ़ोल्डर: %1$s</string>
-    <string name="inbox_folder_none">कोई फ़ोल्डर चयनित नहीं</string>
-    <string name="inbox_saved">✓ इनबॉक्स में सहेजा गया</string>
-    <string name="inbox_permission_lost">इनबॉक्स फ़ोल्डर की पहुँच खो गई। कृपया नया फ़ोल्डर चुनें।</string>
-    <string name="inbox_no_folder_selected">कृपया पहले एक इनबॉक्स फ़ोल्डर चुनें।</string>
-    <string name="inbox_clear">इनबॉक्स फ़ोल्डर साफ़ करें</string>
-    <string name="inbox_filename_format">फ़ाइल नाम प्रारूप</string>
-    <string name="inbox_auto_new_scan">निर्यात के बाद स्वचालित रूप से नया स्कैन शुरू करें</string>
-    <string name="inbox_filename_date_scan">दिनांक + स्कैन (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">दिनांक + समय + स्कैन (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">केवल दिनांक (2026-03-04)</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">पेज हटाएँ?</string>
     <string name="confirm_remove_page_message">क्या आप इस पेज को फिल्मस्ट्रिप से हटाना चाहते हैं?</string>
@@ -447,9 +383,4 @@
     <string name="crop_hint_corner_off_image">कोना छवि के बाहर — आउटपुट में काले बॉर्डर हो सकते हैं</string>
     <string name="crop_edge_dragged">किनारा चयनित. किनारा हिलाने के लिए खींचें.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">दस्तावेज़ सफ़ाई</string>
-    <string name="document_cleanup_original">मूल</string>
-    <string name="document_cleanup_natural">प्राकृतिक</string>
-    <string name="document_cleanup_enhanced">उन्नत</string>
-    <string name="document_cleanup_clean_text">स्वच्छ पाठ</string>
 </resources>

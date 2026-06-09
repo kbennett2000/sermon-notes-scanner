@@ -30,7 +30,6 @@
     <string name="image_to_crop">Image to crop</string>
     <string name="cropped_image">Cropped image</string>
     <string name="document_preview">Document preview</string>
-    <string name="include_ocr_text">Export OCR as separate TXT</string>
     <string name="ocr_results_will_appear_here">OCR results will appear here</string>
     <string name="ocr_no_text_detected">No text detected</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Adjust the trapezoid
@@ -71,14 +70,6 @@
     <string name="share_logs_error">Could not prepare logs: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Grayscale</string>
-    <string name="export_as_jpeg">Export as JPEG</string>
-    <string name="export_as_pdf">Export as PDF (default)</string>
-    <string name="document_cleanup_title">Document cleanup</string>
-    <string name="document_cleanup_original">Original</string>
-    <string name="document_cleanup_natural">Natural</string>
-    <string name="document_cleanup_enhanced">Enhanced</string>
-    <string name="document_cleanup_clean_text">Clean Text</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Toggle flashlight</string>
@@ -107,20 +98,6 @@
     <string name="camera_zoom_ratio">%1$s×</string>
     <string name="camera_zoom_not_available">Zoom is not available on this device</string>
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Color</string>
-    <string name="jpeg_mode_auto">Grayscale</string>
-    <string name="jpeg_mode_bw_text">Black &amp; White</string>
-    <string name="jpeg_mode_bw_robust">Black &amp; White (robust) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">OCR robust preprocessing (JPEG)</string>
-    <string name="jpeg_mode_gray_clean">Grayscale clean (high-pass) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Color clean (high-pass) (JPEG)</string>
-    <string name="pdf_bw_mode_none">Color</string>
-    <string name="pdf_bw_mode_robust">Black &amp; White</string>
-    <string name="pdf_bw_mode_classic">B&amp;W (classic)</string>
-    <string name="pdf_bw_mode_ocr_robust">OCR robust preprocessing (PDF)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Grayscale clean (high-pass)</string>
-    <string name="pdf_bw_mode_color_clean">Color clean (high-pass)</string>
-    <string name="output_color_title" translatable="false">Output color</string>
     <string name="skip_ocr_export_only">Skip OCR (export only)</string>
     <string name="preview_corner_detection">Preview corner detection</string>
     <string name="skip_cropping">Skip cropping</string>
@@ -130,7 +107,6 @@
     <string name="add_another_page">Add page</string>
     <string name="clear_all_pages">Clear all</string>
     <string name="remove_this_page">Remove this page</string>
-    <string name="multipage_not_implemented">Multi-page export not implemented yet</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">Move page left</string>
@@ -181,23 +157,7 @@
     <string name="remove">Remove</string>
     <string name="removed_from_registry_toast">Entry removed</string>
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">PDF quality / size</string>
-    <string name="dpi_settings_label">DPI settings</string>
-    <string name="pdf_preset_high">High (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standard (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Small (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Very small (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF text layer</string>
-    <string name="pdf_text_layer_mode_line_based">Line-based (recommended)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Word-positioned (compatibility)</string>
-    <string name="export_options_title">Export options</string>
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Page size</string>
-    <string name="page_format_fit">Fit to image (recommended)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
-    <string name="jpeg_enhancement_title">JPEG output color</string>
     <string name="btn_options">Options</string>
     <string name="btn_save">Save</string>
     <string name="btn_new">New scan</string>
@@ -312,22 +272,6 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">No document to export</string>
-    <string name="failed_to_export_document">Failed to export document</string>
-    <string name="error_during_export_with_reason">Error during export: %1$s</string>
-    <string name="document_exported">Document %1$s exported</string>
-    <string name="document_multipage_exported">Document (multi-page) %1$s exported</string>
-    <string name="no_target_selected">No target selected</string>
-    <string name="image_exported">Image %1$s exported</string>
-    <string name="failed_to_export_image">Failed to export image</string>
-    <string name="error_during_jpeg_export_with_reason">Error during JPEG export: %1$s</string>
-    <string name="zip_exported">ZIP %1$s exported</string>
-    <string name="failed_to_export_zip">Failed to export ZIP</string>
-    <string name="error_during_zip_export_with_reason">Error during ZIP export: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR text exported as TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Error exporting OCR text: %1$s</string>
-    <string name="no_document_to_share_export_first">No document available to share. Export a document first.</string>
-    <string name="error_sharing_document_with_reason">Error sharing document: %1$s</string>
     <string name="feature_scan_library_disabled">Scan library feature is disabled</string>
     <string name="navigation_failed">Navigation failed</string>
 
@@ -378,7 +322,6 @@
     <!-- Accessibility: Recycler item description and announcements -->
     <string name="page_n_of_m">Page %1$d of %2$d</string>
     <string name="pages_count_announcement">Pages: %1$d</string>
-    <string name="export_started">Export started</string>
     <string name="page_removed">Page removed</string>
     <string name="page_moved_to_position">Moved to position %1$d</string>
     <!-- RecyclerView custom accessibility actions (defined once above in Reorder A11y controls) -->
@@ -444,20 +387,6 @@
     <string name="cleanup_settings_saved">Cleanup settings saved</string>
 
     <!-- Inbox Mode -->
-    <string name="inbox_mode">Inbox Mode</string>
-    <string name="inbox_mode_enable">Enable default export directory</string>
-    <string name="inbox_select_folder">Select folder</string>
-    <string name="inbox_folder_set">Inbox folder: %1$s</string>
-    <string name="inbox_folder_none">No folder selected</string>
-    <string name="inbox_saved">✓ Saved to Inbox</string>
-    <string name="inbox_permission_lost">Inbox folder access lost. Please select a new folder.</string>
-    <string name="inbox_no_folder_selected">Please select an Inbox folder first.</string>
-    <string name="inbox_clear">Clear Inbox folder</string>
-    <string name="inbox_filename_format">Filename format</string>
-    <string name="inbox_auto_new_scan">Start new scan automatically after export</string>
-    <string name="inbox_filename_date_scan">Date + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Date + Time + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Date only (2026-03-04)</string>
     <!-- Crop: Aspect ratio selector (v3.8.0) -->
     <string name="crop_aspect_label">Aspect ratio</string>
     <string name="crop_aspect_auto">Auto (recommended)</string>

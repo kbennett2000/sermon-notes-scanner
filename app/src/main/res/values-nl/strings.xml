@@ -30,7 +30,6 @@
     <string name="image_to_crop">Afbeelding om bij te snijden</string>
     <string name="cropped_image">Bijsneden afbeelding</string>
     <string name="document_preview">Documentvoorbeeld</string>
-    <string name="include_ocr_text">OCR als apart TXT-bestand exporteren</string>
     <string name="ocr_results_will_appear_here">OCR‑resultaten verschijnen hier</string>
     <string name="ocr_no_text_detected">Geen tekst gedetecteerd</string>
     <string name="adjust_the_trapezoid_corners_to_select_the_area_to_crop_then_tap_the_crop_button">Pas de hoeken van
@@ -73,9 +72,6 @@
     <string name="share_logs_error">Kon logbestanden niet voorbereiden: %1$s</string>
 
     <!-- Export options -->
-    <string name="convert_to_grayscale">Grijstinten</string>
-    <string name="export_as_jpeg">Exporteren als JPEG</string>
-    <string name="export_as_pdf">Exporteren als PDF (standaard)</string>
 
     <!-- Flashlight options -->
     <string name="toggle_flashlight">Zaklamp schakelen</string>
@@ -105,19 +101,7 @@
     <string name="camera_zoom_not_available">Zoom is niet beschikbaar op dit apparaat</string>
 
     <!-- JPEG mode labels -->
-    <string name="jpeg_mode_none">Kleur</string>
-    <string name="jpeg_mode_auto">Grijstinten</string>
-    <string name="jpeg_mode_bw_text">Zwart-wit</string>
-    <string name="jpeg_mode_bw_robust">Zwart-wit (robuust) (JPEG)</string>
-    <string name="jpeg_mode_ocr_robust">Robuuste OCR-voorverwerking (JPEG)</string>
 
-    <string name="pdf_bw_mode_robust">Zwart-wit</string>
-    <string name="pdf_bw_mode_classic">Z/W (klassiek)</string>
-    <string name="pdf_bw_mode_ocr_robust">Robuuste OCR-voorverwerking (PDF)</string>
-    <string name="jpeg_mode_gray_clean">Opgeschoonde grijswaarden (hoogdoorlaatfilter) (JPEG)</string>
-    <string name="jpeg_mode_color_clean">Opgeschoonde kleuren (hoogdoorlaatfilter) (JPEG)</string>
-    <string name="pdf_bw_mode_grayscale_clean">Grijswaarden – opgeschoond (hoogdoorlaat)</string>
-    <string name="pdf_bw_mode_color_clean">Kleur – opgeschoond (hoogdoorlaat)</string>
     <string name="skip_ocr_export_only">OCR overslaan (alleen exporteren)</string>
     <string name="skip_cropping">Bijsnijden overslaan</string>
     <string name="preview_corner_detection">Voorbeeld van hoekdetectie</string>
@@ -127,7 +111,6 @@
     <string name="add_another_page">Pagina toevoegen</string>
     <string name="clear_all_pages">Alles wissen</string>
     <string name="remove_this_page">Deze pagina verwijderen</string>
-    <string name="multipage_not_implemented">Meerdere pagina\'s exporteren is nog niet geïmplementeerd</string>
 
     <!-- Reorder A11y controls -->
     <string name="move_page_left">Pagina naar links verplaatsen</string>
@@ -174,16 +157,6 @@
     <string name="removed_from_registry_toast">Item verwijderd</string>
 
     <!-- PDF quality presets (Phase 1) -->
-    <string name="pdf_quality_title">PDF‑kwaliteit / -grootte</string>
-    <string name="pdf_preset_high">Hoog (300 dpi, q85)</string>
-    <string name="pdf_preset_standard">Standaard (200 dpi, q72)</string>
-    <string name="pdf_preset_small">Klein (150 dpi, q62)</string>
-    <string name="pdf_preset_very_small">Zeer klein (110 dpi, q52)</string>
-    <string name="pdf_text_layer_mode_title">PDF-tekstlaag</string>
-    <string name="pdf_text_layer_mode_line_based">Regelgebaseerd (aanbevolen)</string>
-    <string name="pdf_text_layer_mode_word_positioned">Woordgepositioneerd (compatibiliteit)</string>
-    <string name="export_options_title">Exportopties</string>
-    <string name="jpeg_enhancement_title">JPEG‑uitvoerkleur</string>
     <string name="btn_options">Opties</string>
     <string name="btn_save">Opslaan</string>
     <string name="btn_new">Nieuwe scan</string>
@@ -297,22 +270,6 @@
     </string>
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_export">Geen document om te exporteren</string>
-    <string name="failed_to_export_document">Exporteren van document mislukt</string>
-    <string name="error_during_export_with_reason">Fout tijdens exporteren: %1$s</string>
-    <string name="document_exported">Document %1$s geëxporteerd</string>
-    <string name="document_multipage_exported">Document (meerdere pagina’s) %1$s geëxporteerd</string>
-    <string name="no_target_selected">Geen doel geselecteerd</string>
-    <string name="image_exported">Afbeelding %1$s geëxporteerd</string>
-    <string name="failed_to_export_image">Exporteren van afbeelding mislukt</string>
-    <string name="error_during_jpeg_export_with_reason">Fout tijdens JPEG-export: %1$s</string>
-    <string name="zip_exported">ZIP %1$s geëxporteerd</string>
-    <string name="failed_to_export_zip">Exporteren van ZIP mislukt</string>
-    <string name="error_during_zip_export_with_reason">Fout tijdens ZIP-export: %1$s</string>
-    <string name="ocr_text_exported_as_txt">OCR-tekst geëxporteerd als TXT</string>
-    <string name="error_exporting_ocr_text_with_reason">Fout bij exporteren van OCR-tekst: %1$s</string>
-    <string name="no_document_to_share_export_first">Geen document om te delen. Exporteer eerst een document.</string>
-    <string name="error_sharing_document_with_reason">Fout bij het delen van document: %1$s</string>
     <string name="feature_scan_library_disabled">Scanbibliotheekfunctie is uitgeschakeld</string>
     <string name="navigation_failed">Navigatie mislukt</string>
 
@@ -366,7 +323,6 @@
     </string>    <!-- Toegankelijkheid: beschrijving van lijstitems en aankondigingen -->
     <string name="page_n_of_m">Pagina %1$d van %2$d</string>
     <string name="pages_count_announcement">Pagina’s: %1$d</string>
-    <string name="export_started">Export gestart</string>
     <string name="page_removed">Pagina verwijderd</string>
     <string name="page_moved_to_position">Verplaatst naar positie %1$d</string>
 
@@ -415,12 +371,6 @@
 
 
     <!-- Page format selection (PDF export) -->
-    <string name="page_format_label">Paginaformaat</string>
-    <string name="dpi_settings_label">DPI-instellingen</string>
-    <string name="page_format_fit">Aanpassen aan afbeelding (aanbevolen)</string>
-    <string name="page_format_a4">A4</string>
-    <string name="page_format_letter">US Letter</string>
-    <string name="page_format_legal">Legal</string>
 
     <string name="restore_access">Toegang herstellen</string>
     <string name="status">Status</string>
@@ -438,21 +388,6 @@
     <string name="cleanup_max_count">Maximaal aantal</string>
     <string name="cleanup_max_storage_mb">Maximale opslagruimte (MB)</string>
     <string name="cleanup_settings_saved">Opschoningsinstellingen opgeslagen</string>
-    <string name="inbox_mode">Inbox-modus</string>
-    <string name="inbox_mode_enable">Standaard exportmap inschakelen</string>
-    <string name="inbox_select_folder">Map selecteren</string>
-    <string name="inbox_folder_set">Inbox-map: %1$s</string>
-    <string name="inbox_folder_none">Geen map geselecteerd</string>
-    <string name="inbox_saved">✓ Opgeslagen in Inbox</string>
-    <string name="inbox_permission_lost">Toegang tot Inbox-map verloren. Selecteer een nieuwe map.</string>
-    <string name="inbox_no_folder_selected">Selecteer eerst een Inbox-map.</string>
-    <string name="inbox_clear">Inbox-map wissen</string>
-    <string name="inbox_filename_format">Bestandsnaamformaat</string>
-    <string name="inbox_auto_new_scan">Na export automatisch nieuwe scan starten</string>
-    <string name="inbox_filename_date_scan">Datum + Scan (2026-03-04_scan)</string>
-    <string name="inbox_filename_date_time_scan">Datum + tijd + Scan (2026-03-04_143022_scan)</string>
-    <string name="inbox_filename_date_only">Alleen datum (2026-03-04)</string>
-    <string name="pdf_bw_mode_none">Kleur</string>
     <!-- Translations added for missing strings -->
     <string name="confirm_remove_page_title">Pagina verwijderen?</string>
     <string name="confirm_remove_page_message">Wil je deze pagina uit de filmstrip verwijderen?</string>
@@ -474,9 +409,4 @@
     <string name="crop_hint_corner_off_image">Hoek buiten afbeelding — uitvoer kan zwarte randen bevatten</string>
     <string name="crop_edge_dragged">Rand geselecteerd. Sleep om de rand te verplaatsen.</string>
     <!-- Document cleanup -->
-    <string name="document_cleanup_title">Documentopschoning</string>
-    <string name="document_cleanup_original">Origineel</string>
-    <string name="document_cleanup_natural">Natuurlijk</string>
-    <string name="document_cleanup_enhanced">Verbeterd</string>
-    <string name="document_cleanup_clean_text">Schone tekst</string>
 </resources>

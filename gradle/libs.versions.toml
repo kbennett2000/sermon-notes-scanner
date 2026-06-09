@@ -18,10 +18,8 @@ navigationUi = "2.9.8"
 camerax = "1.6.1"
 roomRuntime = "2.8.4"
 lombok = "1.18.46"
-pdfbox = "2.0.27.0"
 activity = "1.13.0"
 exifinterface = "1.4.2"
-documentfile = "1.1.0"
 gson="2.14.0"
 # Android test libs (aligned set)
 androidxTestRules = "1.5.0"
@@ -65,12 +63,8 @@ room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRunti
 # Lombok dependency
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
 
-# PdfBox-Android dependency
-pdfbox-android = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfbox" }
-
 # ExifInterface
 exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 
 # Android test libraries
 test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
