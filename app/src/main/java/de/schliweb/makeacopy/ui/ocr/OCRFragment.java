@@ -80,7 +80,6 @@ public class OCRFragment extends Fragment {
   private OCRHelper langHelper;
 
   @Inject Provider<OCRHelper> ocrHelperProvider;
-  @Inject DictionaryManager dictionaryManager;
 
   // Concurrency: serialize OCR jobs, 1 job ↔ 1 TessBaseAPI instance
   private final ExecutorService ocrExecutor = Executors.newSingleThreadExecutor();
@@ -1757,46 +1756,13 @@ public class OCRFragment extends Fragment {
                   List<RecognizedWord> ocrWords =
                       (bestResult.words != null) ? bestResult.words : new ArrayList<>();
 
-                  // Apply post-processing to correct common OCR errors (including dictionary-based
-                  // correction)
-                  // Only if the option is enabled (default: ON)
-                  boolean postProcessingEnabled = true;
-                  try {
-                    android.content.SharedPreferences pp =
-                        requireContext()
-                            .getSharedPreferences(
-                                "export_options", android.content.Context.MODE_PRIVATE);
-                    postProcessingEnabled = pp.getBoolean(BUNDLE_OCR_POST_PROCESSING, true);
-                  } catch (Throwable ignore) {
-                    // Best-effort; failure is non-critical
-                  }
-                  boolean selectedPaddleMode = getSelectedOcrMode() == OCR_MODE_PADDLE;
-                  if (postProcessingEnabled && !selectedPaddleMode) {
-                    try {
-                      // Process words with dictionary - this is the single source of truth
-                      ocrWords =
-                          OCRPostProcessor.processWithDictionary(ocrWords, lang, dictionaryManager);
-                      // Derive text from processed words instead of processing text separately
-                      ocrText = OCRPostProcessor.wordsToText(ocrWords);
-                      if (ocrText == null || ocrText.trim().isEmpty()) ocrText = "";
-                      // Log quality statistics
-                      OCRPostProcessor.OcrQualityStats stats =
-                          OCRPostProcessor.analyzeQuality(ocrWords);
-                      Log.d(TAG, LP + "OCR Quality: " + stats);
-                    } catch (Throwable t) {
-                      Log.w(TAG, LP + "Post-processing failed", t);
-                    }
-                  } else {
-                    Log.d(
-                        TAG,
-                        LP
-                            + (selectedPaddleMode
-                                ? "OCR post-processing skipped for PaddleOCR"
-                                : "OCR post-processing disabled by user preference"));
-                    // Even without post-processing, derive text from words for consistency
-                    ocrText = OCRPostProcessor.wordsToText(ocrWords); // TODO
-                    if (ocrText == null || ocrText.trim().isEmpty()) ocrText = "";
-                  }
+                  // F1c-3: the dictionary-based OCR post-processing ran only on the non-paddle
+                  // path (gated !selectedPaddleMode, dead under PaddleOCR). With the dictionary
+                  // subgraph removed, PaddleOCR text is derived directly from the recognized words —
+                  // byte-identical to the previous paddle behavior.
+                  Log.d(TAG, LP + "OCR post-processing skipped for PaddleOCR");
+                  ocrText = OCRPostProcessor.wordsToText(ocrWords);
+                  if (ocrText == null || ocrText.trim().isEmpty()) ocrText = "";
 
                   // Create final variables for lambda
                   final String finalText = ocrText;
