@@ -16,7 +16,6 @@ navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
 # Added for MakeACopy
 camerax = "1.6.1"
-roomRuntime = "2.8.4"
 lombok = "1.18.46"
 activity = "1.13.0"
 exifinterface = "1.4.2"
@@ -57,8 +56,6 @@ camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.
 camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 
-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 
 # Lombok dependency
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }

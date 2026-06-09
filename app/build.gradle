@@ -50,7 +50,6 @@ android {
         // Add a note about OpenCV being built from source
         buildConfigField "String", "OPENCV_VERSION", "\"4.13.0\""
         // Feature flags
-        buildConfigField "boolean", "FEATURE_SCAN_LIBRARY", "true"
         buildConfigField "boolean", "FEATURE_REVIEW_OCR", "true"
         buildConfigField "boolean", "FEATURE_FRAMING_LOGGING", "false"
         buildConfigField "boolean", "FEATURE_A11Y_GUIDANCE", "true"
@@ -222,10 +221,6 @@ dependencies {
     }
 
     implementation libs.exifinterface
-
-    // Room (for scan index)
-    implementation libs.room.runtime
-    annotationProcessor libs.room.compiler
 
     // Hilt (Dependency Injection)
     implementation libs.hilt.android

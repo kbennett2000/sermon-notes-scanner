@@ -12,12 +12,9 @@ package de.schliweb.makeacopy;
 import android.app.Application;
 import android.util.Log;
 import dagger.hilt.android.HiltAndroidApp;
-import de.schliweb.makeacopy.data.library.CollectionsRepository;
 import de.schliweb.makeacopy.services.CacheCleanupService;
 import de.schliweb.makeacopy.utils.image.OpenCVUtils;
-import de.schliweb.makeacopy.utils.infra.FeatureFlags;
 import de.schliweb.makeacopy.utils.ocr.PaddleEngineProvider;
-import javax.inject.Inject;
 
 /**
  * Main Application class for MakeACopy. Handles global initialization including OpenCV and
@@ -25,8 +22,6 @@ import javax.inject.Inject;
  */
 @HiltAndroidApp
 public class MakeACopyApplication extends Application {
-
-  @Inject CollectionsRepository collectionsRepository;
 
   private static final String TAG = "MakeACopyApplication";
 
@@ -40,9 +35,6 @@ public class MakeACopyApplication extends Application {
     initializeOpenCV();
 
     initializeCacheCleanupService();
-
-    // Ensure the default "Completed Scans" collection exists on first app start (idempotent)
-    initializeDefaultCompletedScansCollection();
 
     Log.i(TAG, "MakeACopy Application initialized successfully");
   }
@@ -83,28 +75,6 @@ public class MakeACopyApplication extends Application {
 
     } catch (Exception e) {
       Log.e(TAG, "Error initializing Cache Cleanup Service", e);
-    }
-  }
-
-  /**
-   * Ensures the default "Completed Scans" collection exists. Runs off the UI thread and is fully
-   * idempotent.
-   */
-  private void initializeDefaultCompletedScansCollection() {
-    try {
-      if (!FeatureFlags.isScanLibraryEnable()) return;
-      final android.content.Context appCtx = getApplicationContext();
-      new Thread(
-              () -> {
-                try {
-                  collectionsRepository.getOrCreateDefaultCompletedCollection(appCtx);
-                } catch (Throwable t) {
-                  Log.d(TAG, "initializeDefaultCompletedScansCollection: suppressed", t);
-                }
-              })
-          .start();
-    } catch (Throwable t) {
-      Log.d(TAG, "initializeDefaultCompletedScansCollection: suppressed (outer)", t);
     }
   }
 
