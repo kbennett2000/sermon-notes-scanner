@@ -71,8 +71,56 @@ Do not implement against a pending decision — ask first. Update this table whe
 
 ## Build & test
 
-To be filled in during F0b (green build). Until then, do not guess Gradle/NDK invocations —
-discover them, verify, then document here.
+Verified in F0b on Linux x86_64 (8 cores) for the **arm64-v8a** target (Tab A11 + S23). Produces
+unsigned debug APKs for both OCR flavors. Native OpenCV/ONNX are built from source (frozen — see Prime
+directive); `./gradlew` does **not** trigger that — the three scripts must run first.
+
+### One-time toolchain (CI-pinned versions, per `.github/workflows/build-release.yml`)
+- **JDK 21** (Temurin): `export JAVA_HOME=/path/to/jdk-21 PATH=$JAVA_HOME/bin:$PATH`.
+- **Android SDK**: platform API 36 + build-tools 36.x, and **NDK 28.0.13004108**
+  (`sdkmanager "ndk;28.0.13004108"`; `sdkmanager --licenses` once).
+- **CMake 3.31.6** from cmake.org (the SDK's cmake package has no 3.31.x).
+- **Python for the ONNX build** — the ONNX script calls bare `python3`, and that interpreter must have
+  ORT's build deps or the minimal-build step dies with `cannot import name 'parse_config' from 'util'`
+  (flatbuffers missing). Make a venv and put it first on PATH:
+  ```
+  python3.12 -m venv ~/ort-venv
+  ~/ort-venv/bin/pip install -r external/onnxruntime/requirements.txt   # flatbuffers numpy packaging protobuf sympy
+  export PATH=~/ort-venv/bin:$PATH        # so `python3` resolves to this venv
+  ```
+
+### Submodules (~2–4 GB download, a few minutes)
+```
+git submodule update --init --recursive   # external/opencv @4.13.0, external/onnxruntime (+5 nested)
+```
+
+### Build native libs — arm64-v8a (~15 min on 8 cores)
+```
+export ANDROID_HOME=/path/to/Android/Sdk ANDROID_SDK_ROOT=$ANDROID_HOME
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.0.13004108
+export ABIS="arm64-v8a" BUILD_GENERATOR="Unix Makefiles"
+export OPENCV_CMAKE=/path/to/cmake-3.31.6/bin/cmake ORT_CMAKE=$OPENCV_CMAKE
+bash scripts/build_opencv_android.sh        # -> /tmp/opencv-build/lib/arm64-v8a/*.so   (~8 min)
+bash scripts/prepare_opencv.sh              # -> app/src/main/jniLibs/arm64-v8a/
+bash scripts/build_onnxruntime_android.sh   # -> jniLibs/ + app/libs/onnxruntime-1.24.1.jar (~6 min)
+```
+
+### Assemble debug APKs — both flavors, arm64-v8a only (~1 min after deps cached)
+```
+echo "sdk.dir=$ANDROID_HOME" > local.properties      # gitignored
+./gradlew :app:assembleStandardDebug :app:assemblePaddleDebug -PenableAbiSplits=true -PABIS=arm64-v8a
+```
+- Output APKs:
+  - standard (Tesseract): `app/build/outputs/apk/standard/debug/app-standard-arm64-v8a-debug.apk` (~262 MB)
+  - paddle  (PaddleOCR):  `app/build/outputs/apk/paddle/debug/app-paddle-arm64-v8a-debug.apk`  (~154 MB)
+- Both share applicationId `de.schliweb.makeacopy` → install one at a time.
+- Sideload (device not assumed connected): `adb install -r <apk>`
+
+Notes: `jniLibs/`, `app/libs/*.jar`, and `local.properties` are gitignored — the native build never
+dirties the tree and submodule gitlink SHAs stay at upstream's pins. For all four ABIs (CI default) set
+`ABIS="arm64-v8a armeabi-v7a x86 x86_64"` for both the scripts and `-PABIS=...`. Dropping
+`-PenableAbiSplits=true` yields one fat universal APK (carries every dependency ABI). The big debug APK
+size is unstripped OCR language data/fonts (trimmed in a later slice, not F0b).
 
 ## Methodology (non-negotiable)
 
