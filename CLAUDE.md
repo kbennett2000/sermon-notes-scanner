@@ -29,6 +29,9 @@ deleted or replaced — when in doubt, removing UI is the default.
 snap front → crop → OCR → snap back → crop → OCR → concatenate → auto-detect anchor →
 edit screen (text, anchor, title, tags) → finalize (build JSON → POST to songbird and/or share file)
 
+Until F4 lands the edit screen, the kept app terminates at the upstream **OCR result/review screen**
+(`OcrReviewFragment`), which displays the recognized text. It is a temporary terminus, replaced in F4.
+
 ## Output contract (summary — full spec is brief Appendix A)
 
 - ImportDocument: `version: 1`, `exported_at: null`, exactly one annotation, `sermon_notes: []`.
@@ -143,7 +146,9 @@ UI/data (trimmed in F1c per D3).
 - [x] F0b — green build: sideloaded debug APK; capture → crop → OCR verified unchanged
 - [x] F1a — fork identity: applicationId io.github.kbennett2000.sermonscanner, label "Sermon Scanner", v0-upstream-baseline tag (engine choice inverted by F1b)
 - [x] F1b — engine correction: paddle restored as sole flavor, Tesseract removed
-- [ ] F1c — strip to barebones (brief §3 keep/strip lists + D3 English-only OCR; remove dead Tesseract-guarded src/main code)
+- [x] F1c — strip (re-scoped to safe non-code islands): deleted Tesseract data assets (tessdata 66 MB + dictionaries 4 MB; fonts kept — PDF-coupled), store scaffolding (fastlane/ + F-Droid metadata/), langpack-latin-best module + its CI workflow + copyBestModelsForTest, the unused libs.tesseract alias, and the release-CI publish/signing; README rewrite. The strip's entangled CODE is re-sliced along DI seams (below) because this app is heavily Hilt-wired — features interconnect through DI + the Application + the export screen, not clean islands.
+- [ ] F1c-2 — export-output excision: ExportFragment export-output (~900 interleaved lines) + PDF/JPEG/share/inbox classes + pdfbox removal. Gated by the page-hub behavioral contract. Keep the page hub (filmstrip, add-page, preview, OCR display).
+- [ ] F1c-3 — library/Room subgraph: ui/library, data/library (Room), di/DatabaseModule, ui/export/ScanLibraryIndexer, DictionaryManager + DictionarySuggestProvider, library buttons/nav, CacheCleanupService library bits. DI/Application surgery (MakeACopyApplication, @Inject sites). NOTE: DictionaryManager is dead under paddle (only text-affecting use, processWithDictionary, is gated `!selectedPaddleMode`) → removed here. **OCRPostProcessor is FROZEN CORE** — its `wordsToText()` assembles recognized words into output text on the live paddle path (OCRFragment, OcrReviewFragment); never schedule it for deletion.
 - [ ] F2 — two-shot capture + concatenated OCR text
 - [ ] F3 — book map + anchor finder (pure logic, fixture-tested)
 - [ ] F4 — edit screen (text, anchor, title, tags)

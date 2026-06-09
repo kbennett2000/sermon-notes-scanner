@@ -230,27 +230,9 @@ jobs:
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release (tags only)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          name: "MakeACopy v${{ steps.extract_version.outputs.VERSION }}"
-          tag_name: ${{ github.ref_name }}
-          body: ${{ steps.release_notes.outputs.notes }}
-          prerelease: ${{ contains(github.ref_name, '-rc') }}
-          files: |
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-arm64-v8a-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-armeabi-v7a-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86_64-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-arm64-v8a-release.apk.sha256
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-armeabi-v7a-release.apk.sha256
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86_64-release.apk.sha256
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86-release.apk.sha256
-            app/build/outputs/bundle/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-release.aab
-            app/build/outputs/bundle/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-release.aab.sha256
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # F1c: store-publishing dropped — this is a private sideloaded fork. The build + the
+      # workflow-artifact upload below remain; no GitHub Release is published. (Signing steps
+      # are already no-ops without the keystore secrets, which this fork does not set.)
 
       - name: Upload Full APK/AAB artifacts
         uses: actions/upload-artifact@v4

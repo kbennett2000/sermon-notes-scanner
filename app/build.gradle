@@ -298,14 +298,6 @@ tasks.register("copyPaddleEditionAssets", Sync) {
     into(layout.buildDirectory.dir("generated/assets/paddle_edition"))
 }
 
-// Copy Best model from langpack-latin-best to generated assets directory for instrumented tests
-tasks.register("copyBestModelsForTest", Copy) {
-    description = "Copies the Best Tesseract models from langpack-latin-best for OCR comparison tests"
-    from("$rootDir/langpack-latin-best/src/main/assets/tessdata")
-    into(layout.buildDirectory.dir("generated/assets/test_assets/tessdata_best"))
-}
-
-
 // Delete test_jpegs and bestmodels from generated assets after instrumented tests
 tasks.register("deleteTestAssetsAfterTest", Delete) {
     description = "Deletes test assets from generated assets after tests"
@@ -316,20 +308,7 @@ tasks.register("deleteTestAssetsAfterTest", Delete) {
 // Also ensure mergeDebugAssets depends on copy tasks to avoid implicit dependency errors
 tasks.whenTaskAdded { task ->
     if (task.name.startsWith("connectedDebugAndroidTest") || task.name.startsWith("connectedAndroidTest")) {
-        task.dependsOn("copyBestModelsForTest")
         task.finalizedBy("deleteTestAssetsAfterTest")
-    }
-    // Ensure Tesseract Best models are available when assembling/merging assets for
-    // the debug variant (and consequently for the androidTest variant which depends
-    // on the debug assets). Test PDFs/JPEGs live directly under
-    // app/src/androidTest/assets/instrumented_test_data/ and are picked up via the
-    // debug.assets.srcDirs += 'src/androidTest/assets' wiring in the android {} block.
-    // Match flavor-aware merge tasks: mergeDebugAssets, mergePaddleDebugAssets,
-    // mergeStandardDebugAssets, and the corresponding *AndroidTestAssets variants.
-    // The previous hook only matched the non-flavor names and therefore never fired
-    // for the `paddle`/`standard` flavors, so tessdata_best/ was missing in the APK.
-    if (task.name ==~ /merge(Standard)?Debug(AndroidTest)?Assets/) {
-        task.dependsOn("copyBestModelsForTest")
     }
 }
 
