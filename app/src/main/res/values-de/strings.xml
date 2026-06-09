@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">Textmodus: Zeilenumbrüche und Satzzeichen werden derzeit zu Leerzeichen
         normalisiert. Wenn weniger Wörter eingegeben werden, als erkannt wurden, bleiben die übrigen OCR-Wörter

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">Textový režim: Zalomení řádků a interpunkce jsou aktuálně normalizovány na
         mezery. Pokud je zadáno méně slov, než kolik bylo rozpoznáno, zbývající slova OCR zůstanou beze změny. Změny se

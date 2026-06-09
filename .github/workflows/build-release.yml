@@ -114,7 +114,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Code Quality
-        run: ./gradlew :app:compileStandardDebugJavaWithJavac :app:compilePaddleDebugJavaWithJavac :app:testStandardDebugUnitTest :app:testPaddleDebugUnitTest :app:lintStandardDebug :app:lintPaddleDebug
+        run: ./gradlew :app:compileStandardDebugJavaWithJavac :app:testStandardDebugUnitTest :app:lintStandardDebug
 
       # Keystore nur für TAG-Builds dekodieren (PRs/branch: überspringen)
       - name: Decode Keystore (tags only)
@@ -167,10 +167,9 @@ jobs:
       - name: Verify no test data in release APKs
         run: ./gradlew --no-daemon :app:verifyNoTestDataInApk
 
-      # Collect APKs/AABs from per-flavor output dirs into a single staging dir,
-      # renaming so that `standard` keeps the historical name and `paddle` gets
-      # a `-paddle` suffix (analogous to `MakeACopy-Light-...`).
-      - name: Rename Full artifacts (standard + paddle)
+      # Collect APKs/AABs from the standard-flavor output dirs into a single staging dir,
+      # keeping the historical unsuffixed names. (Paddle flavor removed in F1a, D5.)
+      - name: Rename Full artifacts (standard)
         run: |
           set -euo pipefail
           VERSION="${{ steps.extract_version.outputs.VERSION }}"
@@ -178,21 +177,14 @@ jobs:
           STAGE_AAB="app/build/outputs/bundle/release"
           mkdir -p "$STAGE_APK" "$STAGE_AAB"
           shopt -s nullglob
-          # APKs: app-<flavor>-<abi>-release[-unsigned].apk -> staged + renamed
+          # APKs: app-standard-<abi>-release[-unsigned].apk -> staged + renamed
           for apk in app/build/outputs/apk/standard/release/app-standard-*-release*.apk; do
             abi=$(basename "$apk" | sed -n 's/^app-standard-\(.*\)-release\(-unsigned\)\{0,1\}\.apk$/\1/p')
             [ -n "$abi" ] && mv "$apk" "$STAGE_APK/MakeACopy-v${VERSION}-${abi}-release.apk"
           done
-          for apk in app/build/outputs/apk/paddle/release/app-paddle-*-release*.apk; do
-            abi=$(basename "$apk" | sed -n 's/^app-paddle-\(.*\)-release\(-unsigned\)\{0,1\}\.apk$/\1/p')
-            [ -n "$abi" ] && mv "$apk" "$STAGE_APK/MakeACopy-v${VERSION}-${abi}-paddle-release.apk"
-          done
-          # AABs: standard keeps unsuffixed historical name, paddle gets -paddle suffix
+          # AAB: standard keeps the unsuffixed historical name
           if [ -f app/build/outputs/bundle/standardRelease/app-standard-release.aab ]; then
             mv app/build/outputs/bundle/standardRelease/app-standard-release.aab "$STAGE_AAB/MakeACopy-v${VERSION}-release.aab"
-          fi
-          if [ -f app/build/outputs/bundle/paddleRelease/app-paddle-release.aab ]; then
-            mv app/build/outputs/bundle/paddleRelease/app-paddle-release.aab "$STAGE_AAB/MakeACopy-v${VERSION}-paddle-release.aab"
           fi
           ls -la "$STAGE_APK" "$STAGE_AAB"
 
@@ -255,18 +247,8 @@ jobs:
             app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-armeabi-v7a-release.apk.sha256
             app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86_64-release.apk.sha256
             app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86-release.apk.sha256
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-arm64-v8a-paddle-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-armeabi-v7a-paddle-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86_64-paddle-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86-paddle-release.apk
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-arm64-v8a-paddle-release.apk.sha256
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-armeabi-v7a-paddle-release.apk.sha256
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86_64-paddle-release.apk.sha256
-            app/build/outputs/apk/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-x86-paddle-release.apk.sha256
             app/build/outputs/bundle/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-release.aab
             app/build/outputs/bundle/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-release.aab.sha256
-            app/build/outputs/bundle/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-paddle-release.aab
-            app/build/outputs/bundle/release/MakeACopy-v${{ steps.extract_version.outputs.VERSION }}-paddle-release.aab.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -1,4 +1,0 @@
-Čeština
-Jazykový příklad
-Příliš žluťoučký kůň úpěl ďábelské ódy.
-Příklad rozpoznávání textu.

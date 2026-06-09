@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MakeACopy</string>
+    <string name="app_name">Sermon Scanner</string>
 
     <string name="tip_text_mode_editing">Tekstmodus: Linjeskift og tegnsetting normaliseres for øyeblikket til
         mellomrom. Hvis færre ord legges inn enn det som ble gjenkjent, forblir de resterende OCR-ordene uendret.

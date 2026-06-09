@@ -1,4 +1,0 @@
-Français
-Exemple de langue
-Portez ce vieux whisky au juge blond qui fume près de l'île.
-Exemple de reconnaissance de texte.
