@@ -40,4 +40,17 @@
         android:name="de.schliweb.makeacopy.ui.ocr.review.OcrReviewFragment"
         android:label="@string/btn_review"
         tools:layout="@layout/fragment_ocr_review" />
+
+    <fragment
+        android:id="@+id/navigation_edit"
+        android:name="de.schliweb.makeacopy.ui.edit.EditFragment"
+        android:label="@string/title_edit"
+        tools:layout="@layout/fragment_edit" />
+
+    <!-- F4-TEMP stub terminus; replaced when F5/F6 land. -->
+    <fragment
+        android:id="@+id/navigation_draft_preview"
+        android:name="de.schliweb.makeacopy.ui.edit.DraftPreviewFragment"
+        android:label="@string/title_draft_preview"
+        tools:layout="@layout/fragment_draft_preview" />
 </navigation>

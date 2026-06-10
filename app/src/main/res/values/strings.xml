@@ -385,4 +385,24 @@
     <string name="crop_snap_toggle_cd" tools:ignore="MissingTranslation">Toggle right-angle snap</string>
     <string name="crop_snap_toggle_on" tools:ignore="MissingTranslation">Right-angle snap on</string>
     <string name="crop_snap_toggle_off" tools:ignore="MissingTranslation">Right-angle snap off</string>
+
+    <!-- F4 edit screen (default locale only; private sideloaded app) -->
+    <string name="title_edit" tools:ignore="MissingTranslation">Edit</string>
+    <string name="title_draft_preview" tools:ignore="MissingTranslation">Draft preview (TEMP)</string>
+    <string name="label_book" tools:ignore="MissingTranslation">Book</string>
+    <string name="label_chapter" tools:ignore="MissingTranslation">Chapter</string>
+    <string name="label_verse_from" tools:ignore="MissingTranslation">Verse from</string>
+    <string name="label_verse_to" tools:ignore="MissingTranslation">Verse to</string>
+    <string name="label_title" tools:ignore="MissingTranslation">Title</string>
+    <string name="label_date" tools:ignore="MissingTranslation">Date</string>
+    <string name="label_tags" tools:ignore="MissingTranslation">Tags (comma-separated)</string>
+    <string name="label_ocr_text" tools:ignore="MissingTranslation">Note text</string>
+    <string name="btn_continue" tools:ignore="MissingTranslation">Continue</string>
+    <string name="error_chapter_out_of_range" tools:ignore="MissingTranslation">Chapter out of range for this book</string>
+    <string name="error_unknown_book" tools:ignore="MissingTranslation">Unknown book</string>
+    <string name="error_verse_table_missing" tools:ignore="MissingTranslation">Verse-count data unavailable</string>
+    <string name="warn_verse_order" tools:ignore="MissingTranslation">Verse "to" is before verse "from"</string>
+    <string name="title_no_title" tools:ignore="MissingTranslation">No title</string>
+    <string name="msg_no_title" tools:ignore="MissingTranslation">You haven\'t entered a title. Continue anyway?</string>
+    <string name="stub_f5f6_pending" tools:ignore="MissingTranslation">Draft preview — F5/F6 pending (this screen is temporary)</string>
 </resources>
