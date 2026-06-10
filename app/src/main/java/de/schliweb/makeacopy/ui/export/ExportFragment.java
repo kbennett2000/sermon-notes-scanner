@@ -995,6 +995,14 @@ public class ExportFragment extends Fragment {
           return insets;
         });
 
+    // Keep the bottom-anchored Continue container clear of the system nav bar (edge-to-edge).
+    ViewCompat.setOnApplyWindowInsetsListener(
+        binding.exportOptionsGroup,
+        (v, insets) -> {
+          UIUtils.adjustMarginForSystemInsets(binding.exportOptionsGroup, 8);
+          return insets;
+        });
+
     exportViewModel
         .isDocumentReady()
         .observe(

@@ -78,7 +78,7 @@ public class EditViewModelTest {
 
   @Test
   public void initialize_prefillsTextAndAnchorFromFinder() {
-    vm.initialize("The army gathered. (1Sam. 22:1)", table, "2026-06-10");
+    vm.initialize("The army gathered. (1Sam. 22:1)", table, "2026-06-10", "sermon");
     EditUiState st = s();
     assertEquals("The army gathered. (1Sam. 22:1)", st.editedText());
     assertEquals("1SA", st.bookUsfm());
@@ -93,8 +93,24 @@ public class EditViewModelTest {
   }
 
   @Test
+  public void initialize_prefillsConfiguredDefaultTags() {
+    vm.initialize("", table, "2026-06-10", "sermon, majestic view");
+    EditUiState st = s();
+    assertEquals("sermon, majestic view", st.tagsText());
+    assertEquals(Arrays.asList("sermon", "majestic view"), st.tags());
+  }
+
+  @Test
+  public void initialize_blankDefaultTags_yieldsNoTags() {
+    vm.initialize("", table, "2026-06-10", "");
+    EditUiState st = s();
+    assertEquals("", st.tagsText());
+    assertTrue(st.tags().isEmpty());
+  }
+
+  @Test
   public void initialize_noAnchor_leavesFieldsEmptyAndBlocks() {
-    vm.initialize("No scripture references here at all.", table, "2026-06-10");
+    vm.initialize("No scripture references here at all.", table, "2026-06-10", "sermon");
     EditUiState st = s();
     assertEquals("", st.bookUsfm());
     assertEquals("", st.chapterText());
@@ -104,9 +120,9 @@ public class EditViewModelTest {
 
   @Test
   public void initialize_isGuarded_secondCallDoesNotWipeEdits() {
-    vm.initialize("(1Sam. 22:1)", table, "2026-06-10");
+    vm.initialize("(1Sam. 22:1)", table, "2026-06-10", "sermon");
     vm.setChapter("5");
-    vm.initialize("Totally different text", table, "2026-06-11");
+    vm.initialize("Totally different text", table, "2026-06-11", "sermon");
     EditUiState st = s();
     assertEquals("5", st.chapterText());
     assertEquals("1SA", st.bookUsfm());
@@ -114,7 +130,7 @@ public class EditViewModelTest {
 
   @Test
   public void chapterOnly_resolvesWholeChapter() {
-    vm.initialize("", table, "2026-06-10");
+    vm.initialize("", table, "2026-06-10", "sermon");
     vm.setBookUsfm("PSA");
     vm.setChapter("23");
     EditUiState st = s();
@@ -126,7 +142,7 @@ public class EditViewModelTest {
 
   @Test
   public void chapterOutOfRange_blocks() {
-    vm.initialize("", table, "2026-06-10");
+    vm.initialize("", table, "2026-06-10", "sermon");
     vm.setBookUsfm("MAT"); // sample MAT has 5 chapters
     vm.setChapter("9");
     EditUiState st = s();
@@ -136,7 +152,7 @@ public class EditViewModelTest {
 
   @Test
   public void incompleteAnchor_blocks() {
-    vm.initialize("", table, "2026-06-10");
+    vm.initialize("", table, "2026-06-10", "sermon");
     vm.setBookUsfm("PSA");
     vm.setChapter(""); // no chapter yet
     EditUiState st = s();
@@ -146,7 +162,7 @@ public class EditViewModelTest {
 
   @Test
   public void reversedVerseRange_warnsButDoesNotBlock() {
-    vm.initialize("", table, "2026-06-10");
+    vm.initialize("", table, "2026-06-10", "sermon");
     vm.setBookUsfm("1SA");
     vm.setChapter("25");
     vm.setVerseFrom("6");
@@ -160,7 +176,7 @@ public class EditViewModelTest {
 
   @Test
   public void setText_doesNotMoveTheAnchor() {
-    vm.initialize("(1Sam. 22:1)", table, "2026-06-10");
+    vm.initialize("(1Sam. 22:1)", table, "2026-06-10", "sermon");
     vm.setText("Now it says John 1:1 instead");
     EditUiState st = s();
     assertEquals("1SA", st.bookUsfm());
@@ -170,7 +186,7 @@ public class EditViewModelTest {
 
   @Test
   public void titleWarning_trueWhenBlank_falseWhenSet() {
-    vm.initialize("", table, "2026-06-10");
+    vm.initialize("", table, "2026-06-10", "sermon");
     assertTrue(s().titleWarning());
     vm.setTitle("A Story about David & Abigail");
     assertFalse(s().titleWarning());
@@ -178,7 +194,7 @@ public class EditViewModelTest {
 
   @Test
   public void buildDraft_assemblesAllInputs() {
-    vm.initialize("edited body text", table, "2026-06-10");
+    vm.initialize("edited body text", table, "2026-06-10", "sermon");
     vm.setBookUsfm("1SA");
     vm.setChapter("25");
     vm.setVerseFrom("3");
@@ -198,7 +214,7 @@ public class EditViewModelTest {
 
   @Test
   public void buildDraft_nullWhenCannotProceed() {
-    vm.initialize("", table, "2026-06-10");
+    vm.initialize("", table, "2026-06-10", "sermon");
     assertNull(vm.buildDraft());
   }
 

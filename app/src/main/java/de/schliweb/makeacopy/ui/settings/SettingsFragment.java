@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import de.schliweb.makeacopy.R;
@@ -47,7 +48,16 @@ public class SettingsFragment extends Fragment {
     binding.baseUrlField.setText(SongbirdPrefsHelper.getBaseUrl(requireContext()));
     binding.usernameField.setText(SongbirdPrefsHelper.getUsername(requireContext()));
     binding.passwordField.setText(SongbirdPrefsHelper.getPassword(requireContext()));
+    binding.defaultTagsField.setText(SongbirdPrefsHelper.getDefaultTags(requireContext()));
     binding.buttonSaveSettings.setOnClickListener(v -> save());
+
+    // Keep the Save button clear of the system nav bar (edge-to-edge).
+    ViewCompat.setOnApplyWindowInsetsListener(
+        binding.buttonSaveSettings,
+        (v, insets) -> {
+          UIUtils.adjustMarginForSystemInsets(binding.buttonSaveSettings, 16);
+          return insets;
+        });
   }
 
   private void save() {
@@ -57,9 +67,14 @@ public class SettingsFragment extends Fragment {
         binding.usernameField.getText() == null ? "" : binding.usernameField.getText().toString();
     String password =
         binding.passwordField.getText() == null ? "" : binding.passwordField.getText().toString();
+    String defaultTags =
+        binding.defaultTagsField.getText() == null
+            ? ""
+            : binding.defaultTagsField.getText().toString();
     SongbirdPrefsHelper.setBaseUrl(requireContext(), baseUrl); // normalized inside
     SongbirdPrefsHelper.setUsername(requireContext(), username);
     SongbirdPrefsHelper.setPassword(requireContext(), password);
+    SongbirdPrefsHelper.setDefaultTags(requireContext(), defaultTags);
     UIUtils.showToast(requireContext(), getString(R.string.settings_saved), Toast.LENGTH_SHORT);
     try {
       Navigation.findNavController(requireView()).popBackStack();

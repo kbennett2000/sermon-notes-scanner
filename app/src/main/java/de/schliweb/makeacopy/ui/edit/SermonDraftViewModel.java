@@ -30,4 +30,9 @@ public class SermonDraftViewModel extends ViewModel {
   public void setDraft(SermonDraft d) {
     draft.setValue(d);
   }
+
+  /** Clears the handed-off draft (e.g. after a successful send, before returning to start). */
+  public void clear() {
+    draft.setValue(null);
+  }
 }

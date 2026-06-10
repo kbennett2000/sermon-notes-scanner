@@ -422,5 +422,6 @@
     <string name="settings_base_url_hint" tools:ignore="MissingTranslation">Base URL (e.g. http://host:8000)</string>
     <string name="settings_username_hint" tools:ignore="MissingTranslation">Username</string>
     <string name="settings_password_hint" tools:ignore="MissingTranslation">Password</string>
+    <string name="settings_default_tags_hint" tools:ignore="MissingTranslation">Default tags (comma-separated)</string>
     <string name="settings_saved" tools:ignore="MissingTranslation">Settings saved</string>
 </resources>
