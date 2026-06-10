@@ -176,8 +176,14 @@ echo "sdk.dir=$ANDROID_HOME" > local.properties      # gitignored
 - applicationId `io.github.kbennett2000.sermonscanner` (coexists with stock MakeACopy).
   Sideload (device not assumed connected): `adb install -r <apk>`; uninstall:
   `adb uninstall io.github.kbennett2000.sermonscanner`.
-- **First-run config (F6):** on the finalize screen tap **Settings** and enter the songbird base URL
-  (e.g. `http://<host>:8000`, over Tailscale) + bearer token before **Send** is enabled (stored encrypted).
+- **First-run config (F6/F6b):** on the finalize screen tap **Settings** and enter the songbird base URL
+  (e.g. `http://<host>:8000`, over Tailscale) + **username + password** before **Send** is enabled
+  (stored encrypted; songbird is cookie-session — see the Environment errata).
+- **Verification gate (run this, not just assemble):** the CI/merge gate is
+  `./gradlew :app:compilePaddleDebugJavaWithJavac :app:testPaddleDebugUnitTest :app:lintPaddleDebug`
+  (`.github/workflows/build-release.yml`). **`lintPaddleDebug` is part of the gate** (`abortOnError`
+  defaults true, no baseline) — assemble + unit tests alone do **not** catch lint errors (e.g.
+  `MissingDefaultResource`). Always run lint before declaring a slice green.
 
 Notes: paddle is the sole flavor (F1b, D5) — Tesseract removed; there is no `assembleStandardDebug`. The
 packaged ONNX runtime carries **DocQuad + PaddleOCR** ops; the on-disk `libonnxruntime.so` is the F0b

@@ -247,8 +247,6 @@
     <!-- Delete confirmation (ScanDetails) -->
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_share_export_first">Nincs megosztható dokumentum. Először exportálj egy dokumentumot.
-    </string>
 
     <!-- ScanDetailsFragment toasts -->
 
