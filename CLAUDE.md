@@ -88,6 +88,11 @@ numeral → arabic, lowercase, strip whitespace and `.`) followed by a chapter, 
 edit screen is the safety net. Canonical fixture: brief Appendix C must yield `1SA 22:1`.
 The Appendix C fixture is **PaddleOCR** output captured from the stock app — the same engine this fork ships (D5).
 
+Implemented in F3 as pure logic in `de.schliweb.makeacopy.anchor`: `BookMap` (Appendix B, ported
+verbatim) + `AnchorFinder.find(String) → Optional<StructuralAnchor>` over the F2 combined string.
+`StructuralAnchor` keeps a chapter-only reference chapter-only; five-field span / end-verse fill (D2)
+is F3b, not done here. The fixture lives at `app/src/test/resources/anchor/appendix_c_fixture.txt`.
+
 ## Decisions
 
 | # | Question | Status |
@@ -185,7 +190,7 @@ UI/data (trimmed in F1c per D3).
 - [x] F1c-2 — export-output excision: removed ExportFragment export-output + PDF/JPEG/ZIP/TXT/share/inbox classes (PdfCreator, PdfTextUtils, PdfQualityPreset, PageFormat, JpegExporter, JpegExportOptions, InboxExporter, ExportTxtHelper, ExportOptionsDialogFragment, ExportUiBindings) + pdfbox & documentfile deps + FEATURE_INBOX_MODE + orphaned export strings; trimmed ExportPrefsHelper to skip_ocr/pending_add_page/last_import_uri. Page hub kept (filmstrip, add/clear page, preview, OCR badge, ScanPersister persistence). Kept-and-deferred to F1c-3: ShareIntentHelper (used by ui/library/ScanDetailsFragment) + ScanLibraryIndexer.
 - [x] F1c-3 — library/Room subgraph removed: deleted ui/library, data/library (Room), di/DatabaseModule, ui/export/ScanLibraryIndexer, ui/ocr/review/suggest/DictionarySuggestProvider, utils/export/ShareIntentHelper, library buttons/nav (incl. forced minimal edits to CameraFragment + fragment_camera.xml), Room deps, FEATURE_SCAN_LIBRARY + FeatureFlags.isScanLibraryEnable; MakeACopyApplication + CacheCleanupService de-Roomed (startup is now OpenCV → CacheCleanupService, no DB at launch). The app is **database-free**: scan → view text → dead-end (until F2–F6). DictionaryManager was **de-wired but KEPT (RETAINED-DEAD)** to preserve OCRPostProcessor byte-zero-diff (see prime directive). CompletedScansRegistry/RegistryCleaner/ScanPersister (JSON registry, Room-free) kept.
 - [x] F2 — combined OCR text artifact: pure `OcrTextJoiner.join(List<String>)` (hub order, per-page trim, `"\n\n"` seam, null/blank skipped, deterministic, 10 unit tests) + `CombinedOcrTextProvider.fromPages()` glue reading each page's `text.txt` on-demand (no persistence, no frozen-core edits) + TEMP long-press proof hook on the hub preview (removed at F4). Two-shot capture is the pre-existing multi-page hub; this slice delivers the concatenation. Contract recorded under "Combined OCR text contract".
-- [ ] F3 — book map + anchor finder (pure logic, fixture-tested)
+- [x] F3 — book map + anchor finder (pure logic, fixture-tested): `de.schliweb.makeacopy.anchor` — `BookMap` (Appendix B verbatim, 66 books + `|john`→1JN, collision-guarded), `StructuralAnchor` (record; chapter-only stays chapter-only — D2/F3b not bundled), `AnchorFinder.find()` (first resolvable ref, token-window scan, book recognition is pure BookMap lookup). `BookMapTest` (10) + `AnchorFinderTest` (17, incl. Appendix C fixture → `1SA 22:1` by design). No UI/wiring (F4); no frozen-core edits.
 - [ ] F4 — edit screen (text, anchor, title, tags)
 - [ ] F5 — songbird JSON emitter (deterministic, Appendix A)
 - [ ] F6 — finalize: POST / save-share per D4
