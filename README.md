@@ -1,7 +1,7 @@
 # Sermon Scanner
 
 A **private, sideloaded Android app** that photographs a two-sided printed sermon-note handout,
-OCRs it on-device, lets the operator make a few edits, and emits a
+OCRs it on-device, lets the operator fix the text and confirm a Scripture anchor, and emits a
 [songbird](https://github.com/kbennett2000/songbird)-compatible annotation **import JSON**
 (optionally POSTing it straight into songbird over the LAN). Not a store app.
 
@@ -11,10 +11,27 @@ upstream project and validated on real handouts.
 
 ## Status
 
-Work in progress. The app currently scans and shows recognized OCR text; the dedicated edit
-screen, the Scripture-anchor detector, the songbird JSON emitter, and the finalize/POST step
-are not built yet. After the current strip-down, the app terminates at the OCR result screen
-(a temporary terminus until the edit screen lands).
+Feature-complete per its brief. The full workflow is live end-to-end:
+
+> snap front → crop → OCR → snap back → crop → OCR → **concatenate** →
+> **auto-detect the Scripture anchor** → **edit screen** → **finalize**
+
+- **Anchor auto-detection** — scans the combined OCR text top-to-bottom and resolves the first
+  structurally valid Scripture reference using a 66-book USFM map (handles Roman numerals,
+  abbreviations with periods, parenthesised cross-references). Best-effort; the operator fixes it.
+- **Edit screen** — fix the OCR text, confirm the anchor (book picker + chapter/verse fields with a
+  live passage label), and set the title, date, and tags. Out-of-range chapters block; the rest is
+  best-effort with warnings.
+- **Finalize** — preview the exact import JSON, then **Send to songbird** (`POST /api/v1/import`,
+  showing the *created / skipped* result — re-sending the same note is a harmless no-op) or
+  **Share JSON** as a file. Verse spans for whole-chapter references are filled from a bundled,
+  offline verse-count table; the app never calls a Bible API at runtime.
+
+### First run
+
+Before **Send** is enabled, open **Settings** (from the finalize screen) and enter the songbird
+base URL (e.g. `http://<host>:8000`, reachable over the LAN/Tailscale) and bearer token. The token
+is stored encrypted on-device. Until then you can still **Share JSON**.
 
 ## Fork & licensing
 
