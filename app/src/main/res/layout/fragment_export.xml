@@ -213,6 +213,14 @@
                     app:autoSizeStepGranularity="1sp" />
         </LinearLayout>
 
+        <!-- F4: proceed to the edit screen (enabled in code when >=1 page has OCR text) -->
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_continue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/btn_continue" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -42,11 +42,15 @@ and DictionaryManager together.
 snap front → crop → OCR → snap back → crop → OCR → concatenate → auto-detect anchor →
 edit screen (text, anchor, title, tags) → finalize (build JSON → POST to songbird and/or share file)
 
-Until F4 lands the edit screen, the kept app terminates at the upstream **OCR result/review screen**
-(`OcrReviewFragment`), which displays the recognized text. It is a temporary terminus, replaced in F4.
 `ExportFragment` survives as the multi-page **page hub** (filmstrip, add/clear page, preview, per-page
 OCR badge, registry persistence) but, since F1c-2, offers **no export of any kind** — all PDF/JPEG/ZIP/
 TXT/share/inbox output was removed. Document files are not this fork's output; F5/F6 emit songbird JSON.
+
+Since F4, the hub's **Continue** action (enabled once ≥1 page has OCR text) flows to the **edit screen**
+(`ui/edit/EditFragment`): editable combined OCR text + structured anchor (book picker/chapter/verses,
+live passage label, live `SpanResolver` re-resolve that blocks on out-of-range) + title/date/tags. It
+collects a `SermonDraft` (F5 renders the body) and hands it via the activity-scoped `SermonDraftViewModel`
+to a **TEMP** `DraftPreviewFragment` (read-only dump, "F5/F6 pending") — replaced when F5/F6 land.
 
 ## Combined OCR text contract (F2 — the downstream artifact)
 
@@ -194,6 +198,6 @@ UI/data (trimmed in F1c per D3).
 - [x] F2 — combined OCR text artifact: pure `OcrTextJoiner.join(List<String>)` (hub order, per-page trim, `"\n\n"` seam, null/blank skipped, deterministic, 10 unit tests) + `CombinedOcrTextProvider.fromPages()` glue reading each page's `text.txt` on-demand (no persistence, no frozen-core edits) + TEMP long-press proof hook on the hub preview (removed at F4). Two-shot capture is the pre-existing multi-page hub; this slice delivers the concatenation. Contract recorded under "Combined OCR text contract".
 - [x] F3 — book map + anchor finder (pure logic, fixture-tested): `de.schliweb.makeacopy.anchor` — `BookMap` (Appendix B verbatim, 66 books + `|john`→1JN, collision-guarded), `StructuralAnchor` (record; chapter-only stays chapter-only — D2/F3b not bundled), `AnchorFinder.find()` (first resolvable ref, token-window scan, book recognition is pure BookMap lookup). `BookMapTest` (10) + `AnchorFinderTest` (17, incl. Appendix C fixture → `1SA 22:1` by design). No UI/wiring (F4); no frozen-core edits.
 - [x] F3b — verse-count table + span resolver (D2): `de.schliweb.makeacopy.anchor` — `SpanResolver.resolve(StructuralAnchor, VerseTable)` → `ResolvedSpan` (five Appendix A fields) or typed `SpanResolution` failure (`UNKNOWN_BOOK`/`CHAPTER_OUT_OF_RANGE`). Chapter-only fills `1..table[ch]`; single verse `start=end`; range passes through; verses never validated (§6). `VerseTable` (pure Gson parser) reads the **canon-structural** table at `app/src/main/assets/anchor/verse_counts.json` (counts = canonical structure; `source_translation`/`concord_version` are provenance only). Regenerate offline with `python3 tools/generate_verse_counts/generate_verse_counts.py --base-url <concord> --translation <id> --concord-version <v>` — never a runtime dep. The committed table was generated from **NKJV** (`concord_version v1.2.0`); NKJV is a licensed translation in Concord's `data/private/`, so it's a fine verse-count source (bare counts are canonical structure, not text) but **regeneration requires Kris's private Concord deployment**. Tests: `SpanResolverTest` (8) + `VerseTableTest` (6) on a sample table; `VerseCountsSchemaTest` enforces the real asset (66 keys == BookMap, positive counts). Asset loading is F4 wiring; no UI / no frozen-core edits.
-- [ ] F4 — edit screen (text, anchor, title, tags)
+- [x] F4 — edit screen (text, anchor, title, tags): `ui/edit/EditFragment` + fragment-scoped `EditViewModel` (Context-free, injected `VerseTable`). Reached via the hub **Continue** action (gated on ≥1 page with OCR; replaced the F2 TEMP hook). Prefills combined OCR text + runs `AnchorFinder` once (operator owns the anchor after); structured anchor editing (book picker via `anchor/BookNames`, numeric chapter/verse-from/verse-to) with live `PassageLabel` + `SpanResolver` re-resolve (out-of-range/unknown **block**, reversed range **warns**); title (blank warns, not blocks) / date (picker, ISO) / tags. Produces `draft/SermonDraft` (resolved span + label + text/title/date/tags) handed via activity-scoped `SermonDraftViewModel` to TEMP `DraftPreviewFragment`. `VerseTableLoader` is the thin cached asset loader F3b deferred. Tests: `BookNamesTest`, `PassageLabelTest`, `EditViewModelTest` (11). New strings default-locale only. Known limits: stateless between visits; no process-death restore.
 - [ ] F5 — songbird JSON emitter (deterministic, Appendix A)
 - [ ] F6 — finalize: POST / save-share per D4
