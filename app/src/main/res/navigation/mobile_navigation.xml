@@ -47,10 +47,15 @@
         android:label="@string/title_edit"
         tools:layout="@layout/fragment_edit" />
 
-    <!-- F4-TEMP stub terminus; replaced when F5/F6 land. -->
     <fragment
-        android:id="@+id/navigation_draft_preview"
-        android:name="de.schliweb.makeacopy.ui.edit.DraftPreviewFragment"
-        android:label="@string/title_draft_preview"
-        tools:layout="@layout/fragment_draft_preview" />
+        android:id="@+id/navigation_finalize"
+        android:name="de.schliweb.makeacopy.ui.finalize.FinalizeFragment"
+        android:label="@string/title_finalize"
+        tools:layout="@layout/fragment_finalize" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="de.schliweb.makeacopy.ui.settings.SettingsFragment"
+        android:label="@string/title_settings"
+        tools:layout="@layout/fragment_settings" />
 </navigation>

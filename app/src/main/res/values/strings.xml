@@ -388,7 +388,6 @@
 
     <!-- F4 edit screen (default locale only; private sideloaded app) -->
     <string name="title_edit" tools:ignore="MissingTranslation">Edit</string>
-    <string name="title_draft_preview" tools:ignore="MissingTranslation">Draft preview (TEMP)</string>
     <string name="label_book" tools:ignore="MissingTranslation">Book</string>
     <string name="label_chapter" tools:ignore="MissingTranslation">Chapter</string>
     <string name="label_verse_from" tools:ignore="MissingTranslation">Verse from</string>
@@ -404,5 +403,22 @@
     <string name="warn_verse_order" tools:ignore="MissingTranslation">Verse "to" is before verse "from"</string>
     <string name="title_no_title" tools:ignore="MissingTranslation">No title</string>
     <string name="msg_no_title" tools:ignore="MissingTranslation">You haven\'t entered a title. Continue anyway?</string>
-    <string name="stub_f5f6_pending" tools:ignore="MissingTranslation">Draft preview — F5/F6 pending (this screen is temporary)</string>
+
+    <!-- F6 finalize + settings (default locale only; private sideloaded app) -->
+    <string name="title_finalize" tools:ignore="MissingTranslation">Finalize</string>
+    <string name="title_settings" tools:ignore="MissingTranslation">Settings</string>
+    <string name="btn_send_to_songbird" tools:ignore="MissingTranslation">Send to songbird</string>
+    <string name="btn_share_json" tools:ignore="MissingTranslation">Share JSON…</string>
+    <string name="finalize_settings_needed" tools:ignore="MissingTranslation">Set the songbird URL and token in Settings to enable Send.</string>
+    <string name="finalize_sending" tools:ignore="MissingTranslation">Sending…</string>
+    <string name="finalize_imported" tools:ignore="MissingTranslation">Imported: %1$d created, %2$d skipped.</string>
+    <string name="finalize_imported_no_summary" tools:ignore="MissingTranslation">Imported (no summary returned).</string>
+    <string name="finalize_unreachable" tools:ignore="MissingTranslation">Couldn\'t reach songbird — check Tailscale/URL. You can Share JSON instead.</string>
+    <string name="finalize_unauthorized" tools:ignore="MissingTranslation">songbird rejected the token. Update it in Settings.</string>
+    <string name="finalize_http_error" tools:ignore="MissingTranslation">Error %1$d: %2$s</string>
+    <string name="finalize_share_failed" tools:ignore="MissingTranslation">Couldn\'t prepare the file to share.</string>
+    <string name="settings_songbird_header" tools:ignore="MissingTranslation">songbird connection</string>
+    <string name="settings_base_url_hint" tools:ignore="MissingTranslation">Base URL (e.g. http://host:8000)</string>
+    <string name="settings_token_hint" tools:ignore="MissingTranslation">Bearer token</string>
+    <string name="settings_saved" tools:ignore="MissingTranslation">Settings saved</string>
 </resources>

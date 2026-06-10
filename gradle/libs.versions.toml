@@ -19,6 +19,7 @@ camerax = "1.6.1"
 lombok = "1.18.46"
 activity = "1.13.0"
 exifinterface = "1.4.2"
+securityCrypto = "1.1.0-alpha06"
 gson="2.14.0"
 # Android test libs (aligned set)
 androidxTestRules = "1.5.0"
@@ -62,6 +63,9 @@ lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" 
 
 # ExifInterface
 exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+
+# Security (EncryptedSharedPreferences for the songbird bearer token at rest)
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 
 # Android test libraries
 test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }

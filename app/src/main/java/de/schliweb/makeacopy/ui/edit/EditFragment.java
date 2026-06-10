@@ -185,7 +185,7 @@ public class EditFragment extends Fragment {
     if (draft == null) return;
     draftHolder.setDraft(draft);
     try {
-      Navigation.findNavController(requireView()).navigate(R.id.navigation_draft_preview);
+      Navigation.findNavController(requireView()).navigate(R.id.navigation_finalize);
     } catch (IllegalArgumentException | IllegalStateException ignored) {
       // destination unavailable — no-op
     }

@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <!-- Haptics for subtle accessibility feedback (no runtime prompt required) -->
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <!-- F6: POST the songbird import JSON to the LAN/Tailscale songbird instance -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission
             android:name="android.permission.ACCESS_NETWORK_STATE"
             tools:node="remove"/>
