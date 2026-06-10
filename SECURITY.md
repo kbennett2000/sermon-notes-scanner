@@ -9,7 +9,7 @@ We take security seriously and appreciate your efforts to responsibly disclose a
 **Please do NOT open a public GitHub issue for security vulnerabilities.** Instead, please report security vulnerabilities to the project maintainers privately.
 
 1. **Use GitHub's Security Advisory Form**
-   - Navigate to: https://github.com/egdels/makeacopy/security/advisories/new
+   - Navigate to: https://github.com/kbennett2000/sermon-notes-scanner/security/advisories/new
    - This creates a private report visible only to repository maintainers
 
 2. **Or contact the maintainers directly**
@@ -24,7 +24,7 @@ We take security seriously and appreciate your efforts to responsibly disclose a
 Please provide as much information as possible to help us understand and assess the vulnerability:
 
 - **Description** - A clear description of the vulnerability
-- **Affected Version(s)** - Which version(s) of MakeACopy are affected
+- **Affected Version(s)** - Which version(s) of Sermon Scanner are affected
 - **Steps to Reproduce** - How to reproduce the issue (if applicable)
 - **Potential Impact** - What could an attacker do with this vulnerability?
 - **Suggested Fix** - If you have a suggestion for fixing the issue (optional)
@@ -54,39 +54,39 @@ We follow a responsible disclosure process:
 
 ## Supported Versions
 
-| Version | Status | Security Updates |
-|---------|--------|-----------------|
-| 3.x     | Latest | ✅ Yes          |
-| 2.x     | Older  | ⚠️ Case by case |
-| 1.x     | Outdated | ❌ No         |
-
-We recommend users keep their application up to date with the latest version to ensure they have the latest security patches.
+This is a private, sideloaded fork with no versioned release channel — `main` is the supported version.
+Build and sideload from the latest `main`; security fixes land there.
 
 ## Security Considerations
 
-### Offline-First Architecture
+### On-device OCR, LAN-only networking
 
-MakeACopy is designed to work completely offline. This design choice significantly reduces certain classes of security risks:
+OCR runs **entirely on-device** (PaddleOCR via ONNX Runtime + OpenCV); images never leave the phone for
+recognition. The app's **only** network egress is the operator-initiated **import POST to a
+user-configured [songbird](https://github.com/kbennett2000/songbird) instance** over the LAN/Tailscale —
+there are no third-party servers, no cloud storage, no tracking or analytics, and no telemetry.
 
-- ✅ No network requests to untrusted servers
-- ✅ No cloud storage of user data
-- ✅ No tracking or analytics
-- ✅ No third-party API dependencies
+- ✅ OCR and all document processing stay on-device
+- ✅ The single network call is operator-initiated, to a self-hosted server the operator configures
+- ✅ No cloud storage of user data; no tracking/analytics
+- Network specifics:
+  - songbird credentials (username + password) are stored in **`EncryptedSharedPreferences`** and are
+    never logged or echoed.
+  - Auth is songbird's cookie-session; the session cookie is held only for the duration of a send.
+  - **Cleartext HTTP is permitted** (via `res/xml/network_security_config.xml`) because songbird is a
+    LAN/tailnet service without TLS; revisit if it is ever fronted by HTTPS.
 
-However, other security considerations remain important:
-
-- Input validation for document processing
-- Safe handling of OCR models and image processing
-- Secure storage of any cached data
-- Safe handling of file I/O operations
+Other ongoing considerations: input validation for document processing, safe handling of OCR models and
+image processing, secure storage of cached data, and safe file I/O.
 
 ### Dependencies
 
-We carefully select and maintain our dependencies:
+Key third-party components:
 
-- **ONNX Runtime** - ML inference engine for document detection
+- **ONNX Runtime** - ML inference engine (DocQuad corner detection + PaddleOCR)
 - **OpenCV** - Image processing library
-- **Tesseract/Leptonica** - OCR engines
+- **PaddleOCR** - on-device OCR models
+- **androidx.security-crypto** - EncryptedSharedPreferences for the songbird credentials
 
 All dependencies are regularly updated to patch known vulnerabilities. We use tools like:
 
@@ -105,48 +105,31 @@ All code changes, including security fixes, go through:
 
 ### Android Security Features
 
-MakeACopy leverages Android's built-in security features:
+Sermon Scanner leverages Android's built-in security features:
 
 - **Sandboxing** - Each app instance is isolated from others
 - **Permission System** - Users must grant permissions for camera, storage, etc.
 - **SELinux** - Android's mandatory access control framework
 - **Code Signing** - All releases are cryptographically signed
 
-### Build Reproducibility
+### Builds
 
-Official releases are built to be reproducible, allowing community members to verify builds:
-
-- Fixed tool versions (JDK, NDK, CMake)
-- Deterministic build process
-- Published build scripts and documentation
-- APK signature verification available
-
-## APK Verification
-
-All official releases are cryptographically signed. You can verify the authenticity of APKs:
-
-**Upload Key (used for GitHub releases, F-Droid, and sideload APKs):**
-```
-SHA-256: AE:32:2D:3F:B7:1A:FE:21:DF:47:27:E3:7A:5C:68:03:51:1D:5A:2F:E1:FC:31:35:43:0C:EE:06:99:FA:1B:34
-```
-
-**Google Play App Signing Key:**
-- Used for Play Store releases only
+There are no official store releases. The app is built from source and **sideloaded as an unsigned debug
+APK** (the build uses fixed tool versions — JDK 21, NDK 28, CMake 3.31.6 — per CLAUDE.md "Build & test").
+Verify provenance by building from `main` yourself; there is no Play Store / F-Droid distribution and no
+published signing key for this fork.
 
 ## Staying Informed
 
-To stay informed about security updates:
-
-- ⭐ Watch the GitHub repository for release notifications
-- 📧 Subscribe to release announcements
+- ⭐ Watch the GitHub repository for activity
 - 🔔 Enable notifications for security advisories
 
 ## Scope
 
 This security policy covers:
 
-- The MakeACopy application code
-- Official releases (F-Droid, Google Play, GitHub Releases)
+- The Sermon Scanner application code
+- Sideloaded debug builds from `main`
 - The project documentation and build infrastructure
 
 This security policy does **not** cover:
@@ -161,7 +144,7 @@ If you have questions about this security policy or security in general, feel fr
 
 ---
 
-**Thank you for helping keep MakeACopy secure!**
+**Thank you for helping keep Sermon Scanner secure!**
 
 We appreciate the security research community and responsible disclosure practices that help make our project safer for all users.
 

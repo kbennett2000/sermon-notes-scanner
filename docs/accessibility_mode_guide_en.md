@@ -1,6 +1,6 @@
-# MakeACopy – Accessibility Mode
+# Sermon Scanner – Accessibility Mode
 
-This guide explains step by step how to use Accessibility Mode in MakeACopy. The mode is designed to operate the camera without visual cues — using clear spoken announcements and gentle haptic feedback instead.
+This guide explains step by step how to use Accessibility Mode in Sermon Scanner. The mode is designed to operate the camera without visual cues — using clear spoken announcements and gentle haptic feedback instead.
 
 Note: When this guide mentions “tap”, “double tap”, or “button”, it refers to typical screen reader usage such as TalkBack.
 
@@ -94,11 +94,10 @@ Tips for good results
 - Light: Turn on the flashlight in shadows or very low light.
 
 Privacy and offline operation
-- MakeACopy processes images locally on your device.
+- Sermon Scanner processes images locally on your device.
 - No upload or sharing takes place in Accessibility Mode. No internet connection required.
 
 Frequently Asked Questions (FAQ)
-See also: Website FAQ → Scanning (Camera): docs/index.html#faq-scanning
 Q: I hear “Document detected” very often.
 A: The app already limits repetitions. Move the device slightly away and realign. When the detection is stable you’ll get a tone + vibration + announcement.
 
@@ -148,7 +147,6 @@ If the detection is unstable (e.g., because you are moving, the page is partiall
 Q: How can I improve detection and guidance?
 A: Use even, bright lighting and avoid glare; hold the phone parallel to the page; keep all four corners in view with a small margin; if you’re too close, step back a little and crop later; place the paper on a high‑contrast, matte background; keep still briefly so detection can stabilize; match orientation (A4/Letter: portrait usually fits best).
 
-Tip: A more detailed explanation with examples is available on the website: docs/index.html → FAQ → “Scanning (Camera)”.
 
 <a id="guide-en-move-back"></a>
 Q: I keep hearing “Move back” all the time.
