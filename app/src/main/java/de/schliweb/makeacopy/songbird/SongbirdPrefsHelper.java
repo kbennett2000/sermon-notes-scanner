@@ -16,16 +16,18 @@ import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
 /**
- * Stores the songbird connection settings (slice F6, decision D1): base URL + bearer token, both at rest
- * in {@link EncryptedSharedPreferences}. The token is NEVER written to plaintext prefs, NEVER logged, and
- * NEVER echoed — error handling logs only generic messages.
+ * Stores the songbird connection settings (slice F6b): base URL + username + password, all at rest in
+ * {@link EncryptedSharedPreferences}. songbird uses cookie-session auth (no token), so the F6 bearer
+ * token is gone (no migration — it never worked). The password is NEVER written to plaintext prefs,
+ * NEVER logged, and NEVER echoed — error handling logs only generic messages.
  */
 public final class SongbirdPrefsHelper {
 
   private static final String TAG = "SongbirdPrefs";
   private static final String FILE = "songbird_secure_prefs";
   private static final String KEY_BASE_URL = "songbird_base_url";
-  private static final String KEY_TOKEN = "songbird_bearer_token";
+  private static final String KEY_USERNAME = "songbird_username";
+  private static final String KEY_PASSWORD = "songbird_password";
 
   private SongbirdPrefsHelper() {}
 
@@ -34,9 +36,14 @@ public final class SongbirdPrefsHelper {
     return p == null ? "" : p.getString(KEY_BASE_URL, "");
   }
 
-  public static String getToken(Context ctx) {
+  public static String getUsername(Context ctx) {
     SharedPreferences p = open(ctx);
-    return p == null ? "" : p.getString(KEY_TOKEN, "");
+    return p == null ? "" : p.getString(KEY_USERNAME, "");
+  }
+
+  public static String getPassword(Context ctx) {
+    SharedPreferences p = open(ctx);
+    return p == null ? "" : p.getString(KEY_PASSWORD, "");
   }
 
   /** Persists the base URL, normalized (trim + strip trailing slash). */
@@ -45,14 +52,20 @@ public final class SongbirdPrefsHelper {
     if (p != null) p.edit().putString(KEY_BASE_URL, SongbirdSettings.normalizeBaseUrl(value)).apply();
   }
 
-  /** Persists the bearer token (trimmed). Never logged. */
-  public static void setToken(Context ctx, String value) {
+  /** Persists the username (trimmed). */
+  public static void setUsername(Context ctx, String value) {
     SharedPreferences p = open(ctx);
-    if (p != null) p.edit().putString(KEY_TOKEN, value == null ? "" : value.trim()).apply();
+    if (p != null) p.edit().putString(KEY_USERNAME, value == null ? "" : value.trim()).apply();
+  }
+
+  /** Persists the password verbatim (no trim — spaces may be significant). Never logged. */
+  public static void setPassword(Context ctx, String value) {
+    SharedPreferences p = open(ctx);
+    if (p != null) p.edit().putString(KEY_PASSWORD, value == null ? "" : value).apply();
   }
 
   public static boolean isConfigured(Context ctx) {
-    return SongbirdSettings.canSend(getBaseUrl(ctx), getToken(ctx));
+    return SongbirdSettings.canSend(getBaseUrl(ctx), getUsername(ctx), getPassword(ctx));
   }
 
   private static SharedPreferences open(Context ctx) {

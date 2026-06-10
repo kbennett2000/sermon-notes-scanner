@@ -98,8 +98,9 @@ public class FinalizeFragment extends Fragment {
   private void onSend() {
     if (json == null) return;
     String baseUrl = SongbirdPrefsHelper.getBaseUrl(requireContext());
-    String token = SongbirdPrefsHelper.getToken(requireContext());
-    viewModel.send(baseUrl, token, json);
+    String username = SongbirdPrefsHelper.getUsername(requireContext());
+    String password = SongbirdPrefsHelper.getPassword(requireContext());
+    viewModel.send(baseUrl, username, password, json);
   }
 
   private void onShare() {
@@ -144,13 +145,19 @@ public class FinalizeFragment extends Fragment {
   private String describe(ImportResult r) {
     switch (r.status()) {
       case SUCCESS:
-        return r.summaryPresent()
-            ? getString(R.string.finalize_imported, r.created(), r.skipped())
-            : getString(R.string.finalize_imported_no_summary);
+        if (!r.summaryPresent()) {
+          return getString(R.string.finalize_imported_no_summary);
+        }
+        if (r.failed() > 0) {
+          // songbird rejected entries — surface it prominently with the first reason.
+          return getString(
+              R.string.finalize_imported_with_failures, r.created(), r.skipped(), r.failed(), r.detail());
+        }
+        return getString(R.string.finalize_imported, r.created(), r.skipped());
       case UNREACHABLE:
         return getString(R.string.finalize_unreachable);
-      case UNAUTHORIZED:
-        return getString(R.string.finalize_unauthorized);
+      case LOGIN_REJECTED:
+        return getString(R.string.finalize_login_rejected);
       case HTTP_ERROR:
       default:
         return getString(R.string.finalize_http_error, r.httpCode(), r.detail());

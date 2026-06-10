@@ -38,12 +38,14 @@ public class SongbirdSettingsTest {
   }
 
   @Test
-  public void canSend_requiresBoth() {
-    assertTrue(SongbirdSettings.canSend("http://h:8000", "tok"));
-    assertFalse(SongbirdSettings.canSend("", "tok"));
-    assertFalse(SongbirdSettings.canSend("http://h:8000", ""));
-    assertFalse(SongbirdSettings.canSend("  ", "tok"));
-    assertFalse(SongbirdSettings.canSend("http://h:8000", "   "));
-    assertFalse(SongbirdSettings.canSend(null, null));
+  public void canSend_requiresAllThree() {
+    assertTrue(SongbirdSettings.canSend("http://h:8000", "kris", "pw"));
+    assertFalse(SongbirdSettings.canSend("", "kris", "pw"));
+    assertFalse(SongbirdSettings.canSend("http://h:8000", "", "pw"));
+    assertFalse(SongbirdSettings.canSend("http://h:8000", "kris", ""));
+    assertFalse(SongbirdSettings.canSend("  ", "kris", "pw"));
+    assertFalse(SongbirdSettings.canSend("http://h:8000", "  ", "pw"));
+    assertFalse(SongbirdSettings.canSend("http://h:8000", "kris", "   "));
+    assertFalse(SongbirdSettings.canSend(null, null, null));
   }
 }

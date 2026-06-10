@@ -24,10 +24,10 @@ import de.schliweb.makeacopy.songbird.SongbirdPrefsHelper;
 import de.schliweb.makeacopy.utils.ui.UIUtils;
 
 /**
- * Minimal settings screen (slice F6): the songbird base URL + bearer token. There was no pre-existing
- * settings UI in the stripped fork, so this is the surviving settings surface — reached from the finalize
- * screen. The token field is masked (password toggle); values persist via the encrypted {@link
- * SongbirdPrefsHelper}. The token is never logged or echoed.
+ * Minimal settings screen (slice F6b): the songbird base URL + username + password. There was no
+ * pre-existing settings UI in the stripped fork, so this is the surviving settings surface — reached from
+ * the finalize screen. The password field is masked (password toggle); values persist via the encrypted
+ * {@link SongbirdPrefsHelper}. The password is never logged or echoed.
  */
 @dagger.hilt.android.AndroidEntryPoint
 public class SettingsFragment extends Fragment {
@@ -45,17 +45,21 @@ public class SettingsFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     binding.baseUrlField.setText(SongbirdPrefsHelper.getBaseUrl(requireContext()));
-    binding.tokenField.setText(SongbirdPrefsHelper.getToken(requireContext()));
+    binding.usernameField.setText(SongbirdPrefsHelper.getUsername(requireContext()));
+    binding.passwordField.setText(SongbirdPrefsHelper.getPassword(requireContext()));
     binding.buttonSaveSettings.setOnClickListener(v -> save());
   }
 
   private void save() {
     String baseUrl =
         binding.baseUrlField.getText() == null ? "" : binding.baseUrlField.getText().toString();
-    String token =
-        binding.tokenField.getText() == null ? "" : binding.tokenField.getText().toString();
+    String username =
+        binding.usernameField.getText() == null ? "" : binding.usernameField.getText().toString();
+    String password =
+        binding.passwordField.getText() == null ? "" : binding.passwordField.getText().toString();
     SongbirdPrefsHelper.setBaseUrl(requireContext(), baseUrl); // normalized inside
-    SongbirdPrefsHelper.setToken(requireContext(), token);
+    SongbirdPrefsHelper.setUsername(requireContext(), username);
+    SongbirdPrefsHelper.setPassword(requireContext(), password);
     UIUtils.showToast(requireContext(), getString(R.string.settings_saved), Toast.LENGTH_SHORT);
     try {
       Navigation.findNavController(requireView()).popBackStack();

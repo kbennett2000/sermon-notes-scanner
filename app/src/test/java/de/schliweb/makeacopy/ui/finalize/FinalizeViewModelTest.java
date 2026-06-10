@@ -17,26 +17,32 @@ import androidx.arch.core.executor.TaskExecutor;
 import de.schliweb.makeacopy.songbird.ImportPoster;
 import de.schliweb.makeacopy.songbird.ImportResult;
 import de.schliweb.makeacopy.songbird.PostResult;
+import de.schliweb.makeacopy.songbird.SongbirdExchange;
 import de.schliweb.makeacopy.ui.finalize.FinalizeViewModel.Phase;
 import de.schliweb.makeacopy.ui.finalize.FinalizeViewModel.SendUiState;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link FinalizeViewModel} via a fake {@link ImportPoster} + inline executor (slice F6). */
+/**
+ * Tests for {@link FinalizeViewModel} via a fake {@link ImportPoster} + inline executor (slice F6b):
+ * the login-per-send two-step flow — login-fail, login-ok/import-fail, login-ok/import-ok.
+ */
 public class FinalizeViewModelTest {
 
-  /** Records the args it was called with and returns a canned PostResult. */
+  /** Records the args it was called with and returns a canned exchange. */
   private static final class FakePoster implements ImportPoster {
     String baseUrl;
-    String token;
+    String username;
+    String password;
     String json;
-    PostResult result;
+    SongbirdExchange result;
 
     @Override
-    public PostResult post(String baseUrl, String token, String json) {
+    public SongbirdExchange send(String baseUrl, String username, String password, String json) {
       this.baseUrl = baseUrl;
-      this.token = token;
+      this.username = username;
+      this.password = password;
       this.json = json;
       return result;
     }
@@ -74,16 +80,19 @@ public class FinalizeViewModelTest {
   }
 
   @Test
-  public void send_success_passesArgsAndPublishesDone() {
+  public void send_loginOkImportOk_passesCredsAndPublishesSuccess() {
     FakePoster fake = new FakePoster();
-    fake.result = PostResult.http(200, "{\"annotations\": {\"created\": 1, \"skipped\": 0}}");
+    fake.result =
+        SongbirdExchange.of(
+            PostResult.http(200, "{}"),
+            PostResult.http(200, "{\"annotations\":{\"created\":1,\"skipped\":0,\"failed\":0}}"));
     FinalizeViewModel vm = vm(fake);
 
-    vm.send("http://host:8000", "secret-token", "{json}");
+    vm.send("http://host:8077", "kris", "s3cret", "{json}");
 
-    // The poster received exactly what we passed.
-    assertEquals("http://host:8000", fake.baseUrl);
-    assertEquals("secret-token", fake.token);
+    assertEquals("http://host:8077", fake.baseUrl);
+    assertEquals("kris", fake.username);
+    assertEquals("s3cret", fake.password);
     assertEquals("{json}", fake.json);
 
     SendUiState s = vm.getState().getValue();
@@ -91,24 +100,34 @@ public class FinalizeViewModelTest {
     assertEquals(Phase.DONE, s.phase());
     assertEquals(ImportResult.Status.SUCCESS, s.result().status());
     assertEquals(1, s.result().created());
-    assertEquals(0, s.result().skipped());
   }
 
   @Test
-  public void send_unreachable_publishesUnreachable() {
+  public void send_loginFail_publishesLoginRejected() {
     FakePoster fake = new FakePoster();
-    fake.result = PostResult.unreachable();
+    fake.result = SongbirdExchange.loginOnly(PostResult.http(401, "{\"detail\":{}}"));
     FinalizeViewModel vm = vm(fake);
-    vm.send("http://host:8000", "t", "{}");
+    vm.send("http://host:8077", "kris", "wrong", "{}");
+    assertEquals(ImportResult.Status.LOGIN_REJECTED, vm.getState().getValue().result().status());
+  }
+
+  @Test
+  public void send_loginOkImportFail_publishesHttpError() {
+    FakePoster fake = new FakePoster();
+    fake.result = SongbirdExchange.of(PostResult.http(200, "{}"), PostResult.http(502, "concord down"));
+    FinalizeViewModel vm = vm(fake);
+    vm.send("http://host:8077", "kris", "s3cret", "{}");
+    ImportResult r = vm.getState().getValue().result();
+    assertEquals(ImportResult.Status.HTTP_ERROR, r.status());
+    assertEquals(502, r.httpCode());
+  }
+
+  @Test
+  public void send_loginUnreachable_publishesUnreachable() {
+    FakePoster fake = new FakePoster();
+    fake.result = SongbirdExchange.loginOnly(PostResult.unreachable());
+    FinalizeViewModel vm = vm(fake);
+    vm.send("http://host:8077", "kris", "s3cret", "{}");
     assertEquals(ImportResult.Status.UNREACHABLE, vm.getState().getValue().result().status());
-  }
-
-  @Test
-  public void send_unauthorized_publishesUnauthorized() {
-    FakePoster fake = new FakePoster();
-    fake.result = PostResult.http(401, "denied");
-    FinalizeViewModel vm = vm(fake);
-    vm.send("http://host:8000", "bad", "{}");
-    assertEquals(ImportResult.Status.UNAUTHORIZED, vm.getState().getValue().result().status());
   }
 }

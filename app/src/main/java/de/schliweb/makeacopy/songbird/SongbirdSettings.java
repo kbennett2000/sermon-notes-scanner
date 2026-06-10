@@ -29,11 +29,12 @@ public final class SongbirdSettings {
     return s;
   }
 
-  /** True when both the base URL and the token are present (the Send gate). */
-  public static boolean canSend(String baseUrl, String token) {
-    return baseUrl != null
-        && !baseUrl.trim().isEmpty()
-        && token != null
-        && !token.trim().isEmpty();
+  /** True when the base URL, username, and password are all present (the Send gate). */
+  public static boolean canSend(String baseUrl, String username, String password) {
+    return notBlank(baseUrl) && notBlank(username) && notBlank(password);
+  }
+
+  private static boolean notBlank(String s) {
+    return s != null && !s.trim().isEmpty();
   }
 }
