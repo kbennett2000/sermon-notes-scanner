@@ -130,6 +130,11 @@ Do not implement against a pending decision — ask first. Update this table whe
   stays unedited as the founding document; this errata carries reality.
 - Secrets: the songbird **username + password** never enter the repo — runtime settings only, stored in
   EncryptedSharedPreferences (the password is never logged or echoed). (F6's bearer token is gone — F6b.)
+- **Cleartext HTTP (F6b):** songbird is a LAN/tailnet `http` service (no TLS) at an operator-set host, but
+  `targetSdk 36` blocks cleartext by default — which surfaced as a false "couldn't reach songbird". A
+  network-security config (`res/xml/network_security_config.xml`, `cleartextTrafficPermitted="true"`,
+  wired via `<application android:networkSecurityConfig>`) permits it. Acceptable for a private,
+  non-store, sideloaded app; revisit if songbird ever fronts with TLS.
 
 ## Build & test
 
