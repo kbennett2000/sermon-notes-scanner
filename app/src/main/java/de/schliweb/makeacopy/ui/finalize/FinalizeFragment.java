@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import de.schliweb.makeacopy.BuildConfig;
 import de.schliweb.makeacopy.R;
@@ -30,7 +31,10 @@ import de.schliweb.makeacopy.emit.ImportJsonEmitter;
 import de.schliweb.makeacopy.songbird.ImportResult;
 import de.schliweb.makeacopy.songbird.ShareFilename;
 import de.schliweb.makeacopy.songbird.SongbirdPrefsHelper;
+import de.schliweb.makeacopy.ui.camera.CameraViewModel;
+import de.schliweb.makeacopy.ui.crop.CropViewModel;
 import de.schliweb.makeacopy.ui.edit.SermonDraftViewModel;
+import de.schliweb.makeacopy.ui.export.session.ExportSessionViewModel;
 import de.schliweb.makeacopy.ui.finalize.FinalizeViewModel.Phase;
 import de.schliweb.makeacopy.utils.ui.UIUtils;
 import java.io.File;
@@ -45,10 +49,14 @@ import java.nio.charset.StandardCharsets;
 @dagger.hilt.android.AndroidEntryPoint
 public class FinalizeFragment extends Fragment {
 
+  /** Brief pause so the operator sees the created/skipped result before the screen returns to start. */
+  private static final long AUTO_RETURN_DELAY_MS = 1500L;
+
   private FragmentFinalizeBinding binding;
   private FinalizeViewModel viewModel;
   private SermonDraft draft;
   private String json;
+  private boolean returning; // one-shot guard: a successful send auto-returns exactly once
 
   @Override
   public View onCreateView(
@@ -138,8 +146,45 @@ public class FinalizeFragment extends Fragment {
       binding.resultText.setText(R.string.finalize_sending);
     } else if (state.phase() == Phase.DONE && state.result() != null) {
       binding.resultText.setText(describe(state.result()));
+      maybeAutoReturn(state.result());
     }
     updateSendGate();
+  }
+
+  /**
+   * A clean import (SUCCESS, no rejected entries) ends the workflow: briefly show the result, then
+   * clear the session and return to the camera start screen so the next handout starts fresh. This
+   * also prevents re-tapping Send on a note that already imported. Failures stay put so the operator
+   * can read the error and retry.
+   */
+  private void maybeAutoReturn(ImportResult r) {
+    if (returning || r == null || !r.isSuccess() || r.failed() > 0) return;
+    returning = true;
+    binding.buttonSend.setEnabled(false);
+    binding.getRoot().postDelayed(this::returnToStart, AUTO_RETURN_DELAY_MS);
+  }
+
+  /** Mirrors the page hub's "start over" reset (ExportFragment): wipe session + capture state. */
+  private void returnToStart() {
+    if (binding == null || !isAdded()) return;
+    ViewModelProvider activity = new ViewModelProvider(requireActivity());
+    activity.get(ExportSessionViewModel.class).setInitial(null);
+    activity.get(SermonDraftViewModel.class).clear();
+    CameraViewModel cameraViewModel = activity.get(CameraViewModel.class);
+    CropViewModel cropViewModel = activity.get(CropViewModel.class);
+    cameraViewModel.setImageUri(null);
+    cropViewModel.setImageCropped(false);
+    cropViewModel.setImageBitmap(null);
+    cropViewModel.setOriginalImageBitmap(null);
+    cropViewModel.setImageLoaded(false);
+    NavOptions navOptions =
+        new NavOptions.Builder().setPopUpTo(R.id.navigation_camera, true).build();
+    try {
+      Navigation.findNavController(requireView())
+          .navigate(R.id.navigation_camera, null, navOptions);
+    } catch (IllegalArgumentException | IllegalStateException ignored) {
+      // destination unavailable — no-op
+    }
   }
 
   private String describe(ImportResult r) {

@@ -28,6 +28,10 @@ public final class SongbirdPrefsHelper {
   private static final String KEY_BASE_URL = "songbird_base_url";
   private static final String KEY_USERNAME = "songbird_username";
   private static final String KEY_PASSWORD = "songbird_password";
+  private static final String KEY_DEFAULT_TAGS = "songbird_default_tags";
+
+  /** Out-of-box default tag (preserves the documented {@code ["sermon"]} import default). */
+  private static final String DEFAULT_TAGS_FALLBACK = "sermon";
 
   private SongbirdPrefsHelper() {}
 
@@ -62,6 +66,21 @@ public final class SongbirdPrefsHelper {
   public static void setPassword(Context ctx, String value) {
     SharedPreferences p = open(ctx);
     if (p != null) p.edit().putString(KEY_PASSWORD, value == null ? "" : value).apply();
+  }
+
+  /**
+   * The operator's default tags (comma-separated) to prefill the edit screen. Defaults to {@code
+   * "sermon"} until the operator sets (or explicitly blanks) it in Settings.
+   */
+  public static String getDefaultTags(Context ctx) {
+    SharedPreferences p = open(ctx);
+    return p == null ? DEFAULT_TAGS_FALLBACK : p.getString(KEY_DEFAULT_TAGS, DEFAULT_TAGS_FALLBACK);
+  }
+
+  /** Persists the default tags (trimmed). An explicit blank is honored (empty tag box). */
+  public static void setDefaultTags(Context ctx, String value) {
+    SharedPreferences p = open(ctx);
+    if (p != null) p.edit().putString(KEY_DEFAULT_TAGS, value == null ? "" : value.trim()).apply();
   }
 
   public static boolean isConfigured(Context ctx) {

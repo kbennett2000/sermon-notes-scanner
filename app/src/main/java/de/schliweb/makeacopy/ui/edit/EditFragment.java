@@ -19,10 +19,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import de.schliweb.makeacopy.R;
+import de.schliweb.makeacopy.songbird.SongbirdPrefsHelper;
 import de.schliweb.makeacopy.anchor.BookNames;
 import de.schliweb.makeacopy.anchor.SpanResolution;
 import de.schliweb.makeacopy.anchor.VerseTable;
@@ -75,13 +77,25 @@ public class EditFragment extends Fragment {
           android.widget.Toast.LENGTH_LONG);
     }
     String combined = CombinedOcrTextProvider.fromPages(session.getPages().getValue());
-    viewModel.initialize(combined, table, LocalDate.now(ZoneId.systemDefault()).toString());
+    viewModel.initialize(
+        combined,
+        table,
+        LocalDate.now(ZoneId.systemDefault()).toString(),
+        SongbirdPrefsHelper.getDefaultTags(requireContext()));
 
     setupBookPicker();
     bindInitialFields();
     wireWatchers();
     wireDatePicker();
     wireContinue();
+
+    // Keep the Continue button clear of the system nav bar (edge-to-edge).
+    ViewCompat.setOnApplyWindowInsetsListener(
+        binding.buttonContinue,
+        (v, insets) -> {
+          UIUtils.adjustMarginForSystemInsets(binding.buttonContinue, 16);
+          return insets;
+        });
 
     viewModel.getState().observe(getViewLifecycleOwner(), this::renderDerived);
   }

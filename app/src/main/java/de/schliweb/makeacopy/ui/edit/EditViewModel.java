@@ -78,15 +78,18 @@ public class EditViewModel extends ViewModel {
    * @param combinedText the F2 combined OCR string
    * @param verseTable the bundled verse-count table (injected; loaded by the fragment)
    * @param todayIso today's date as {@code yyyy-MM-dd}
+   * @param defaultTags the operator's configured default tags (comma-separated) to prefill the tag
+   *     box; passed verbatim (the {@code "sermon"} fallback lives in the prefs helper)
    */
-  public void initialize(String combinedText, VerseTable verseTable, String todayIso) {
+  public void initialize(
+      String combinedText, VerseTable verseTable, String todayIso, String defaultTags) {
     if (initialized) return;
     initialized = true;
     this.table = verseTable;
     this.editedText = combinedText == null ? "" : combinedText;
     this.title = "";
     this.dateIso = todayIso == null ? "" : todayIso;
-    this.tagsText = "sermon";
+    this.tagsText = defaultTags == null ? "" : defaultTags;
 
     Optional<StructuralAnchor> found = AnchorFinder.find(this.editedText);
     if (found.isPresent()) {
