@@ -183,6 +183,25 @@ public class ExportFragment extends Fragment {
    *       enqueues a background OCR run for the active page via {@link #runInlineOcrForPage(int)}.
    * </ul>
    */
+  /** F4: true when at least one page has a readable OCR text artifact (gates the Continue action). */
+  private static boolean hasAnyPageOcr(
+      List<de.schliweb.makeacopy.ui.export.session.CompletedScan> pages) {
+    if (pages == null) return false;
+    for (de.schliweb.makeacopy.ui.export.session.CompletedScan s : pages) {
+      if (s == null) continue;
+      String ocrPath = s.ocrTextPath();
+      if (ocrPath != null) {
+        try {
+          File f = new File(ocrPath);
+          if (f.exists() && f.isFile()) return true;
+        } catch (Throwable ignore) {
+          // best-effort
+        }
+      }
+    }
+    return false;
+  }
+
   private void updatePreviewOcrBadge() {
     if (binding == null || binding.previewOcrBadge == null) return;
     android.widget.TextView badge = binding.previewOcrBadge;
@@ -559,34 +578,16 @@ public class ExportFragment extends Fragment {
     binding.pagesRecycler.setLayoutManager(lm);
     binding.pagesRecycler.setAdapter(pagesAdapter);
 
-    // F2-TEMP (remove when F4 edit screen lands): long-press the preview to inspect the combined
-    // OCR string (all pages, hub order, "\n\n" seam) — the F2 artifact F3/F4/F5 will consume.
-    if (binding.documentPreview != null) {
-      binding.documentPreview.setOnLongClickListener(
-          v -> {
-            if (!isAdded() || exportSessionViewModel == null) return false;
-            String combined =
-                de.schliweb.makeacopy.ui.export.session.CombinedOcrTextProvider.fromPages(
-                    exportSessionViewModel.getPages().getValue());
-            Log.d(
-                TAG,
-                "[F2_PROOF] combined OCR len="
-                    + (combined == null ? 0 : combined.length())
-                    + "\n"
-                    + combined);
-            androidx.appcompat.app.AlertDialog dialog =
-                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("F2-TEMP: combined OCR")
-                    .setMessage((combined == null || combined.isEmpty()) ? "(empty)" : combined)
-                    .setPositiveButton(android.R.string.ok, (d, w) -> d.dismiss())
-                    .create();
-            dialog.setOnShowListener(
-                dlg ->
-                    DialogUtils.improveAlertDialogButtonContrastForNight(dialog, requireContext()));
-            dialog.show();
-            return true;
-          });
-    }
+    // F4: proceed to the edit screen. Enabled only when >=1 page has OCR text (gated in the pages
+    // observer below).
+    binding.buttonContinue.setOnClickListener(
+        v -> {
+          try {
+            Navigation.findNavController(requireView()).navigate(R.id.navigation_edit);
+          } catch (IllegalArgumentException | IllegalStateException ignored) {
+            // destination unavailable — no-op
+          }
+        });
 
     // Enable drag & drop reordering via ItemTouchHelper (horizontal)
     androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback cb =
@@ -690,6 +691,8 @@ public class ExportFragment extends Fragment {
               }
               // Refresh OCR badge overlay on the preview (mirrors filmstrip badge state).
               updatePreviewOcrBadge();
+              // F4: gate "Continue" on at least one page having OCR text.
+              binding.buttonContinue.setEnabled(hasAnyPageOcr(pages));
             });
     // Initialize or update pages based on current state and pending add-page flag
     Bitmap initBmp = cropViewModel.getImageBitmap().getValue();
