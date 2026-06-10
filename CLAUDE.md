@@ -48,6 +48,25 @@ Until F4 lands the edit screen, the kept app terminates at the upstream **OCR re
 OCR badge, registry persistence) but, since F1c-2, offers **no export of any kind** — all PDF/JPEG/ZIP/
 TXT/share/inbox output was removed. Document files are not this fork's output; F5/F6 emit songbird JSON.
 
+## Combined OCR text contract (F2 — the downstream artifact)
+
+The **combined OCR string** is THE artifact F3 (anchor scan), F4 (edit screen), and F5 (emitter)
+consume — page provenance is irrelevant after the join. It is produced **on-demand/derived** from the
+page hub (no persistence, no cache, no database): `CombinedOcrTextProvider.fromPages(pages)` reads each
+page's plain text and hands the ordered list to the pure `OcrTextJoiner.join(List<String>)`. Contract:
+
+- **Order** = hub order (`ExportSessionViewModel.getPages()` — filmstrip order incl. operator reorder;
+  front first in normal use).
+- Each page's text is **trimmed** (leading/trailing); internal whitespace untouched.
+- `null`/empty/whitespace-only pages **contribute nothing** (no stray separators).
+- Survivors are joined with **exactly `"\n\n"`** — plain whitespace, no marker tokens or headers, so the
+  brief's Appendix C concatenation stays valid verbatim for F3's scanner.
+- **Deterministic**: same pages + order + disk ⇒ byte-identical output.
+
+Per-page text comes from `scans/{id}/text.txt` (the validated `wordsToText()` plain text, co-written by
+both write sites); the provider never parses `words.json` and never touches frozen-core OCR. `OcrTextJoiner`
+is pure (no Android deps) and fixture-tested.
+
 ## Output contract (summary — full spec is brief Appendix A)
 
 - ImportDocument: `version: 1`, `exported_at: null`, exactly one annotation, `sermon_notes: []`.
@@ -165,7 +184,7 @@ UI/data (trimmed in F1c per D3).
 - [x] F1c — strip (re-scoped to safe non-code islands): deleted Tesseract data assets (tessdata 66 MB + dictionaries 4 MB; fonts kept — PDF-coupled), store scaffolding (fastlane/ + F-Droid metadata/), langpack-latin-best module + its CI workflow + copyBestModelsForTest, the unused libs.tesseract alias, and the release-CI publish/signing; README rewrite. The strip's entangled CODE is re-sliced along DI seams (below) because this app is heavily Hilt-wired — features interconnect through DI + the Application + the export screen, not clean islands.
 - [x] F1c-2 — export-output excision: removed ExportFragment export-output + PDF/JPEG/ZIP/TXT/share/inbox classes (PdfCreator, PdfTextUtils, PdfQualityPreset, PageFormat, JpegExporter, JpegExportOptions, InboxExporter, ExportTxtHelper, ExportOptionsDialogFragment, ExportUiBindings) + pdfbox & documentfile deps + FEATURE_INBOX_MODE + orphaned export strings; trimmed ExportPrefsHelper to skip_ocr/pending_add_page/last_import_uri. Page hub kept (filmstrip, add/clear page, preview, OCR badge, ScanPersister persistence). Kept-and-deferred to F1c-3: ShareIntentHelper (used by ui/library/ScanDetailsFragment) + ScanLibraryIndexer.
 - [x] F1c-3 — library/Room subgraph removed: deleted ui/library, data/library (Room), di/DatabaseModule, ui/export/ScanLibraryIndexer, ui/ocr/review/suggest/DictionarySuggestProvider, utils/export/ShareIntentHelper, library buttons/nav (incl. forced minimal edits to CameraFragment + fragment_camera.xml), Room deps, FEATURE_SCAN_LIBRARY + FeatureFlags.isScanLibraryEnable; MakeACopyApplication + CacheCleanupService de-Roomed (startup is now OpenCV → CacheCleanupService, no DB at launch). The app is **database-free**: scan → view text → dead-end (until F2–F6). DictionaryManager was **de-wired but KEPT (RETAINED-DEAD)** to preserve OCRPostProcessor byte-zero-diff (see prime directive). CompletedScansRegistry/RegistryCleaner/ScanPersister (JSON registry, Room-free) kept.
-- [ ] F2 — two-shot capture + concatenated OCR text
+- [x] F2 — combined OCR text artifact: pure `OcrTextJoiner.join(List<String>)` (hub order, per-page trim, `"\n\n"` seam, null/blank skipped, deterministic, 10 unit tests) + `CombinedOcrTextProvider.fromPages()` glue reading each page's `text.txt` on-demand (no persistence, no frozen-core edits) + TEMP long-press proof hook on the hub preview (removed at F4). Two-shot capture is the pre-existing multi-page hub; this slice delivers the concatenation. Contract recorded under "Combined OCR text contract".
 - [ ] F3 — book map + anchor finder (pure logic, fixture-tested)
 - [ ] F4 — edit screen (text, anchor, title, tags)
 - [ ] F5 — songbird JSON emitter (deterministic, Appendix A)
