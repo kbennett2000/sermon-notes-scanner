@@ -1,8 +1,9 @@
 # AI Policy
 
 ## Tools Used
-- Junie by JetBrains / Claude (architecture, implementation, code review, CI/CD setup)
-- JetBrains AI Assistant (code completion)
+- **Claude Code (Claude Opus)** — this fork's songbird-import workflow was built slice-by-slice with
+  Claude Code under a plan-first, one-PR-per-slice process, each PR human-reviewed before merge.
+- (Upstream MakeACopy additionally used Junie by JetBrains and the JetBrains AI Assistant.)
 
 ## How AI Is Used
 AI tools are used as a significant development partner in this project,

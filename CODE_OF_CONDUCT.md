@@ -2,7 +2,7 @@
 
 ## Our Commitment
 
-We are committed to providing a welcoming and inspiring community for all. We pledge that everyone participating in the MakeACopy project and its communities will be treated with respect and dignity.
+We are committed to providing a welcoming and inspiring community for all. We pledge that everyone participating in the Sermon Scanner project and its communities will be treated with respect and dignity.
 
 ## Our Standards
 
@@ -33,7 +33,7 @@ This Code of Conduct applies to:
 - GitHub issues, pull requests, and discussions
 - Project communication channels (if any)
 - Community events and meetings
-- Any other spaces that represent the MakeACopy project or community
+- Any other spaces that represent the Sermon Scanner project or community
 
 This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community.
 
@@ -77,5 +77,5 @@ If you have questions about this Code of Conduct, please reach out to the projec
 
 ---
 
-**Thank you for helping make MakeACopy a welcoming and inclusive community!**
+**Thank you for helping make Sermon Scanner a welcoming and inclusive community!**
 

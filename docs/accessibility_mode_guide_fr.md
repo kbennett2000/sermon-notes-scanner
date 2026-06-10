@@ -1,6 +1,6 @@
-# MakeACopy – Mode accessibilité
+# Sermon Scanner – Mode accessibilité
 
-Ce guide explique étape par étape comment utiliser le mode Accessibilité dans MakeACopy. Ce mode est conçu pour utiliser l'appareil photo sans repères visuels — avec des annonces vocales claires et un retour haptique léger.
+Ce guide explique étape par étape comment utiliser le mode Accessibilité dans Sermon Scanner. Ce mode est conçu pour utiliser l'appareil photo sans repères visuels — avec des annonces vocales claires et un retour haptique léger.
 
 Remarque : lorsque ce guide mentionne « toucher », « double‑toucher » ou « bouton », il s'agit de l'usage typique avec un lecteur d'écran comme TalkBack.
 
@@ -94,11 +94,10 @@ Conseils pour de bons résultats
 - Lumière : activez la lampe en cas d'ombre ou de très faible luminosité.
 
 Confidentialité et fonctionnement hors ligne
-- MakeACopy traite les images localement sur votre appareil.
+- Sermon Scanner traite les images localement sur votre appareil.
 - Aucun upload ni partage n'a lieu en mode Accessibilité. Aucune connexion Internet requise.
 
 Foire aux questions (FAQ)
-Voir aussi : FAQ du site → Numérisation (Caméra) : docs/index_fr.html#faq-scanning
 Q : J'entends « Document détecté » très souvent.
 R : L'application limite déjà les répétitions. Éloignez légèrement l'appareil puis réalignez. Lorsque la détection est stable, vous obtenez un son + une vibration + une annonce.
 
@@ -149,7 +148,6 @@ Si la détection est instable (par ex. parce que vous bougez, que la page est pa
 Q : Comment améliorer la détection et le guidage ?
 R : Utilisez un éclairage homogène et suffisamment fort, évitez les reflets ; tenez le téléphone parallèle à la page ; gardez les quatre coins visibles avec une petite marge ; si vous êtes trop près, reculez un peu et recadrez ensuite ; posez le papier sur un fond mat et contrasté ; restez brièvement immobile pour stabiliser la détection ; choisissez une orientation adaptée (A4/Letter : le portrait convient souvent).
 
-Astuce : une explication plus détaillée avec des exemples est disponible sur le site : docs/index.html → FAQ → « Scanning (Camera) ».
 
 <a id="guide-fr-move-back"></a>
 Q : J'entends constamment « Éloignez‑vous/Move back ».

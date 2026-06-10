@@ -51,10 +51,11 @@ The full workflow is now live end-to-end (no TEMP anything): scan front/back →
 `SpanResolver` re-resolve blocking on out-of-range, + title/date/tags) → **finalize screen**
 (`ui/finalize/FinalizeFragment`). Finalize shows the byte-stable JSON (`emit/ImportJsonEmitter`, Appendix A;
 body via `emit/NoteMarkdown`; golden `app/src/test/resources/emit/golden_import.json` governs the wire
-format — update consciously), then **Send to songbird** (`POST {base}/api/v1/import`, Bearer token,
-result shows created/skipped) or **Share JSON** (FileProvider, cache). Connection settings live in
-`ui/settings/SettingsFragment` (base URL + token via the encrypted `songbird/SongbirdPrefsHelper`), reached
-from finalize. The `SermonDraft` flows via the activity-scoped `SermonDraftViewModel`.
+format — update consciously), then **Send to songbird** (cookie-session login-per-send →
+`POST {base}/api/v1/import`; result shows created/skipped/failed — see the Environment errata) or
+**Share JSON** (FileProvider, cache). Connection settings live in `ui/settings/SettingsFragment` (base URL
++ **username + password** via the encrypted `songbird/SongbirdPrefsHelper`), reached from finalize. The
+`SermonDraft` flows via the activity-scoped `SermonDraftViewModel`.
 
 ## Combined OCR text contract (F2 — the downstream artifact)
 

@@ -1,6 +1,6 @@
-# MakeACopy – Accessibility‑Modus
+# Sermon Scanner – Accessibility‑Modus
 
-Dieser Leitfaden erklärt Schritt für Schritt, wie du den Accessibility‑Modus in MakeACopy benutzt. Der Modus ist speziell dafür gedacht, die Kamera ohne visuelle Hinweise zu bedienen – mit klaren akustischen Ansagen und leichter haptischer Rückmeldung.
+Dieser Leitfaden erklärt Schritt für Schritt, wie du den Accessibility‑Modus in Sermon Scanner benutzt. Der Modus ist speziell dafür gedacht, die Kamera ohne visuelle Hinweise zu bedienen – mit klaren akustischen Ansagen und leichter haptischer Rückmeldung.
 
 Hinweis: Die Begriffe „Tippen“, „Doppeltippen“ und „Taste“ beziehen sich auf die übliche Bedienung mit einem Screenreader wie TalkBack.
 
@@ -94,11 +94,10 @@ Tipps für gute Ergebnisse
 - Licht: Bei Schatten oder sehr wenig Licht die Taschenlampe einschalten.
 
 Datenschutz und Offline‑Betrieb
-- MakeACopy verarbeitet Bilder lokal auf deinem Gerät.
+- Sermon Scanner verarbeitet Bilder lokal auf deinem Gerät.
 - Es findet kein Hochladen oder Teilen im Accessibility‑Modus statt. Keine Internetverbindung nötig.
 
 Häufige Fragen (FAQ)
-Siehe auch: Website‑FAQ → Scannen (Kamera): docs/index_de.html#faq-scanning
 F: Ich höre die „Dokument erkannt“‑Hinweise sehr häufig.
 A: Die App begrenzt Wiederholungen bereits. Bewege das Gerät leicht weg und richte es dann erneut aus. Beim stabilen Erkennen kommt ein Ton + Vibration + Ansage.
 
@@ -146,7 +145,6 @@ Wichtig: Die Stabilität über mehrere Frames wird separat genutzt, um Ansagen r
 F: Wie kann ich den Score verbessern?
 A: Nutze gleichmäßiges, helles Licht und vermeide Blendungen; halte das Telefon parallel zur Seite; lasse alle vier Ecken mit einem kleinen Rand sichtbar; wenn du zu nah dran bist, gehe ein Stück zurück und schneide später zu; lege das Papier auf einen kontrastreichen, matten Hintergrund; halte kurz ruhig, damit sich die Erkennung stabilisiert; wähle eine passende Ausrichtung (A4/Letter: meist Hochformat).
 
-Hinweis: Eine ausführlichere Erklärung mit Beispielen findest du auf der Website: docs/index.html → FAQ → „Scanning (Camera)“.
 
 <a id="guide-de-move-back"></a>
 F: Ich höre ständig „Weiter weg/Move back“.
