@@ -256,8 +256,6 @@
     <!-- Löschbestätigung (ScanDetails) -->
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_share_export_first">Kein Dokument zum Teilen verfügbar. Bitte zuerst exportieren.
-    </string>
 
     <!-- ScanDetailsFragment toasts -->
 

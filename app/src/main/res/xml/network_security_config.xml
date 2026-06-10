@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sermon Scanner is a private, sideloaded, LAN/tailnet-first app: the operator points it at a songbird
+  instance reached over plain HTTP at an arbitrary, operator-configured host (e.g. http://192.168.1.62:8055
+  or a Tailscale host) — there is no TLS and no fixed domain to scope to. Android (targetSdk >= 28) blocks
+  cleartext HTTP by default, which otherwise surfaces as "couldn't reach songbird". Permit cleartext.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

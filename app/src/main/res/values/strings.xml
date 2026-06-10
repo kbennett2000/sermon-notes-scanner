@@ -412,13 +412,15 @@
     <string name="finalize_settings_needed" tools:ignore="MissingTranslation">Set the songbird URL and token in Settings to enable Send.</string>
     <string name="finalize_sending" tools:ignore="MissingTranslation">Sending…</string>
     <string name="finalize_imported" tools:ignore="MissingTranslation">Imported: %1$d created, %2$d skipped.</string>
+    <string name="finalize_imported_with_failures" tools:ignore="MissingTranslation">⚠ Imported: %1$d created, %2$d skipped, %3$d FAILED — %4$s</string>
     <string name="finalize_imported_no_summary" tools:ignore="MissingTranslation">Imported (no summary returned).</string>
     <string name="finalize_unreachable" tools:ignore="MissingTranslation">Couldn\'t reach songbird — check Tailscale/URL. You can Share JSON instead.</string>
-    <string name="finalize_unauthorized" tools:ignore="MissingTranslation">songbird rejected the token. Update it in Settings.</string>
+    <string name="finalize_login_rejected" tools:ignore="MissingTranslation">songbird rejected the username/password. Update them in Settings.</string>
     <string name="finalize_http_error" tools:ignore="MissingTranslation">Error %1$d: %2$s</string>
     <string name="finalize_share_failed" tools:ignore="MissingTranslation">Couldn\'t prepare the file to share.</string>
     <string name="settings_songbird_header" tools:ignore="MissingTranslation">songbird connection</string>
     <string name="settings_base_url_hint" tools:ignore="MissingTranslation">Base URL (e.g. http://host:8000)</string>
-    <string name="settings_token_hint" tools:ignore="MissingTranslation">Bearer token</string>
+    <string name="settings_username_hint" tools:ignore="MissingTranslation">Username</string>
+    <string name="settings_password_hint" tools:ignore="MissingTranslation">Password</string>
     <string name="settings_saved" tools:ignore="MissingTranslation">Settings saved</string>
 </resources>

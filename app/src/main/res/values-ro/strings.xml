@@ -252,9 +252,6 @@
     <!-- Delete confirmation (ScanDetails) -->
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_share_export_first">Niciun document disponibil pentru partajare. Exportați mai întâi un
-        document.
-    </string>
 
     <!-- ScanDetailsFragment toasts -->
 

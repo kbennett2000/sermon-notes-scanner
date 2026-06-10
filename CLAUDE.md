@@ -117,10 +117,24 @@ Do not implement against a pending decision — ask first. Update this table whe
 
 - Devices: Samsung Tab A11, Galaxy S23. Sideloaded debug APK. OCR stays on-device — never
   move it to a server.
-- songbird import: `POST {base_url}/api/v1/import`, header `Authorization: Bearer <token>`,
-  body = ImportDocument. Response: `{"annotations": {"created": N, "skipped": M}}`. Idempotent.
-  Reachable over Tailscale. Concord is NOT a runtime dependency.
-- Secrets: the bearer token never enters the repo — runtime settings only.
+- songbird import: `POST {base_url}/api/v1/import`, body = ImportDocument. Idempotent. Reachable over
+  Tailscale. Concord is NOT a runtime dependency of this fork (songbird calls it server-side).
+- **Brief errata (verified against songbird source @ commit `89f894e`, supersedes brief §4):** songbird
+  has **NO bearer-token auth** — it is **Argon2 cookie-session**. Auth is login-per-send:
+  `POST /api/v1/auth/login` `{username,password}` → **200** + `Set-Cookie: songbird_session=…` (bad creds
+  → **401** `{"detail":{"code":"INVALID_CREDENTIALS"}}`); then `POST /api/v1/import` carrying that cookie;
+  then best-effort `POST /api/v1/auth/logout` (sessions are 30-day, accumulate one row per login).
+  Import **200** response is `ImportSummary` = `{"annotations":{created,skipped,failed},
+  "sermon_notes":{…},"errors":[…]}` — NOT the brief's `{"annotations":{"created","skipped"}}` (missing
+  `failed`/`sermon_notes`/`errors`). Import without a valid cookie → 401; Concord down → 502. The brief
+  stays unedited as the founding document; this errata carries reality.
+- Secrets: the songbird **username + password** never enter the repo — runtime settings only, stored in
+  EncryptedSharedPreferences (the password is never logged or echoed). (F6's bearer token is gone — F6b.)
+- **Cleartext HTTP (F6b):** songbird is a LAN/tailnet `http` service (no TLS) at an operator-set host, but
+  `targetSdk 36` blocks cleartext by default — which surfaced as a false "couldn't reach songbird". A
+  network-security config (`res/xml/network_security_config.xml`, `cleartextTrafficPermitted="true"`,
+  wired via `<application android:networkSecurityConfig>`) permits it. Acceptable for a private,
+  non-store, sideloaded app; revisit if songbird ever fronts with TLS.
 
 ## Build & test
 
@@ -167,8 +181,14 @@ echo "sdk.dir=$ANDROID_HOME" > local.properties      # gitignored
 - applicationId `io.github.kbennett2000.sermonscanner` (coexists with stock MakeACopy).
   Sideload (device not assumed connected): `adb install -r <apk>`; uninstall:
   `adb uninstall io.github.kbennett2000.sermonscanner`.
-- **First-run config (F6):** on the finalize screen tap **Settings** and enter the songbird base URL
-  (e.g. `http://<host>:8000`, over Tailscale) + bearer token before **Send** is enabled (stored encrypted).
+- **First-run config (F6/F6b):** on the finalize screen tap **Settings** and enter the songbird base URL
+  (e.g. `http://<host>:8000`, over Tailscale) + **username + password** before **Send** is enabled
+  (stored encrypted; songbird is cookie-session — see the Environment errata).
+- **Verification gate (run this, not just assemble):** the CI/merge gate is
+  `./gradlew :app:compilePaddleDebugJavaWithJavac :app:testPaddleDebugUnitTest :app:lintPaddleDebug`
+  (`.github/workflows/build-release.yml`). **`lintPaddleDebug` is part of the gate** (`abortOnError`
+  defaults true, no baseline) — assemble + unit tests alone do **not** catch lint errors (e.g.
+  `MissingDefaultResource`). Always run lint before declaring a slice green.
 
 Notes: paddle is the sole flavor (F1b, D5) — Tesseract removed; there is no `assembleStandardDebug`. The
 packaged ONNX runtime carries **DocQuad + PaddleOCR** ops; the on-disk `libonnxruntime.so` is the F0b
@@ -206,4 +226,5 @@ UI/data (trimmed in F1c per D3).
 - [x] F3b — verse-count table + span resolver (D2): `de.schliweb.makeacopy.anchor` — `SpanResolver.resolve(StructuralAnchor, VerseTable)` → `ResolvedSpan` (five Appendix A fields) or typed `SpanResolution` failure (`UNKNOWN_BOOK`/`CHAPTER_OUT_OF_RANGE`). Chapter-only fills `1..table[ch]`; single verse `start=end`; range passes through; verses never validated (§6). `VerseTable` (pure Gson parser) reads the **canon-structural** table at `app/src/main/assets/anchor/verse_counts.json` (counts = canonical structure; `source_translation`/`concord_version` are provenance only). Regenerate offline with `python3 tools/generate_verse_counts/generate_verse_counts.py --base-url <concord> --translation <id> --concord-version <v>` — never a runtime dep. The committed table was generated from **NKJV** (`concord_version v1.2.0`); NKJV is a licensed translation in Concord's `data/private/`, so it's a fine verse-count source (bare counts are canonical structure, not text) but **regeneration requires Kris's private Concord deployment**. Tests: `SpanResolverTest` (8) + `VerseTableTest` (6) on a sample table; `VerseCountsSchemaTest` enforces the real asset (66 keys == BookMap, positive counts). Asset loading is F4 wiring; no UI / no frozen-core edits.
 - [x] F4 — edit screen (text, anchor, title, tags): `ui/edit/EditFragment` + fragment-scoped `EditViewModel` (Context-free, injected `VerseTable`). Reached via the hub **Continue** action (gated on ≥1 page with OCR; replaced the F2 TEMP hook). Prefills combined OCR text + runs `AnchorFinder` once (operator owns the anchor after); structured anchor editing (book picker via `anchor/BookNames`, numeric chapter/verse-from/verse-to) with live `PassageLabel` + `SpanResolver` re-resolve (out-of-range/unknown **block**, reversed range **warns**); title (blank warns, not blocks) / date (picker, ISO) / tags. Produces `draft/SermonDraft` (resolved span + label + text/title/date/tags) handed via activity-scoped `SermonDraftViewModel` to TEMP `DraftPreviewFragment`. `VerseTableLoader` is the thin cached asset loader F3b deferred. Tests: `BookNamesTest`, `PassageLabelTest`, `EditViewModelTest` (11). New strings default-locale only. Known limits: stateless between visits; no process-death restore.
 - [x] F5 — songbird JSON emitter (deterministic, Appendix A): `de.schliweb.makeacopy.emit` — `NoteMarkdown.build()` (D1 minimal body: `# title` omitted when blank, `passage — date` em-dash line, non-empty edited lines as `- ` items, emphasis passed through never generated) + `ImportJsonEmitter.emit()` (fixed-order StringBuilder walk, 2-space indent, invariants hard-coded, tags trimmed/deduped, reversed range normalized at the wire, no trailing newline). Byte-stability pinned by `app/src/test/resources/emit/golden_import.json` (regenerate consciously). Tests: `NoteMarkdownTest` (10), `ImportJsonEmitterTest` (9, incl. golden byte-equality + present-and-null vs absent), `EmitterFixtureChainTest` (full pure pipeline → `1SA 25:1-44`). Stub `DraftPreviewFragment` now shows the real JSON. No frozen-core edits.
-- [x] F6 — finalize: POST / save-share per D4: `ui/finalize/FinalizeFragment` (replaces the F4/F5 TEMP stub) — JSON preview + **Send to songbird** (`songbird/HttpImportPoster`: one `HttpURLConnection` POST to `{base}/api/v1/import`, Bearer header, 5s/15s, no retries/idempotent) + **Share JSON** (FileProvider, cache, `application/json`). `FinalizeViewModel` (injected poster+executor) publishes IDLE→SENDING→DONE; `songbird/ImportResult.from` classifies SUCCESS/UNREACHABLE/UNAUTHORIZED/HTTP_ERROR (success shows created+skipped). `ui/settings/SettingsFragment` + `songbird/SongbirdPrefsHelper` store base URL + token in **EncryptedSharedPreferences** (token never logged/echoed). Added `INTERNET` permission + `androidx.security-crypto`. Tests: `SongbirdSettingsTest`, `ImportResultTest`, `ShareFilenameTest`, `FinalizeViewModelTest` (fake poster). No frozen-core edits. **The brief's slice plan is complete.**
+- [x] F6 — finalize: POST / save-share per D4: `ui/finalize/FinalizeFragment` (replaces the F4/F5 TEMP stub) — JSON preview + **Send to songbird** (`songbird/HttpImportPoster`: one `HttpURLConnection` POST to `{base}/api/v1/import`, Bearer header, 5s/15s, no retries/idempotent) + **Share JSON** (FileProvider, cache, `application/json`). `FinalizeViewModel` (injected poster+executor) publishes IDLE→SENDING→DONE; `songbird/ImportResult.from` classifies SUCCESS/UNREACHABLE/UNAUTHORIZED/HTTP_ERROR (success shows created+skipped). `ui/settings/SettingsFragment` + `songbird/SongbirdPrefsHelper` store base URL + token in **EncryptedSharedPreferences** (token never logged/echoed). Added `INTERNET` permission + `androidx.security-crypto`. Tests: `SongbirdSettingsTest`, `ImportResultTest`, `ShareFilenameTest`, `FinalizeViewModelTest` (fake poster). No frozen-core edits. **NOTE: built to a wrong brief auth contract (Bearer token) — corrected in F6b.**
+- [x] F6b — speak songbird's real auth (cookie-session): the integration gate found songbird has no bearer auth. Reworked to **login-per-send** (`POST /api/v1/auth/login` → `songbird_session` cookie → cookied `POST /api/v1/import` → best-effort `logout`) via `HttpImportPoster` with explicit cookie handling (no global CookieManager). Settings became base URL + **username + password** (EncryptedSharedPreferences; password never logged); the dead token pref is gone. `ImportPoster.send(...) → SongbirdExchange`; `ImportResult` statuses now `SUCCESS`/`UNREACHABLE`/`LOGIN_REJECTED`/`HTTP_ERROR`, parsing the real `ImportSummary` (created/skipped/**failed** + `errors[]`; `failed>0` surfaced). Verified against songbird source @ `89f894e`; contract in the Environment errata. Tests reworked against the real shape + committed `songbird/import_summary.json` fixture. No frozen-core edits. **The brief's slice plan is complete (F6b corrects the F6 contract).**

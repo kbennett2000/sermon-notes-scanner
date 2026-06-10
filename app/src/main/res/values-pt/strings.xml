@@ -251,8 +251,6 @@
     <!-- Delete confirmation (ScanDetails) -->
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_share_export_first">Brak dokumentu do udostępnienia. Najpierw wyeksportuj dokument.
-    </string>
 
     <!-- ScanDetailsFragment toasts -->
 

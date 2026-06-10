@@ -229,8 +229,6 @@
     <!-- Delete confirmation -->
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_share_export_first">शेयर करने के लिए कोई दस्तावेज़ नहीं। पहले निर्यात करें।
-    </string>
 
     <!-- ScanDetailsFragment toasts -->
 

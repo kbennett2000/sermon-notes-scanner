@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModel;
 import de.schliweb.makeacopy.songbird.HttpImportPoster;
 import de.schliweb.makeacopy.songbird.ImportPoster;
 import de.schliweb.makeacopy.songbird.ImportResult;
-import de.schliweb.makeacopy.songbird.PostResult;
+import de.schliweb.makeacopy.songbird.SongbirdExchange;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,13 +56,13 @@ public class FinalizeViewModel extends ViewModel {
     return state;
   }
 
-  /** POSTs the JSON; safe to call again to retry (idempotent). */
-  public void send(String baseUrl, String token, String json) {
+  /** Logs in and sends the JSON; safe to call again to retry (idempotent). */
+  public void send(String baseUrl, String username, String password, String json) {
     state.setValue(new SendUiState(Phase.SENDING, null));
     executor.execute(
         () -> {
-          PostResult pr = poster.post(baseUrl, token, json);
-          state.postValue(new SendUiState(Phase.DONE, ImportResult.from(pr)));
+          SongbirdExchange ex = poster.send(baseUrl, username, password, json);
+          state.postValue(new SendUiState(Phase.DONE, ImportResult.from(ex)));
         });
   }
 

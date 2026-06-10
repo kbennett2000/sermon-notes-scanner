@@ -245,8 +245,6 @@
     <!-- Delete confirmation (ScanDetails) -->
 
     <!-- ExportFragment toasts -->
-    <string name="no_document_to_share_export_first">هیچ سندی برای اشتراک‌گذاری وجود ندارد. ابتدا یک سند خروجی بگیرید.
-    </string>
 
     <!-- ScanDetailsFragment toasts -->
 
