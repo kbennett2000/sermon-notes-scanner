@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "exported_at": null,
+  "annotations": [
+    {
+      "book_usfm": "1SA",
+      "start_chapter": 25,
+      "start_verse": 1,
+      "end_chapter": 25,
+      "end_verse": 44,
+      "note_markdown": "# A Story about David & Abigail — 'Grace & Truth'\n\n1 Samuel 25 — 2026-05-10\n\n- I. The key people in the story.\n- A. Abigail\n- 1. Her name means joy.\n",
+      "color": null,
+      "scope_type": "all",
+      "scope_translations": [],
+      "tags": ["sermon", "grace"]
+    }
+  ],
+  "sermon_notes": []
+}
