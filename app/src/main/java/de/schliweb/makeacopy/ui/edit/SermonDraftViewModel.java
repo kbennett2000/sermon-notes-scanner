@@ -16,8 +16,8 @@ import de.schliweb.makeacopy.draft.SermonDraft;
 
 /**
  * Activity-scoped hand-off for the produced {@link SermonDraft} (slice F4). The edit screen sets it on
- * proceed and the next destination reads it — avoiding Parcelable nav-arg boilerplate. This is the seam
- * F5 (emitter) and F6 (finalize) will consume; for now the TEMP {@code DraftPreviewFragment} reads it.
+ * proceed and the finalize screen reads it — avoiding Parcelable nav-arg boilerplate. This is the seam
+ * the finalize screen (F6) consumes to emit, POST, or share the import document.
  */
 public class SermonDraftViewModel extends ViewModel {
 
