@@ -17,9 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import de.schliweb.makeacopy.anchor.ResolvedSpan;
 import de.schliweb.makeacopy.databinding.FragmentDraftPreviewBinding;
 import de.schliweb.makeacopy.draft.SermonDraft;
+import de.schliweb.makeacopy.emit.ImportJsonEmitter;
 
 /**
  * F4-TEMP terminus: read-only dump of the {@link SermonDraft} the edit screen produced, with a clearly
@@ -49,27 +49,8 @@ public class DraftPreviewFragment extends Fragment {
 
   private static String render(SermonDraft d) {
     if (d == null) return "(no draft)";
-    ResolvedSpan s = d.span();
-    StringBuilder sb = new StringBuilder();
-    sb.append("title: ").append(d.title()).append('\n');
-    sb.append("passage: ").append(d.passageLabel()).append('\n');
-    sb.append("date: ").append(d.dateIso()).append('\n');
-    sb.append("tags: ").append(d.tags()).append('\n');
-    if (s != null) {
-      sb.append("span: ")
-          .append(s.bookUsfm())
-          .append(' ')
-          .append(s.startChapter())
-          .append(':')
-          .append(s.startVerse())
-          .append(" -> ")
-          .append(s.endChapter())
-          .append(':')
-          .append(s.endVerse())
-          .append('\n');
-    }
-    sb.append("\n--- note text ---\n").append(d.editedText());
-    return sb.toString();
+    // F5: show the real emitted songbird import JSON (the payload F6 will POST/share).
+    return ImportJsonEmitter.emit(d);
   }
 
   @Override
