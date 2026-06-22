@@ -1,4 +1,15 @@
-# Sermon Scanner
+<p align="center">
+  <img src="assets/banner.png" alt="Sermon Scanner — photograph a sermon handout → on-device OCR → Scripture anchor → songbird import JSON" width="100%">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
+  <img alt="Platform: Android" src="https://img.shields.io/badge/platform-Android-3DDC84?logo=android&logoColor=white">
+  <img alt="minSdk 29 / targetSdk 36" src="https://img.shields.io/badge/SDK-29%E2%80%9336-555">
+  <img alt="OCR: PaddleOCR + OpenCV + ONNX Runtime" src="https://img.shields.io/badge/OCR-PaddleOCR%20%C2%B7%20OpenCV%20%C2%B7%20ONNX-orange">
+  <img alt="On-device" src="https://img.shields.io/badge/inference-on--device-success">
+  <a href=".github/workflows/build-release.yml"><img alt="Build" src="https://github.com/kbennett2000/sermon-notes-scanner/actions/workflows/build-release.yml/badge.svg"></a>
+</p>
 
 A **private, sideloaded Android app** that photographs a two-sided printed sermon-note handout,
 OCRs it on-device, lets the operator fix the text and confirm a Scripture anchor, and emits a
@@ -30,18 +41,20 @@ Feature-complete. The full workflow is live end-to-end:
 > snap front → crop → OCR → snap back → crop → OCR → **concatenate** →
 > **auto-detect the Scripture anchor** → **edit screen** → **finalize**
 
-- **Anchor auto-detection** — scans the combined OCR text top-to-bottom and resolves the first
-  structurally valid Scripture reference using a 66-book USFM map (handles Roman numerals,
-  abbreviations with periods, parenthesised cross-references). Best-effort; the operator fixes it.
-- **Edit screen** — fix the OCR text, confirm the anchor (book picker + chapter/verse fields with a
-  live passage label), and set the title, date, and tags. Out-of-range chapters block; the rest is
-  best-effort with warnings.
-- **Finalize** — preview the exact import JSON, then **Send to songbird** (`POST /api/v1/import`,
-  showing the *created / skipped* result) or **Share JSON** as a file. Verse spans for whole-chapter
-  references are filled from a bundled, offline verse-count table; the app never calls a Bible API at
-  runtime.
+## Features
 
-### First run
+| | Feature | What it does |
+|---|---|---|
+| 📷 | **Two-sided capture** | Multi-page hub (filmstrip, add/clear page, preview, per-page OCR badge) for the front and back of a handout. |
+| 🔍 | **On-device OCR** | CameraX → crop/perspective → OpenCV enhance → PaddleOCR, all on the phone. The validated upstream pipeline, untouched. |
+| 🧵 | **Combined text** | Pages are concatenated in hub order into one OCR string — the single artifact every later step consumes. |
+| ✝️ | **Anchor auto-detect** | Scans the combined text top-to-bottom and resolves the first structurally valid Scripture reference via a 66-book USFM map (Roman numerals, abbreviations with periods, parenthesised cross-refs). Best-effort; the operator fixes it. |
+| ✏️ | **Edit screen** | Fix the OCR text; confirm the anchor with a book picker + chapter/verse fields and a live passage label; set title, date, and tags. Out-of-range chapters block; the rest warns. |
+| 📖 | **Verse-span fill** | Whole-chapter references are expanded to a verse range from a bundled, offline verse-count table — the app never calls a Bible API at runtime. |
+| 📤 | **Finalize & send** | Preview the exact import JSON, then **Send to songbird** (`POST /api/v1/import`, shows *created / skipped*; re-sending is a harmless no-op) or **Share JSON** as a file. |
+| 🔒 | **Private by design** | OCR stays on-device; songbird is reached over the LAN/Tailscale; credentials live only in encrypted on-device storage. |
+
+## First run
 
 songbird uses cookie-session login. Before **Send** is enabled, open **Settings** (from the finalize
 screen) and enter the songbird base URL (e.g. `http://<host>:<port>`, reachable over the LAN/Tailscale),
@@ -53,9 +66,9 @@ your songbird **username**, and **password**. Credentials are stored encrypted o
 This is a fork of **MakeACopy** ([egdels/makeacopy](https://github.com/egdels/makeacopy)),
 **custom-tailored to Majestic View's notes format** (the anchor-detection heuristic and book-name
 aliases) and retargeted from a document-scanner to a songbird note importer. Licensed under the
-**Apache License 2.0**; the `LICENSE` and `NOTICE` files are preserved verbatim and attribution is
-retained permanently. See `NOTICE` for upstream and third-party attributions (OpenCV, ONNX Runtime,
-PaddleOCR, and others).
+**Apache License 2.0**; the [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE) files are preserved verbatim
+and attribution is retained permanently. See `NOTICE` for upstream and third-party attributions
+(OpenCV, ONNX Runtime, PaddleOCR, and others). This fork is never pushed upstream.
 
 ## Developer notes — adapting to other note formats
 
@@ -89,3 +102,16 @@ Appendix C = a real OCR fixture); architecture and slice history are in [`CLAUDE
 The build is non-trivial (native OpenCV + ONNX Runtime compiled from source, paddle flavor,
 arm64-v8a). The full, verified recipe — toolchain versions, submodule init, native-lib build,
 and the Gradle assemble step — lives in **[CLAUDE.md](CLAUDE.md)** under "Build & test".
+
+```bash
+# after the one-time toolchain + native-lib setup documented in CLAUDE.md:
+./gradlew :app:assemblePaddleDebug -PenableAbiSplits=true -PABIS=arm64-v8a
+adb install -r app/build/outputs/apk/paddle/debug/app-paddle-arm64-v8a-debug.apk
+```
+
+## Contributing & policies
+
+- [Contributing guide](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security policy](SECURITY.md)
+- [AI policy](AI_POLICY.md)
