@@ -27,7 +27,13 @@ jobs:
 
       - name: Install ORT
         run: |
-          ORT_URL=$(curl -s https://api.github.com/repos/oss-review-toolkit/ort/releases/latest \
+          # Pin ORT (was floating releases/latest). ORT 89.0.0+ requires Java 25 to launch,
+          # and even on JDK 25 its bundled Gradle Inspector (Gradle 8.13) can't parse Java 25
+          # bytecode ("Unsupported class file major version 69") — so chasing the JDK baseline
+          # just moves the break. 88.0.0 is the last release that runs cleanly on JDK 21 (the
+          # combo that was green on main). Revisit when ORT's Gradle Inspector supports Java 25.
+          ORT_VERSION="88.0.0"
+          ORT_URL=$(curl -s "https://api.github.com/repos/oss-review-toolkit/ort/releases/tags/${ORT_VERSION}" \
             | jq -r '.assets[] | select(.name | test("^ort-.*\\.tgz$")) | .browser_download_url')
           curl -L -o ort.tgz "$ORT_URL"
           tar -xzf ort.tgz
