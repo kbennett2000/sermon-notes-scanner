@@ -23,7 +23,10 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          # Must track the JRE the "Install ORT" step's floating releases/latest needs.
+          # ORT's latest release targets Java 25 (class file 69.0); JDK 21 throws
+          # UnsupportedClassVersionError. Bump this if ORT raises its baseline again.
+          java-version: "25"
 
       - name: Install ORT
         run: |
